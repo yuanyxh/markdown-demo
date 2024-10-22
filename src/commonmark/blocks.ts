@@ -931,6 +931,9 @@ class Parser {
      * 如果并非所有容器都匹配，请将 all_matched 设置为 false
      */
     let lastChild: MarkdownNode | null;
+
+    // 当初次进入时，this.doc 根文档不包含任何子节点，此循环跳过
+
     while ((lastChild = container.lastChild) && lastChild.open) {
       container = lastChild;
 
@@ -954,7 +957,10 @@ class Parser {
       }
     }
 
+    //
     this.allClosed = container === this.oldtip;
+
+    //
     this.lastMatchedContainer = container;
 
     let matchedLeaf =

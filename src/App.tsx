@@ -23,7 +23,7 @@ const App: React.FC = () => {
     }
 
     readFileAsText(file).then((text) => {
-      const ast = parser.current.parse("          \t");
+      const ast = parser.current.parse(text);
 
       console.log(ast);
     });
