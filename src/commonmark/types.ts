@@ -76,6 +76,7 @@ export interface IParserBlockRun {
   acceptsLines: boolean;
 }
 
+/** 解析块开始的函数 */
 export type TParserBlockStartsFun = (
   parser: Parser,
   container: MarkdownNode

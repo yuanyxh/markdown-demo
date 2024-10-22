@@ -507,24 +507,31 @@ const blocks: {
 /**
  * 块启动功能。  返回值：
  * 0 = 不匹配
- * 1 = 匹配的容器，继续
- * 2 = 匹配的叶子，不再有块开始
+ * 1 = 匹配到了容器，继续
+ * 2 = 匹配到了叶块，不再有块开始
  */
 const blockStarts: TParserBlockStartsFun[] = [
-  // block quote
+  // blockquote 解析
   function (parser) {
+    // 如果行首空白字符不满足进入代码块，且第一个非空白字符为 > 则返回 1
     if (
       !parser.indented &&
       peek(parser.currentLine, parser.nextNonspace) === C_GREATERTHAN
     ) {
+      // 前进到下一个非空白字符
       parser.advanceNextNonspace();
+
       parser.advanceOffset(1, false);
+
       // optional following space
       if (isSpaceOrTab(peek(parser.currentLine, parser.offset))) {
         parser.advanceOffset(1, true);
       }
+
       parser.closeUnmatchedBlocks();
+
       parser.addChild("block_quote", parser.nextNonspace);
+
       return 1;
     } else {
       return 0;
@@ -748,6 +755,7 @@ class Parser {
 
   tip = this.doc;
 
+  /** 每次分析一行时重置为 this.tip */
   oldtip = this.doc;
 
   lastMatchedContainer: MarkdownNode | null = this.doc;
@@ -755,16 +763,23 @@ class Parser {
   /** 当前行字符串 */
   currentLine = "";
 
-  /** 当前行号 */
+  /** 当前行号, 每次分析一行时 +1 */
   lineNumber = 0;
 
+  /** 行偏移，字符计，\t 计 4 空白字符，每次分析一行时重置为 0 */
   offset = 0;
 
+  /**
+   * 列偏移，4 字符一列，\t 计 4 空白字符
+   * 始终是 4 的倍数，只有在空白字符数能整除 4 时，才会前进到下一列
+   * 每次分析一行时重置为 0
+   * */
   column = 0;
 
   /** 当前行首到当前行非空白字符的位置 */
   nextNonspace = 0;
 
+  /** 当前行首到当前行非空白字符的列组 */
   nextNonspaceColumn = 0;
 
   /** 当前行缩进 */
@@ -773,9 +788,10 @@ class Parser {
   /** 当前行首空白字符数是否可以进入代码块范围 (大于等于 4) */
   indented = false;
 
-  /** 当前行是否到行尾 */
+  /** 当前行是否到行尾，每次分析一行时重置为 false */
   blank = false;
 
+  /** tab 字符的一部分是否作为空白的一部分? 每次分析一行 或 advanceNextNonspace 时重置为 false */
   partiallyConsumedTab = false;
 
   allClosed = true;
@@ -822,10 +838,14 @@ class Parser {
     this.indented = this.indent >= CODE_INDENT;
   }
 
+  /**
+   * this.offset 前进偏移量
+   */
   advanceOffset(count: number, columns: boolean = false) {
     const currentLine = this.currentLine;
 
-    let charsToTab: number, charsToAdvance: number;
+    let charsToTab: number;
+    let charsToAdvance: number;
     let c: string;
 
     while (count > 0 && (c = currentLine[this.offset])) {
@@ -833,6 +853,7 @@ class Parser {
         charsToTab = 4 - (this.column % 4);
 
         if (columns) {
+          // 是否消费了 tab 作为空白字符
           this.partiallyConsumedTab = charsToTab > count;
 
           charsToAdvance = charsToTab > count ? count : charsToTab;
@@ -857,6 +878,11 @@ class Parser {
     }
   }
 
+  /**
+   * 将 offset 推进到 nextNonspace 非空白字符位置
+   * 将 column 推进到 nextNonspaceColumn 非空白字符所在列位置
+   * partiallyConsumedTab 设置为 false
+   */
   advanceNextNonspace() {
     this.offset = this.nextNonspace;
     this.column = this.nextNonspaceColumn;
@@ -937,6 +963,7 @@ class Parser {
     while ((lastChild = container.lastChild) && lastChild.open) {
       container = lastChild;
 
+      // 记录当前行首空白字符，缩进，是否换行等信息
       this.findNextNonspace();
 
       switch (this.blocks[container.type].continue(this, container)) {
@@ -953,6 +980,7 @@ class Parser {
 
       if (!all_matched) {
         container = container.parent; // 备份到最后一个匹配块
+
         break;
       }
     }
@@ -969,25 +997,38 @@ class Parser {
     const starts = this.blockStarts;
     const startsLen = starts.length;
 
-    // Unless last matched container is a code block, try new container starts,
-    // adding children to the last matched container:
+    /**
+     * 除非最后一个匹配的容器是代码块，否则尝试启动新容器，将子项添加到最后一个匹配的容器：
+     */
     while (!matchedLeaf) {
+      // 记录当前行首空白字符，缩进，是否换行等信息
       this.findNextNonspace();
 
-      // this is a little performance optimization:
+      // 这是一些性能优化：
+
+      // 如果当前行首空白数无法进入代码块且删除行首空格后的字符串不以
+      // “#”、“`”、“~”、“*”、“+”、“_”、“=”、“>”、“<”、数字 “0” 到 “9”、 “-” 开头
+
+      // 一行首，没有四个空白，且不以 markdown 标点字符开头则进入 advanceNextNonspace 优化
       if (!this.indented && !reMaybeSpecial.test(ln.slice(this.nextNonspace))) {
+        // 将 this.offset、 this.column 前进至下一个非空白字符
+        // 将 partiallyConsumedTab 重置为 false
         this.advanceNextNonspace();
+
         break;
       }
 
+      // 运行所有块开始解析函数，当解析函数返回 1 或 2 时跳出循环
       let i = 0;
       while (i < startsLen) {
         const res = starts[i](this, container!);
+
         if (res === 1) {
           container = this.tip;
           break;
         } else if (res === 2) {
           container = this.tip;
+
           matchedLeaf = true;
           break;
         } else {
@@ -996,7 +1037,7 @@ class Parser {
       }
 
       if (i === startsLen) {
-        // nothing matched
+        // 运行到此处时表明没有匹配的块，跳出循环
         this.advanceNextNonspace();
         break;
       }
