@@ -72,6 +72,7 @@ export interface IParserBlockRun {
   continue(parser: Parser, container: MarkdownNode): number;
   /** 当块关闭时运行 “finalize” */
   finalize(parser: Parser, block: MarkdownNode): void;
+  /** 判断是否能够包含指定 type 的子级 */
   canContain(type: TMarkdownNodeType): boolean;
   acceptsLines: boolean;
 }

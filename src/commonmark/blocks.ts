@@ -521,15 +521,19 @@ const blockStarts: TParserBlockStartsFun[] = [
       // 前进到下一个非空白字符
       parser.advanceNextNonspace();
 
+      // 前进一位，首个非空白字符的下一个字符
       parser.advanceOffset(1, false);
 
-      // optional following space
+      // 可选的后续空格或 tab，如 # ，> ，- ，
       if (isSpaceOrTab(peek(parser.currentLine, parser.offset))) {
+        // 前进一位，跳过可选的空白字符或 tab
         parser.advanceOffset(1, true);
       }
 
+      // 完成并关闭不匹配的块
       parser.closeUnmatchedBlocks();
 
+      // 添加 blockquote child
       parser.addChild("block_quote", parser.nextNonspace);
 
       return 1;
@@ -538,28 +542,36 @@ const blockStarts: TParserBlockStartsFun[] = [
     }
   },
 
-  // ATX heading
+  /** atx 标题匹配 */
   function (parser) {
-    let match;
+    let match: RegExpMatchArray | null;
+
+    // 没有进入代码块，且 atx 正则匹配
+    // ### , # 后必须跟至少一个空白字符，或不跟任何字符
     if (
       !parser.indented &&
       (match = parser.currentLine
         .slice(parser.nextNonspace)
         .match(reATXHeadingMarker))
     ) {
+      // 前进到非空白字符
       parser.advanceNextNonspace();
+      // 前进匹配的 markdown 标点长度
       parser.advanceOffset(match[0].length, false);
+      // 关闭所有未关闭不匹配的块
       parser.closeUnmatchedBlocks();
 
       const container = parser.addChild("heading", parser.nextNonspace);
       container.level = match[0].trim().length; // number of #s
 
-      // remove trailing ###s:
+      // 删除尾随的 # 号
+      // 当前 string_content 为删除无效尾随空格后的内容
       container.string_content = parser.currentLine
         .slice(parser.offset)
         .replace(/^[ \t]*#+[ \t]*$/, "")
         .replace(/[ \t]+#+[ \t]*$/, "");
 
+      // 前进到末尾
       parser.advanceOffset(parser.currentLine.length - parser.offset);
 
       return 2;
@@ -753,6 +765,7 @@ class Parser {
   /** 文档根 */
   doc: MarkdownNode = new Document();
 
+  /** 当前的顶端，doc -> 容器块 -> 其他块 */
   tip = this.doc;
 
   /** 每次分析一行时重置为 this.tip */
@@ -890,7 +903,7 @@ class Parser {
   }
 
   /**
-   * 在块的尖端添加一条线，我们假设 () 可以接受 Line —— 应该在调用此之前完成检查
+   * 在块的尖端添加一行 (\n)，我们假设可以接受 Line —— 应该在调用此之前完成检查
    */
   addLine() {
     if (this.partiallyConsumedTab) {
@@ -908,20 +921,27 @@ class Parser {
    * 如果提示不能接受子级，关闭并完成它并尝试其父级，依此类推，直到我们找到一个可以容纳孩子的街区
    */
   addChild(tag: TMarkdownNodeType, offset: number) {
+    // 是否可以包含指定 type 的 node
     while (!this.blocks[this.tip.type].canContain(tag)) {
       this.finalize(this.tip, this.lineNumber - 1);
     }
 
+    // 列位置为非空白字符偏移 + 1
     const column_number = offset + 1; // offset 0 = column 1
+
+    // 创建新块
     const newBlock = new MarkdownNode(tag, [
       [this.lineNumber, column_number],
       [0, 0],
     ]);
 
+    /** 新块的 string_content "" */
     newBlock.string_content = "";
 
+    /** 当前的头部块添加新块 */
     this.tip.appendChild(newBlock);
 
+    // tip 设置为新块，进入新块的解析
     this.tip = newBlock;
 
     return newBlock;
@@ -1024,11 +1044,14 @@ class Parser {
         const res = starts[i](this, container!);
 
         if (res === 1) {
+          // 匹配到了一个块，此处 this.tip 指向新块，container 为新块
           container = this.tip;
           break;
         } else if (res === 2) {
+          // 匹配到了一个叶块，此处 this.tip 指向新的叶块，container 为新叶块
           container = this.tip;
 
+          // 匹配到叶子块，跳出循环
           matchedLeaf = true;
           break;
         } else {
@@ -1043,25 +1066,26 @@ class Parser {
       }
     }
 
-    // What remains at the offset is a text line.  Add the text to the
-    // appropriate container.
+    // 保留在偏移处的是文本行, 将文本添加到合适的容器
 
-    // First check for a lazy paragraph continuation:
+    // 首先检查是否存在惰性段落延续：
     if (!this.allClosed && !this.blank && this.tip.type === "paragraph") {
-      // lazy paragraph continuation
+      // 添加一行
       this.addLine();
     } else {
-      // not a lazy continuation
+      // 不是懒惰的延续
 
-      // finalize any blocks not matched
+      // 完成任何不匹配的块
       this.closeUnmatchedBlocks();
 
       t = container!.type;
 
+      // 如果接受 line
       if (this.blocks[t].acceptsLines) {
+        // 添加一行
         this.addLine();
 
-        // if HtmlBlock, check for end condition
+        // 如果 html_block，检查结束条件是否匹配
         if (
           t === "html_block" &&
           container!.htmlBlockType! >= 1 &&
@@ -1070,19 +1094,25 @@ class Parser {
             this.currentLine.slice(this.offset)
           )
         ) {
+          // 最后一行的长度为当前行的长度
           this.lastLineLength = ln.length;
 
           this.finalize(container!, this.lineNumber);
         }
       } else if (this.offset < ln.length && !this.blank) {
-        // create paragraph container for line
+        // 如果偏移未超过当前行的长度且未换行
+
+        // 为行创建段落容器
         container = this.addChild("paragraph", this.offset);
 
+        // 回到首个非空白字符位置
         this.advanceNextNonspace();
+        // 添加一行
         this.addLine();
       }
     }
 
+    // 最后一行的长度为当前行的长度
     this.lastLineLength = ln.length;
   }
 
@@ -1122,10 +1152,10 @@ class Parser {
     }
   }
 
-  // Finalize and close any unmatched blocks.
+  /** 完成并关闭任何不匹配的块 */
   closeUnmatchedBlocks() {
     if (!this.allClosed) {
-      // finalize any blocks not matched
+      // 完成任何不匹配的块
       while (this.oldtip !== this.lastMatchedContainer) {
         const parent = this.oldtip.parent!;
 

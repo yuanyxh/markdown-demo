@@ -188,9 +188,12 @@ class MarkdownNode {
     this.listData.delimiter = delimiter;
   }
 
+  /** 添加一个子节点 */
   appendChild(child: MarkdownNode) {
+    // 子节点删除其他链接
     child.unlink();
 
+    // 父节点指向当前
     child.parent = this;
 
     if (this.lastChild) {
@@ -220,19 +223,25 @@ class MarkdownNode {
     }
   }
 
+  /** 取消与其他节点的链接 */
   unlink() {
     if (this.prev) {
+      // 将上一个节点的下一个节点指向当前节点的下一个节点
       this.prev.next = this.next;
     } else if (this.parent) {
+      // 将父节点的首个节点指向当前节点的下一个节点
       this.parent.firstChild = this.next;
     }
 
     if (this.next) {
+      // 将下一个节点的上一个节点指向当前节点的上一个节点
       this.next.prev = this.prev;
     } else if (this.parent) {
+      // 将父节点的最后一个节点指向当前节点的上一个节点
       this.parent.lastChild = this.prev;
     }
 
+    // 删除所有链接
     this.parent = null;
     this.next = null;
     this.prev = null;
