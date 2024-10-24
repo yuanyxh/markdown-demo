@@ -267,6 +267,7 @@ const blocks: {
     },
     finalize: function (parser, block) {
       removeLinkReferenceDefinitions(parser, block);
+
       return;
     },
     canContain: function (t) {
@@ -282,14 +283,24 @@ const blocks: {
       let item = block.firstChild;
 
       while (item) {
-        // check for non-final list item ending with blank line:
+        // 检查以空行结尾的非最终列表项，
+        /**
+         * 1. xx
+         *
+         * 2. xx
+         *
+         * 这样的列表是松散的，非紧凑的
+         */
         if (item.next && endsWithBlankLine(item)) {
           block.listData.tight = false;
+
           break;
         }
 
-        // recurse into children of list item, to see if there are
-        // spaces between any of them:
+        // 递归到列表项的子项，看看是否有其中任何一个之间的空格：
+        /**
+         * 子列表的空行也会导致当前列表视为松散列表
+         */
         let subitem = item.firstChild;
 
         while (subitem) {
@@ -314,6 +325,7 @@ const blocks: {
   block_quote: {
     continue: function (parser) {
       const ln = parser.currentLine;
+
       if (!parser.indented && peek(ln, parser.nextNonspace) === C_GREATERTHAN) {
         parser.advanceNextNonspace();
         parser.advanceOffset(1, false);
@@ -324,6 +336,7 @@ const blocks: {
       } else {
         return 1;
       }
+
       return 0;
     },
     finalize: function () {
@@ -338,7 +351,7 @@ const blocks: {
     continue: function (parser, container) {
       if (parser.blank) {
         if (container.firstChild == null) {
-          // Blank line after empty list item
+          // 空列表项后的空行
           return 1;
         } else {
           parser.advanceNextNonspace();
@@ -361,7 +374,7 @@ const blocks: {
       if (block.lastChild) {
         block.sourcepos[1] = block.lastChild.sourcepos[1];
       } else {
-        // Empty list item
+        // 空列表项
         block.sourcepos[1][0] = block.sourcepos[0][0];
         block.sourcepos[1][1] =
           block.listData.markerOffset + block.listData.padding!;
@@ -374,9 +387,10 @@ const blocks: {
     },
     acceptsLines: false,
   },
+
   heading: {
+    /** 标题不能大于 1 行，不能匹配一个块 */
     continue: function () {
-      // a heading can never container > 1 line, so fail to match:
       return 1;
     },
     finalize: function () {
@@ -979,7 +993,6 @@ class Parser {
     let lastChild: MarkdownNode | null;
 
     // 当初次进入时，this.doc 根文档不包含任何子节点，此循环跳过
-
     while ((lastChild = container.lastChild) && lastChild.open) {
       container = lastChild;
 
@@ -1102,7 +1115,7 @@ class Parser {
       } else if (this.offset < ln.length && !this.blank) {
         // 如果偏移未超过当前行的长度且未换行
 
-        // 为行创建段落容器
+        // 为行文本创建段落容器
         container = this.addChild("paragraph", this.offset);
 
         // 回到首个非空白字符位置
@@ -1116,11 +1129,13 @@ class Parser {
     this.lastLineLength = ln.length;
   }
 
-  // Finalize a block.  Close it and do any necessary postprocessing,
-  // e.g. creating string_content from strings, setting the 'tight'
-  // or 'loose' status of a list, and parsing the beginnings
-  // of paragraphs for reference definitions.  Reset the tip to the
-  // parent of the closed block.
+  /**
+   * 完成一个块
+   * 关闭它并进行任何必要的后处理，例如从字符串创建 string_content
+   * 设置列表的 'tight' 或 'loose' 状态，并解析开头
+   * 参考定义的段落
+   * 将 tip 重置为封闭块的父级
+   */
   finalize(block: MarkdownNode, lineNumber: number) {
     const above = block.parent!;
     block.open = false;

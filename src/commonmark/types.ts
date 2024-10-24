@@ -68,12 +68,18 @@ export interface IParserOptions {
 
 /** 块运行解析 */
 export interface IParserBlockRun {
-  /** 运行 "continue" 来检查块是否正在继续 */
+  /**
+   * 运行 "continue" 来检查块是否正在继续
+   * 0 匹配到了一个块
+   * 1 无法匹配一个块
+   * 2 到达受防护代码关闭的行尾且可返回
+   * */
   continue(parser: Parser, container: MarkdownNode): number;
   /** 当块关闭时运行 “finalize” */
   finalize(parser: Parser, block: MarkdownNode): void;
   /** 判断是否能够包含指定 type 的子级 */
   canContain(type: TMarkdownNodeType): boolean;
+  /** 是否接受 Line */
   acceptsLines: boolean;
 }
 
