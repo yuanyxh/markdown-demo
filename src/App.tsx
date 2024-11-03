@@ -3,13 +3,10 @@ import { Button } from "antd";
 import "./styles/App.less";
 import { useRef } from "react";
 
-import { Parser } from "./commonmark";
-
 import { readFileAsText } from "./utils";
 
 const App: React.FC = () => {
   const triggerRef = useRef<HTMLInputElement>(null);
-  const parser = useRef(new Parser({ time: true }));
 
   const handleSelectMarkdown = () => {
     triggerRef.current?.click();
@@ -22,11 +19,7 @@ const App: React.FC = () => {
       return void 0;
     }
 
-    readFileAsText(file).then((text) => {
-      const ast = parser.current.parse(text);
-
-      console.log(ast);
-    });
+    readFileAsText(file).then((text) => {});
   };
 
   return (
