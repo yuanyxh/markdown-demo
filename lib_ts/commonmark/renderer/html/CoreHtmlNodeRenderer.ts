@@ -1,7 +1,10 @@
 import { NodeRenderer } from "../NodeRenderer";
 
+import { Appendable } from "../../../common";
+
 import {
   Node,
+  ListBlock,
   Document,
   Heading,
   Paragraph,
@@ -27,6 +30,60 @@ import {
 import { HtmlNodeRendererContext } from "./HtmlNodeRendererContext";
 import HtmlWriter from "./HtmlWriter";
 
+type VisitArgs =
+  | Document
+  | Heading
+  | Paragraph
+  | BlockQuote
+  | BulletList
+  | FencedCodeBlock
+  | HtmlBlock
+  | ThematicBreak
+  | IndentedCodeBlock
+  | Link
+  | ListItem
+  | OrderedList
+  | Image
+  | Emphasis
+  | StrongEmphasis
+  | Text
+  | Code
+  | HtmlInline
+  | SoftLineBreak
+  | HardLineBreak;
+
+class AltTextVisitor extends AbstractVisitor {
+  private readonly sb: Appendable = new Appendable();
+
+  public getAltText() {
+    return this.sb.toString();
+  }
+
+  public visit(node: Text | SoftLineBreak | HardLineBreak) {
+    switch (true) {
+      case node instanceof Text: {
+        const text = node;
+
+        this.sb.append(text.getLiteral());
+
+        break;
+      }
+
+      case node instanceof SoftLineBreak: {
+        this.sb.append("\n");
+
+        break;
+      }
+
+      case node instanceof HardLineBreak: {
+        this.sb.append("\n");
+
+        break;
+      }
+    }
+  }
+}
+
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).
  */
@@ -40,81 +97,42 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.html = context.getWriter();
   }
 
-  public beforeRoot(rootNode: Node): void {}
-  public afterRoot(rootNode: Node): void {}
+  public beforeRoot(rootNode: Node) {}
+  public afterRoot(rootNode: Node) {}
 
-  public getNodeTypes(): Set<Node> | null {
-    return java.util.Set.of(
-      Document.class,
-      Heading.class,
-      Paragraph.class,
-      BlockQuote.class,
-      BulletList.class,
-      FencedCodeBlock.class,
-      HtmlBlock.class,
-      ThematicBreak.class,
-      IndentedCodeBlock.class,
-      Link.class,
-      ListItem.class,
-      OrderedList.class,
-      Image.class,
-      Emphasis.class,
-      StrongEmphasis.class,
-      Text.class,
-      Code.class,
-      HtmlInline.class,
-      SoftLineBreak.class,
-      HardLineBreak.class
-    );
+  public getNodeTypes(): Set<Node> {
+    return new Set([
+      Document,
+      Heading,
+      Paragraph,
+      BlockQuote,
+      BulletList,
+      FencedCodeBlock,
+      HtmlBlock,
+      ThematicBreak,
+      IndentedCodeBlock,
+      Link,
+      ListItem,
+      OrderedList,
+      Image,
+      Emphasis,
+      StrongEmphasis,
+      Text,
+      Code,
+      HtmlInline,
+      SoftLineBreak,
+      HardLineBreak,
+    ]);
   }
 
-  public render(node: Node | null): void {
+  public render(node: Node) {
     node.accept(this);
   }
 
-  public visit(document: Document | null): void;
-
-  public visit(heading: Heading | null): void;
-
-  public visit(paragraph: Paragraph | null): void;
-
-  public visit(blockQuote: BlockQuote | null): void;
-
-  public visit(bulletList: BulletList | null): void;
-
-  public visit(fencedCodeBlock: FencedCodeBlock | null): void;
-
-  public visit(htmlBlock: HtmlBlock | null): void;
-
-  public visit(thematicBreak: ThematicBreak | null): void;
-
-  public visit(indentedCodeBlock: IndentedCodeBlock | null): void;
-
-  public visit(link: Link | null): void;
-
-  public visit(listItem: ListItem | null): void;
-
-  public visit(orderedList: OrderedList | null): void;
-
-  public visit(image: Image | null): void;
-
-  public visit(emphasis: Emphasis | null): void;
-
-  public visit(strongEmphasis: StrongEmphasis | null): void;
-
-  public visit(text: Text | null): void;
-
-  public visit(code: Code | null): void;
-
-  public visit(htmlInline: HtmlInline | null): void;
-
-  public visit(softLineBreak: SoftLineBreak | null): void;
-
-  public visit(hardLineBreak: HardLineBreak | null): void;
-  public visit(...args: unknown[]): void {
-    switch (args.length) {
-      case 1: {
-        const [document] = args as [Document];
+  public visit(node: VisitArgs) {
+    switch (true) {
+      case node instanceof Document: {
+        const document = node;
 
         // No rendering itself
         this.visitChildren(document);
@@ -122,10 +140,10 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [heading] = args as [Heading];
+      case node instanceof Heading: {
+        const heading = node;
 
-        let htag: java.lang.String = "h" + heading.getLevel();
+        const htag = "h" + heading.getLevel();
         this.html.line();
         this.html.tag(htag, this.getAttrs(heading, htag));
         this.visitChildren(heading);
@@ -135,20 +153,23 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [paragraph] = args as [Paragraph];
+      case node instanceof Paragraph: {
+        const paragraph = node;
 
-        let omitP: boolean =
+        const omitP: boolean =
           this.isInTightList(paragraph) || //
           (this.context.shouldOmitSingleParagraphP() &&
             paragraph.getParent() instanceof Document && //
             paragraph.getPrevious() === null &&
             paragraph.getNext() === null);
+
         if (!omitP) {
           this.html.line();
           this.html.tag("p", this.getAttrs(paragraph, "p"));
         }
+
         this.visitChildren(paragraph);
+
         if (!omitP) {
           this.html.tag("/p");
           this.html.line();
@@ -157,8 +178,8 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [blockQuote] = args as [BlockQuote];
+      case node instanceof BlockQuote: {
+        const blockQuote = node;
 
         this.html.line();
         this.html.tag("blockquote", this.getAttrs(blockQuote, "blockquote"));
@@ -171,38 +192,41 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [bulletList] = args as [BulletList];
+      case node instanceof BulletList: {
+        const bulletList = node;
 
         this.renderListBlock(bulletList, "ul", this.getAttrs(bulletList, "ul"));
 
         break;
       }
 
-      case 1: {
-        const [fencedCodeBlock] = args as [FencedCodeBlock];
+      case node instanceof FencedCodeBlock: {
+        const fencedCodeBlock = node;
 
-        let literal: java.lang.String = fencedCodeBlock.getLiteral();
-        let attributes: java.util.Map<java.lang.String, java.lang.String> =
-          new java.util.LinkedHashMap();
-        let info: java.lang.String = fencedCodeBlock.getInfo();
+        const literal = fencedCodeBlock.getLiteral();
+        const attributes = new Map<string, string>();
+        const info = fencedCodeBlock.getInfo();
+
         if (info !== null && !info.isEmpty()) {
-          let space: int = info.indexOf(" ");
-          let language: java.lang.String;
+          const space = info.indexOf(" ");
+          let language: string;
+
           if (space === -1) {
             language = info;
           } else {
             language = info.substring(0, space);
           }
-          attributes.put("class", "language-" + language);
+
+          attributes.set("class", "language-" + language);
         }
+
         this.renderCodeBlock(literal, fencedCodeBlock, attributes);
 
         break;
       }
 
-      case 1: {
-        const [htmlBlock] = args as [HtmlBlock];
+      case node instanceof HtmlBlock: {
+        const htmlBlock = node;
 
         this.html.line();
         if (this.context.shouldEscapeHtml()) {
@@ -212,13 +236,14 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         } else {
           this.html.raw(htmlBlock.getLiteral());
         }
+
         this.html.line();
 
         break;
       }
 
-      case 1: {
-        const [thematicBreak] = args as [ThematicBreak];
+      case node instanceof ThematicBreak: {
+        const thematicBreak = node;
 
         this.html.line();
         this.html.tag("hr", this.getAttrs(thematicBreak, "hr"), true);
@@ -227,35 +252,36 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [indentedCodeBlock] = args as [IndentedCodeBlock];
+      case node instanceof IndentedCodeBlock: {
+        const indentedCodeBlock = node;
 
         this.renderCodeBlock(
           indentedCodeBlock.getLiteral(),
           indentedCodeBlock,
-          java.util.Map.of()
+          new Map<string, string>()
         );
 
         break;
       }
 
-      case 1: {
-        const [link] = args as [Link];
+      case node instanceof Link: {
+        const link = node;
 
-        let attrs: java.util.Map<java.lang.String, java.lang.String> =
-          new java.util.LinkedHashMap();
-        let url: java.lang.String = link.getDestination();
+        const attrs = new Map<string, string>();
+        let url = link.getDestination();
 
         if (this.context.shouldSanitizeUrls()) {
           url = this.context.urlSanitizer().sanitizeLinkUrl(url);
-          attrs.put("rel", "nofollow");
+          attrs.set("rel", "nofollow");
         }
 
         url = this.context.encodeUrl(url);
-        attrs.put("href", url);
+        attrs.set("href", url);
+
         if (link.getTitle() !== null) {
-          attrs.put("title", link.getTitle());
+          attrs.set("title", link.getTitle());
         }
+
         this.html.tag("a", this.getAttrs(link, "a", attrs));
         this.visitChildren(link);
         this.html.tag("/a");
@@ -263,8 +289,8 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [listItem] = args as [ListItem];
+      case node instanceof ListItem: {
+        const listItem = node;
 
         this.html.tag("li", this.getAttrs(listItem, "li"));
         this.visitChildren(listItem);
@@ -274,18 +300,20 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [orderedList] = args as [OrderedList];
+      case node instanceof OrderedList: {
+        const orderedList = node;
 
-        let start: int =
+        const start =
           orderedList.getMarkerStartNumber() !== null
             ? orderedList.getMarkerStartNumber()
             : 1;
-        let attrs: java.util.Map<java.lang.String, java.lang.String> =
-          new java.util.LinkedHashMap();
+
+        const attrs = new Map<string, string>();
+
         if (start !== 1) {
-          attrs.put("start", java.lang.String.valueOf(start));
+          attrs.set("start", start.toString());
         }
+
         this.renderListBlock(
           orderedList,
           "ol",
@@ -295,26 +323,27 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [image] = args as [Image];
+      case node instanceof Image: {
+        const image = node;
 
-        let url: java.lang.String = image.getDestination();
+        let url = image.getDestination();
 
-        let altTextVisitor: CoreHtmlNodeRenderer.AltTextVisitor =
-          new CoreHtmlNodeRenderer.AltTextVisitor();
+        const altTextVisitor = new AltTextVisitor();
         image.accept(altTextVisitor);
-        let altText: java.lang.String = altTextVisitor.getAltText();
 
-        let attrs: java.util.Map<java.lang.String, java.lang.String> =
-          new java.util.LinkedHashMap();
+        const altText = altTextVisitor.getAltText();
+
+        const attrs = new Map<string, string>();
+
         if (this.context.shouldSanitizeUrls()) {
           url = this.context.urlSanitizer().sanitizeImageUrl(url);
         }
 
-        attrs.put("src", this.context.encodeUrl(url));
-        attrs.put("alt", altText);
+        attrs.set("src", this.context.encodeUrl(url));
+        attrs.set("alt", altText);
+
         if (image.getTitle() !== null) {
-          attrs.put("title", image.getTitle());
+          attrs.set("title", image.getTitle());
         }
 
         this.html.tag("img", this.getAttrs(image, "img", attrs), true);
@@ -322,8 +351,8 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [emphasis] = args as [Emphasis];
+      case node instanceof Emphasis: {
+        const emphasis = node;
 
         this.html.tag("em", this.getAttrs(emphasis, "em"));
         this.visitChildren(emphasis);
@@ -332,8 +361,8 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [strongEmphasis] = args as [StrongEmphasis];
+      case node instanceof StrongEmphasis: {
+        const strongEmphasis = node;
 
         this.html.tag("strong", this.getAttrs(strongEmphasis, "strong"));
         this.visitChildren(strongEmphasis);
@@ -342,16 +371,16 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [text] = args as [Text];
+      case node instanceof Text: {
+        const text = node;
 
         this.html.text(text.getLiteral());
 
         break;
       }
 
-      case 1: {
-        const [code] = args as [Code];
+      case node instanceof Code: {
+        const code = node;
 
         this.html.tag("code", this.getAttrs(code, "code"));
         this.html.text(code.getLiteral());
@@ -360,8 +389,8 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [htmlInline] = args as [HtmlInline];
+      case node instanceof HtmlInline: {
+        const htmlInline = node;
 
         if (this.context.shouldEscapeHtml()) {
           this.html.text(htmlInline.getLiteral());
@@ -372,45 +401,38 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         break;
       }
 
-      case 1: {
-        const [softLineBreak] = args as [SoftLineBreak];
-
+      case node instanceof SoftLineBreak: {
         this.html.raw(this.context.getSoftbreak());
 
         break;
       }
 
-      case 1: {
-        const [hardLineBreak] = args as [HardLineBreak];
+      case node instanceof HardLineBreak: {
+        const hardLineBreak = node;
 
         this.html.tag("br", this.getAttrs(hardLineBreak, "br"), true);
         this.html.line();
 
         break;
       }
-
-      default: {
-        throw new java.lang.IllegalArgumentException(
-          S`Invalid number of arguments`
-        );
-      }
     }
   }
 
-  protected visitChildren(parent: Node | null): void {
-    let node: Node = parent.getFirstChild();
+  protected visitChildren(parent: Node) {
+    let node = parent.getFirstChild();
+
     while (node !== null) {
-      let next: Node = node.getNext();
+      let next = node.getNext();
       this.context.render(node);
       node = next;
     }
   }
 
   private renderCodeBlock(
-    literal: java.lang.String | null,
-    node: Node | null,
-    attributes: java.util.Map<java.lang.String, java.lang.String> | null
-  ): void {
+    literal: string,
+    node: Node,
+    attributes: Map<string, string>
+  ) {
     this.html.line();
     this.html.tag("pre", this.getAttrs(node, "pre"));
     this.html.tag("code", this.getAttrs(node, "code", attributes));
@@ -421,10 +443,10 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   }
 
   private renderListBlock(
-    listBlock: ListBlock | null,
-    tagName: java.lang.String | null,
-    attributes: java.util.Map<java.lang.String, java.lang.String> | null
-  ): void {
+    listBlock: ListBlock,
+    tagName: string,
+    attributes: Map<string, string>
+  ) {
     this.html.line();
     this.html.tag(tagName, attributes);
     this.html.line();
@@ -434,107 +456,30 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.html.line();
   }
 
-  private isInTightList(paragraph: Paragraph | null): boolean {
-    let parent: Node = paragraph.getParent();
+  private isInTightList(paragraph: Paragraph): boolean {
+    let parent = paragraph.getParent();
+
     if (parent !== null) {
-      let gramps: Node = parent.getParent();
+      let gramps = parent.getParent();
       if (gramps instanceof ListBlock) {
-        let list: ListBlock = gramps as ListBlock;
+        let list: ListBlock = gramps;
+
         return list.isTight();
       }
     }
+
     return false;
   }
 
   private getAttrs(
-    node: Node | null,
-    tagName: java.lang.String | null
-  ): java.util.Map<java.lang.String, java.lang.String> | null;
-
-  private getAttrs(
-    node: Node | null,
-    tagName: java.lang.String | null,
-    defaultAttributes: java.util.Map<java.lang.String, java.lang.String> | null
-  ): java.util.Map<java.lang.String, java.lang.String> | null;
-  private getAttrs(
-    ...args: unknown[]
-  ): java.util.Map<java.lang.String, java.lang.String> | null {
-    switch (args.length) {
-      case 2: {
-        const [node, tagName] = args as [Node, java.lang.String];
-
-        return this.getAttrs(node, tagName, java.util.Map.of());
-
-        break;
-      }
-
-      case 3: {
-        const [node, tagName, defaultAttributes] = args as [
-          Node,
-          java.lang.String,
-          java.util.Map<java.lang.String, java.lang.String>
-        ];
-
-        return this.context.extendAttributes(node, tagName, defaultAttributes);
-
-        break;
-      }
-
-      default: {
-        throw new java.lang.IllegalArgumentException(
-          S`Invalid number of arguments`
-        );
-      }
-    }
+    node: Node,
+    tagName: string,
+    defaultAttributes = new Map<string, string>()
+  ): Map<string, string> {
+    return this.context.extendAttributes(node, tagName, defaultAttributes);
   }
 
-  public static AltTextVisitor = class AltTextVisitor extends AbstractVisitor {
-    private readonly sb: java.lang.StringBuilder | null =
-      new java.lang.StringBuilder();
-
-    protected getAltText(): java.lang.String | null {
-      return this.sb.toString();
-    }
-
-    public visit(text: Text | null): void;
-
-    public visit(softLineBreak: SoftLineBreak | null): void;
-
-    public visit(hardLineBreak: HardLineBreak | null): void;
-    public visit(...args: unknown[]): void {
-      switch (args.length) {
-        case 1: {
-          const [text] = args as [Text];
-
-          this.sb.append(text.getLiteral());
-
-          break;
-        }
-
-        case 1: {
-          const [softLineBreak] = args as [SoftLineBreak];
-
-          this.sb.append("\n");
-
-          break;
-        }
-
-        case 1: {
-          const [hardLineBreak] = args as [HardLineBreak];
-
-          this.sb.append("\n");
-
-          break;
-        }
-
-        default: {
-          throw new java.lang.IllegalArgumentException(
-            S`Invalid number of arguments`
-          );
-        }
-      }
-    }
-  };
+  public static AltTextVisitor = AltTextVisitor;
 }
 
 export default CoreHtmlNodeRenderer;
