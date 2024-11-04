@@ -1,23 +1,26 @@
-class Builder {
-  public readonly set: java.util.BitSet;
+import { BitSet, fromCodePoint } from "../../common";
+import { CharMatcher } from "./CharMatcher";
 
-  public constructor(set: java.util.BitSet) {
+class Builder {
+  public readonly set: BitSet;
+
+  public constructor(set: BitSet) {
     this.set = set;
   }
 
   public c(c: string): Builder {
-    if (c.codePointAt(0)! > 127) {
+    if (c.charCodeAt(0) > 127) {
       throw Error("Can only match ASCII characters");
     }
 
-    this.set.set(c);
+    this.set.set(c.charCodeAt(0));
 
     return this;
   }
 
   public anyOf(s: string): Builder;
-  public anyOf(characters: Set<Character>): Builder;
-  public anyOf(data: string | Set<Character>): Builder {
+  public anyOf(characters: Set<string>): Builder;
+  public anyOf(data: string | Set<string>): Builder {
     if (typeof data === "string") {
       for (let i = 0; i < data.length; i++) {
         this.c(data.charAt(i));
@@ -32,8 +35,8 @@ class Builder {
   }
 
   public range(from: string, toInclusive: string): Builder {
-    for (let c = from.codePointAt(0)!; c <= toInclusive.codePointAt(0)!; c++) {
-      this.c(String.fromCodePoint(c));
+    for (let c = from.charCodeAt(0); c <= toInclusive.charCodeAt(0); c++) {
+      this.c(fromCodePoint(c));
     }
 
     return this;
@@ -47,19 +50,19 @@ class Builder {
 /**
  * Char matcher that can match ASCII characters efficiently.
  */
-export class AsciiMatcher implements CharMatcher {
-  private readonly set: java.util.BitSet;
+class AsciiMatcher implements CharMatcher {
+  private readonly set: BitSet;
 
   public constructor(builder: Builder) {
     this.set = builder.set;
   }
 
   public matches(c: string): boolean {
-    return this.set.get(c.codePointAt(0));
+    return this.set.get(c.charCodeAt(0));
   }
 
   public newBuilder(): Builder {
-    return new Builder(this.set.clone() as java.util.BitSet);
+    return new Builder(this.set.clone());
   }
 
   public static builder(): Builder;
@@ -68,9 +71,11 @@ export class AsciiMatcher implements CharMatcher {
     if (matcher) {
       return new Builder(matcher.set.clone());
     } else {
-      new Builder(new BitSet());
+      return new Builder(new BitSet());
     }
   }
 
   public static Builder = Builder;
 }
+
+export default AsciiMatcher;

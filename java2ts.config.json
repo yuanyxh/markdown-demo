@@ -1,4 +1,8 @@
 {
   "packageRoot": "./lib",
-  "outputPath": "./lib_ts"
+  "outputPath": "./lib_ts",
+  "options": {
+    "addNullUnionType": false,
+    "addIndexFiles": true
+  }
 }

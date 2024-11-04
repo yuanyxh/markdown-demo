@@ -1,400 +1,351 @@
+import { NodeRenderer } from "../NodeRenderer";
+import LineBreakRendering from "./LineBreakRendering";
+import TextContentWriter from "./TextContentWriter";
+import { TextContentNodeRendererContext } from "./TextContentNodeRendererContext";
 
+import {
+  ListHolder,
+  OrderedListHolder,
+  BulletListHolder,
+} from "../../renderer";
 
+import {
+  Node,
+  Document,
+  Heading,
+  Paragraph,
+  BlockQuote,
+  BulletList,
+  FencedCodeBlock,
+  HtmlBlock,
+  ThematicBreak,
+  IndentedCodeBlock,
+  Link,
+  ListItem,
+  OrderedList,
+  Image,
+  Emphasis,
+  StrongEmphasis,
+  Text,
+  Code,
+  HtmlInline,
+  SoftLineBreak,
+  HardLineBreak,
+  AbstractVisitor,
+} from "../../node";
 
-import { java, S } from "jree";
-
-
+type VisitArgs =
+  | Document
+  | BlockQuote
+  | BulletList
+  | Code
+  | FencedCodeBlock
+  | HardLineBreak
+  | Heading
+  | ThematicBreak
+  | HtmlInline
+  | HtmlBlock
+  | Image
+  | IndentedCodeBlock
+  | Link
+  | ListItem
+  | OrderedList
+  | Paragraph
+  | SoftLineBreak
+  | Text;
 
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).
  */
-export  class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRenderer {
+class CoreTextContentNodeRenderer
+  extends AbstractVisitor
+  implements NodeRenderer
+{
+  protected readonly context: TextContentNodeRendererContext;
+  private readonly textContent: TextContentWriter;
 
-    protected readonly  context:  TextContentNodeRendererContext | null;
-    private readonly  textContent:  TextContentWriter | null;
+  private listHolder: ListHolder | null = null;
 
-    private  listHolder:  ListHolder | null;
+  public constructor(context: TextContentNodeRendererContext) {
+    super();
 
-    public  constructor(context: TextContentNodeRendererContext| null) {
-        super();
-this.context = context;
-        this.textContent = context.getWriter();
-    }
+    this.context = context;
+    this.textContent = context.getWriter();
+  }
 
-    public  getNodeTypes():  java.util.Set<java.lang.Class< Node>> | null {
-        return java.util.Set.of(
-                Document.class,
-                Heading.class,
-                Paragraph.class,
-                BlockQuote.class,
-                BulletList.class,
-                FencedCodeBlock.class,
-                HtmlBlock.class,
-                ThematicBreak.class,
-                IndentedCodeBlock.class,
-                Link.class,
-                ListItem.class,
-                OrderedList.class,
-                Image.class,
-                Emphasis.class,
-                StrongEmphasis.class,
-                Text.class,
-                Code.class,
-                HtmlInline.class,
-                SoftLineBreak.class,
-                HardLineBreak.class
-        );
-    }
+  public beforeRoot(rootNode: Node): void {}
+  public afterRoot(rootNode: Node): void {}
 
-    public  render(node: Node| null):  void {
-        node.accept(this);
-    }
+  public getNodeTypes(): Set<Node> {
+    return new Set([
+      Document,
+      Heading,
+      Paragraph,
+      BlockQuote,
+      BulletList,
+      FencedCodeBlock,
+      HtmlBlock,
+      ThematicBreak,
+      IndentedCodeBlock,
+      Link,
+      ListItem,
+      OrderedList,
+      Image,
+      Emphasis,
+      StrongEmphasis,
+      Text,
+      Code,
+      HtmlInline,
+      SoftLineBreak,
+      HardLineBreak,
+    ]);
+  }
 
-    public  visit(document: Document| null):  void;
+  public render(node: Node) {
+    node.accept(this);
+  }
 
-    public  visit(blockQuote: BlockQuote| null):  void;
+  public visit(node: VisitArgs) {
+    switch (true) {
+      case node instanceof Document:
+        this.visitChildren(node);
 
-    public  visit(bulletList: BulletList| null):  void;
+        break;
 
-    public  visit(code: Code| null):  void;
-
-    public  visit(fencedCodeBlock: FencedCodeBlock| null):  void;
-
-    public  visit(hardLineBreak: HardLineBreak| null):  void;
-
-    public  visit(heading: Heading| null):  void;
-
-    public  visit(thematicBreak: ThematicBreak| null):  void;
-
-    public  visit(htmlInline: HtmlInline| null):  void;
-
-    public  visit(htmlBlock: HtmlBlock| null):  void;
-
-    public  visit(image: Image| null):  void;
-
-    public  visit(indentedCodeBlock: IndentedCodeBlock| null):  void;
-
-    public  visit(link: Link| null):  void;
-
-    public  visit(listItem: ListItem| null):  void;
-
-    public  visit(orderedList: OrderedList| null):  void;
-
-    public  visit(paragraph: Paragraph| null):  void;
-
-    public  visit(softLineBreak: SoftLineBreak| null):  void;
-
-    public  visit(text: Text| null):  void;
-public visit(...args: unknown[]):  void {
-		switch (args.length) {
-			case 1: {
-				const [document] = args as [Document];
-
-
-        // No rendering itself
-        this.visitChildren(document);
-    
-
-				break;
-			}
-
-			case 1: {
-				const [blockQuote] = args as [BlockQuote];
-
-
-        // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
-        this.textContent.write('\u00AB');
-        this.visitChildren(blockQuote);
+      case node instanceof BlockQuote:
+        this.textContent.write("\u00AB");
+        this.visitChildren(node);
         this.textContent.resetBlock();
-        // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-        this.textContent.write('\u00BB');
-
+        this.textContent.write("\u00BB");
         this.textContent.block();
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [bulletList] = args as [BulletList];
-
-
-        this.textContent.pushTight(bulletList.isTight());
-        this.listHolder = new  BulletListHolder(this.listHolder, bulletList);
-        this.visitChildren(bulletList);
+      case node instanceof BulletList:
+        this.textContent.pushTight(node.isTight());
+        this.listHolder = new BulletListHolder(this.listHolder, node);
+        this.visitChildren(node);
         this.textContent.popTight();
         this.textContent.block();
         this.listHolder = this.listHolder.getParent();
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [code] = args as [Code];
+      case node instanceof Code:
+        this.textContent.write('"');
+        this.textContent.write(node.getLiteral());
+        this.textContent.write('"');
 
+        break;
 
-        this.textContent.write('\"');
-        this.textContent.write(code.getLiteral());
-        this.textContent.write('\"');
-    
+      case node instanceof FencedCodeBlock:
+        const fencedCodeBlockLiteral =
+          CoreTextContentNodeRenderer.stripTrailingNewline(node.getLiteral());
 
-				break;
-			}
-
-			case 1: {
-				const [fencedCodeBlock] = args as [FencedCodeBlock];
-
-
-        let  literal  = CoreTextContentNodeRenderer.stripTrailingNewline(fencedCodeBlock.getLiteral());
         if (this.stripNewlines()) {
-            this.textContent.writeStripped(literal);
+          this.textContent.writeStripped(fencedCodeBlockLiteral);
         } else {
-            this.textContent.write(literal);
+          this.textContent.write(fencedCodeBlockLiteral);
         }
+
         this.textContent.block();
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [hardLineBreak] = args as [HardLineBreak];
+      case node instanceof HardLineBreak:
+        if (this.stripNewlines()) {
+          this.textContent.whitespace();
+        } else {
+          this.textContent.line();
+        }
 
+        break;
+
+      case node instanceof Heading:
+        this.visitChildren(node);
 
         if (this.stripNewlines()) {
-            this.textContent.whitespace();
+          this.textContent.write(": ");
         } else {
-            this.textContent.line();
+          this.textContent.block();
         }
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [heading] = args as [Heading];
-
-
-        this.visitChildren(heading);
-        if (this.stripNewlines()) {
-            this.textContent.write(": ");
-        } else {
-            this.textContent.block();
-        }
-    
-
-				break;
-			}
-
-			case 1: {
-				const [thematicBreak] = args as [ThematicBreak];
-
-
+      case node instanceof ThematicBreak:
         if (!this.stripNewlines()) {
-            this.textContent.write("***");
+          this.textContent.write("***");
         }
+
         this.textContent.block();
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [htmlInline] = args as [HtmlInline];
+      case node instanceof HtmlInline:
+        this.writeText(node.getLiteral());
 
+        break;
 
-        this.writeText(htmlInline.getLiteral());
-    
+      case node instanceof HtmlBlock:
+        this.writeText(node.getLiteral());
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [htmlBlock] = args as [HtmlBlock];
+      case node instanceof Image:
+        this.writeLink(node, node.getTitle(), node.getDestination());
 
+        break;
 
-        this.writeText(htmlBlock.getLiteral());
-    
-
-				break;
-			}
-
-			case 1: {
-				const [image] = args as [Image];
-
-
-        this.writeLink(image, image.getTitle(), image.getDestination());
-    
-
-				break;
-			}
-
-			case 1: {
-				const [indentedCodeBlock] = args as [IndentedCodeBlock];
-
-
-        let  literal  = CoreTextContentNodeRenderer.stripTrailingNewline(indentedCodeBlock.getLiteral());
+      case node instanceof IndentedCodeBlock:
+        const indentedCodeBlockLiteral =
+          CoreTextContentNodeRenderer.stripTrailingNewline(node.getLiteral());
         if (this.stripNewlines()) {
-            this.textContent.writeStripped(literal);
+          this.textContent.writeStripped(indentedCodeBlockLiteral);
         } else {
-            this.textContent.write(literal);
+          this.textContent.write(indentedCodeBlockLiteral);
         }
+
         this.textContent.block();
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [link] = args as [Link];
+      case node instanceof Link:
+        this.writeLink(node, node.getTitle(), node.getDestination());
 
+        break;
 
-        this.writeLink(link, link.getTitle(), link.getDestination());
-    
+      case node instanceof ListItem:
+        if (
+          this.listHolder != null &&
+          this.listHolder instanceof OrderedListHolder
+        ) {
+          const orderedListHolder = this.listHolder as OrderedListHolder;
+          const indent = this.stripNewlines()
+            ? ""
+            : orderedListHolder.getIndent();
 
-				break;
-			}
+          this.textContent.write(
+            indent +
+              orderedListHolder.getCounter() +
+              orderedListHolder.getDelimiter() +
+              " "
+          );
+          this.visitChildren(node);
+          this.textContent.block();
 
-			case 1: {
-				const [listItem] = args as [ListItem];
+          orderedListHolder.increaseCounter();
+        } else if (
+          this.listHolder != null &&
+          this.listHolder instanceof BulletListHolder
+        ) {
+          const bulletListHolder = this.listHolder as BulletListHolder;
+          if (!this.stripNewlines()) {
+            this.textContent.write(
+              bulletListHolder.getIndent() + bulletListHolder.getMarker() + " "
+            );
+          }
 
-
-        if (this.listHolder !== null && this.listHolder instanceof OrderedListHolder) {
-            let  orderedListHolder: OrderedListHolder =  this.listHolder as OrderedListHolder;
-            let  indent: java.lang.String = this.stripNewlines() ? "" : orderedListHolder.getIndent();
-            this.textContent.write(indent + orderedListHolder.getCounter() + orderedListHolder.getDelimiter() + " ");
-            this.visitChildren(listItem);
-            this.textContent.block();
-            orderedListHolder.increaseCounter();
-        } else if (this.listHolder !== null && this.listHolder instanceof BulletListHolder) {
-            let  bulletListHolder: BulletListHolder =  this.listHolder as BulletListHolder;
-            if (!this.stripNewlines()) {
-                this.textContent.write(bulletListHolder.getIndent() + bulletListHolder.getMarker() + " ");
-            }
-            this.visitChildren(listItem);
-            this.textContent.block();
+          this.visitChildren(node);
+          this.textContent.block();
         }
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [orderedList] = args as [OrderedList];
-
-
-        this.textContent.pushTight(orderedList.isTight());
-        this.listHolder = new  OrderedListHolder(this.listHolder, orderedList);
-        this.visitChildren(orderedList);
+      case node instanceof OrderedList:
+        this.textContent.pushTight(node.isTight());
+        this.listHolder = new OrderedListHolder(this.listHolder, node);
+        this.visitChildren(node);
         this.textContent.popTight();
         this.textContent.block();
         this.listHolder = this.listHolder.getParent();
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [paragraph] = args as [Paragraph];
-
-
-        this.visitChildren(paragraph);
+      case node instanceof Paragraph:
+        this.visitChildren(node);
         this.textContent.block();
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [softLineBreak] = args as [SoftLineBreak];
-
-
+      case node instanceof SoftLineBreak:
         if (this.stripNewlines()) {
-            this.textContent.whitespace();
+          this.textContent.whitespace();
         } else {
-            this.textContent.line();
+          this.textContent.line();
         }
-    
 
-				break;
-			}
+        break;
 
-			case 1: {
-				const [text] = args as [Text];
+      case node instanceof Text:
+        this.writeText(node.getLiteral());
 
+        break;
+    }
+  }
 
-        this.writeText(text.getLiteral());
-    
+  protected visitChildren(parent: Node) {
+    let node = parent.getFirstChild();
 
-				break;
-			}
+    while (node !== null) {
+      let next = node.getNext();
+      this.context.render(node);
+      node = next;
+    }
+  }
 
-			default: {
-				throw new java.lang.IllegalArgumentException(S`Invalid number of arguments`);
-			}
-		}
-	}
+  private writeText(text: string) {
+    if (this.stripNewlines()) {
+      this.textContent.writeStripped(text);
+    } else {
+      this.textContent.write(text);
+    }
+  }
 
+  private writeLink(node: Node, title: string, destination: string): void {
+    const hasChild = node.getFirstChild() !== null;
+    const hasTitle = title !== destination;
+    const hasDestination = destination !== "";
 
-    protected  visitChildren(parent: Node| null):  void {
-        let  node: Node = parent.getFirstChild();
-        while (node !== null) {
-            let  next: Node = node.getNext();
-            this.context.render(node);
-            node = next;
-        }
+    if (hasChild) {
+      this.textContent.write('"');
+      this.visitChildren(node);
+      this.textContent.write('"');
+
+      if (hasTitle || hasDestination) {
+        this.textContent.whitespace();
+        this.textContent.write("(");
+      }
     }
 
-    private  writeText(text: java.lang.String| null):  void {
-        if (this.stripNewlines()) {
-            this.textContent.writeStripped(text);
-        } else {
-            this.textContent.write(text);
-        }
+    if (hasTitle) {
+      this.textContent.write(title);
+
+      if (hasDestination) {
+        this.textContent.colon();
+        this.textContent.whitespace();
+      }
     }
 
-    private  writeLink(node: Node| null, title: java.lang.String| null, destination: java.lang.String| null):  void {
-        let  hasChild: boolean = node.getFirstChild() !== null;
-        let  hasTitle: boolean = title !== null && !title.equals(destination);
-        let  hasDestination: boolean = destination !== null && !destination.equals("");
-
-        if (hasChild) {
-            this.textContent.write('"');
-            this.visitChildren(node);
-            this.textContent.write('"');
-            if (hasTitle || hasDestination) {
-                this.textContent.whitespace();
-                this.textContent.write('(');
-            }
-        }
-
-        if (hasTitle) {
-            this.textContent.write(title);
-            if (hasDestination) {
-                this.textContent.colon();
-                this.textContent.whitespace();
-            }
-        }
-
-        if (hasDestination) {
-            this.textContent.write(destination);
-        }
-
-        if (hasChild && (hasTitle || hasDestination)) {
-            this.textContent.write(')');
-        }
+    if (hasDestination) {
+      this.textContent.write(destination);
     }
 
-    private  stripNewlines():  boolean {
-        return this.context.lineBreakRendering() === LineBreakRendering.STRIP;
+    if (hasChild && (hasTitle || hasDestination)) {
+      this.textContent.write(")");
     }
+  }
 
-    private static  stripTrailingNewline(s: java.lang.String| null):  java.lang.String | null {
-        if (s.endsWith("\n")) {
-            return s.substring(0, s.length() - 1);
-        } else {
-            return s;
-        }
+  private stripNewlines() {
+    return this.context.lineBreakRendering() === LineBreakRendering.STRIP;
+  }
+
+  private static stripTrailingNewline(s: string) {
+    if (s.endsWith("\n")) {
+      return s.substring(0, s.length - 1);
+    } else {
+      return s;
     }
+  }
 }
+
+export default CoreTextContentNodeRenderer;

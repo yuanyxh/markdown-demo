@@ -1,7 +1,4 @@
-
-import { java, JavaObject, S } from "jree";
-
-
+import Node from "./Node";
 
 /**
  * Abstract visitor that visits all children by default.
@@ -9,305 +6,261 @@ import { java, JavaObject, S } from "jree";
  * Can be used to only process certain nodes. If you override a method and want visiting to descend into children,
  * call {@link #visitChildren}.
  */
-export abstract  class AbstractVisitor extends JavaObject implements Visitor {
+abstract class AbstractVisitor implements Visitor {
+  public visit(blockQuote: BlockQuote | null): void;
 
-    public  visit(blockQuote: BlockQuote| null):  void;
+  public visit(bulletList: BulletList | null): void;
 
-    public  visit(bulletList: BulletList| null):  void;
+  public visit(code: Code | null): void;
 
-    public  visit(code: Code| null):  void;
+  public visit(document: Document | null): void;
 
-    public  visit(document: Document| null):  void;
+  public visit(emphasis: Emphasis | null): void;
 
-    public  visit(emphasis: Emphasis| null):  void;
+  public visit(fencedCodeBlock: FencedCodeBlock | null): void;
 
-    public  visit(fencedCodeBlock: FencedCodeBlock| null):  void;
+  public visit(hardLineBreak: HardLineBreak | null): void;
 
-    public  visit(hardLineBreak: HardLineBreak| null):  void;
+  public visit(heading: Heading | null): void;
 
-    public  visit(heading: Heading| null):  void;
+  public visit(thematicBreak: ThematicBreak | null): void;
 
-    public  visit(thematicBreak: ThematicBreak| null):  void;
+  public visit(htmlInline: HtmlInline | null): void;
 
-    public  visit(htmlInline: HtmlInline| null):  void;
+  public visit(htmlBlock: HtmlBlock | null): void;
 
-    public  visit(htmlBlock: HtmlBlock| null):  void;
+  public visit(image: Image | null): void;
 
-    public  visit(image: Image| null):  void;
+  public visit(indentedCodeBlock: IndentedCodeBlock | null): void;
 
-    public  visit(indentedCodeBlock: IndentedCodeBlock| null):  void;
+  public visit(link: Link | null): void;
 
-    public  visit(link: Link| null):  void;
+  public visit(listItem: ListItem | null): void;
 
-    public  visit(listItem: ListItem| null):  void;
+  public visit(orderedList: OrderedList | null): void;
 
-    public  visit(orderedList: OrderedList| null):  void;
+  public visit(paragraph: Paragraph | null): void;
 
-    public  visit(paragraph: Paragraph| null):  void;
+  public visit(softLineBreak: SoftLineBreak | null): void;
 
-    public  visit(softLineBreak: SoftLineBreak| null):  void;
+  public visit(strongEmphasis: StrongEmphasis | null): void;
 
-    public  visit(strongEmphasis: StrongEmphasis| null):  void;
+  public visit(text: Text | null): void;
 
-    public  visit(text: Text| null):  void;
+  public visit(linkReferenceDefinition: LinkReferenceDefinition | null): void;
 
-    public  visit(linkReferenceDefinition: LinkReferenceDefinition| null):  void;
+  public visit(customBlock: CustomBlock | null): void;
 
-    public  visit(customBlock: CustomBlock| null):  void;
-
-    public  visit(customNode: CustomNode| null):  void;
-public visit(...args: unknown[]):  void {
-		switch (args.length) {
-			case 1: {
-				const [blockQuote] = args as [BlockQuote];
-
+  public visit(customNode: CustomNode | null): void;
+  public visit(...args: unknown[]): void {
+    switch (args.length) {
+      case 1: {
+        const [blockQuote] = args as [BlockQuote];
 
         this.visitChildren(blockQuote);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [bulletList] = args as [BulletList];
-
+      case 1: {
+        const [bulletList] = args as [BulletList];
 
         this.visitChildren(bulletList);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [code] = args as [Code];
-
+      case 1: {
+        const [code] = args as [Code];
 
         this.visitChildren(code);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [document] = args as [Document];
-
+      case 1: {
+        const [document] = args as [Document];
 
         this.visitChildren(document);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [emphasis] = args as [Emphasis];
-
+      case 1: {
+        const [emphasis] = args as [Emphasis];
 
         this.visitChildren(emphasis);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [fencedCodeBlock] = args as [FencedCodeBlock];
-
+      case 1: {
+        const [fencedCodeBlock] = args as [FencedCodeBlock];
 
         this.visitChildren(fencedCodeBlock);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [hardLineBreak] = args as [HardLineBreak];
-
+      case 1: {
+        const [hardLineBreak] = args as [HardLineBreak];
 
         this.visitChildren(hardLineBreak);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [heading] = args as [Heading];
-
+      case 1: {
+        const [heading] = args as [Heading];
 
         this.visitChildren(heading);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [thematicBreak] = args as [ThematicBreak];
-
+      case 1: {
+        const [thematicBreak] = args as [ThematicBreak];
 
         this.visitChildren(thematicBreak);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [htmlInline] = args as [HtmlInline];
-
+      case 1: {
+        const [htmlInline] = args as [HtmlInline];
 
         this.visitChildren(htmlInline);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [htmlBlock] = args as [HtmlBlock];
-
+      case 1: {
+        const [htmlBlock] = args as [HtmlBlock];
 
         this.visitChildren(htmlBlock);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [image] = args as [Image];
-
+      case 1: {
+        const [image] = args as [Image];
 
         this.visitChildren(image);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [indentedCodeBlock] = args as [IndentedCodeBlock];
-
+      case 1: {
+        const [indentedCodeBlock] = args as [IndentedCodeBlock];
 
         this.visitChildren(indentedCodeBlock);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [link] = args as [Link];
-
+      case 1: {
+        const [link] = args as [Link];
 
         this.visitChildren(link);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [listItem] = args as [ListItem];
-
+      case 1: {
+        const [listItem] = args as [ListItem];
 
         this.visitChildren(listItem);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [orderedList] = args as [OrderedList];
-
+      case 1: {
+        const [orderedList] = args as [OrderedList];
 
         this.visitChildren(orderedList);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [paragraph] = args as [Paragraph];
-
+      case 1: {
+        const [paragraph] = args as [Paragraph];
 
         this.visitChildren(paragraph);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [softLineBreak] = args as [SoftLineBreak];
-
+      case 1: {
+        const [softLineBreak] = args as [SoftLineBreak];
 
         this.visitChildren(softLineBreak);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [strongEmphasis] = args as [StrongEmphasis];
-
+      case 1: {
+        const [strongEmphasis] = args as [StrongEmphasis];
 
         this.visitChildren(strongEmphasis);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [text] = args as [Text];
-
+      case 1: {
+        const [text] = args as [Text];
 
         this.visitChildren(text);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [linkReferenceDefinition] = args as [LinkReferenceDefinition];
-
+      case 1: {
+        const [linkReferenceDefinition] = args as [LinkReferenceDefinition];
 
         this.visitChildren(linkReferenceDefinition);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [customBlock] = args as [CustomBlock];
-
+      case 1: {
+        const [customBlock] = args as [CustomBlock];
 
         this.visitChildren(customBlock);
-    
 
-				break;
-			}
+        break;
+      }
 
-			case 1: {
-				const [customNode] = args as [CustomNode];
-
+      case 1: {
+        const [customNode] = args as [CustomNode];
 
         this.visitChildren(customNode);
-    
 
-				break;
-			}
+        break;
+      }
 
-			default: {
-				throw new java.lang.IllegalArgumentException(S`Invalid number of arguments`);
-			}
-		}
-	}
-
-
-    /**
-     * Visit the child nodes.
-     *
-     * @param parent the parent node whose children should be visited
-     */
-    protected  visitChildren(parent: Node| null):  void {
-        let  node: Node = parent.getFirstChild();
-        while (node !== null) {
-            // A subclass of this visitor might modify the node, resulting in getNext returning a different node or no
-            // node after visiting it. So get the next node before visiting.
-            let  next: Node = node.getNext();
-            node.accept(this);
-            node = next;
-        }
+      default: {
+        throw new java.lang.IllegalArgumentException(
+          S`Invalid number of arguments`
+        );
+      }
     }
+  }
+
+  /**
+   * Visit the child nodes.
+   *
+   * @param parent the parent node whose children should be visited
+   */
+  protected visitChildren(parent: Node | null): void {
+    let node: Node = parent.getFirstChild();
+    while (node !== null) {
+      // A subclass of this visitor might modify the node, resulting in getNext returning a different node or no
+      // node after visiting it. So get the next node before visiting.
+      let next: Node = node.getNext();
+      node.accept(this);
+      node = next;
+    }
+  }
 }
+
+export default AbstractVisitor;

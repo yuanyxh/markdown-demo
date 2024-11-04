@@ -1,10 +1,3 @@
-
-
-
-import { java } from "jree";
-
-
-
 /**
  * Sanitizes urls for img and a elements by whitelisting protocols.
  * This is intended to prevent XSS payloads like [Click this totally safe url](javascript:document.xss=true;)
@@ -13,20 +6,20 @@ import { java } from "jree";
  *
  * @since 0.14.0
  */
- interface UrlSanitizer {
-    /**
-     * Sanitize a url for use in the href attribute of a {@link Link}.
-     *
-     * @param url Link to sanitize
-     * @return Sanitized link
-     */
-      sanitizeLinkUrl(url: java.lang.String| null): java.lang.String;
+export interface UrlSanitizer {
+  /**
+   * Sanitize a url for use in the href attribute of a {@link Link}.
+   *
+   * @param url Link to sanitize
+   * @return Sanitized link
+   */
+  sanitizeLinkUrl(url: java.lang.String | null): java.lang.String;
 
-    /**
-     * Sanitize a url for use in the src attribute of a {@link Image}.
-     *
-     * @param url Link to sanitize
-     * @return Sanitized link {@link Image}
-     */
-      sanitizeImageUrl(url: java.lang.String| null): java.lang.String;
+  /**
+   * Sanitize a url for use in the src attribute of a {@link Image}.
+   *
+   * @param url Link to sanitize
+   * @return Sanitized link {@link Image}
+   */
+  sanitizeImageUrl(url: java.lang.String | null): java.lang.String;
 }

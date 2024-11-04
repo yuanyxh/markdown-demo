@@ -1,18 +1,13 @@
 
 
-
-import { java, JavaObject, type int, S } from "jree";
-
-
-
 /**
  *
  * Allows http, https, mailto, and data protocols for url.
  * Also allows protocol relative urls, and relative urls.
  * Implementation based on https://github.com/OWASP/java-html-sanitizer/blob/f07e44b034a45d94d6fd010279073c38b6933072/src/main/java/org/owasp/html/FilterUrlByProtocolAttributePolicy.java
  */
-export  class DefaultUrlSanitizer extends JavaObject implements UrlSanitizer {
-    private  protocols:  java.util.Set<java.lang.String> | null;
+  class DefaultUrlSanitizer implements UrlSanitizer {
+    private  protocols:  Set<string> | null;
 
     public  constructor();
 
@@ -107,3 +102,5 @@ let  n: int = s.length();
         }
     }
 }
+
+export default DefaultUrlSanitizer

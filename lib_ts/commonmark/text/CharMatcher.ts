@@ -1,8 +1,3 @@
-
-import { java, type char } from "jree";
-
-
-
 /**
  * Matcher interface for {@code char} values.
  * <p>
@@ -10,7 +5,6 @@ import { java, type char } from "jree";
  * this only operates on the level of code units and doesn't support supplementary characters
  * (see {@link Character#isSupplementaryCodePoint(int)}).
  */
- interface CharMatcher {
-
-      matches(c: char): boolean;
+export interface CharMatcher {
+  matches(c: string): boolean;
 }
