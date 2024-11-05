@@ -1,4 +1,4 @@
-import { Appendable } from "../../../common";
+import { Appendable, fromCodePoint } from "../../../common";
 import { CharMatcher } from "../../text";
 
 /**
@@ -8,7 +8,7 @@ class MarkdownWriter {
   private readonly buffer: Appendable;
 
   private blockSeparator = 0;
-  private lastChar = "";
+  private lastChar = fromCodePoint(0);
   private atLineStart = true;
 
   // Stacks of settings that affect various rendering behaviors. The common pattern here is that callers use "push" to

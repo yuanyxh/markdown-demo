@@ -20,6 +20,22 @@ class Character {
     return this.isUnicodeCharOfCategory(Character.UnicodeCategory.L, char);
   }
 
+  public static isHighSurrogate(codePoint: number) {
+    const highSurrogateStart = 0xd800;
+    const lowSurrogateStart = 0xdc00;
+    return codePoint >= highSurrogateStart && codePoint < lowSurrogateStart;
+  }
+
+  public static isLowSurrogate(codePoint: number) {
+    const highSurrogateStart = 0xdc00;
+    const lowSurrogateStart = 0xe000;
+    return codePoint >= highSurrogateStart && codePoint < lowSurrogateStart;
+  }
+
+  public static toCodePoint(char1: number, char2: number) {
+    return (char1 << 10) + char2 + -56613888;
+  }
+
   public static readonly UnicodeCategory = {
     Ll: "Ll",
     Lu: "Lu",

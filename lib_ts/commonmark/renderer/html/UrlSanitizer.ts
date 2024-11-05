@@ -13,7 +13,7 @@ export interface UrlSanitizer {
    * @param url Link to sanitize
    * @return Sanitized link
    */
-  sanitizeLinkUrl(url: java.lang.String | null): java.lang.String;
+  sanitizeLinkUrl(url: string): string;
 
   /**
    * Sanitize a url for use in the src attribute of a {@link Image}.
@@ -21,5 +21,5 @@ export interface UrlSanitizer {
    * @param url Link to sanitize
    * @return Sanitized link {@link Image}
    */
-  sanitizeImageUrl(url: java.lang.String | null): java.lang.String;
+  sanitizeImageUrl(url: string): string;
 }

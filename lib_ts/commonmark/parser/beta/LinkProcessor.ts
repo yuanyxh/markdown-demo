@@ -1,9 +1,7 @@
-
-
-
-import { java } from "jree";
-
-
+import { InlineParserContext } from "./../InlineParserContext";
+import { LinkInfo } from "./LinkInfo";
+import LinkResult from "./LinkResult";
+import Scanner from "./Scanner";
 
 /**
  * An interface to decide how links/images are handled.
@@ -30,14 +28,17 @@ import { java } from "jree";
  * {@link LinkResult}. If it returns {@link LinkResult#none()}, the next registered processor is tried. If none of them
  * apply, the link is handled as it normally would.
  */
- interface LinkProcessor {
-
-    /**
-     * @param linkInfo information about the parsed link/image
-     * @param scanner  the scanner at the current position after the parsed link/image
-     * @param context  context for inline parsing
-     * @return what to do with the link/image, e.g. do nothing (try the next processor), wrap the text in a node, or
-     * replace the link/image with a node
-     */
-      process(linkInfo: LinkInfo| null, scanner: java.util.Scanner| null, context: InlineParserContext| null): LinkResult;
+export interface LinkProcessor {
+  /**
+   * @param linkInfo information about the parsed link/image
+   * @param scanner  the scanner at the current position after the parsed link/image
+   * @param context  context for inline parsing
+   * @return what to do with the link/image, e.g. do nothing (try the next processor), wrap the text in a node, or
+   * replace the link/image with a node
+   */
+  process(
+    linkInfo: LinkInfo,
+    scanner: Scanner,
+    context: InlineParserContext
+  ): LinkResult;
 }

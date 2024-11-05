@@ -1,39 +1,42 @@
+import { BlockParser } from "./BlockParser";
+import { Block } from "../../node";
+import SourceLine from "../SourceLine";
+import BlockContinue from "./BlockContinue";
 
+abstract class AbstractBlockParser implements BlockParser {
+  getBlock(): Block {
+    throw new Error("Method not implemented.");
+  }
 
+  tryContinue(parserState): BlockContinue {
+    throw new Error("Method not implemented.");
+  }
 
-import { java, JavaObject } from "jree";
+  public isContainer(): boolean {
+    return false;
+  }
 
+  public canHaveLazyContinuationLines(): boolean {
+    return false;
+  }
 
+  public canContain(childBlock: Block): boolean {
+    return false;
+  }
 
-export abstract  class AbstractBlockParser extends JavaObject implements BlockParser {
+  public addLine(line: SourceLine): void {}
 
-    public  isContainer():  boolean {
-        return false;
-    }
+  public addSourceSpan(sourceSpan: SourceSpan): void {
+    this.getBlock().addSourceSpan(sourceSpan);
+  }
 
-    public  canHaveLazyContinuationLines():  boolean {
-        return false;
-    }
+  public getDefinitions(): DefinitionMap<unknown>[] {
+    return [];
+  }
 
-    public  canContain(childBlock: Block| null):  boolean {
-        return false;
-    }
+  public closeBlock(): void {}
 
-    public  addLine(line: SourceLine| null):  void {
-    }
-
-    public  addSourceSpan(sourceSpan: SourceSpan| null):  void {
-        getBlock().addSourceSpan(sourceSpan);
-    }
-
-    public  getDefinitions():  java.util.List<DefinitionMap<unknown>> | null {
-        return java.util.List.of();
-    }
-
-    public  closeBlock():  void {
-    }
-
-    public  parseInlines(inlineParser: InlineParser| null):  void {
-    }
-
+  public parseInlines(inlineParser: InlineParser) {}
 }
+
+export default AbstractBlockParser;

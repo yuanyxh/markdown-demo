@@ -1,33 +1,24 @@
-
-
-
-import { java, JavaObject, type int } from "jree";
-
-
+import { BlockContinueImpl } from "../../internal";
 
 /**
  * Result object for continuing parsing of a block, see static methods for constructors.
  */
-export  class BlockContinue extends JavaObject {
+class BlockContinue {
+  public static none(): BlockContinue | null {
+    return null;
+  }
 
-    protected  constructor() {
-    super();
+  public static atIndex(newIndex: number): BlockContinue {
+    return new BlockContinueImpl(newIndex, -1, false);
+  }
+
+  public static atColumn(newColumn: number): BlockContinue {
+    return new BlockContinueImpl(-1, newColumn, false);
+  }
+
+  public static finished(): BlockContinue | null {
+    return new BlockContinueImpl(-1, -1, true);
+  }
 }
 
-    public static  none():  BlockContinue | null {
-        return null;
-    }
-
-    public static  atIndex(newIndex: int):  BlockContinue | null {
-        return new  BlockContinueImpl(newIndex, -1, false);
-    }
-
-    public static  atColumn(newColumn: int):  BlockContinue | null {
-        return new  BlockContinueImpl(-1, newColumn, false);
-    }
-
-    public static  finished():  BlockContinue | null {
-        return new  BlockContinueImpl(-1, -1, true);
-    }
-
-}
+export default BlockContinue;

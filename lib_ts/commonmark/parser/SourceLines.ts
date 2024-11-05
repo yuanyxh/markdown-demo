@@ -1,90 +1,64 @@
-
-
-
-import { java, JavaObject, type int, S } from "jree";
-
-
+import { Appendable } from "../../common";
+import SourceLine from "./SourceLine";
 
 /**
  * A set of lines ({@link SourceLine}) from the input source.
  *
  * @since 0.16.0
  */
-export  class SourceLines extends JavaObject {
+class SourceLines {
+  private readonly lines: SourceLine[] = [];
 
-    private readonly  lines:  java.util.List<SourceLine> | null = new  java.util.ArrayList();
+  public static empty(): SourceLines {
+    return new SourceLines();
+  }
 
-    public static  empty():  SourceLines | null {
-        return new  SourceLines();
+  public static of(sourceLines: SourceLine[]): SourceLines {
+    const result = new SourceLines();
+    result.lines.push(...sourceLines);
+
+    return result;
+  }
+
+  public addLine(sourceLine: SourceLine) {
+    this.lines.push(sourceLine);
+  }
+
+  public getLines(): SourceLine[] {
+    return this.lines;
+  }
+
+  public isEmpty(): boolean {
+    return this.lines.length === 0;
+  }
+
+  public getContent(): string {
+    const sb = new Appendable();
+
+    for (let i = 0; i < this.lines.length; i++) {
+      if (i !== 0) {
+        sb.append("\n");
+      }
+
+      sb.append(this.lines[i].getContent());
     }
 
-    public static  of(sourceLine: SourceLine| null):  SourceLines | null;
+    return sb.toString();
+  }
 
-    public static  of(sourceLines: java.util.List<SourceLine>| null):  SourceLines | null;
-public static of(...args: unknown[]):  SourceLines | null {
-		switch (args.length) {
-			case 1: {
-				const [sourceLine] = args as [SourceLine];
+  public getSourceSpans(): SourceSpan[] {
+    let sourceSpans: SourceSpan[] = [];
 
+    for (const line of this.lines) {
+      let sourceSpan = line.getSourceSpan();
 
-        let  sourceLines: SourceLines = new  SourceLines();
-        sourceLines.addLine(sourceLine);
-        return sourceLines;
-    
-
-				break;
-			}
-
-			case 1: {
-				const [sourceLines] = args as [java.util.List<SourceLine>];
-
-
-        let  result: SourceLines = new  SourceLines();
-        result.lines.addAll(sourceLines);
-        return result;
-    
-
-				break;
-			}
-
-			default: {
-				throw new java.lang.IllegalArgumentException(S`Invalid number of arguments`);
-			}
-		}
-	}
-
-
-    public  addLine(sourceLine: SourceLine| null):  void {
-        this.lines.add(sourceLine);
+      if (sourceSpan !== null) {
+        sourceSpans.push(sourceSpan);
+      }
     }
 
-    public  getLines():  java.util.List<SourceLine> | null {
-        return this.lines;
-    }
-
-    public  isEmpty():  boolean {
-        return this.lines.isEmpty();
-    }
-
-    public  getContent():  java.lang.String | null {
-        let  sb: java.lang.StringBuilder = new  java.lang.StringBuilder();
-        for (let  i: int = 0; i < this.lines.size(); i++) {
-            if (i !== 0) {
-                sb.append('\n');
-            }
-            sb.append(this.lines.get(i).getContent());
-        }
-        return sb.toString();
-    }
-
-    public  getSourceSpans():  java.util.List<SourceSpan> | null {
-        let  sourceSpans: java.util.List<SourceSpan> = new  java.util.ArrayList();
-        for (let line of this.lines) {
-            let  sourceSpan: SourceSpan = line.getSourceSpan();
-            if (sourceSpan !== null) {
-                sourceSpans.add(sourceSpan);
-            }
-        }
-        return sourceSpans;
-    }
+    return sourceSpans;
+  }
 }
+
+export default SourceLines;

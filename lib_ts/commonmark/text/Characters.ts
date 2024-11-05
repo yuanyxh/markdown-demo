@@ -1,5 +1,4 @@
-import { fromCodePoint } from "../../common";
-import Character from "./Character";
+import { fromCodePoint, Character } from "../../common";
 
 /**
  * Functions for finding characters in strings or checking characters.

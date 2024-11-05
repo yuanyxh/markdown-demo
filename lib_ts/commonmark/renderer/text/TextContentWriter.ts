@@ -1,4 +1,4 @@
-import { Appendable } from "../../../common";
+import { Appendable, fromCodePoint } from "../../../common";
 import LineBreakRendering from "./LineBreakRendering";
 
 class TextContentWriter {
@@ -8,7 +8,7 @@ class TextContentWriter {
   private readonly tight: boolean[] = [];
 
   private blockSeparator: string | null = null;
-  private lastChar = "";
+  private lastChar = fromCodePoint(0);
 
   public constructor(
     out: Appendable,

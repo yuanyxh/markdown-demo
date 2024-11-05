@@ -1,31 +1,23 @@
-
-
-
-import { java, JavaObject, type int } from "jree";
-
-
+import { BlockStartImpl } from "../../internal";
+import { BlockParser } from "./BlockParser";
 
 /**
  * Result object for starting parsing of a block, see static methods for constructors.
  */
-export abstract  class BlockStart extends JavaObject {
+abstract class BlockStart {
+  public static none(): BlockStart | null {
+    return null;
+  }
 
-    protected  constructor() {
-    super();
+  public static of(...blockParsers: BlockParser[]): BlockStart {
+    return new BlockStartImpl(blockParsers);
+  }
+
+  public abstract atIndex(newIndex: number): BlockStart;
+
+  public abstract atColumn(newColumn: number): BlockStart;
+
+  public abstract replaceActiveBlockParser(): BlockStart;
 }
 
-    public static  none():  BlockStart | null {
-        return null;
-    }
-
-    public static  of(...blockParsers: BlockParser| null[]):  BlockStart | null {
-        return new  BlockStartImpl(blockParsers);
-    }
-
-    public abstract  atIndex(newIndex: int):  BlockStart | null;
-
-    public abstract  atColumn(newColumn: int):  BlockStart | null;
-
-    public abstract  replaceActiveBlockParser():  BlockStart | null;
-
-}
+export default BlockStart;
