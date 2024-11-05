@@ -1,11 +1,5 @@
-
-import { java } from "jree";
-
-
-
-export  class UnderscoreDelimiterProcessor extends EmphasisDelimiterProcessor {
-
-    public  constructor() {
-        super('_');
-    }
+export class UnderscoreDelimiterProcessor extends EmphasisDelimiterProcessor {
+  public constructor() {
+    super("_");
+  }
 }

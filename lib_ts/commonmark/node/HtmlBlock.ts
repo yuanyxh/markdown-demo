@@ -1,26 +1,25 @@
-
-import { java } from "jree";
-
-
+import Block from "./Block";
+import { Visitor } from "./Visitor";
 
 /**
  * HTML block
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#html-blocks">CommonMark Spec</a>
  */
-export  class HtmlBlock extends Block {
+class HtmlBlock extends Block {
+  private literal = "";
 
-    private  literal:  java.lang.String | null;
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+  public getLiteral(): string {
+    return this.literal;
+  }
 
-    public  getLiteral():  java.lang.String | null {
-        return this.literal;
-    }
-
-    public  setLiteral(literal: java.lang.String| null):  void {
-        this.literal = literal;
-    }
+  public setLiteral(literal: string) {
+    this.literal = literal;
+  }
 }
+
+export default HtmlBlock;

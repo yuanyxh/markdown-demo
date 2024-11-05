@@ -1,11 +1,10 @@
+import Node from "./Node";
+import { Visitor } from "./Visitor";
 
-import { java } from "jree";
-
-
-
-export  class SoftLineBreak extends Node {
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+class SoftLineBreak extends Node {
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 }
+
+export default SoftLineBreak;

@@ -1,24 +1,23 @@
+import Block from "./Block";
+import { Visitor } from "./Visitor";
 
-import { java } from "jree";
+class ThematicBreak extends Block {
+  private literal = "";
 
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 
+  /**
+   * @return the source literal that represents this node, if available
+   */
+  public getLiteral(): string {
+    return this.literal;
+  }
 
-export  class ThematicBreak extends Block {
-
-    private  literal:  java.lang.String | null;
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
-
-    /**
-     * @return the source literal that represents this node, if available
-     */
-    public  getLiteral():  java.lang.String | null {
-        return this.literal;
-    }
-
-    public  setLiteral(literal: java.lang.String| null):  void {
-        this.literal = literal;
-    }
+  public setLiteral(literal: string) {
+    this.literal = literal;
+  }
 }
+
+export default ThematicBreak;

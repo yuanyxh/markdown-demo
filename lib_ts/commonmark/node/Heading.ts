@@ -1,21 +1,20 @@
+import { Visitor } from "./Visitor";
+import Block from "./Block";
 
-import { java, type int } from "jree";
+class Heading extends Block {
+  private level = -1;
 
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 
+  public getLevel(): number {
+    return this.level;
+  }
 
-export  class Heading extends Block {
-
-    private  level:  int;
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
-
-    public  getLevel():  int {
-        return this.level;
-    }
-
-    public  setLevel(level: int):  void {
-        this.level = level;
-    }
+  public setLevel(level: number) {
+    this.level = level;
+  }
 }
+
+export default Heading;

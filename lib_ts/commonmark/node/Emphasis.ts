@@ -1,56 +1,31 @@
+import { Delimited } from "./Delimited";
+import Node from "./Node";
+import { Visitor } from "./Visitor";
 
-import { java, S } from "jree";
+class Emphasis extends Node implements Delimited {
+  private delimiter: string;
 
-
-
-export  class Emphasis extends Node implements Delimited {
-
-    private  delimiter:  java.lang.String | null;
-
-    public  constructor();
-
-    public  constructor(delimiter: java.lang.String| null);
-    public constructor(...args: unknown[]) {
-		switch (args.length) {
-			case 0: {
-
+  public constructor(delimiter = "") {
     super();
 
+    this.delimiter = delimiter;
+  }
 
-				break;
-			}
+  public setDelimiter(delimiter: string) {
+    this.delimiter = delimiter;
+  }
 
-			case 1: {
-				const [delimiter] = args as [java.lang.String];
+  public getOpeningDelimiter(): string {
+    return this.delimiter;
+  }
 
+  public getClosingDelimiter(): string {
+    return this.delimiter;
+  }
 
-        super();
-this.delimiter = delimiter;
-    
-
-				break;
-			}
-
-			default: {
-				throw new java.lang.IllegalArgumentException(S`Invalid number of arguments`);
-			}
-		}
-	}
-
-
-    public  setDelimiter(delimiter: java.lang.String| null):  void {
-        this.delimiter = delimiter;
-    }
-
-    public  getOpeningDelimiter():  java.lang.String | null {
-        return this.delimiter;
-    }
-
-    public  getClosingDelimiter():  java.lang.String | null {
-        return this.delimiter;
-    }
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 }
+
+export default Emphasis;

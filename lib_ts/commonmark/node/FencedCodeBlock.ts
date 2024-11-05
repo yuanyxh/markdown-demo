@@ -1,125 +1,138 @@
+import Block from "./Block";
+import { Visitor } from "./Visitor";
 
-import { java, type int, type char } from "jree";
+class FencedCodeBlock extends Block {
+  private fenceCharacter: string;
+  private openingFenceLength = -1;
+  private closingFenceLength = -1;
+  private fenceIndent = -1;
 
+  private info = "";
+  private literal = "";
 
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 
-export  class FencedCodeBlock extends Block {
+  /**
+   * @return the fence character that was used, e.g. {@code `} or {@code ~}, if available, or null otherwise
+   */
+  public getFenceCharacter(): string {
+    return this.fenceCharacter;
+  }
 
-    private  fenceCharacter:  java.lang.String | null;
-    private  openingFenceLength:  java.lang.Integer | null;
-    private  closingFenceLength:  java.lang.Integer | null;
-    private  fenceIndent:  int;
+  public setFenceCharacter(fenceCharacter: string): void {
+    this.fenceCharacter = fenceCharacter;
+  }
 
-    private  info:  java.lang.String | null;
-    private  literal:  java.lang.String | null;
+  /**
+   * @return the length of the opening fence (how many of {{@link #getFenceCharacter()}} were used to start the code
+   * block) if available, or null otherwise
+   */
+  public getOpeningFenceLength(): number {
+    return this.openingFenceLength;
+  }
 
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
+  public setOpeningFenceLength(openingFenceLength: number) {
+    if (openingFenceLength !== null && openingFenceLength < 3) {
+      throw Error("openingFenceLength needs to be >= 3");
     }
 
-    /**
-     * @return the fence character that was used, e.g. {@code `} or {@code ~}, if available, or null otherwise
-     */
-    public  getFenceCharacter():  java.lang.String | null {
-        return this.fenceCharacter;
+    FencedCodeBlock.checkFenceLengths(
+      openingFenceLength,
+      this.closingFenceLength
+    );
+
+    this.openingFenceLength = openingFenceLength;
+  }
+
+  /**
+   * @return the length of the closing fence (how many of {@link #getFenceCharacter()} were used to end the code
+   * block) if available, or null otherwise
+   */
+  public getClosingFenceLength(): number {
+    return this.closingFenceLength;
+  }
+
+  public setClosingFenceLength(closingFenceLength: number): void {
+    if (closingFenceLength !== null && closingFenceLength < 3) {
+      throw Error("closingFenceLength needs to be >= 3");
     }
 
-    public  setFenceCharacter(fenceCharacter: java.lang.String| null):  void {
-        this.fenceCharacter = fenceCharacter;
-    }
+    FencedCodeBlock.checkFenceLengths(
+      this.openingFenceLength,
+      closingFenceLength
+    );
+    this.closingFenceLength = closingFenceLength;
+  }
 
-    /**
-     * @return the length of the opening fence (how many of {{@link #getFenceCharacter()}} were used to start the code
-     * block) if available, or null otherwise
-     */
-    public  getOpeningFenceLength():  java.lang.Integer | null {
-        return this.openingFenceLength;
-    }
+  public getFenceIndent(): number {
+    return this.fenceIndent;
+  }
 
-    public  setOpeningFenceLength(openingFenceLength: java.lang.Integer| null):  void {
-        if (openingFenceLength !== null && openingFenceLength < 3) {
-            throw new  java.lang.IllegalArgumentException("openingFenceLength needs to be >= 3");
-        }
-        FencedCodeBlock.checkFenceLengths(openingFenceLength, this.closingFenceLength);
-        this.openingFenceLength = openingFenceLength;
-    }
+  public setFenceIndent(fenceIndent: number) {
+    this.fenceIndent = fenceIndent;
+  }
 
-    /**
-     * @return the length of the closing fence (how many of {@link #getFenceCharacter()} were used to end the code
-     * block) if available, or null otherwise
-     */
-    public  getClosingFenceLength():  java.lang.Integer | null {
-        return this.closingFenceLength;
-    }
+  /**
+   * @see <a href="http://spec.commonmark.org/0.31.2/#info-string">CommonMark spec</a>
+   */
+  public getInfo(): string {
+    return this.info;
+  }
 
-    public  setClosingFenceLength(closingFenceLength: java.lang.Integer| null):  void {
-        if (closingFenceLength !== null && closingFenceLength < 3) {
-            throw new  java.lang.IllegalArgumentException("closingFenceLength needs to be >= 3");
-        }
-        FencedCodeBlock.checkFenceLengths(this.openingFenceLength, closingFenceLength);
-        this.closingFenceLength = closingFenceLength;
-    }
+  public setInfo(info: string) {
+    this.info = info;
+  }
 
-    public  getFenceIndent():  int {
-        return this.fenceIndent;
-    }
+  public getLiteral(): string {
+    return this.literal;
+  }
 
-    public  setFenceIndent(fenceIndent: int):  void {
-        this.fenceIndent = fenceIndent;
-    }
+  public setLiteral(literal: string) {
+    this.literal = literal;
+  }
 
-    /**
-     * @see <a href="http://spec.commonmark.org/0.31.2/#info-string">CommonMark spec</a>
-     */
-    public  getInfo():  java.lang.String | null {
-        return this.info;
-    }
+  /**
+   * @deprecated use {@link #getFenceCharacter()} instead
+   */
+  public getFenceChar(): string {
+    return this.fenceCharacter !== "" ? this.fenceCharacter.charAt(0) : "\0";
+  }
 
-    public  setInfo(info: java.lang.String| null):  void {
-        this.info = info;
-    }
+  /**
+   * @deprecated use {@link #setFenceCharacter} instead
+   */
+  public setFenceChar(fenceChar: string): void {
+    this.fenceCharacter = fenceChar !== "\0" ? fenceChar : "";
+  }
 
-    public  getLiteral():  java.lang.String | null {
-        return this.literal;
-    }
+  /**
+   * @deprecated use {@link #getOpeningFenceLength} instead
+   */
+  public getFenceLength(): number {
+    return this.openingFenceLength !== -1 ? this.openingFenceLength : 0;
+  }
 
-    public  setLiteral(literal: java.lang.String| null):  void {
-        this.literal = literal;
-    }
+  /**
+   * @deprecated use {@link #setOpeningFenceLength} instead
+   */
+  public setFenceLength(fenceLength: number): void {
+    this.openingFenceLength = fenceLength !== 0 ? fenceLength : -1;
+  }
 
-    /**
-     * @deprecated use {@link #getFenceCharacter()} instead
-     */
-    public  getFenceChar():  char {
-        return this.fenceCharacter !== null && !this.fenceCharacter.isEmpty() ? this.fenceCharacter.charAt(0) : '\0';
+  private static checkFenceLengths(
+    openingFenceLength: number,
+    closingFenceLength: number
+  ) {
+    if (openingFenceLength !== -1 && closingFenceLength !== -1) {
+      if (closingFenceLength < openingFenceLength) {
+        throw Error(
+          "fence lengths required to be: closingFenceLength >= openingFenceLength"
+        );
+      }
     }
-
-    /**
-     * @deprecated use {@link #setFenceCharacter} instead
-     */
-    public  setFenceChar(fenceChar: char):  void {
-        this.fenceCharacter = fenceChar !== '\0' ? java.lang.String.valueOf(fenceChar) : null;
-    }
-
-    /**
-     * @deprecated use {@link #getOpeningFenceLength} instead
-     */
-    public  getFenceLength():  int {
-        return this.openingFenceLength !== null ? this.openingFenceLength : 0;
-    }
-
-    /**
-     * @deprecated use {@link #setOpeningFenceLength} instead
-     */
-    public  setFenceLength(fenceLength: int):  void {
-        this.openingFenceLength = fenceLength !== 0 ? fenceLength : null;
-    }
-
-    private static  checkFenceLengths(openingFenceLength: java.lang.Integer| null, closingFenceLength: java.lang.Integer| null):  void {
-        if (openingFenceLength !== null && closingFenceLength !== null) {
-            if (closingFenceLength < openingFenceLength) {
-                throw new  java.lang.IllegalArgumentException("fence lengths required to be: closingFenceLength >= openingFenceLength");
-            }
-        }
-    }
+  }
 }
+
+export default FencedCodeBlock;

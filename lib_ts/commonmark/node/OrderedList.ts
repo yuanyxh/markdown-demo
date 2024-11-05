@@ -1,64 +1,63 @@
+import ListBlock from "./ListBlock";
+import { Visitor } from "./Visitor";
 
-import { java, type int, type char } from "jree";
+class OrderedList extends ListBlock {
+  private markerDelimiter = "";
+  private markerStartNumber = -1;
 
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 
+  /**
+   * @return the start number used in the marker, e.g. {@code 1}, if available, or null otherwise
+   */
+  public getMarkerStartNumber(): number {
+    return this.markerStartNumber;
+  }
 
-export  class OrderedList extends ListBlock {
+  public setMarkerStartNumber(markerStartNumber: number) {
+    this.markerStartNumber = markerStartNumber;
+  }
 
-    private  markerDelimiter:  java.lang.String | null;
-    private  markerStartNumber:  java.lang.Integer | null;
+  /**
+   * @return the delimiter used in the marker, e.g. {@code .} or {@code )}, if available, or null otherwise
+   */
+  public getMarkerDelimiter(): string {
+    return this.markerDelimiter;
+  }
 
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+  public setMarkerDelimiter(markerDelimiter: string) {
+    this.markerDelimiter = markerDelimiter;
+  }
 
-    /**
-     * @return the start number used in the marker, e.g. {@code 1}, if available, or null otherwise
-     */
-    public  getMarkerStartNumber():  java.lang.Integer | null {
-        return this.markerStartNumber;
-    }
+  /**
+   * @deprecated use {@link #getMarkerStartNumber()} instead
+   */
+  public getStartNumber(): number {
+    return this.markerStartNumber !== -1 ? this.markerStartNumber : 0;
+  }
 
-    public  setMarkerStartNumber(markerStartNumber: java.lang.Integer| null):  void {
-        this.markerStartNumber = markerStartNumber;
-    }
+  /**
+   * @deprecated use {@link #setMarkerStartNumber} instead
+   */
+  public setStartNumber(startNumber: number): void {
+    this.markerStartNumber = startNumber !== 0 ? startNumber : -1;
+  }
 
-    /**
-     * @return the delimiter used in the marker, e.g. {@code .} or {@code )}, if available, or null otherwise
-     */
-    public  getMarkerDelimiter():  java.lang.String | null {
-        return this.markerDelimiter;
-    }
+  /**
+   * @deprecated use {@link #getMarkerDelimiter()} instead
+   */
+  public getDelimiter(): string {
+    return this.markerDelimiter !== "" ? this.markerDelimiter.charAt(0) : "\0";
+  }
 
-    public  setMarkerDelimiter(markerDelimiter: java.lang.String| null):  void {
-        this.markerDelimiter = markerDelimiter;
-    }
-
-    /**
-     * @deprecated use {@link #getMarkerStartNumber()} instead
-     */
-    public  getStartNumber():  int {
-        return this.markerStartNumber !== null ? this.markerStartNumber : 0;
-    }
-
-    /**
-     * @deprecated use {@link #setMarkerStartNumber} instead
-     */
-    public  setStartNumber(startNumber: int):  void {
-        this.markerStartNumber = startNumber !== 0 ? startNumber : null;
-    }
-
-    /**
-     * @deprecated use {@link #getMarkerDelimiter()} instead
-     */
-    public  getDelimiter():  char {
-        return this.markerDelimiter !== null && !this.markerDelimiter.isEmpty() ? this.markerDelimiter.charAt(0) : '\0';
-    }
-
-    /**
-     * @deprecated use {@link #setMarkerDelimiter} instead
-     */
-    public  setDelimiter(delimiter: char):  void {
-        this.markerDelimiter = delimiter !== '\0' ? java.lang.String.valueOf(delimiter) : null;
-    }
+  /**
+   * @deprecated use {@link #setMarkerDelimiter} instead
+   */
+  public setDelimiter(delimiter: string): void {
+    this.markerDelimiter = delimiter !== "\0" ? delimiter : "";
+  }
 }
+
+export default OrderedList;

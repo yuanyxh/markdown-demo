@@ -1,14 +1,13 @@
-
-import { java } from "jree";
-
-
+import Block from "./Block";
+import { Visitor } from "./Visitor";
 
 /**
  * A paragraph block, contains inline nodes such as {@link Text}
  */
-export  class Paragraph extends Block {
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+class Paragraph extends Block {
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 }
+
+export default Paragraph;

@@ -1,11 +1,10 @@
+import Block from "./Block";
+import { Visitor } from "./Visitor";
 
-import { java } from "jree";
-
-
-
-export  class BlockQuote extends Block {
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+class BlockQuote extends Block {
+  public accept(visitor: Visitor): void {
+    visitor.visit(this);
+  }
 }
+
+export default BlockQuote;

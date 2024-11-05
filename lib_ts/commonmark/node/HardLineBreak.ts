@@ -1,11 +1,10 @@
+import Node from "./Node";
+import { Visitor } from "./Visitor";
 
-import { java } from "jree";
-
-
-
-export  class HardLineBreak extends Node {
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+class HardLineBreak extends Node {
+  public accept(visitor: Visitor): void {
+    visitor.visit(this);
+  }
 }
+
+export default HardLineBreak;

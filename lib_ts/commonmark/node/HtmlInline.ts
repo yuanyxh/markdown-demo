@@ -1,26 +1,25 @@
-
-import { java } from "jree";
-
-
+import Node from "./Node";
+import { Visitor } from "./Visitor";
 
 /**
  * Inline HTML element.
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#raw-html">CommonMark Spec</a>
  */
-export  class HtmlInline extends Node {
+class HtmlInline extends Node {
+  private literal = "";
 
-    private  literal:  java.lang.String | null;
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+  public getLiteral(): string {
+    return this.literal;
+  }
 
-    public  getLiteral():  java.lang.String | null {
-        return this.literal;
-    }
-
-    public  setLiteral(literal: java.lang.String| null):  void {
-        this.literal = literal;
-    }
+  public setLiteral(literal: string) {
+    this.literal = literal;
+  }
 }
+
+export default HtmlInline;

@@ -1,7 +1,5 @@
-
-import { java, S } from "jree";
-
-
+import Node from "./Node";
+import { Visitor } from "./Visitor";
 
 /**
  * A link with a destination and an optional title; the link text is in child nodes.
@@ -23,67 +21,43 @@ import { java, S } from "jree";
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#links">CommonMark Spec for links</a>
  */
-export  class Link extends Node {
+class Link extends Node {
+  private destination = "";
+  private title = "";
 
-    private  destination:  java.lang.String | null;
-    private  title:  java.lang.String | null;
-
-    public  constructor();
-
-    public  constructor(destination: java.lang.String| null, title: java.lang.String| null);
-    public constructor(...args: unknown[]) {
-		switch (args.length) {
-			case 0: {
-
+  public constructor(destination = "", title = "") {
     super();
 
+    this.destination = destination;
+    this.title = title;
+  }
 
-				break;
-			}
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 
-			case 2: {
-				const [destination, title] = args as [java.lang.String, java.lang.String];
+  public getDestination(): string {
+    return this.destination;
+  }
 
+  public setDestination(destination: string) {
+    this.destination = destination;
+  }
 
-        super();
-this.destination = destination;
-        this.title = title;
-    
+  /**
+   * @return the title or null
+   */
+  public getTitle(): string {
+    return this.title;
+  }
 
-				break;
-			}
+  public setTitle(title: string) {
+    this.title = title;
+  }
 
-			default: {
-				throw new java.lang.IllegalArgumentException(S`Invalid number of arguments`);
-			}
-		}
-	}
-
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
-
-    public  getDestination():  java.lang.String | null {
-        return this.destination;
-    }
-
-    public  setDestination(destination: java.lang.String| null):  void {
-        this.destination = destination;
-    }
-
-    /**
-     * @return the title or null
-     */
-    public  getTitle():  java.lang.String | null {
-        return this.title;
-    }
-
-    public  setTitle(title: java.lang.String| null):  void {
-        this.title = title;
-    }
-
-    protected  toStringAttributes():  java.lang.String | null {
-        return "destination=" + this.destination + ", title=" + this.title;
-    }
+  protected toStringAttributes(): string {
+    return "destination=" + this.destination + ", title=" + this.title;
+  }
 }
+
+export default Link;

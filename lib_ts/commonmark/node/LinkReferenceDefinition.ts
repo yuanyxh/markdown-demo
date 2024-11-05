@@ -1,7 +1,5 @@
-
-import { java, S } from "jree";
-
-
+import Block from "./Block";
+import { Visitor } from "./Visitor";
 
 /**
  * A link reference definition, e.g.:
@@ -14,70 +12,45 @@ import { java, S } from "jree";
  *
  * @see <a href="https://spec.commonmark.org/0.31.2/#link-reference-definition">Link reference definitions</a>
  */
-export  class LinkReferenceDefinition extends Block {
+class LinkReferenceDefinition extends Block {
+  private label = "";
+  private destination = "";
+  private title = "";
 
-    private  label:  java.lang.String | null;
-    private  destination:  java.lang.String | null;
-    private  title:  java.lang.String | null;
-
-    public  constructor();
-
-    public  constructor(label: java.lang.String| null, destination: java.lang.String| null, title: java.lang.String| null);
-    public constructor(...args: unknown[]) {
-		switch (args.length) {
-			case 0: {
-
+  public constructor(label = "", destination = "", title = "") {
     super();
+    this.label = label;
+    this.destination = destination;
+    this.title = title;
+  }
 
+  public getLabel(): string | null {
+    return this.label;
+  }
 
-				break;
-			}
+  public setLabel(label: string) {
+    this.label = label;
+  }
 
-			case 3: {
-				const [label, destination, title] = args as [java.lang.String, java.lang.String, java.lang.String];
+  public getDestination(): string {
+    return this.destination;
+  }
 
+  public setDestination(destination: string) {
+    this.destination = destination;
+  }
 
-        super();
-this.label = label;
-        this.destination = destination;
-        this.title = title;
-    
+  public getTitle(): string {
+    return this.title;
+  }
 
-				break;
-			}
+  public setTitle(title: string) {
+    this.title = title;
+  }
 
-			default: {
-				throw new java.lang.IllegalArgumentException(S`Invalid number of arguments`);
-			}
-		}
-	}
-
-
-    public  getLabel():  java.lang.String | null {
-        return this.label;
-    }
-
-    public  setLabel(label: java.lang.String| null):  void {
-        this.label = label;
-    }
-
-    public  getDestination():  java.lang.String | null {
-        return this.destination;
-    }
-
-    public  setDestination(destination: java.lang.String| null):  void {
-        this.destination = destination;
-    }
-
-    public  getTitle():  java.lang.String | null {
-        return this.title;
-    }
-
-    public  setTitle(title: java.lang.String| null):  void {
-        this.title = title;
-    }
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+  public accept(visitor: Visitor) {
+    visitor.visit(this);
+  }
 }
+
+export default LinkReferenceDefinition;

@@ -1,7 +1,7 @@
 
 
 
-import { java, JavaObject, type char, type int, S } from "jree";
+
 
 
 
@@ -18,10 +18,10 @@ export  class LinkReferenceDefinitionParser extends JavaObject {
     private readonly  definitions:  java.util.List<LinkReferenceDefinition> | null = new  java.util.ArrayList();
     private readonly  sourceSpans:  java.util.List<SourceSpan> | null = new  java.util.ArrayList();
 
-    private  label:  java.lang.StringBuilder | null;
-    private  destination:  java.lang.String | null;
+    private  label:  stringBuilder | null;
+    private  destination:  string | null;
     private  titleDelimiter:  char;
-    private  title:  java.lang.StringBuilder | null;
+    private  title:  stringBuilder | null;
     private  referenceValid:  boolean = false;
 
     public  parse(line: SourceLine| null):  void {
@@ -106,7 +106,7 @@ export  class LinkReferenceDefinitionParser extends JavaObject {
         }
 
         this.state = LinkReferenceDefinitionParser.State.LABEL;
-        this.label = new  java.lang.StringBuilder();
+        this.label = new  stringBuilder();
 
         if (!scanner.hasNext()) {
             this.label.append('\n');
@@ -137,7 +137,7 @@ export  class LinkReferenceDefinitionParser extends JavaObject {
                 return false;
             }
 
-            let  normalizedLabel: java.lang.String = Escaping.normalizeLabelContent(this.label.toString());
+            let  normalizedLabel: string = Escaping.normalizeLabelContent(this.label.toString());
             if (normalizedLabel.isEmpty()) {
                 return false;
             }
@@ -158,7 +158,7 @@ export  class LinkReferenceDefinitionParser extends JavaObject {
             return false;
         }
 
-        let  rawDestination: java.lang.String = scanner.getSource(start, scanner.position()).getContent();
+        let  rawDestination: string = scanner.getSource(start, scanner.position()).getContent();
         this.destination = rawDestination.startsWith("<") ?
                 rawDestination.substring(1, rawDestination.length() - 1) :
                 rawDestination;
@@ -202,7 +202,7 @@ default:
 
         if (this.titleDelimiter !== '\0') {
             this.state = LinkReferenceDefinitionParser.State.TITLE;
-            this.title = new  java.lang.StringBuilder();
+            this.title = new  stringBuilder();
             scanner.next();
             if (!scanner.hasNext()) {
                 this.title.append('\n');
@@ -252,8 +252,8 @@ default:
             return;
         }
 
-        let  d: java.lang.String = Escaping.unescapeString(this.destination);
-        let  t: java.lang.String = this.title !== null ? Escaping.unescapeString(this.title.toString()) : null;
+        let  d: string = Escaping.unescapeString(this.destination);
+        let  t: string = this.title !== null ? Escaping.unescapeString(this.title.toString()) : null;
         let  definition: LinkReferenceDefinition = new  LinkReferenceDefinition(this.label.toString(), d, t);
         definition.setSourceSpans(this.sourceSpans);
         this.sourceSpans.clear();

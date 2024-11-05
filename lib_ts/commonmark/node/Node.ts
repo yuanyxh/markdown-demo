@@ -1,3 +1,6 @@
+import SourceSpan from "./SourceSpan";
+import { Visitor } from "./Visitor";
+
 /**
  * The base class of all CommonMark AST nodes ({@link Block} and inlines).
  * <p>
@@ -11,7 +14,7 @@ abstract class Node {
   private next: Node | null = null;
   private sourceSpans: SourceSpan[] | null = null;
 
-  public abstract accept(visitor: Visitor | null): void;
+  public abstract accept(visitor: Visitor): void;
 
   public getNext(): Node | null {
     return this.next;

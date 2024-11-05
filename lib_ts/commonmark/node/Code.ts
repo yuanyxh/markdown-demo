@@ -1,52 +1,26 @@
+import Node from "./Node";
+import { Visitor } from "./Visitor";
 
-import { java, S } from "jree";
+class Code extends Node {
+  private literal: string;
 
-
-
-export  class Code extends Node {
-
-    private  literal:  java.lang.String | null;
-
-    public  constructor();
-
-    public  constructor(literal: java.lang.String| null);
-    public constructor(...args: unknown[]) {
-		switch (args.length) {
-			case 0: {
-
+  public constructor(literal = "") {
     super();
 
+    this.literal = literal;
+  }
 
-				break;
-			}
+  public accept(visitor: Visitor): void {
+    visitor.visit(this);
+  }
 
-			case 1: {
-				const [literal] = args as [java.lang.String];
+  public getLiteral(): string {
+    return this.literal;
+  }
 
-
-        super();
-this.literal = literal;
-    
-
-				break;
-			}
-
-			default: {
-				throw new java.lang.IllegalArgumentException(S`Invalid number of arguments`);
-			}
-		}
-	}
-
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
-
-    public  getLiteral():  java.lang.String | null {
-        return this.literal;
-    }
-
-    public  setLiteral(literal: java.lang.String| null):  void {
-        this.literal = literal;
-    }
+  public setLiteral(literal: string) {
+    this.literal = literal;
+  }
 }
+
+export default Code;

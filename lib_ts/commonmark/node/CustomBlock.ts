@@ -1,11 +1,10 @@
+import Block from "./Block";
+import { Visitor } from "./Visitor";
 
-import { java } from "jree";
-
-
-
-export abstract  class CustomBlock extends Block {
-
-    public  accept(visitor: Visitor| null):  void {
-        visitor.visit(this);
-    }
+abstract class CustomBlock extends Block {
+  public accept(visitor: Visitor): void {
+    visitor.visit(this);
+  }
 }
+
+export default CustomBlock;

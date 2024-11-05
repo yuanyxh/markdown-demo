@@ -1,78 +1,73 @@
+import Node from "./Node";
 
+class NodeIterable implements Iterable<Node> {
+  private readonly first: Node;
+  private readonly end: Node;
 
+  public constructor(first: Node, end: Node) {
+    this.first = first;
+    this.end = end;
+  }
 
-import { java, JavaObject } from "jree";
+  [Symbol.iterator](): Iterator<Node, any, any> {
+    return this.iterator();
+  }
 
+  public iterator(): Iterator<Node> {
+    return new NodeIterator(this.first, this.end);
+  }
+}
 
+class NodeIterator implements Iterator<Node> {
+  private node: Node | null;
+  private readonly end: Node;
+
+  public constructor(first: Node, end: Node) {
+    this.node = first;
+    this.end = end;
+  }
+
+  public hasNext(): boolean {
+    return this.node !== null && this.node !== this.end;
+  }
+
+  public next(): IteratorResult<Node> {
+    const result = this.node;
+    this.node = this.node ? this.node.getNext() : null;
+
+    if (result === null || result === this.end) {
+      return { done: true, value: result };
+    }
+
+    return { done: false, value: result };
+  }
+
+  public remove(): void {
+    throw new Error("remove");
+  }
+}
 
 /**
  * Utility class for working with multiple {@link Node}s.
  *
  * @since 0.16.0
  */
-export  class Nodes extends JavaObject {
-
-    private  constructor() {
-    super();
-}
-
-    /**
-     * The nodes between (not including) start and end.
-     */
-    public static  between(start: Node| null, end: Node| null):  java.lang.Iterable<Node> | null {
-        return new  Nodes.NodeIterable(start.getNext(), end);
+class Nodes {
+  /**
+   * The nodes between (not including) start and end.
+   */
+  public static between(start: Node, end: Node): NodeIterable {
+    const first = start.getNext();
+    if (first !== null) {
+      return new NodeIterable(first, end);
     }
 
-    public static NodeIterable =  class NodeIterable extends JavaObject implements java.lang.Iterable<Node> {
+    throw Error("Null first node.");
+  }
 
-        private readonly  first:  Node | null;
-        private readonly  end:  Node | null;
+  public static NodeIterable = NodeIterable;
 
-        private  constructor(first: Node| null, end: Node| null) {
-            super();
-this.first = first;
-            this.end = end;
-        }
-
-        public  iterator():  java.util.Iterator<Node> | null {
-            return new  Nodes.NodeIterator(this.first, this.end);
-        }
-    };
-
-
-    public static NodeIterator =  class NodeIterator extends JavaObject implements java.util.Iterator<Node> {
-
-        private  node:  Node | null;
-        private readonly  end:  Node | null;
-
-        private  constructor(first: Node| null, end: Node| null) {
-            super();
-this.node = first;
-            this.end = end;
-        }
-
-        public  hasNext():  boolean {
-            return this.node !== null && this.node !== this.end;
-        }
-
-        public  next():  Node | null {
-            let  result: Node = this.node;
-            this.node = this.node.getNext();
-            return result;
-        }
-
-        public  remove():  void {
-            throw new  java.lang.UnsupportedOperationException("remove");
-        }
-    };
-
+  public static NodeIterator = NodeIterator;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace Nodes {
-	export type NodeIterable = InstanceType<typeof Nodes.NodeIterable>;
-	export type NodeIterator = InstanceType<typeof Nodes.NodeIterator>;
-}
-
-
-
+export default Nodes;
