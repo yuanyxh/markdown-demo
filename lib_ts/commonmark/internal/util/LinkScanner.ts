@@ -1,4 +1,4 @@
-export class LinkScanner extends JavaObject {
+class LinkScanner {
   /**
    * Attempt to scan the contents of a link label (inside the brackets), stopping after the content or returning false.
    * The stopped position can bei either the closing {@code ]}, or the end of the line if the label continues on
@@ -206,3 +206,5 @@ export class LinkScanner extends JavaObject {
     return false;
   }
 }
+
+export default LinkScanner;

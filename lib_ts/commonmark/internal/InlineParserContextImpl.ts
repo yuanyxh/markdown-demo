@@ -1,7 +1,4 @@
-export class InlineParserContextImpl
-  extends JavaObject
-  implements InlineParserContext
-{
+class InlineParserContextImpl implements InlineParserContext {
   private readonly inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null;
   private readonly delimiterProcessors: java.util.List<DelimiterProcessor> | null;
   private readonly linkProcessors: java.util.List<LinkProcessor> | null;
@@ -52,3 +49,5 @@ export class InlineParserContextImpl
     return this.definitions.getDefinition(type, label);
   }
 }
+
+export default InlineParserContextImpl;

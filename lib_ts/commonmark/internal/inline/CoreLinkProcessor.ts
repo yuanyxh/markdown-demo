@@ -1,12 +1,19 @@
-export class CoreLinkProcessor extends JavaObject implements LinkProcessor {
+import { Image, Link, LinkReferenceDefinition } from "../../node";
+import { LinkInfo } from "../../parser/beta/LinkInfo";
+import LinkResult from "../../parser/beta/LinkResult";
+import Scanner from "../../parser/beta/Scanner";
+import { InlineParserContext } from "../../parser/InlineParserContext";
+import { LinkProcessor } from "./../../parser/beta/LinkProcessor";
+
+class CoreLinkProcessor implements LinkProcessor {
   public process(
-    linkInfo: LinkInfo | null,
-    scanner: java.util.Scanner | null,
-    context: InlineParserContext | null
-  ): LinkResult | null {
-    if (linkInfo.destination() !== null) {
+    linkInfo: LinkInfo,
+    scanner: Scanner,
+    context: InlineParserContext
+  ): LinkResult {
+    if (linkInfo.destination() !== "") {
       // Inline link
-      return this.process(
+      return CoreLinkProcessor.process(
         linkInfo,
         scanner,
         linkInfo.destination(),
@@ -14,31 +21,32 @@ export class CoreLinkProcessor extends JavaObject implements LinkProcessor {
       );
     }
 
-    let label = linkInfo.label();
-    let ref = label !== null && !label.isEmpty() ? label : linkInfo.text();
-    let def = context.getDefinition(LinkReferenceDefinition.class, ref);
+    const label = linkInfo.label();
+    const ref = label !== "" ? label : linkInfo.text();
+    const def = context.getDefinition(LinkReferenceDefinition, ref);
+
     if (def !== null) {
       // Reference link
-      return this.process(
+      return CoreLinkProcessor.process(
         linkInfo,
         scanner,
         def.getDestination(),
         def.getTitle()
       );
     }
+
     return LinkResult.none();
   }
 
   private static process(
-    linkInfo: LinkInfo | null,
-    scanner: java.util.Scanner | null,
-    destination: string | null,
-    title: string | null
-  ): LinkResult | null {
-    if (
-      linkInfo.marker() !== null &&
-      linkInfo.marker().getLiteral().equals("!")
-    ) {
+    linkInfo: LinkInfo,
+    scanner: Scanner,
+    destination: string,
+    title: string
+  ): LinkResult {
+    const marker = linkInfo.marker();
+
+    if (marker !== null && marker.getLiteral() === "!") {
       return LinkResult.wrapTextIn(
         new Image(destination, title),
         scanner.position()
@@ -50,3 +58,5 @@ export class CoreLinkProcessor extends JavaObject implements LinkProcessor {
     );
   }
 }
+
+export default CoreLinkProcessor;

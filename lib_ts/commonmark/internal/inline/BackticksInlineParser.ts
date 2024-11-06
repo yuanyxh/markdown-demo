@@ -1,23 +1,35 @@
+import { Code, Text } from "../../node";
+import { InlineContentParser } from "../../parser/beta/InlineContentParser";
+import { InlineContentParserFactory } from "../../parser/beta/InlineContentParserFactory";
+import { InlineParserState } from "../../parser/beta/InlineParserState";
+import ParsedInline from "../../parser/beta/ParsedInline";
+import { Characters } from "../../text";
+
+class Factory implements InlineContentParserFactory {
+  public getTriggerCharacters(): Set<string> {
+    return new Set("`");
+  }
+
+  public create(): InlineContentParser {
+    return new BackticksInlineParser();
+  }
+}
+
 /**
  * Attempt to parse backticks, returning either a backtick code span or a literal sequence of backticks.
  */
-export class BackticksInlineParser
-  extends JavaObject
-  implements InlineContentParser
-{
-  public tryParse(
-    inlineParserState: InlineParserState | null
-  ): ParsedInline | null {
-    let scanner: java.util.Scanner = inlineParserState.scanner();
-    let start: Position = scanner.position();
-    let openingTicks: int = scanner.matchMultiple("`");
-    let afterOpening: Position = scanner.position();
+class BackticksInlineParser implements InlineContentParser {
+  public tryParse(inlineParserState: InlineParserState): ParsedInline {
+    const scanner = inlineParserState.scanner();
+    const start = scanner.position();
+    const openingTicks = scanner.matchMultiple("`");
+    const afterOpening = scanner.position();
 
     while (scanner.find("`") > 0) {
-      let beforeClosing: Position = scanner.position();
-      let count: int = scanner.matchMultiple("`");
+      const beforeClosing = scanner.position();
+      const count = scanner.matchMultiple("`");
       if (count === openingTicks) {
-        let node: Code = new Code();
+        const node = new Code();
 
         let content: string = scanner
           .getSource(afterOpening, beforeClosing)
@@ -27,40 +39,27 @@ export class BackticksInlineParser
         // spec: If the resulting string both begins and ends with a space character, but does not consist
         // entirely of space characters, a single space character is removed from the front and back.
         if (
-          content.length() >= 3 &&
+          content.length >= 3 &&
           content.charAt(0) === " " &&
-          content.charAt(content.length() - 1) === " " &&
+          content.charAt(content.length - 1) === " " &&
           Characters.hasNonSpace(content)
         ) {
-          content = content.substring(1, content.length() - 1);
+          content = content.substring(1, content.length - 1);
         }
 
         node.setLiteral(content);
+
         return ParsedInline.of(node, scanner.position());
       }
     }
 
     // If we got here, we didn't find a matching closing backtick sequence.
-    let source: SourceLines = scanner.getSource(start, afterOpening);
-    let text: Text = new Text(source.getContent());
+    const source = scanner.getSource(start, afterOpening);
+    const text = new Text(source.getContent());
     return ParsedInline.of(text, afterOpening);
   }
 
-  public static Factory = class Factory
-    extends JavaObject
-    implements InlineContentParserFactory
-  {
-    public getTriggerCharacters(): java.util.Set<java.lang.Character> | null {
-      return java.util.Set.of("`");
-    }
-
-    public create(): InlineContentParser | null {
-      return new BackticksInlineParser();
-    }
-  };
+  public static Factory = Factory;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace BackticksInlineParser {
-  export type Factory = InstanceType<typeof BackticksInlineParser.Factory>;
-}
+export default BackticksInlineParser;

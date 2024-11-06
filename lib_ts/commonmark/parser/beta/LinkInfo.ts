@@ -1,3 +1,4 @@
+import { Text } from "../../node";
 import Position from "./Position";
 
 /**
@@ -28,7 +29,7 @@ export interface LinkInfo {
    * The marker if present, or null. A marker is e.g. {@code !} for an image, or a custom marker as specified in
    * {@link org.commonmark.parser.Parser.Builder#linkMarker}.
    */
-  marker(): Text;
+  marker(): Text | null;
 
   /**
    * The text node of the opening bracket {@code [}.

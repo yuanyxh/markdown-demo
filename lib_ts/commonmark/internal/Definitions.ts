@@ -1,4 +1,4 @@
-export class Definitions extends JavaObject {
+class Definitions {
   private readonly definitionsByType: java.util.Map<
     java.lang.Class<unknown>,
     DefinitionMap<unknown>
@@ -29,3 +29,5 @@ export class Definitions extends JavaObject {
     return this.definitionsByType.get(type) as DefinitionMap<V>;
   }
 }
+
+export default Definitions;

@@ -1,4 +1,4 @@
-export class ListBlockParser extends AbstractBlockParser {
+class ListBlockParser extends AbstractBlockParser {
   private readonly block: ListBlock | null;
 
   private hadBlankLine: boolean;
@@ -267,7 +267,7 @@ export class ListBlockParser extends AbstractBlockParser {
     }
   };
 
-  public static ListData = class ListData extends JavaObject {
+  public static ListData = class ListData {
     protected readonly listBlock: ListBlock | null;
     protected readonly contentColumn: int;
 
@@ -278,7 +278,7 @@ export class ListBlockParser extends AbstractBlockParser {
     }
   };
 
-  public static ListMarkerData = class ListMarkerData extends JavaObject {
+  public static ListMarkerData = class ListMarkerData {
     protected readonly listBlock: ListBlock | null;
     protected readonly indexAfterMarker: int;
 
@@ -290,11 +290,4 @@ export class ListBlockParser extends AbstractBlockParser {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace ListBlockParser {
-  export type Factory = InstanceType<typeof ListBlockParser.Factory>;
-  export type ListData = InstanceType<typeof ListBlockParser.ListData>;
-  export type ListMarkerData = InstanceType<
-    typeof ListBlockParser.ListMarkerData
-  >;
-}
+export default ListBlockParser;

@@ -1,18 +1,23 @@
-export class ParsedInlineImpl extends JavaObject implements ParsedInline {
-  private readonly node: Node | null;
-  private readonly position: Position | null;
+import { Node } from "../../node";
+import ParsedInline from "../../parser/beta/ParsedInline";
+import Position from "../../parser/beta/Position";
 
-  public constructor(node: Node | null, position: Position | null) {
-    super();
+class ParsedInlineImpl implements ParsedInline {
+  private readonly node: Node;
+  private readonly position: Position;
+
+  public constructor(node: Node, position: Position) {
     this.node = node;
     this.position = position;
   }
 
-  public getNode(): Node | null {
+  public getNode(): Node {
     return this.node;
   }
 
-  public getPosition(): Position | null {
+  public getPosition(): Position {
     return this.position;
   }
 }
+
+export default ParsedInlineImpl;

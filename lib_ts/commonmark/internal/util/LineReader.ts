@@ -6,7 +6,7 @@
  * corresponding line terminator. If a stream has a line at the end without a terminator, {@link #getLineTerminator()}
  * returns {@code null}.
  */
-export class LineReader extends JavaObject implements java.io.Closeable {
+class LineReader implements java.io.Closeable {
   // Same as java.io.BufferedReader
   protected static readonly CHAR_BUFFER_SIZE: int = 8192;
   protected static readonly EXPECTED_LINE_LENGTH: int = 80;
@@ -147,3 +147,5 @@ export class LineReader extends JavaObject implements java.io.Closeable {
     }
   }
 }
+
+export default LineReader;

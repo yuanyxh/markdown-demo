@@ -1,4 +1,4 @@
-export class FencedCodeBlockParser extends AbstractBlockParser {
+class FencedCodeBlockParser extends AbstractBlockParser {
   private readonly block: FencedCodeBlock | null = new FencedCodeBlock();
   private readonly fenceChar: char;
   private readonly openingFenceLength: int;
@@ -143,7 +143,4 @@ export class FencedCodeBlockParser extends AbstractBlockParser {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace FencedCodeBlockParser {
-  export type Factory = InstanceType<typeof FencedCodeBlockParser.Factory>;
-}
+export default FencedCodeBlockParser;

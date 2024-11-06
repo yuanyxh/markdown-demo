@@ -1,4 +1,4 @@
-export abstract class ListHolder extends JavaObject {
+abstract class ListHolder {
   private static readonly INDENT_DEFAULT: string | null = "   ";
   private static readonly INDENT_EMPTY: string | null = "";
 
@@ -24,3 +24,5 @@ export abstract class ListHolder extends JavaObject {
     return this.indent;
   }
 }
+
+export default ListHolder;

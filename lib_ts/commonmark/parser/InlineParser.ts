@@ -1,3 +1,5 @@
+import SourceLines from "./SourceLines";
+
 /**
  * Parser for inline content (text, links, emphasized text, etc).
  */

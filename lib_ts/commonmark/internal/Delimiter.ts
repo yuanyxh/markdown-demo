@@ -1,7 +1,7 @@
 /**
  * Delimiter (emphasis, strong emphasis or custom emphasis).
  */
-export class Delimiter extends JavaObject implements DelimiterRun {
+class Delimiter implements DelimiterRun {
   public readonly characters: java.util.List<Text> | null;
   public readonly delimiterChar: char;
   private readonly originalLength: int;
@@ -78,3 +78,5 @@ export class Delimiter extends JavaObject implements DelimiterRun {
     return this.characters.subList(0, length);
   }
 }
+
+export default Delimiter;

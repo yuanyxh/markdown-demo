@@ -1,7 +1,4 @@
-export class InlineParserImpl
-  extends JavaObject
-  implements InlineParser, InlineParserState
-{
+class InlineParserImpl implements InlineParser, InlineParserState {
   private readonly context: InlineParserContext | null;
   private readonly inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null;
   private readonly delimiterProcessors: java.util.Map<
@@ -1088,7 +1085,7 @@ export class InlineParserImpl
     }
   }
 
-  public static DelimiterData = class DelimiterData extends JavaObject {
+  public static DelimiterData = class DelimiterData {
     protected readonly characters: java.util.List<Text> | null;
     protected readonly canClose: boolean;
     protected readonly canOpen: boolean;
@@ -1108,7 +1105,7 @@ export class InlineParserImpl
   /**
    * A destination and optional title for a link or image.
    */
-  public static DestinationTitle = class DestinationTitle extends JavaObject {
+  public static DestinationTitle = class DestinationTitle {
     protected readonly destination: string | null;
     protected readonly title: string | null;
 
@@ -1119,10 +1116,7 @@ export class InlineParserImpl
     }
   };
 
-  public static LinkInfoImpl = class LinkInfoImpl
-    extends JavaObject
-    implements LinkInfo
-  {
+  public static LinkInfoImpl = class LinkInfoImpl implements LinkInfo {
     private readonly marker: Text | null;
     private readonly openingBracket: Text | null;
     private readonly text: string | null;
@@ -1180,13 +1174,4 @@ export class InlineParserImpl
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace InlineParserImpl {
-  export type DelimiterData = InstanceType<
-    typeof InlineParserImpl.DelimiterData
-  >;
-  export type DestinationTitle = InstanceType<
-    typeof InlineParserImpl.DestinationTitle
-  >;
-  export type LinkInfoImpl = InstanceType<typeof InlineParserImpl.LinkInfoImpl>;
-}
+export default InlineParserImpl;

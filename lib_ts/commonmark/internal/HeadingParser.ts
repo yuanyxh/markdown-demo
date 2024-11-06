@@ -1,4 +1,4 @@
-export class HeadingParser extends AbstractBlockParser {
+class HeadingParser extends AbstractBlockParser {
   private readonly block: Heading | null = new Heading();
   private readonly content: SourceLines | null;
 
@@ -164,3 +164,5 @@ export class HeadingParser extends AbstractBlockParser {
 export namespace HeadingParser {
   export type Factory = InstanceType<typeof HeadingParser.Factory>;
 }
+
+export default HeadingParser;

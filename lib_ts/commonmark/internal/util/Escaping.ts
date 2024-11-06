@@ -1,4 +1,4 @@
-export class Escaping extends JavaObject {
+class Escaping {
   public static readonly ESCAPABLE: string | null =
     "[!\"#$%&'()*+,./:;<=>?@\\[\\\\\\]^_`{|}~-]";
 
@@ -43,7 +43,7 @@ export class Escaping extends JavaObject {
     java.util.regex.Pattern.compile("[ \t\r\n]+");
 
   private static readonly UNESCAPE_REPLACER: Escaping.Replacer | null =
-    new (class extends JavaObject implements Replacer {
+    new (class implements Replacer {
       public replace(input: string | null, sb: stringBuilder | null): void {
         if (input.charAt(0) === "\\") {
           sb.append(input, 1, input.length());
@@ -54,7 +54,6 @@ export class Escaping extends JavaObject {
     })();
 
   private static readonly URI_REPLACER: Escaping.Replacer | null = new (class
-    extends JavaObject
     implements Replacer
   {
     public replace(input: string | null, sb: stringBuilder | null): void {
@@ -180,9 +179,4 @@ export class Escaping extends JavaObject {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace Escaping {
-  export interface Replacer {
-    replace(input: string | null, sb: stringBuilder | null): void;
-  }
-}
+export default Escaping;

@@ -1,3 +1,5 @@
+import { SourceSpan } from "../node";
+
 /**
  * A line or part of a line from the input source.
  *
@@ -5,9 +7,9 @@
  */
 class SourceLine {
   private readonly content: string;
-  private readonly sourceSpan: SourceSpan;
+  private readonly sourceSpan: SourceSpan | null = null;
 
-  public static of(content: string, sourceSpan: SourceSpan): SourceLine {
+  public static of(content: string, sourceSpan: SourceSpan | null): SourceLine {
     return new SourceLine(content, sourceSpan);
   }
 
@@ -20,14 +22,14 @@ class SourceLine {
     return this.content;
   }
 
-  public getSourceSpan(): SourceSpan {
+  public getSourceSpan(): SourceSpan | null {
     return this.sourceSpan;
   }
 
   public substring(beginIndex: number, endIndex: number): SourceLine {
     const newContent = this.content.substring(beginIndex, endIndex);
 
-    let newSourceSpan: SourceSpan;
+    let newSourceSpan!: SourceSpan;
     if (this.sourceSpan !== null) {
       const length = endIndex - beginIndex;
 

@@ -178,7 +178,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     node.accept(this);
   }
 
-  public visit(node: VisitArgs) {
+  public visit(node: Node) {
     switch (true) {
       case node instanceof Document: {
         const document = node;

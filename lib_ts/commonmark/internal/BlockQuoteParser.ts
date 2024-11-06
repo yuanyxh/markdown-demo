@@ -1,4 +1,4 @@
-export class BlockQuoteParser extends AbstractBlockParser {
+class BlockQuoteParser extends AbstractBlockParser {
   private readonly block: BlockQuote | null = new BlockQuote();
 
   public isContainer(): boolean {
@@ -63,7 +63,4 @@ export class BlockQuoteParser extends AbstractBlockParser {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace BlockQuoteParser {
-  export type Factory = InstanceType<typeof BlockQuoteParser.Factory>;
-}
+export default BlockQuoteParser;

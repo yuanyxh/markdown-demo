@@ -1,4 +1,4 @@
-export class BlockContinueImpl extends BlockContinue {
+class BlockContinueImpl extends BlockContinue {
   private readonly newIndex: int;
   private readonly newColumn: int;
   private readonly finalize: boolean;
@@ -22,3 +22,5 @@ export class BlockContinueImpl extends BlockContinue {
     return this.finalize;
   }
 }
+
+export default BlockContinueImpl;

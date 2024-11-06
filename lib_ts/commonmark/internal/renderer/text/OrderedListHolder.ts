@@ -1,4 +1,4 @@
-export class OrderedListHolder extends ListHolder {
+class OrderedListHolder extends ListHolder {
   private readonly delimiter: string | null;
   private counter: int;
 
@@ -22,3 +22,5 @@ export class OrderedListHolder extends ListHolder {
     this.counter++;
   }
 }
+
+export default OrderedListHolder;

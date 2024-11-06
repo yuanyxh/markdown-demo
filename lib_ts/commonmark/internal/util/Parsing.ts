@@ -1,4 +1,4 @@
-export class Parsing extends JavaObject {
+class Parsing {
   public static CODE_BLOCK_INDENT: int = 4;
 
   public static columnsToNextTabStop(column: int): int {
@@ -6,3 +6,5 @@ export class Parsing extends JavaObject {
     return 4 - (column % 4);
   }
 }
+
+export default Parsing;

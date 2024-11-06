@@ -1,4 +1,4 @@
-export class NodeRendererMap extends JavaObject {
+class NodeRendererMap {
   private readonly nodeRenderers: java.util.List<NodeRenderer> | null =
     new java.util.ArrayList();
   private readonly renderers: java.util.Map<
@@ -29,3 +29,5 @@ export class NodeRendererMap extends JavaObject {
     this.nodeRenderers.forEach((r) => r.afterRoot(node));
   }
 }
+
+export default NodeRendererMap;

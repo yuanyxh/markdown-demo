@@ -1,4 +1,4 @@
-export class BlockStartImpl extends BlockStart {
+class BlockStartImpl extends BlockStart {
   private readonly blockParsers: BlockParser[] | null;
   private newIndex: int = -1;
   private newColumn: int = -1;
@@ -40,3 +40,5 @@ export class BlockStartImpl extends BlockStart {
     return this;
   }
 }
+
+export default BlockStartImpl;

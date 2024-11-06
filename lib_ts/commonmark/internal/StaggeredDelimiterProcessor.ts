@@ -4,10 +4,7 @@
  * lengths. A given delimiter run is dispatched to the child with the largest acceptable minimum length. If no
  * child is applicable, the one with the largest minimum length is chosen.
  */
-export class StaggeredDelimiterProcessor
-  extends JavaObject
-  implements DelimiterProcessor
-{
+class StaggeredDelimiterProcessor implements DelimiterProcessor {
   private readonly delim: char;
   private minLength: int = 0;
   private processors: java.util.LinkedList<DelimiterProcessor> | null =
@@ -81,3 +78,5 @@ export class StaggeredDelimiterProcessor
     );
   }
 }
+
+export default StaggeredDelimiterProcessor;

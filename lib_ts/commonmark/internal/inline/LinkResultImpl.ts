@@ -1,43 +1,42 @@
-export class LinkResultImpl extends JavaObject implements LinkResult {
-  public includeMarker(): LinkResult | null {
+import { Node } from "../../node";
+import LinkResult from "../../parser/beta/LinkResult";
+import Position from "../../parser/beta/Position";
+
+enum Type {
+  WRAP = "WRAP",
+  REPLACE = "REPLACE",
+}
+
+class LinkResultImpl implements LinkResult {
+  public setIncludeMarker(): LinkResult {
     this.includeMarker = true;
+
     return this;
   }
 
-  public static Type = class Type extends java.lang.Enum<Type> {
-    public static readonly WRAP: Type = new (class extends Type {})(S`WRAP`, 0);
-    public static readonly REPLACE: Type = new (class extends Type {})(
-      S`REPLACE`,
-      1
-    );
-  };
+  public static Type = Type;
 
-  private readonly type: LinkResultImpl.Type | null;
-  private readonly node: Node | null;
-  private readonly position: Position | null;
+  private readonly type: Type;
+  private readonly node: Node;
+  private readonly position: Position;
 
   private includeMarker: boolean = false;
 
-  public constructor(
-    type: LinkResultImpl.Type | null,
-    node: Node | null,
-    position: Position | null
-  ) {
-    super();
+  public constructor(type: Type, node: Node, position: Position) {
     this.type = type;
     this.node = node;
     this.position = position;
   }
 
-  public getType(): LinkResultImpl.Type | null {
+  public getType(): Type {
     return this.type;
   }
 
-  public getNode(): Node | null {
+  public getNode(): Node {
     return this.node;
   }
 
-  public getPosition(): Position | null {
+  public getPosition(): Position {
     return this.position;
   }
 
@@ -46,7 +45,4 @@ export class LinkResultImpl extends JavaObject implements LinkResult {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace LinkResultImpl {
-  export type Type = InstanceType<typeof LinkResultImpl.Type>;
-}
+export default LinkResultImpl;

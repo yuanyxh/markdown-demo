@@ -1,4 +1,4 @@
-export class DocumentBlockParser extends AbstractBlockParser {
+class DocumentBlockParser extends AbstractBlockParser {
   private readonly document: Document | null = new Document();
 
   public isContainer(): boolean {
@@ -19,3 +19,5 @@ export class DocumentBlockParser extends AbstractBlockParser {
 
   public addLine(line: SourceLine | null): void {}
 }
+
+export default DocumentBlockParser;

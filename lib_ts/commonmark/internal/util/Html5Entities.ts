@@ -1,4 +1,4 @@
-export class Html5Entities extends JavaObject {
+class Html5Entities {
   private static readonly NAMED_CHARACTER_REFERENCES: java.util.Map<
     string,
     string
@@ -91,3 +91,5 @@ export class Html5Entities extends JavaObject {
     return entities;
   }
 }
+
+export default Html5Entities;

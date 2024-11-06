@@ -1,5 +1,6 @@
 import Position from "./Position";
 import { LinkResultImpl } from "../../internal";
+import { Node } from "../../node";
 
 /**
  * What to do with a link/image processed by {@link LinkProcessor}.
@@ -44,7 +45,7 @@ abstract class LinkResult {
   /**
    * If a {@link LinkInfo#marker()} is present, include it in processing (i.e. treat it the same way as the brackets).
    */
-  public abstract includeMarker(): LinkResult;
+  public abstract setIncludeMarker(): LinkResult;
 }
 
 export default LinkResult;

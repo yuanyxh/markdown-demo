@@ -1,4 +1,4 @@
-export class HtmlBlockParser extends AbstractBlockParser {
+class HtmlBlockParser extends AbstractBlockParser {
   private static readonly TAGNAME: string | null = "[A-Za-z][A-Za-z0-9-]*";
   private static readonly ATTRIBUTENAME: string | null =
     "[a-zA-Z_:][a-zA-Z0-9:._-]*";
@@ -178,3 +178,5 @@ export class HtmlBlockParser extends AbstractBlockParser {
 export namespace HtmlBlockParser {
   export type Factory = InstanceType<typeof HtmlBlockParser.Factory>;
 }
+
+export default HtmlBlockParser;

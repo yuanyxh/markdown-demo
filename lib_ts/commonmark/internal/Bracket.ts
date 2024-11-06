@@ -1,7 +1,7 @@
 /**
  * Opening bracket for links ({@code [}), images ({@code ![}), or links with other markers.
  */
-export class Bracket extends JavaObject {
+class Bracket {
   /**
    * The node of a marker such as {@code !} if present, null otherwise.
    */
@@ -104,3 +104,5 @@ export class Bracket extends JavaObject {
     this.previousDelimiter = previousDelimiter;
   }
 }
+
+export default Bracket;

@@ -1,4 +1,4 @@
-export class ThematicBreakParser extends AbstractBlockParser {
+class ThematicBreakParser extends AbstractBlockParser {
   private readonly block: ThematicBreak | null = new ThematicBreak();
 
   public constructor(literal: string | null) {
@@ -76,7 +76,4 @@ export class ThematicBreakParser extends AbstractBlockParser {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace ThematicBreakParser {
-  export type Factory = InstanceType<typeof ThematicBreakParser.Factory>;
-}
+export default ThematicBreakParser;

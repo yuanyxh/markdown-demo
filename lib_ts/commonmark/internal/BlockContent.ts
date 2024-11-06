@@ -1,4 +1,4 @@
-export class BlockContent extends JavaObject {
+class BlockContent {
   private readonly sb: stringBuilder | null;
 
   private lineCount: int = 0;
@@ -44,3 +44,5 @@ export class BlockContent extends JavaObject {
     return this.sb.toString();
   }
 }
+
+export default BlockContent;

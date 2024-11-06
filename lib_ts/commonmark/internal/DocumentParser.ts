@@ -1,4 +1,4 @@
-export class DocumentParser extends JavaObject implements ParserState {
+class DocumentParser implements ParserState {
   private static readonly CORE_FACTORY_TYPES: java.util.Set<
     java.lang.Class<Block>
   > | null = new java.util.LinkedHashSet(
@@ -659,7 +659,6 @@ export class DocumentParser extends JavaObject implements ParserState {
   }
 
   public static MatchedBlockParserImpl = class MatchedBlockParserImpl
-    extends JavaObject
     implements MatchedBlockParser
   {
     private readonly matchedBlockParser: BlockParser | null;
@@ -683,7 +682,7 @@ export class DocumentParser extends JavaObject implements ParserState {
     }
   };
 
-  public static OpenBlockParser = class OpenBlockParser extends JavaObject {
+  public static OpenBlockParser = class OpenBlockParser {
     private readonly blockParser: BlockParser | null;
     private sourceIndex: int;
 
@@ -695,12 +694,4 @@ export class DocumentParser extends JavaObject implements ParserState {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace DocumentParser {
-  export type MatchedBlockParserImpl = InstanceType<
-    typeof DocumentParser.MatchedBlockParserImpl
-  >;
-  export type OpenBlockParser = InstanceType<
-    typeof DocumentParser.OpenBlockParser
-  >;
-}
+export default DocumentParser;

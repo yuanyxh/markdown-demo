@@ -1,4 +1,4 @@
-export class ListItemParser extends AbstractBlockParser {
+class ListItemParser extends AbstractBlockParser {
   private readonly block: ListItem | null = new ListItem();
 
   /**
@@ -60,3 +60,5 @@ export class ListItemParser extends AbstractBlockParser {
     }
   }
 }
+
+export default ListItemParser;

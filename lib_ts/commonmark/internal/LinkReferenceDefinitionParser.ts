@@ -10,7 +10,7 @@
  *
  * @see <a href="https://spec.commonmark.org/0.31.2/#link-reference-definitions">Link reference definitions</a>
  */
-export  class LinkReferenceDefinitionParser extends JavaObject {
+  class LinkReferenceDefinitionParser  {
 
     private  state:  LinkReferenceDefinitionParser.State | null = LinkReferenceDefinitionParser.State.START_DEFINITION;
 
@@ -289,9 +289,4 @@ default:
 
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace LinkReferenceDefinitionParser {
-	export type State = InstanceType<typeof LinkReferenceDefinitionParser.State>;
-}
-
-
+export default LinkReferenceDefinitionParser

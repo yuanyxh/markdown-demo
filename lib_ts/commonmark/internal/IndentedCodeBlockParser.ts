@@ -1,4 +1,4 @@
-export class IndentedCodeBlockParser extends AbstractBlockParser {
+class IndentedCodeBlockParser extends AbstractBlockParser {
   private readonly block: IndentedCodeBlock | null = new IndentedCodeBlock();
   private readonly lines: java.util.List<java.lang.CharSequence> | null =
     new java.util.ArrayList();
@@ -63,7 +63,4 @@ export class IndentedCodeBlockParser extends AbstractBlockParser {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
-export namespace IndentedCodeBlockParser {
-  export type Factory = InstanceType<typeof IndentedCodeBlockParser.Factory>;
-}
+export default IndentedCodeBlockParser;

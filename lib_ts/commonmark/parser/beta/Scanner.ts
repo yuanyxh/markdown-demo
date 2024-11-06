@@ -1,4 +1,6 @@
 import { Character, fromCodePoint } from "../../../common";
+import { SourceSpan } from "../../node";
+import { CharMatcher } from "../../text";
 import SourceLine from "../SourceLine";
 import SourceLines from "../SourceLines";
 import Position from "./Position";
@@ -118,9 +120,10 @@ class Scanner {
    * @param content the text content to match on a single line (excluding newline characters)
    * @return true if matched and position was advanced, false otherwise
    */
-  public next(content?: string): void | boolean {
+  public next(content?: string): boolean {
     if (typeof content === "undefined") {
       this.index++;
+
       if (this.index > this.lineLength) {
         this.lineIndex++;
         if (this.lineIndex < this.lines.length) {
@@ -131,6 +134,8 @@ class Scanner {
 
         this.index = 0;
       }
+
+      return true;
     } else {
       if (
         this.index < this.lineLength &&
@@ -165,10 +170,10 @@ class Scanner {
     return count;
   }
 
-  public match(matcher: string): number {
+  public match(matcher: CharMatcher): number {
     let count = 0;
 
-    while (matcher.includes(this.peek())) {
+    while (matcher.matches(this.peek())) {
       count++;
       this.next();
     }
@@ -197,20 +202,36 @@ class Scanner {
     }
   }
 
-  public find(c: string): number {
-    let count = 0;
+  public find(c: string | CharMatcher): number {
+    if (typeof c === "string") {
+      let count = 0;
+      while (true) {
+        const cur = this.peek();
 
-    while (true) {
-      const cur = this.peek();
-      if (cur == Scanner.END) {
-        return -1;
-      } else if (c.includes(c)) {
-        return count;
+        if (cur == Scanner.END) {
+          return -1;
+        } else if (cur == c) {
+          return count;
+        }
+
+        count++;
+        this.next();
       }
+    } else {
+      let count = 0;
 
-      count++;
+      while (true) {
+        const cur = this.peek();
+        if (cur == Scanner.END) {
+          return -1;
+        } else if (c.matches(cur)) {
+          return count;
+        }
 
-      this.next();
+        count++;
+
+        this.next();
+      }
     }
   }
 
@@ -236,8 +257,8 @@ class Scanner {
       // Shortcut for common case of text from a single line
       const line: SourceLine = this.lines[begin.lineIndex];
       const newContent = line.getContent().substring(begin.index, end.index);
-      let newSourceSpan: SourceSpan;
-      const sourceSpan: SourceSpan = line.getSourceSpan();
+      let newSourceSpan!: SourceSpan;
+      const sourceSpan = line.getSourceSpan();
 
       if (sourceSpan !== null) {
         newSourceSpan = sourceSpan.subSpan(begin.index, end.index);

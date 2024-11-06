@@ -1,3 +1,8 @@
+import { DelimiterProcessor } from "./delimiter/DelimiterProcessor";
+import { InlineContentParserFactory } from "./beta/InlineContentParserFactory";
+import { LinkProcessor } from "./beta/LinkProcessor";
+import { LinkReferenceDefinition } from "../node";
+
 /**
  * Context for inline parsing.
  */
@@ -44,5 +49,8 @@ export interface InlineParserContext {
    *
    * @return the definition if one exists, null otherwise
    */
-  getDefinition<D>(type: D, label: string): D;
+  getDefinition<D extends abstract new (...args: any) => any>(
+    type: D,
+    label: string
+  ): InstanceType<D> | null;
 }

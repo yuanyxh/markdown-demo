@@ -1,5 +1,6 @@
 import Position from "./Position";
 import { ParsedInlineImpl } from "../../internal";
+import { Node } from "../../node";
 
 /**
  * The result of a single inline parser. Use the static methods to create instances.

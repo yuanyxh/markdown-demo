@@ -1,4 +1,4 @@
-export class ParagraphParser extends AbstractBlockParser {
+class ParagraphParser extends AbstractBlockParser {
   private readonly block: Paragraph | null = new Paragraph();
   private readonly linkReferenceDefinitionParser: LinkReferenceDefinitionParser | null =
     new LinkReferenceDefinitionParser();
@@ -63,3 +63,5 @@ export class ParagraphParser extends AbstractBlockParser {
     return this.linkReferenceDefinitionParser.getParagraphLines();
   }
 }
+
+export default ParagraphParser;
