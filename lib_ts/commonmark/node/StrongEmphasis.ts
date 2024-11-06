@@ -1,47 +1,28 @@
+import { Delimited } from "./Delimited";
+import Node from "./Node";
+import { Visitor } from "./Visitor";
+
 class StrongEmphasis extends Node implements Delimited {
-  private delimiter: string | null;
+  private delimiter: string;
 
-  public constructor();
-
-  public constructor(delimiter: string | null);
-  public constructor(...args: unknown[]) {
-    switch (args.length) {
-      case 0: {
-        super();
-
-        break;
-      }
-
-      case 1: {
-        const [delimiter] = args as [string];
-
-        super();
-        this.delimiter = delimiter;
-
-        break;
-      }
-
-      default: {
-        throw new java.lang.IllegalArgumentException(
-          S`Invalid number of arguments`
-        );
-      }
-    }
-  }
-
-  public setDelimiter(delimiter: string | null): void {
+  public constructor(delimiter: string) {
+    super();
     this.delimiter = delimiter;
   }
 
-  public getOpeningDelimiter(): string | null {
+  public setDelimiter(delimiter: string) {
+    this.delimiter = delimiter;
+  }
+
+  public getOpeningDelimiter(): string {
     return this.delimiter;
   }
 
-  public getClosingDelimiter(): string | null {
+  public getClosingDelimiter(): string {
     return this.delimiter;
   }
 
-  public accept(visitor: Visitor | null): void {
+  public accept(visitor: Visitor) {
     visitor.visit(this);
   }
 }

@@ -19,81 +19,44 @@
  *
  * @since 0.16.0
  */
-class SourceSpan extends JavaObject {
-  private readonly lineIndex: int;
-  private readonly columnIndex: int;
-  private readonly inputIndex: int;
-  private readonly length: int;
+class SourceSpan {
+  private readonly lineIndex: number;
+  private readonly columnIndex: number;
+  private readonly inputIndex: number;
+  private readonly length: number;
 
   /**
-   * @deprecated Use {{@link #of(int, int, int, int)}} instead to also specify input index. Using the deprecated one
+   * Use {{@link #of(int, int, int, int)}} instead to also specify input index. Using the deprecated one
    * will set {@link #inputIndex} to 0.
    */
   public static of(
-    lineIndex: int,
-    columnIndex: int,
-    length: int
-  ): SourceSpan | null;
-
-  public static of(
-    line: int,
-    col: int,
-    input: int,
-    length: int
-  ): SourceSpan | null;
-  public static of(...args: unknown[]): SourceSpan | null {
-    switch (args.length) {
-      case 3: {
-        const [lineIndex, columnIndex, length] = args as [int, int, int];
-
-        return SourceSpan.of(lineIndex, columnIndex, 0, length);
-
-        break;
-      }
-
-      case 4: {
-        const [line, col, input, length] = args as [int, int, int, int];
-
-        return new SourceSpan(line, col, input, length);
-
-        break;
-      }
-
-      default: {
-        throw new java.lang.IllegalArgumentException(
-          S`Invalid number of arguments`
-        );
-      }
-    }
+    line: number,
+    col: number,
+    input: number = 0,
+    length: number
+  ): SourceSpan {
+    return new SourceSpan(line, col, input, length);
   }
 
   private constructor(
-    lineIndex: int,
-    columnIndex: int,
-    inputIndex: int,
-    length: int
+    lineIndex: number,
+    columnIndex: number,
+    inputIndex: number,
+    length: number
   ) {
-    super();
     if (lineIndex < 0) {
-      throw new java.lang.IllegalArgumentException(
-        "lineIndex " + lineIndex + " must be >= 0"
-      );
+      throw new Error("lineIndex " + lineIndex + " must be >= 0");
     }
     if (columnIndex < 0) {
-      throw new java.lang.IllegalArgumentException(
-        "columnIndex " + columnIndex + " must be >= 0"
-      );
+      throw new Error("columnIndex " + columnIndex + " must be >= 0");
     }
     if (inputIndex < 0) {
-      throw new java.lang.IllegalArgumentException(
-        "inputIndex " + inputIndex + " must be >= 0"
-      );
+      throw new Error("inputIndex " + inputIndex + " must be >= 0");
     }
     if (length < 0) {
-      throw new java.lang.IllegalArgumentException(
-        "length " + length + " must be >= 0"
-      );
+      throw new Error("length " + length + " must be >= 0");
     }
+
     this.lineIndex = lineIndex;
     this.columnIndex = columnIndex;
     this.inputIndex = inputIndex;
@@ -103,7 +66,7 @@ class SourceSpan extends JavaObject {
   /**
    * @return 0-based line index, e.g. 0 for first line, 1 for the second line, etc
    */
-  public getLineIndex(): int {
+  public getLineIndex(): number {
     return this.lineIndex;
   }
 
@@ -111,7 +74,7 @@ class SourceSpan extends JavaObject {
    * @return 0-based index of column (character on line) in source, e.g. 0 for the first character of a line, 1 for
    * the second character, etc
    */
-  public getColumnIndex(): int {
+  public getColumnIndex(): number {
     return this.columnIndex;
   }
 
@@ -119,116 +82,68 @@ class SourceSpan extends JavaObject {
    * @return 0-based index in whole input
    * @since 0.24.0
    */
-  public getInputIndex(): int {
+  public getInputIndex(): number {
     return this.inputIndex;
   }
 
   /**
    * @return length of the span in characters
    */
-  public getLength(): int {
+  public getLength(): number {
     return this.length;
   }
 
-  public subSpan(beginIndex: int): SourceSpan | null;
-
-  public subSpan(beginIndex: int, endIndex: int): SourceSpan | null;
-  public subSpan(...args: unknown[]): SourceSpan | null {
-    switch (args.length) {
-      case 1: {
-        const [beginIndex] = args as [int];
-
-        return this.subSpan(beginIndex, this.length);
-
-        break;
-      }
-
-      case 2: {
-        const [beginIndex, endIndex] = args as [int, int];
-
-        if (beginIndex < 0) {
-          throw new java.lang.IndexOutOfBoundsException(
-            "beginIndex " + beginIndex + " + must be >= 0"
-          );
-        }
-        if (beginIndex > this.length) {
-          throw new java.lang.IndexOutOfBoundsException(
-            "beginIndex " + beginIndex + " must be <= length " + this.length
-          );
-        }
-        if (endIndex < 0) {
-          throw new java.lang.IndexOutOfBoundsException(
-            "endIndex " + endIndex + " + must be >= 0"
-          );
-        }
-        if (endIndex > this.length) {
-          throw new java.lang.IndexOutOfBoundsException(
-            "endIndex " + endIndex + " must be <= length " + this.length
-          );
-        }
-        if (beginIndex > endIndex) {
-          throw new java.lang.IndexOutOfBoundsException(
-            "beginIndex " + beginIndex + " must be <= endIndex " + endIndex
-          );
-        }
-        if (beginIndex === 0 && endIndex === this.length) {
-          return this;
-        }
-        return new SourceSpan(
-          this.lineIndex,
-          this.columnIndex + beginIndex,
-          this.inputIndex + beginIndex,
-          endIndex - beginIndex
-        );
-
-        break;
-      }
-
-      default: {
-        throw new java.lang.IllegalArgumentException(
-          S`Invalid number of arguments`
-        );
-      }
+  public subSpan(
+    beginIndex: number,
+    endIndex: number = this.length
+  ): SourceSpan {
+    if (beginIndex < 0) {
+      throw Error("beginIndex " + beginIndex + " + must be >= 0");
     }
+    if (beginIndex > this.length) {
+      throw Error(
+        "beginIndex " + beginIndex + " must be <= length " + this.length
+      );
+    }
+    if (endIndex < 0) {
+      throw Error("endIndex " + endIndex + " + must be >= 0");
+    }
+    if (endIndex > this.length) {
+      throw Error("endIndex " + endIndex + " must be <= length " + this.length);
+    }
+    if (beginIndex > endIndex) {
+      throw Error(
+        "beginIndex " + beginIndex + " must be <= endIndex " + endIndex
+      );
+    }
+
+    if (beginIndex === 0 && endIndex === this.length) {
+      return this;
+    }
+
+    return new SourceSpan(
+      this.lineIndex,
+      this.columnIndex + beginIndex,
+      this.inputIndex + beginIndex,
+      endIndex - beginIndex
+    );
   }
 
-  public override equals(o: java.lang.Object | null): boolean {
+  public equals(o: any): boolean {
     if (this === o) {
       return true;
     }
-    if (o === null || this.getClass() !== o.getClass()) {
+
+    if (!(o instanceof SourceSpan)) {
       return false;
     }
-    let that: SourceSpan = o as SourceSpan;
+
+    const that = o;
     return (
       this.lineIndex === that.lineIndex &&
       this.columnIndex === that.columnIndex &&
       this.inputIndex === that.inputIndex &&
       this.length === that.length
-    );
-  }
-
-  public override hashCode(): int {
-    return java.util.Objects.hash(
-      this.lineIndex,
-      this.columnIndex,
-      this.inputIndex,
-      this.length
-    );
-  }
-
-  public override toString(): string | null {
-    return (
-      "SourceSpan{" +
-      "line=" +
-      this.lineIndex +
-      ", column=" +
-      this.columnIndex +
-      ", input=" +
-      this.inputIndex +
-      ", length=" +
-      this.length +
-      "}"
     );
   }
 }

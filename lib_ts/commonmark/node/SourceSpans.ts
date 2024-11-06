@@ -1,53 +1,54 @@
+import SourceSpan from "./SourceSpan";
+import Node from "./Node";
+
 /**
  * A list of source spans that can be added to. Takes care of merging adjacent source spans.
  *
  * @since 0.16.0
  */
-class SourceSpans extends JavaObject {
-  private sourceSpans: java.util.List<SourceSpan> | null;
+class SourceSpans {
+  private sourceSpans: SourceSpan[];
 
-  public static empty(): SourceSpans | null {
+  public static empty(): SourceSpans {
     return new SourceSpans();
   }
 
-  public getSourceSpans(): java.util.List<SourceSpan> | null {
-    return this.sourceSpans !== null ? this.sourceSpans : java.util.List.of();
+  public getSourceSpans(): SourceSpan[] {
+    return this.sourceSpans ? this.sourceSpans : [];
   }
 
-  public addAllFrom(nodes: java.lang.Iterable<Node> | null): void {
-    for (let node of nodes) {
+  public addAllFrom(nodes: Node[]): void {
+    for (const node of nodes) {
       this.addAll(node.getSourceSpans());
     }
   }
 
-  public addAll(other: java.util.List<SourceSpan> | null): void {
-    if (other.isEmpty()) {
+  public addAll(other: SourceSpan[]) {
+    if (other.length === 0) {
       return;
     }
 
-    if (this.sourceSpans === null) {
-      this.sourceSpans = new java.util.ArrayList();
+    if (!this.sourceSpans) {
+      this.sourceSpans = [];
     }
 
-    if (this.sourceSpans.isEmpty()) {
-      this.sourceSpans.addAll(other);
+    if (this.sourceSpans.length === 0) {
+      this.sourceSpans.push(...other);
     } else {
-      let lastIndex: int = this.sourceSpans.size() - 1;
-      let a: SourceSpan = this.sourceSpans.get(lastIndex);
-      let b: SourceSpan = other.get(0);
+      const lastIndex = this.sourceSpans.length - 1;
+      const a = this.sourceSpans[lastIndex];
+      const b = other[0];
       if (a.getInputIndex() + a.getLength() === b.getInputIndex()) {
-        this.sourceSpans.set(
-          lastIndex,
-          SourceSpan.of(
-            a.getLineIndex(),
-            a.getColumnIndex(),
-            a.getInputIndex(),
-            a.getLength() + b.getLength()
-          )
+        this.sourceSpans[lastIndex] = SourceSpan.of(
+          a.getLineIndex(),
+          a.getColumnIndex(),
+          a.getInputIndex(),
+          a.getLength() + b.getLength()
         );
-        this.sourceSpans.addAll(other.subList(1, other.size()));
+
+        this.sourceSpans.push(...other.slice(1, other.length));
       } else {
-        this.sourceSpans.addAll(other);
+        this.sourceSpans.push(...other);
       }
     }
   }
