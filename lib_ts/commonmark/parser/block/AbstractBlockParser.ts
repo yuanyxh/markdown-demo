@@ -1,14 +1,15 @@
 import { BlockParser } from "./BlockParser";
-import { Block } from "../../node";
+import { Block, DefinitionMap, SourceSpan } from "../../node";
 import SourceLine from "../SourceLine";
 import BlockContinue from "./BlockContinue";
+import { InlineParser } from "../InlineParser";
 
 abstract class AbstractBlockParser implements BlockParser {
   getBlock(): Block {
     throw new Error("Method not implemented.");
   }
 
-  tryContinue(parserState): BlockContinue {
+  tryContinue(parserState): BlockContinue | null {
     throw new Error("Method not implemented.");
   }
 

@@ -1,12 +1,11 @@
 abstract class ListHolder {
-  private static readonly INDENT_DEFAULT: string | null = "   ";
-  private static readonly INDENT_EMPTY: string | null = "";
+  private static readonly INDENT_DEFAULT: string = "   ";
+  private static readonly INDENT_EMPTY: string = "";
 
-  private readonly parent: ListHolder | null;
-  private readonly indent: string | null;
+  private readonly parent: ListHolder | null = null;
+  private readonly indent: string;
 
-  protected constructor(parent: ListHolder | null) {
-    super();
+  protected constructor(parent: ListHolder) {
     this.parent = parent;
 
     if (parent !== null) {
@@ -20,7 +19,7 @@ abstract class ListHolder {
     return this.parent;
   }
 
-  public getIndent(): string | null {
+  public getIndent(): string {
     return this.indent;
   }
 }

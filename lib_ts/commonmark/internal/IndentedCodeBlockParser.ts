@@ -1,13 +1,46 @@
-class IndentedCodeBlockParser extends AbstractBlockParser {
-  private readonly block: IndentedCodeBlock | null = new IndentedCodeBlock();
-  private readonly lines: java.util.List<java.lang.CharSequence> | null =
-    new java.util.ArrayList();
+import Appendable from "../../common/Appendable";
+import { Block, IndentedCodeBlock, Paragraph } from "../node";
+import {
+  AbstractBlockParser,
+  AbstractBlockParserFactory,
+  BlockContinue,
+  BlockStart,
+  MatchedBlockParser,
+  ParserState,
+  SourceLine,
+} from "../parser";
+import { Characters } from "../text";
+import Parsing from "./util/Parsing";
 
-  public getBlock(): Block | null {
+class Factory extends AbstractBlockParserFactory {
+  public tryStart(
+    state: ParserState,
+    matchedBlockParser: MatchedBlockParser
+  ): BlockStart | null {
+    // An indented code block cannot interrupt a paragraph.
+    if (
+      state.getIndent() >= Parsing.CODE_BLOCK_INDENT &&
+      !state.isBlank() &&
+      !(state.getActiveBlockParser().getBlock() instanceof Paragraph)
+    ) {
+      return BlockStart.of(new IndentedCodeBlockParser()).atColumn(
+        state.getColumn() + Parsing.CODE_BLOCK_INDENT
+      );
+    } else {
+      return BlockStart.none();
+    }
+  }
+}
+
+class IndentedCodeBlockParser extends AbstractBlockParser {
+  private readonly block = new IndentedCodeBlock();
+  private readonly lines: string[] = [];
+
+  public getBlock(): Block {
     return this.block;
   }
 
-  public tryContinue(state: ParserState | null): BlockContinue | null {
+  public tryContinue(state: ParserState): BlockContinue | null {
     if (state.getIndent() >= Parsing.CODE_BLOCK_INDENT) {
       return BlockContinue.atColumn(
         state.getColumn() + Parsing.CODE_BLOCK_INDENT
@@ -19,22 +52,24 @@ class IndentedCodeBlockParser extends AbstractBlockParser {
     }
   }
 
-  public addLine(line: SourceLine | null): void {
-    this.lines.add(line.getContent());
+  public addLine(line: SourceLine): void {
+    this.lines.push(line.getContent());
   }
 
   public closeBlock(): void {
-    let lastNonBlank: int = this.lines.size() - 1;
+    let lastNonBlank = this.lines.length - 1;
+
     while (lastNonBlank >= 0) {
-      if (!Characters.isBlank(this.lines.get(lastNonBlank))) {
+      if (!Characters.isBlank(this.lines[lastNonBlank])) {
         break;
       }
+
       lastNonBlank--;
     }
 
-    let sb: stringBuilder = new stringBuilder();
-    for (let i: int = 0; i < lastNonBlank + 1; i++) {
-      sb.append(this.lines.get(i));
+    const sb = new Appendable();
+    for (let i = 0; i < lastNonBlank + 1; i++) {
+      sb.append(this.lines[i]);
       sb.append("\n");
     }
 
@@ -42,25 +77,7 @@ class IndentedCodeBlockParser extends AbstractBlockParser {
     this.block.setLiteral(literal);
   }
 
-  public static Factory = class Factory extends AbstractBlockParserFactory {
-    public tryStart(
-      state: ParserState | null,
-      matchedBlockParser: MatchedBlockParser | null
-    ): BlockStart | null {
-      // An indented code block cannot interrupt a paragraph.
-      if (
-        state.getIndent() >= Parsing.CODE_BLOCK_INDENT &&
-        !state.isBlank() &&
-        !(state.getActiveBlockParser().getBlock() instanceof Paragraph)
-      ) {
-        return BlockStart.of(new IndentedCodeBlockParser()).atColumn(
-          state.getColumn() + Parsing.CODE_BLOCK_INDENT
-        );
-      } else {
-        return BlockStart.none();
-      }
-    }
-  };
+  public static Factory = Factory;
 }
 
 export default IndentedCodeBlockParser;

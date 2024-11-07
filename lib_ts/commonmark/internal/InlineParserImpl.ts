@@ -1,35 +1,140 @@
-class InlineParserImpl implements InlineParser, InlineParserState {
-  private readonly context: InlineParserContext | null;
-  private readonly inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null;
-  private readonly delimiterProcessors: java.util.Map<
-    java.lang.Character,
-    DelimiterProcessor
-  > | null;
-  private readonly linkProcessors: java.util.List<LinkProcessor> | null;
-  private readonly specialCharacters: java.util.BitSet | null;
-  private readonly linkMarkers: java.util.BitSet | null;
+import Appendable from "../../common/Appendable";
+import BitSet from "../../common/BitSet";
+import Character from "../../common/Character";
+import { HardLineBreak, Node, SoftLineBreak, SourceSpans, Text } from "../node";
+import {
+  DelimiterProcessor,
+  InlineContentParser,
+  InlineContentParserFactory,
+  InlineParser,
+  InlineParserContext,
+  InlineParserState,
+  LinkInfo,
+  LinkProcessor,
+  Position,
+  Scanner,
+  SourceLines,
+} from "../parser";
+import { Characters } from "../text";
+import Bracket from "./Bracket";
+import Delimiter from "./Delimiter";
+import AsteriskDelimiterProcessor from "./inline/AsteriskDelimiterProcessor";
+import AutolinkInlineParser from "./inline/AutolinkInlineParser";
+import BackslashInlineParser from "./inline/BackslashInlineParser";
+import BackticksInlineParser from "./inline/BackticksInlineParser";
+import CoreLinkProcessor from "./inline/CoreLinkProcessor";
+import EntityInlineParser from "./inline/EntityInlineParser";
+import HtmlInlineParser from "./inline/HtmlInlineParser";
+import LinkResultImpl from "./inline/LinkResultImpl";
+import ParsedInlineImpl from "./inline/ParsedInlineImpl";
+import UnderscoreDelimiterProcessor from "./inline/UnderscoreDelimiterProcessor";
+import StaggeredDelimiterProcessor from "./StaggeredDelimiterProcessor";
+import Escaping from "./util/Escaping";
+import LinkScanner from "./util/LinkScanner";
 
-  private inlineParsers: java.util.Map<
-    java.lang.Character,
-    java.util.List<InlineContentParser>
-  > | null;
-  private scanner: java.util.Scanner | null;
+class DelimiterData {
+  public readonly characters: Text[];
+  public readonly canClose: boolean;
+  public readonly canOpen: boolean;
+
+  public constructor(characters: Text[], canOpen: boolean, canClose: boolean) {
+    this.characters = characters;
+    this.canOpen = canOpen;
+    this.canClose = canClose;
+  }
+}
+
+class DestinationTitle {
+  public readonly destination: string;
+  public readonly title: string;
+
+  public constructor(destination: string, title: string) {
+    this.destination = destination;
+    this.title = title;
+  }
+}
+
+class LinkInfoImpl implements LinkInfo {
+  private readonly marker: Text;
+  private readonly openingBracket: Text;
+  private readonly text: string;
+  private readonly label: string;
+  private readonly destination: string;
+  private readonly title: string;
+  private readonly afterTextBracket: Position;
+
+  public constructor(
+    marker: Text,
+    openingBracket: Text,
+    text: string,
+    label: string,
+    destination: string,
+    title: string,
+    afterTextBracket: Position
+  ) {
+    this.marker = marker;
+    this.openingBracket = openingBracket;
+    this.text = text;
+    this.label = label;
+    this.destination = destination;
+    this.title = title;
+    this.afterTextBracket = afterTextBracket;
+  }
+
+  public getMarker(): Text {
+    return this.marker;
+  }
+
+  public getOpeningBracket(): Text {
+    return this.openingBracket;
+  }
+
+  public getText(): string {
+    return this.text;
+  }
+
+  public getLabel(): string {
+    return this.label;
+  }
+
+  public getDestination(): string {
+    return this.destination;
+  }
+
+  public getTitle(): string {
+    return this.title;
+  }
+
+  public getAfterTextBracket(): Position {
+    return this.afterTextBracket;
+  }
+}
+
+class InlineParserImpl implements InlineParser, InlineParserState {
+  private readonly context: InlineParserContext;
+  private readonly inlineContentParserFactories: InlineContentParserFactory[];
+  private readonly delimiterProcessors: Map<string, DelimiterProcessor>;
+  private readonly linkProcessors: LinkProcessor[];
+  private readonly specialCharacters: BitSet;
+  private readonly linkMarkers: BitSet;
+
+  private inlineParsers: Map<string, InlineContentParser[]> | null = null;
+  private scanner: Scanner;
   private includeSourceSpans: boolean;
-  private trailingSpaces: int;
+  private trailingSpaces: number;
 
   /**
    * Top delimiter (emphasis, strong emphasis or custom emphasis). (Brackets are on a separate stack, different
    * from the algorithm described in the spec.)
    */
-  private lastDelimiter: Delimiter | null;
+  private lastDelimiter: Delimiter | null = null;
 
   /**
    * Top opening bracket (<code>[</code> or <code>![)</code>).
    */
-  private lastBracket: Bracket | null;
+  private lastBracket: Bracket | null = null;
 
-  public constructor(context: InlineParserContext | null) {
-    super();
+  public constructor(context: InlineParserContext) {
     this.context = context;
     this.inlineContentParserFactories =
       this.calculateInlineContentParserFactories(
@@ -46,70 +151,71 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     );
     this.specialCharacters = InlineParserImpl.calculateSpecialCharacters(
       this.linkMarkers,
-      this.delimiterProcessors.keySet(),
+      new Set(this.delimiterProcessors.keys()),
       this.inlineContentParserFactories
     );
   }
 
   private calculateInlineContentParserFactories(
-    customFactories: java.util.List<InlineContentParserFactory> | null
-  ): java.util.List<InlineContentParserFactory> | null {
+    customFactories: InlineContentParserFactory[]
+  ): InlineContentParserFactory[] {
     // Custom parsers can override built-in parsers if they want, so make sure they are tried first
-    let list = new java.util.ArrayList(customFactories);
-    list.add(new BackslashInlineParser.Factory());
-    list.add(new BackticksInlineParser.Factory());
-    list.add(new EntityInlineParser.Factory());
-    list.add(new AutolinkInlineParser.Factory());
-    list.add(new HtmlInlineParser.Factory());
+    const list = [...customFactories];
+
+    list.push(new BackslashInlineParser.Factory());
+    list.push(new BackticksInlineParser.Factory());
+    list.push(new EntityInlineParser.Factory());
+    list.push(new AutolinkInlineParser.Factory());
+    list.push(new HtmlInlineParser.Factory());
+
     return list;
   }
 
   private calculateLinkProcessors(
-    linkProcessors: java.util.List<LinkProcessor> | null
-  ): java.util.List<LinkProcessor> | null {
+    linkProcessors: LinkProcessor[]
+  ): LinkProcessor[] {
     // Custom link processors can override the built-in behavior, so make sure they are tried first
-    let list = new java.util.ArrayList(linkProcessors);
-    list.add(new CoreLinkProcessor());
+    const list = [...linkProcessors];
+    list.push(new CoreLinkProcessor());
+
     return list;
   }
 
   private static calculateDelimiterProcessors(
-    delimiterProcessors: java.util.List<DelimiterProcessor> | null
-  ): java.util.Map<java.lang.Character, DelimiterProcessor> | null {
-    let map = new java.util.HashMap<java.lang.Character, DelimiterProcessor>();
+    delimiterProcessors: DelimiterProcessor[]
+  ): Map<string, DelimiterProcessor> {
+    let map = new Map<string, DelimiterProcessor>();
+
     InlineParserImpl.addDelimiterProcessors(
-      java.util.List.of(
-        new AsteriskDelimiterProcessor(),
-        new UnderscoreDelimiterProcessor()
-      ),
+      [new AsteriskDelimiterProcessor(), new UnderscoreDelimiterProcessor()],
       map
     );
     InlineParserImpl.addDelimiterProcessors(delimiterProcessors, map);
+
     return map;
   }
 
   private static addDelimiterProcessors(
-    delimiterProcessors: java.lang.Iterable<DelimiterProcessor> | null,
-    map: java.util.Map<java.lang.Character, DelimiterProcessor> | null
+    delimiterProcessors: DelimiterProcessor[],
+    map: Map<string, DelimiterProcessor>
   ): void {
-    for (let delimiterProcessor of delimiterProcessors) {
-      let opening: char = delimiterProcessor.getOpeningCharacter();
-      let closing: char = delimiterProcessor.getClosingCharacter();
+    for (const delimiterProcessor of delimiterProcessors) {
+      const opening = delimiterProcessor.getOpeningCharacter();
+      const closing = delimiterProcessor.getClosingCharacter();
+
       if (opening === closing) {
-        let old: DelimiterProcessor = map.get(opening);
-        if (
-          old !== null &&
-          old.getOpeningCharacter() === old.getClosingCharacter()
-        ) {
+        const old = map.get(opening);
+        if (old && old.getOpeningCharacter() === old.getClosingCharacter()) {
           let s: StaggeredDelimiterProcessor;
+
           if (old instanceof StaggeredDelimiterProcessor) {
-            s = old as StaggeredDelimiterProcessor;
+            s = old;
           } else {
             s = new StaggeredDelimiterProcessor(opening);
             s.add(old);
           }
           s.add(delimiterProcessor);
-          map.put(opening, s);
+          map.set(opening, s);
         } else {
           InlineParserImpl.addDelimiterProcessorForChar(
             opening,
@@ -133,19 +239,20 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   }
 
   private static addDelimiterProcessorForChar(
-    delimiterChar: char,
-    toAdd: DelimiterProcessor | null,
-    delimiterProcessors: java.util.Map<
-      java.lang.Character,
-      DelimiterProcessor
-    > | null
-  ): void {
-    let existing: DelimiterProcessor = delimiterProcessors.put(
-      delimiterChar,
-      toAdd
-    );
-    if (existing !== null) {
-      throw new java.lang.IllegalArgumentException(
+    delimiterChar: string,
+    toAdd: DelimiterProcessor,
+    delimiterProcessors: Map<string, DelimiterProcessor>
+  ) {
+    let existing = false;
+
+    if (delimiterProcessors.has(delimiterChar)) {
+      existing = true;
+    }
+
+    delimiterProcessors.set(delimiterChar, toAdd);
+
+    if (existing) {
+      throw new Error(
         "Delimiter processor conflict with delimiter char '" +
           delimiterChar +
           "'"
@@ -153,71 +260,73 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     }
   }
 
-  private static calculateLinkMarkers(
-    linkMarkers: java.util.Set<java.lang.Character> | null
-  ): java.util.BitSet | null {
-    let bitSet = new java.util.BitSet();
-    for (let c of linkMarkers) {
-      bitSet.set(c);
+  private static calculateLinkMarkers(linkMarkers: Set<string>): BitSet {
+    let bitSet = new BitSet();
+    for (const c of linkMarkers) {
+      bitSet.set(c.charCodeAt(0));
     }
-    bitSet.set("!");
+
+    bitSet.set("!".charCodeAt(0));
     return bitSet;
   }
 
   private static calculateSpecialCharacters(
-    linkMarkers: java.util.BitSet | null,
-    delimiterCharacters: java.util.Set<java.lang.Character> | null,
-    inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null
-  ): java.util.BitSet | null {
-    let bitSet: java.util.BitSet = linkMarkers.clone() as java.util.BitSet;
-    for (let c of delimiterCharacters) {
-      bitSet.set(c);
+    linkMarkers: BitSet,
+    delimiterCharacters: Set<string>,
+    inlineContentParserFactories: InlineContentParserFactory[]
+  ): BitSet {
+    let bitSet = linkMarkers.clone();
+    for (const c of delimiterCharacters) {
+      bitSet.set(c.charCodeAt(0));
     }
-    for (let factory of inlineContentParserFactories) {
-      for (let c of factory.getTriggerCharacters()) {
-        bitSet.set(c);
+
+    for (const factory of inlineContentParserFactories) {
+      for (const c of factory.getTriggerCharacters()) {
+        bitSet.set(c.charCodeAt(0));
       }
     }
-    bitSet.set("[");
-    bitSet.set("]");
-    bitSet.set("!");
-    bitSet.set("\n");
+
+    bitSet.set("[".charCodeAt(0));
+    bitSet.set("]".charCodeAt(0));
+    bitSet.set("!".charCodeAt(0));
+    bitSet.set("\n".charCodeAt(0));
+
     return bitSet;
   }
 
-  private createInlineContentParsers(): java.util.Map<
-    java.lang.Character,
-    java.util.List<InlineContentParser>
-  > | null {
-    let map = new java.util.HashMap<
-      java.lang.Character,
-      java.util.List<InlineContentParser>
-    >();
-    for (let factory of this.inlineContentParserFactories) {
-      let parser = factory.create();
-      for (let c of factory.getTriggerCharacters()) {
-        map.computeIfAbsent(c, (k) => new java.util.ArrayList()).add(parser);
+  private createInlineContentParsers(): Map<string, InlineContentParser[]> {
+    const map = new Map<string, InlineContentParser[]>();
+    for (const factory of this.inlineContentParserFactories) {
+      const parser = factory.create();
+
+      for (const c of factory.getTriggerCharacters()) {
+        if (!map.has(c)) {
+          map.set(c, [parser]);
+        }
       }
     }
+
     return map;
   }
 
-  public scanner(): java.util.Scanner | null {
+  public getScanner(): Scanner {
     return this.scanner;
   }
 
   /**
    * Parse content in block into inline children, appending them to the block node.
    */
-  public parse(lines: SourceLines | null, block: Node | null): void {
+  public parse(lines: SourceLines, block: Node) {
     this.reset(lines);
 
     while (true) {
-      let nodes = this.parseInline();
+      const nodes = this.parseInline();
+
       if (nodes === null) {
         break;
       }
-      for (let node of nodes) {
+
+      for (const node of nodes) {
         block.appendChild(node);
       }
     }
@@ -226,17 +335,17 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     this.mergeChildTextNodes(block);
   }
 
-  protected reset(lines: SourceLines | null): void {
-    this.scanner = java.util.Scanner.of(lines);
-    this.includeSourceSpans = !lines.getSourceSpans().isEmpty();
+  protected reset(lines: SourceLines) {
+    this.scanner = Scanner.of(lines);
+    this.includeSourceSpans = lines.getSourceSpans().length !== 0;
     this.trailingSpaces = 0;
     this.lastDelimiter = null;
     this.lastBracket = null;
     this.inlineParsers = this.createInlineContentParsers();
   }
 
-  private text(sourceLines: SourceLines | null): Text | null {
-    let text: Text = new Text(sourceLines.getContent());
+  private text(sourceLines: SourceLines): Text {
+    const text = new Text(sourceLines.getContent());
     text.setSourceSpans(sourceLines.getSourceSpans());
     return text;
   }
@@ -246,56 +355,58 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * On success, return the new inline node.
    * On failure, return null.
    */
-  private parseInline(): java.util.List<Node> | null {
-    let c: char = this.scanner.peek();
+  private parseInline(): Node[] | null {
+    const c = this.scanner.peek();
 
     switch (c) {
       case "[":
-        return java.util.List.of(this.parseOpenBracket());
+        return [this.parseOpenBracket()!];
       case "]":
-        return java.util.List.of(this.parseCloseBracket());
+        return [this.parseCloseBracket()];
       case "\n":
-        return java.util.List.of(this.parseLineBreak());
-      case java.util.Scanner.END:
+        return [this.parseLineBreak()];
+      case Scanner.END:
         return null;
 
       default:
     }
 
-    if (this.linkMarkers.get(c)) {
+    if (this.linkMarkers.get(c.charCodeAt(0))) {
       let markerPosition = this.scanner.position();
       let nodes = this.parseLinkMarker();
+
       if (nodes !== null) {
         return nodes;
       }
+
       // Reset and try other things (e.g. inline parsers below)
       this.scanner.setPosition(markerPosition);
     }
 
     // No inline parser, delimiter or other special handling.
-    if (!this.specialCharacters.get(c)) {
-      return java.util.List.of(this.parseText());
+    if (!this.specialCharacters.get(c.charCodeAt(0))) {
+      return [this.parseText()!];
     }
 
-    let inlineParsers: java.util.List<InlineContentParser> =
-      this.inlineParsers.get(c);
-    if (inlineParsers !== null) {
-      let position: Position = this.scanner.position();
-      for (let inlineParser of inlineParsers) {
-        let parsedInline: ParsedInline = inlineParser.tryParse(this);
+    const inlineParsers = this.inlineParsers!.get(c);
+    if (inlineParsers) {
+      const position = this.scanner.position();
+
+      for (const inlineParser of inlineParsers) {
+        const parsedInline = inlineParser.tryParse(this);
+
         if (parsedInline instanceof ParsedInlineImpl) {
-          let parsedInlineImpl: ParsedInlineImpl =
-            parsedInline as ParsedInlineImpl;
-          let node: Node = parsedInlineImpl.getNode();
-          this.scanner.setPosition(parsedInlineImpl.getPosition());
-          if (this.includeSourceSpans && node.getSourceSpans().isEmpty()) {
+          const node = parsedInline.getNode();
+          this.scanner.setPosition(parsedInline.getPosition());
+          if (this.includeSourceSpans && node.getSourceSpans().length === 0) {
             node.setSourceSpans(
               this.scanner
                 .getSource(position, this.scanner.position())
                 .getSourceSpans()
             );
           }
-          return java.util.List.of(node);
+
+          return [node];
         } else {
           // Reset position
           this.scanner.setPosition(position);
@@ -303,38 +414,33 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       }
     }
 
-    let delimiterProcessor: DelimiterProcessor =
-      this.delimiterProcessors.get(c);
-    if (delimiterProcessor !== null) {
-      let nodes: java.util.List<Node> = this.parseDelimiters(
-        delimiterProcessor,
-        c
-      );
+    const delimiterProcessor = this.delimiterProcessors.get(c);
+    if (delimiterProcessor) {
+      const nodes = this.parseDelimiters(delimiterProcessor, c);
+
       if (nodes !== null) {
         return nodes;
       }
     }
 
     // If we get here, even for a special/delimiter character, we will just treat it as text.
-    return java.util.List.of(this.parseText());
+    return [this.parseText()!];
   }
 
   /**
    * Attempt to parse delimiters like emphasis, strong emphasis or custom delimiters.
    */
   private parseDelimiters(
-    delimiterProcessor: DelimiterProcessor | null,
-    delimiterChar: char
-  ): java.util.List<Node> | null {
-    let res: InlineParserImpl.DelimiterData = this.scanDelimiters(
-      delimiterProcessor,
-      delimiterChar
-    );
+    delimiterProcessor: DelimiterProcessor,
+    delimiterChar: string
+  ): Node[] | null {
+    const res = this.scanDelimiters(delimiterProcessor, delimiterChar);
+
     if (res === null) {
       return null;
     }
 
-    let characters: java.util.List<Text> = res.characters;
+    const characters = res.characters;
 
     // Add entry to stack for this opener
     this.lastDelimiter = new Delimiter(
@@ -344,6 +450,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       res.canClose,
       this.lastDelimiter
     );
+
     if (this.lastDelimiter.previous !== null) {
       this.lastDelimiter.previous.next = this.lastDelimiter;
     }
@@ -367,8 +474,8 @@ class InlineParserImpl implements InlineParser, InlineParserState {
         node,
         start,
         contentPosition,
-        this.lastBracket,
-        this.lastDelimiter
+        this.lastBracket!,
+        this.lastDelimiter!
       )
     );
 
@@ -379,16 +486,16 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * If next character is {@code [}, add a bracket to the stack.
    * Otherwise, return null.
    */
-  private parseLinkMarker(): java.util.List<Node> | null {
-    let markerPosition = this.scanner.position();
+  private parseLinkMarker(): Node[] | null {
+    const markerPosition = this.scanner.position();
     this.scanner.next();
-    let bracketPosition = this.scanner.position();
+    const bracketPosition = this.scanner.position();
     if (this.scanner.next("[")) {
-      let contentPosition = this.scanner.position();
-      let bangNode = this.text(
+      const contentPosition = this.scanner.position();
+      const bangNode = this.text(
         this.scanner.getSource(markerPosition, bracketPosition)
       );
-      let bracketNode = this.text(
+      const bracketNode = this.text(
         this.scanner.getSource(bracketPosition, contentPosition)
       );
 
@@ -400,11 +507,11 @@ class InlineParserImpl implements InlineParser, InlineParserState {
           bracketNode,
           bracketPosition,
           contentPosition,
-          this.lastBracket,
-          this.lastDelimiter
+          this.lastBracket!,
+          this.lastDelimiter!
         )
       );
-      return java.util.List.of(bangNode, bracketNode);
+      return [bangNode, bracketNode];
     } else {
       return null;
     }
@@ -414,13 +521,13 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * Try to match close bracket against an opening in the delimiter stack. Return either a link or image, or a
    * plain [ character. If there is a matching delimiter, remove it from the delimiter stack.
    */
-  private parseCloseBracket(): Node | null {
-    let beforeClose: Position = this.scanner.position();
+  private parseCloseBracket(): Node {
+    const beforeClose = this.scanner.position();
     this.scanner.next();
-    let afterClose: Position = this.scanner.position();
+    const afterClose: Position = this.scanner.position();
 
     // Get previous `[` or `![`
-    let opener: Bracket = this.lastBracket;
+    const opener = this.lastBracket;
     if (opener === null) {
       // No matching opener, just return a literal.
       return this.text(this.scanner.getSource(beforeClose, afterClose));
@@ -436,6 +543,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     if (linkOrImage !== null) {
       return linkOrImage;
     }
+
     this.scanner.setPosition(afterClose);
 
     // Nothing parsed, just parse the bracket as text and continue
@@ -444,17 +552,17 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   }
 
   private parseLinkOrImage(
-    opener: Bracket | null,
-    beforeClose: Position | null
+    opener: Bracket,
+    beforeClose: Position
   ): Node | null {
-    let linkInfo = this.parseLinkInfo(opener, beforeClose);
+    const linkInfo = this.parseLinkInfo(opener, beforeClose);
     if (linkInfo === null) {
       return null;
     }
-    let processorStartPosition = this.scanner.position();
+    const processorStartPosition = this.scanner.position();
 
-    for (let linkProcessor of this.linkProcessors) {
-      let linkResult = linkProcessor.process(
+    for (const linkProcessor of this.linkProcessors) {
+      const linkResult = linkProcessor.process(
         linkInfo,
         this.scanner,
         this.context
@@ -465,16 +573,16 @@ class InlineParserImpl implements InlineParser, InlineParserState {
         continue;
       }
 
-      let result = linkResult as LinkResultImpl;
-      let node = result.getNode();
-      let position = result.getPosition();
-      let includeMarker = result.isIncludeMarker();
+      const result = linkResult;
+      const node = result.getNode();
+      const position = result.getPosition();
+      const includeMarker = result.isIncludeMarker();
 
       switch (result.getType()) {
-        case WRAP:
+        case LinkResultImpl.Type.WRAP:
           this.scanner.setPosition(position);
           return this.wrapBracket(opener, node, includeMarker);
-        case java.nio.charset.CodingErrorAction.REPLACE:
+        case LinkResultImpl.Type.REPLACE:
           this.scanner.setPosition(position);
           return this.replaceBracket(opener, node, includeMarker);
 
@@ -486,8 +594,8 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   }
 
   private parseLinkInfo(
-    opener: Bracket | null,
-    beforeClose: Position | null
+    opener: Bracket,
+    beforeClose: Position
   ): LinkInfo | null {
     // Check to see if we have a link (or image, with a ! in front). The different types:
     // - Inline:       `[foo](/uri)` or with optional title `[foo](/uri "title")`
@@ -496,23 +604,24 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     //   - Collapsed: `[foo][]`    (foo is both the text and label)
     //   - Shortcut:  `[foo]`      (foo is both the text and label)
 
-    let text: string = this.scanner
-      .getSource(opener.contentPosition, beforeClose)
+    const text: string = this.scanner
+      .getSource(opener.contentPosition!, beforeClose)
       .getContent();
 
     // Starting position is after the closing `]`
-    let afterClose: Position = this.scanner.position();
+    const afterClose = this.scanner.position();
 
     // Maybe an inline link/image
-    let destinationTitle = InlineParserImpl.parseInlineDestinationTitle(
+    const destinationTitle = InlineParserImpl.parseInlineDestinationTitle(
       this.scanner
     );
+
     if (destinationTitle !== null) {
-      return new InlineParserImpl.LinkInfoImpl(
-        opener.markerNode,
-        opener.bracketNode,
+      return new LinkInfoImpl(
+        opener.markerNode!,
+        opener.bracketNode!,
         text,
-        null,
+        null!,
         destinationTitle.destination,
         destinationTitle.title,
         afterClose
@@ -526,12 +635,12 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     // failed to be parsed as an inline link/image before.
 
     // See if there's a link label like `[bar]` or `[]`
-    let label: string = InlineParserImpl.parseLinkLabel(this.scanner);
+    const label = InlineParserImpl.parseLinkLabel(this.scanner);
     if (label === null) {
       // No label, rewind back
       this.scanner.setPosition(afterClose);
     }
-    let textIsReference = label === null || label.isEmpty();
+    const textIsReference = label === null || label === "";
     if (opener.bracketAfter && textIsReference && opener.markerNode === null) {
       // In case of shortcut or collapsed links, the text is used as the reference. But the reference is not allowed to
       // contain an unescaped bracket, so if that's the case we don't need to continue. This is an optimization.
@@ -539,25 +648,25 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     }
 
     return new InlineParserImpl.LinkInfoImpl(
-      opener.markerNode,
-      opener.bracketNode,
+      opener.markerNode!,
+      opener.bracketNode!,
       text,
-      label,
-      null,
-      null,
+      label!,
+      null!,
+      null!,
       afterClose
     );
   }
 
   private wrapBracket(
-    opener: Bracket | null,
-    wrapperNode: Node | null,
+    opener: Bracket,
+    wrapperNode: Node,
     includeMarker: boolean
-  ): Node | null {
+  ): Node {
     // Add all nodes between the opening bracket and now (closing bracket) as child nodes of the link
-    let n: Node = opener.bracketNode.getNext();
+    let n = opener.bracketNode!.getNext();
     while (n !== null) {
-      let next: Node = n.getNext();
+      let next = n.getNext();
       wrapperNode.appendChild(n);
       n = next;
     }
@@ -569,7 +678,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
           : opener.bracketPosition;
       wrapperNode.setSourceSpans(
         this.scanner
-          .getSource(startPosition, this.scanner.position())
+          .getSource(startPosition!, this.scanner.position())
           .getSourceSpans()
       );
     }
@@ -581,17 +690,19 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     if (includeMarker && opener.markerNode !== null) {
       opener.markerNode.unlink();
     }
-    opener.bracketNode.unlink();
+
+    opener.bracketNode!.unlink();
     this.removeLastBracket();
 
     // Links within links are not allowed. We found this link, so there can be no other link around it.
     if (opener.markerNode === null) {
-      let bracket: Bracket = this.lastBracket;
+      let bracket = this.lastBracket;
       while (bracket !== null) {
         if (bracket.markerNode === null) {
           // Disallow link opener. It will still get matched, but will not result in a link.
           bracket.allowed = false;
         }
+
         bracket = bracket.previous;
       }
     }
@@ -600,10 +711,10 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   }
 
   private replaceBracket(
-    opener: Bracket | null,
-    node: Node | null,
+    opener: Bracket,
+    node: Node,
     includeMarker: boolean
-  ): Node | null {
+  ): Node {
     // Remove delimiters (but keep text nodes)
     while (
       this.lastDelimiter !== null &&
@@ -619,7 +730,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
           : opener.bracketPosition;
       node.setSourceSpans(
         this.scanner
-          .getSource(startPosition, this.scanner.position())
+          .getSource(startPosition!, this.scanner.position())
           .getSourceSpans()
       );
     }
@@ -627,15 +738,17 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     this.removeLastBracket();
 
     // Remove nodes that we added since the opener, because we're replacing them
-    let n: Node =
+    let n: Node | null =
       includeMarker && opener.markerNode !== null
         ? opener.markerNode
         : opener.bracketNode;
+
     while (n !== null) {
       let next = n.getNext();
       n.unlink();
       n = next;
     }
+
     return node;
   }
 
@@ -646,28 +759,28 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     this.lastBracket = bracket;
   }
 
-  private removeLastBracket(): void {
-    this.lastBracket = this.lastBracket.previous;
+  private removeLastBracket() {
+    this.lastBracket = this.lastBracket!.previous;
   }
 
   /**
    * Try to parse the destination and an optional title for an inline link/image.
    */
   private static parseInlineDestinationTitle(
-    scanner: java.util.Scanner | null
-  ): InlineParserImpl.DestinationTitle | null {
+    scanner: Scanner
+  ): DestinationTitle | null {
     if (!scanner.next("(")) {
       return null;
     }
 
     scanner.whitespace();
-    let dest: string = InlineParserImpl.parseLinkDestination(scanner);
+    const dest = InlineParserImpl.parseLinkDestination(scanner);
     if (dest === null) {
       return null;
     }
 
-    let title: string = null;
-    let whitespace: int = scanner.whitespace();
+    let title: string | null;
+    const whitespace = scanner.whitespace();
     // title needs a whitespace before
     if (whitespace >= 1) {
       title = InlineParserImpl.parseLinkTitle(scanner);
@@ -678,16 +791,14 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       // Note that something like `[foo](` could still be valid later, `(` will just be text.
       return null;
     }
-    return new InlineParserImpl.DestinationTitle(dest, title);
+    return new InlineParserImpl.DestinationTitle(dest, title!);
   }
 
   /**
    * Attempt to parse link destination, returning the string or null if no match.
    */
-  private static parseLinkDestination(
-    scanner: java.util.Scanner | null
-  ): string | null {
-    let delimiter: char = scanner.peek();
+  private static parseLinkDestination(scanner: Scanner): string | null {
+    let delimiter = scanner.peek();
     let start: Position = scanner.position();
     if (!LinkScanner.scanLinkDestination(scanner)) {
       return null;
@@ -699,7 +810,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       let rawDestination: string = scanner
         .getSource(start, scanner.position())
         .getContent();
-      dest = rawDestination.substring(1, rawDestination.length() - 1);
+      dest = rawDestination.substring(1, rawDestination.length - 1);
     } else {
       dest = scanner.getSource(start, scanner.position()).getContent();
     }
@@ -710,9 +821,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   /**
    * Attempt to parse link title (sans quotes), returning the string or null if no match.
    */
-  private static parseLinkTitle(
-    scanner: java.util.Scanner | null
-  ): string | null {
+  private static parseLinkTitle(scanner: Scanner): string | null {
     let start: Position = scanner.position();
     if (!LinkScanner.scanLinkTitle(scanner)) {
       return null;
@@ -722,16 +831,14 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     let rawTitle: string = scanner
       .getSource(start, scanner.position())
       .getContent();
-    let title: string = rawTitle.substring(1, rawTitle.length() - 1);
+    let title: string = rawTitle.substring(1, rawTitle.length - 1);
     return Escaping.unescapeString(title);
   }
 
   /**
    * Attempt to parse a link label, returning the label between the brackets or null.
    */
-  protected static parseLinkLabel(
-    scanner: java.util.Scanner | null
-  ): string | null {
+  protected static parseLinkLabel(scanner: Scanner): string | null {
     if (!scanner.next("[")) {
       return null;
     }
@@ -748,14 +855,14 @@ class InlineParserImpl implements InlineParser, InlineParserState {
 
     let content: string = scanner.getSource(start, end).getContent();
     // spec: A link label can have at most 999 characters inside the square brackets.
-    if (content.length() > 999) {
+    if (content.length > 999) {
       return null;
     }
 
     return content;
   }
 
-  private parseLineBreak(): Node | null {
+  private parseLineBreak(): Node {
     this.scanner.next();
 
     if (this.trailingSpaces >= 2) {
@@ -771,35 +878,35 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   private parseText(): Node | null {
     let start: Position = this.scanner.position();
     this.scanner.next();
-    let c: char;
+    let c: string;
+
     while (true) {
       c = this.scanner.peek();
-      if (c === java.util.Scanner.END || this.specialCharacters.get(c)) {
+
+      if (c === Scanner.END || this.specialCharacters.get(c.charCodeAt(0))) {
         break;
       }
+
       this.scanner.next();
     }
 
-    let source: SourceLines = this.scanner.getSource(
-      start,
-      this.scanner.position()
-    );
-    let content: string = source.getContent();
+    const source = this.scanner.getSource(start, this.scanner.position());
+    let content = source.getContent();
 
     if (c === "\n") {
       // We parsed until the end of the line. Trim any trailing spaces and remember them (for hard line breaks).
-      let end: int =
-        Characters.skipBackwards(" ", content, content.length() - 1, 0) + 1;
-      this.trailingSpaces = content.length() - end;
+      const end =
+        Characters.skipBackwards(" ", content, content.length - 1, 0) + 1;
+      this.trailingSpaces = content.length - end;
       content = content.substring(0, end);
-    } else if (c === java.util.Scanner.END) {
+    } else if (c === Scanner.END) {
       // For the last line, both tabs and spaces are trimmed for some reason (checked with commonmark.js).
-      let end: int =
-        Characters.skipSpaceTabBackwards(content, content.length() - 1, 0) + 1;
+      const end =
+        Characters.skipSpaceTabBackwards(content, content.length - 1, 0) + 1;
       content = content.substring(0, end);
     }
 
-    let text: Text = new Text(content);
+    const text: Text = new Text(content);
     text.setSourceSpans(source.getSourceSpans());
     return text;
   }
@@ -811,52 +918,54 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * @return information about delimiter run, or {@code null}
    */
   private scanDelimiters(
-    delimiterProcessor: DelimiterProcessor | null,
-    delimiterChar: char
-  ): InlineParserImpl.DelimiterData | null {
-    let before: int = this.scanner.peekPreviousCodePoint();
-    let start: Position = this.scanner.position();
+    delimiterProcessor: DelimiterProcessor,
+    delimiterChar: string
+  ): DelimiterData | null {
+    const before = this.scanner.peekPreviousCodePoint();
+    const start: Position = this.scanner.position();
 
     // Quick check to see if we have enough delimiters.
-    let delimiterCount: int = this.scanner.matchMultiple(delimiterChar);
+    const delimiterCount = this.scanner.matchMultiple(delimiterChar);
     if (delimiterCount < delimiterProcessor.getMinLength()) {
       this.scanner.setPosition(start);
       return null;
     }
 
     // We do have enough, extract a text node for each delimiter character.
-    let delimiters: java.util.List<Text> = new java.util.ArrayList();
+    const delimiters: Text[] = [];
     this.scanner.setPosition(start);
     let positionBefore: Position = start;
+
     while (this.scanner.next(delimiterChar)) {
-      delimiters.add(
+      delimiters.push(
         this.text(
           this.scanner.getSource(positionBefore, this.scanner.position())
         )
       );
+
       positionBefore = this.scanner.position();
     }
 
-    let after: int = this.scanner.peekCodePoint();
+    const after = this.scanner.peekCodePoint();
 
     // We could be more lazy here, in most cases we don't need to do every match case.
-    let beforeIsPunctuation: boolean =
-      before === java.util.Scanner.END ||
+    const beforeIsPunctuation =
+      before === Scanner.END.charCodeAt(0) ||
       Characters.isPunctuationCodePoint(before);
-    let beforeIsWhitespace: boolean =
-      before === java.util.Scanner.END ||
+    const beforeIsWhitespace: boolean =
+      before === Scanner.END.charCodeAt(0) ||
       Characters.isWhitespaceCodePoint(before);
-    let afterIsPunctuation: boolean =
-      after === java.util.Scanner.END ||
+    const afterIsPunctuation: boolean =
+      after === Scanner.END.charCodeAt(0) ||
       Characters.isPunctuationCodePoint(after);
-    let afterIsWhitespace: boolean =
-      after === java.util.Scanner.END ||
+    const afterIsWhitespace: boolean =
+      after === Scanner.END.charCodeAt(0) ||
       Characters.isWhitespaceCodePoint(after);
 
-    let leftFlanking: boolean =
+    const leftFlanking: boolean =
       !afterIsWhitespace &&
       (!afterIsPunctuation || beforeIsWhitespace || beforeIsPunctuation);
-    let rightFlanking: boolean =
+    const rightFlanking: boolean =
       !beforeIsWhitespace &&
       (!beforeIsPunctuation || afterIsWhitespace || afterIsPunctuation);
     let canOpen: boolean;
@@ -873,49 +982,54 @@ class InlineParserImpl implements InlineParser, InlineParserState {
         delimiterChar === delimiterProcessor.getClosingCharacter();
     }
 
-    return new InlineParserImpl.DelimiterData(delimiters, canOpen, canClose);
+    return new DelimiterData(delimiters, canOpen, canClose);
   }
 
-  private processDelimiters(stackBottom: Delimiter | null): void {
-    let openersBottom: java.util.Map<java.lang.Character, Delimiter> =
-      new java.util.HashMap();
+  private processDelimiters(stackBottom: Delimiter | null) {
+    let openersBottom = new Map<string, Delimiter>();
 
     // find first closer above stackBottom:
-    let closer: Delimiter = this.lastDelimiter;
+    let closer = this.lastDelimiter;
     while (closer !== null && closer.previous !== stackBottom) {
       closer = closer.previous;
     }
+
     // move forward, looking for closers, and handling each
     while (closer !== null) {
-      let delimiterChar: char = closer.delimiterChar;
+      const delimiterChar = closer.delimiterChar;
 
-      let delimiterProcessor: DelimiterProcessor =
-        this.delimiterProcessors.get(delimiterChar);
-      if (!closer.canClose() || delimiterProcessor === null) {
+      const delimiterProcessor =
+        this.delimiterProcessors.get(delimiterChar) || null;
+      if (!closer.getCanClose() || delimiterProcessor === null) {
         closer = closer.next;
         continue;
       }
 
-      let openingDelimiterChar: char = delimiterProcessor.getOpeningCharacter();
+      const openingDelimiterChar = delimiterProcessor.getOpeningCharacter();
 
       // Found delimiter closer. Now look back for first matching opener.
-      let usedDelims: int = 0;
-      let openerFound: boolean = false;
-      let potentialOpenerFound: boolean = false;
-      let opener: Delimiter = closer.previous;
+      let usedDelims = 0;
+      let openerFound = false;
+      let potentialOpenerFound = false;
+      let opener = closer.previous;
       while (
         opener !== null &&
         opener !== stackBottom &&
         opener !== openersBottom.get(delimiterChar)
       ) {
-        if (opener.canOpen() && opener.delimiterChar === openingDelimiterChar) {
+        if (
+          opener.getCanOpen() &&
+          opener.delimiterChar === openingDelimiterChar
+        ) {
           potentialOpenerFound = true;
           usedDelims = delimiterProcessor.process(opener, closer);
+
           if (usedDelims > 0) {
             openerFound = true;
             break;
           }
         }
+
         opener = opener.previous;
       }
 
@@ -928,8 +1042,9 @@ class InlineParserImpl implements InlineParser, InlineParserState {
           // delimiters (e.g. because of the "multiple of 3" rule),
           // we want to consider it next time because the number
           // of delimiters can change as we continue processing.
-          openersBottom.put(delimiterChar, closer.previous);
-          if (!closer.canOpen()) {
+          openersBottom.set(delimiterChar, closer.previous!);
+
+          if (!closer.getCanOpen()) {
             // We can remove a closer that can't be an opener,
             // once we've seen there's no matching opener:
             this.removeDelimiterKeepNode(closer);
@@ -940,26 +1055,29 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       }
 
       // Remove number of used delimiters nodes.
-      for (let i: int = 0; i < usedDelims; i++) {
-        let delimiter: Text = opener.characters.remove(
-          opener.characters.size() - 1
+      for (let i = 0; i < usedDelims; i++) {
+        const delimiter = opener!.characters.splice(
+          opener!.characters.length - 1,
+          1
         );
-        delimiter.unlink();
-      }
-      for (let i: int = 0; i < usedDelims; i++) {
-        let delimiter: Text = closer.characters.remove(0);
-        delimiter.unlink();
+
+        delimiter.forEach((d) => d.unlink());
       }
 
-      this.removeDelimitersBetween(opener, closer);
+      for (let i = 0; i < usedDelims; i++) {
+        const delimiter = closer.characters.splice(0, 1);
+        delimiter.forEach((d) => d.unlink());
+      }
+
+      this.removeDelimitersBetween(opener!, closer);
 
       // No delimiter characters left to process, so we can remove delimiter and the now empty node.
-      if (opener.length() === 0) {
-        this.removeDelimiterAndNodes(opener);
+      if (opener!.length() === 0) {
+        this.removeDelimiterAndNodes(opener!);
       }
 
       if (closer.length() === 0) {
-        let next: Delimiter = closer.next;
+        let next = closer.next;
         this.removeDelimiterAndNodes(closer);
         closer = next;
       }
@@ -971,13 +1089,10 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     }
   }
 
-  private removeDelimitersBetween(
-    opener: Delimiter | null,
-    closer: Delimiter | null
-  ): void {
-    let delimiter: Delimiter = closer.previous;
+  private removeDelimitersBetween(opener: Delimiter, closer: Delimiter): void {
+    let delimiter = closer.previous;
     while (delimiter !== null && delimiter !== opener) {
-      let previousDelimiter: Delimiter = delimiter.previous;
+      let previousDelimiter = delimiter.previous;
       this.removeDelimiterKeepNode(delimiter);
       delimiter = previousDelimiter;
     }
@@ -986,21 +1101,22 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   /**
    * Remove the delimiter and the corresponding text node. For used delimiters, e.g. `*` in `*foo*`.
    */
-  private removeDelimiterAndNodes(delim: Delimiter | null): void {
+  private removeDelimiterAndNodes(delim: Delimiter) {
     this.removeDelimiter(delim);
   }
 
   /**
    * Remove the delimiter but keep the corresponding node as text. For unused delimiters such as `_` in `foo_bar`.
    */
-  private removeDelimiterKeepNode(delim: Delimiter | null): void {
+  private removeDelimiterKeepNode(delim: Delimiter) {
     this.removeDelimiter(delim);
   }
 
-  private removeDelimiter(delim: Delimiter | null): void {
+  private removeDelimiter(delim: Delimiter) {
     if (delim.previous !== null) {
       delim.previous.next = delim.next;
     }
+
     if (delim.next === null) {
       // top of stack
       this.lastDelimiter = delim.previous;
@@ -1009,7 +1125,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     }
   }
 
-  private mergeChildTextNodes(node: Node | null): void {
+  private mergeChildTextNodes(node: Node) {
     // No children, no need for merging
     if (node.getFirstChild() === null) {
       return;
@@ -1022,18 +1138,20 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     fromNode: Node | null,
     toNode: Node | null
   ): void {
-    let first: Text = null;
-    let last: Text = null;
-    let length: int = 0;
+    let first: Text | null = null;
+    let last: Text | null = null;
+    let length = 0;
 
-    let node: Node = fromNode;
+    let node: Node | null = fromNode;
     while (node !== null) {
       if (node instanceof Text) {
-        let text: Text = node as Text;
+        let text = node;
+
         if (first === null) {
           first = text;
         }
-        length += text.getLiteral().length();
+
+        length += text.getLiteral().length;
         last = text;
       } else {
         this.mergeIfNeeded(first, last, length);
@@ -1043,9 +1161,11 @@ class InlineParserImpl implements InlineParser, InlineParserState {
 
         this.mergeChildTextNodes(node);
       }
+
       if (node === toNode) {
         break;
       }
+
       node = node.getNext();
     }
 
@@ -1055,123 +1175,49 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   private mergeIfNeeded(
     first: Text | null,
     last: Text | null,
-    textLength: int
+    textLength: number
   ): void {
     if (first !== null && last !== null && first !== last) {
-      let sb: stringBuilder = new stringBuilder(textLength);
+      const sb = new Appendable();
       sb.append(first.getLiteral());
-      let sourceSpans: SourceSpans = null;
+      let sourceSpans: SourceSpans | null = null;
+
       if (this.includeSourceSpans) {
         sourceSpans = new SourceSpans();
         sourceSpans.addAll(first.getSourceSpans());
       }
-      let node: Node = first.getNext();
-      let stop: Node = last.getNext();
+
+      let node = first.getNext();
+      let stop = last.getNext();
       while (node !== stop) {
         sb.append((node as Text).getLiteral());
+
         if (sourceSpans !== null) {
-          sourceSpans.addAll(node.getSourceSpans());
+          sourceSpans.addAll(node!.getSourceSpans());
         }
 
-        let unlink: Node = node;
-        node = node.getNext();
+        let unlink: Node = node!;
+        node = node!.getNext();
         unlink.unlink();
       }
+
       let literal: string = sb.toString();
       first.setLiteral(literal);
+
       if (sourceSpans !== null) {
         first.setSourceSpans(sourceSpans.getSourceSpans());
       }
     }
   }
 
-  public static DelimiterData = class DelimiterData {
-    protected readonly characters: java.util.List<Text> | null;
-    protected readonly canClose: boolean;
-    protected readonly canOpen: boolean;
-
-    protected constructor(
-      characters: java.util.List<Text> | null,
-      canOpen: boolean,
-      canClose: boolean
-    ) {
-      super();
-      this.characters = characters;
-      this.canOpen = canOpen;
-      this.canClose = canClose;
-    }
-  };
+  public static DelimiterData = DelimiterData;
 
   /**
    * A destination and optional title for a link or image.
    */
-  public static DestinationTitle = class DestinationTitle {
-    protected readonly destination: string | null;
-    protected readonly title: string | null;
+  public static DestinationTitle = DestinationTitle;
 
-    public constructor(destination: string | null, title: string | null) {
-      super();
-      this.destination = destination;
-      this.title = title;
-    }
-  };
-
-  public static LinkInfoImpl = class LinkInfoImpl implements LinkInfo {
-    private readonly marker: Text | null;
-    private readonly openingBracket: Text | null;
-    private readonly text: string | null;
-    private readonly label: string | null;
-    private readonly destination: string | null;
-    private readonly title: string | null;
-    private readonly afterTextBracket: Position | null;
-
-    private constructor(
-      marker: Text | null,
-      openingBracket: Text | null,
-      text: string | null,
-      label: string | null,
-      destination: string | null,
-      title: string | null,
-      afterTextBracket: Position | null
-    ) {
-      super();
-      this.marker = marker;
-      this.openingBracket = openingBracket;
-      this.text = text;
-      this.label = label;
-      this.destination = destination;
-      this.title = title;
-      this.afterTextBracket = afterTextBracket;
-    }
-
-    public marker(): Text | null {
-      return this.marker;
-    }
-
-    public openingBracket(): Text | null {
-      return this.openingBracket;
-    }
-
-    public text(): string | null {
-      return this.text;
-    }
-
-    public label(): string | null {
-      return this.label;
-    }
-
-    public destination(): string | null {
-      return this.destination;
-    }
-
-    public title(): string | null {
-      return this.title;
-    }
-
-    public afterTextBracket(): Position | null {
-      return this.afterTextBracket;
-    }
-  };
+  public static LinkInfoImpl = LinkInfoImpl;
 }
 
 export default InlineParserImpl;

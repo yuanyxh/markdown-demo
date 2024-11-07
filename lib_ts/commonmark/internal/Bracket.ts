@@ -1,3 +1,7 @@
+import { Text } from "../node";
+import { Position } from "../parser";
+import Delimiter from "./Delimiter";
+
 /**
  * Opening bracket for links ({@code [}), images ({@code ![}), or links with other markers.
  */
@@ -48,12 +52,12 @@ class Bracket {
   public bracketAfter: boolean = false;
 
   public static link(
-    bracketNode: Text | null,
-    bracketPosition: Position | null,
-    contentPosition: Position | null,
-    previous: Bracket | null,
-    previousDelimiter: Delimiter | null
-  ): Bracket | null {
+    bracketNode: Text,
+    bracketPosition: Position,
+    contentPosition: Position,
+    previous: Bracket,
+    previousDelimiter: Delimiter
+  ): Bracket {
     return new Bracket(
       null,
       null,
@@ -66,14 +70,14 @@ class Bracket {
   }
 
   public static withMarker(
-    markerNode: Text | null,
-    markerPosition: Position | null,
-    bracketNode: Text | null,
-    bracketPosition: Position | null,
-    contentPosition: Position | null,
-    previous: Bracket | null,
-    previousDelimiter: Delimiter | null
-  ): Bracket | null {
+    markerNode: Text,
+    markerPosition: Position,
+    bracketNode: Text,
+    bracketPosition: Position,
+    contentPosition: Position,
+    previous: Bracket,
+    previousDelimiter: Delimiter
+  ): Bracket {
     return new Bracket(
       markerNode,
       markerPosition,
@@ -94,7 +98,6 @@ class Bracket {
     previous: Bracket | null,
     previousDelimiter: Delimiter | null
   ) {
-    super();
     this.markerNode = markerNode;
     this.markerPosition = markerPosition;
     this.bracketNode = bracketNode;

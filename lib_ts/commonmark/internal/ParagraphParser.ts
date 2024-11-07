@@ -1,17 +1,34 @@
+import {
+  Block,
+  DefinitionMap,
+  LinkReferenceDefinition,
+  Paragraph,
+  SourceSpan,
+} from "../node";
+import {
+  AbstractBlockParser,
+  BlockContinue,
+  InlineParser,
+  ParserState,
+  SourceLine,
+  SourceLines,
+} from "../parser";
+import LinkReferenceDefinitionParser from "./LinkReferenceDefinitionParser";
+
 class ParagraphParser extends AbstractBlockParser {
-  private readonly block: Paragraph | null = new Paragraph();
-  private readonly linkReferenceDefinitionParser: LinkReferenceDefinitionParser | null =
+  private readonly block = new Paragraph();
+  private readonly linkReferenceDefinitionParser =
     new LinkReferenceDefinitionParser();
 
   public canHaveLazyContinuationLines(): boolean {
     return true;
   }
 
-  public getBlock(): Block | null {
+  public getBlock(): Block {
     return this.block;
   }
 
-  public tryContinue(state: ParserState | null): BlockContinue | null {
+  public tryContinue(state: ParserState): BlockContinue | null {
     if (!state.isBlank()) {
       return BlockContinue.atIndex(state.getIndex());
     } else {
@@ -19,22 +36,23 @@ class ParagraphParser extends AbstractBlockParser {
     }
   }
 
-  public addLine(line: SourceLine | null): void {
+  public addLine(line: SourceLine) {
     this.linkReferenceDefinitionParser.parse(line);
   }
 
-  public addSourceSpan(sourceSpan: SourceSpan | null): void {
+  public addSourceSpan(sourceSpan: SourceSpan) {
     // Some source spans might belong to link reference definitions, others to the paragraph.
     // The parser will handle that.
     this.linkReferenceDefinitionParser.addSourceSpan(sourceSpan);
   }
 
-  public getDefinitions(): java.util.List<DefinitionMap<unknown>> | null {
-    let map = new DefinitionMap(LinkReferenceDefinition.class);
-    for (let def of this.linkReferenceDefinitionParser.getDefinitions()) {
-      map.putIfAbsent(def.getLabel(), def);
+  public getDefinitions(): DefinitionMap<unknown>[] {
+    let map = new DefinitionMap(LinkReferenceDefinition);
+    for (const def of this.linkReferenceDefinitionParser.getDefinitions()) {
+      map.putIfAbsent(def.getLabel()!, def as any);
     }
-    return java.util.List.of(map);
+
+    return [map];
   }
 
   public closeBlock(): void {
@@ -51,15 +69,14 @@ class ParagraphParser extends AbstractBlockParser {
     }
   }
 
-  public parseInlines(inlineParser: InlineParser | null): void {
-    let lines: SourceLines =
-      this.linkReferenceDefinitionParser.getParagraphLines();
+  public parseInlines(inlineParser: InlineParser) {
+    const lines = this.linkReferenceDefinitionParser.getParagraphLines();
     if (!lines.isEmpty()) {
       inlineParser.parse(lines, this.block);
     }
   }
 
-  public getParagraphLines(): SourceLines | null {
+  public getParagraphLines(): SourceLines {
     return this.linkReferenceDefinitionParser.getParagraphLines();
   }
 }

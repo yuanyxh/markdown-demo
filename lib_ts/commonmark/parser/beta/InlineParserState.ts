@@ -8,5 +8,5 @@ export interface InlineParserState {
    * Note that this always returns the same instance, if you want to backtrack you need to use
    * {@link Scanner#position()} and {@link Scanner#setPosition(Position)}.
    */
-  scanner(): Scanner;
+  getScanner(): Scanner;
 }

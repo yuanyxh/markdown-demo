@@ -1,4 +1,4 @@
-import { Block } from "../../node";
+import { Block, DefinitionMap, SourceSpan } from "../../node";
 import { InlineParser } from "../InlineParser";
 import SourceLine from "../SourceLine";
 import BlockContinue from "./BlockContinue";
@@ -30,7 +30,7 @@ export interface BlockParser {
 
   getBlock(): Block;
 
-  tryContinue(parserState: ParserState): BlockContinue;
+  tryContinue(parserState: ParserState): BlockContinue | null;
 
   /**
    * Add the part of a line that belongs to this block parser to parse (i.e. without any container block markers).

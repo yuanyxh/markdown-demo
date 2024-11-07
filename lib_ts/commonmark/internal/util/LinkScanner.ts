@@ -1,12 +1,13 @@
+import Character from "../../../common/Character";
+import { Scanner } from "../../parser";
+
 class LinkScanner {
   /**
    * Attempt to scan the contents of a link label (inside the brackets), stopping after the content or returning false.
    * The stopped position can bei either the closing {@code ]}, or the end of the line if the label continues on
    * the next line.
    */
-  public static scanLinkLabelContent(
-    scanner: java.util.Scanner | null
-  ): boolean {
+  public static scanLinkLabelContent(scanner: Scanner): boolean {
     while (scanner.hasNext()) {
       switch (scanner.peek()) {
         case "\\":
@@ -25,15 +26,14 @@ class LinkScanner {
           scanner.next();
       }
     }
+
     return true;
   }
 
   /**
    * Attempt to scan a link destination, stopping after the destination or returning false.
    */
-  public static scanLinkDestination(
-    scanner: java.util.Scanner | null
-  ): boolean {
+  public static scanLinkDestination(scanner: Scanner): boolean {
     if (!scanner.hasNext()) {
       return false;
     }
@@ -57,18 +57,19 @@ class LinkScanner {
             scanner.next();
         }
       }
+
       return false;
     } else {
       return LinkScanner.scanLinkDestinationWithBalancedParens(scanner);
     }
   }
 
-  public static scanLinkTitle(scanner: java.util.Scanner | null): boolean {
+  public static scanLinkTitle(scanner: Scanner): boolean {
     if (!scanner.hasNext()) {
       return false;
     }
 
-    let endDelimiter: char;
+    let endDelimiter: string;
     switch (scanner.peek()) {
       case '"':
         endDelimiter = '"';
@@ -82,24 +83,29 @@ class LinkScanner {
       default:
         return false;
     }
+
     scanner.next();
 
     if (!LinkScanner.scanLinkTitleContent(scanner, endDelimiter)) {
       return false;
     }
+
     if (!scanner.hasNext()) {
       return false;
     }
+
     scanner.next();
+
     return true;
   }
 
   public static scanLinkTitleContent(
-    scanner: java.util.Scanner | null,
-    endDelimiter: char
+    scanner: Scanner,
+    endDelimiter: string
   ): boolean {
     while (scanner.hasNext()) {
-      let c: char = scanner.peek();
+      let c = scanner.peek();
+
       if (c === "\\") {
         scanner.next();
         if (LinkScanner.isEscapable(scanner.peek())) {
@@ -114,6 +120,7 @@ class LinkScanner {
         scanner.next();
       }
     }
+
     return true;
   }
 
@@ -121,12 +128,13 @@ class LinkScanner {
   // characters, and includes parentheses only if (a) they are backslash-escaped or (b) they are part of a balanced
   // pair of unescaped parentheses
   private static scanLinkDestinationWithBalancedParens(
-    scanner: java.util.Scanner | null
+    scanner: Scanner
   ): boolean {
-    let parens: int = 0;
+    let parens = 0;
     let empty: boolean = true;
+
     while (scanner.hasNext()) {
-      let c: char = scanner.peek();
+      let c = scanner.peek();
       switch (c) {
         case " ":
           return !empty;
@@ -142,6 +150,7 @@ class LinkScanner {
           if (parens > 32) {
             return false;
           }
+
           scanner.next();
           break;
         case ")":
@@ -150,22 +159,25 @@ class LinkScanner {
           } else {
             parens--;
           }
+
           scanner.next();
           break;
         default:
           // or control character
-          if (java.lang.Character.isISOControl(c)) {
+          if (Character.isISOControl(c)) {
             return !empty;
           }
+
           scanner.next();
           break;
       }
+
       empty = false;
     }
     return true;
   }
 
-  private static isEscapable(c: char): boolean {
+  private static isEscapable(c: string): boolean {
     switch (c) {
       case "!":
       case '"':

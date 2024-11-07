@@ -39,7 +39,7 @@ export interface InlineParserContext {
    * @return the definition if one exists, {@code null} otherwise
    * @deprecated use {@link #getDefinition} with {@link LinkReferenceDefinition} instead
    */
-  getLinkReferenceDefinition(label: string): LinkReferenceDefinition;
+  getLinkReferenceDefinition(label: string): LinkReferenceDefinition | null;
 
   /**
    * Look up a definition of a type for a given label.

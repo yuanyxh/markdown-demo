@@ -1,24 +1,27 @@
-class OrderedListHolder extends ListHolder {
-  private readonly delimiter: string | null;
-  private counter: int;
+import { OrderedList } from "../../../node";
+import ListHolder from "./ListHolder";
 
-  public constructor(parent: ListHolder | null, list: OrderedList | null) {
+class OrderedListHolder extends ListHolder {
+  private readonly delimiter: string;
+  private counter = -1;
+
+  public constructor(parent: ListHolder, list: OrderedList) {
     super(parent);
     this.delimiter =
-      list.getMarkerDelimiter() !== null ? list.getMarkerDelimiter() : ".";
+      list.getMarkerDelimiter() !== "" ? list.getMarkerDelimiter() : ".";
     this.counter =
-      list.getMarkerStartNumber() !== null ? list.getMarkerStartNumber() : 1;
+      list.getMarkerStartNumber() !== -1 ? list.getMarkerStartNumber() : 1;
   }
 
-  public getDelimiter(): string | null {
+  public getDelimiter(): string {
     return this.delimiter;
   }
 
-  public getCounter(): int {
+  public getCounter(): number {
     return this.counter;
   }
 
-  public increaseCounter(): void {
+  public increaseCounter() {
     this.counter++;
   }
 }

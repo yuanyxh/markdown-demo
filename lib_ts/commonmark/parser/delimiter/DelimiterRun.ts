@@ -7,12 +7,12 @@ export interface DelimiterRun {
   /**
    * @return whether this can open a delimiter
    */
-  canOpen(): boolean;
+  getCanOpen(): boolean;
 
   /**
    * @return whether this can close a delimiter
    */
-  canClose(): boolean;
+  getCanClose(): boolean;
 
   /**
    * @return the number of characters in this delimiter run (that are left for processing)
@@ -23,7 +23,7 @@ export interface DelimiterRun {
    * @return the number of characters originally in this delimiter run; at the start of processing, this is the same
    * as {{@link #length()}}
    */
-  originalLength(): number;
+  getOriginalLength(): number;
 
   /**
    * @return the innermost opening delimiter, e.g. for {@code ***} this is the last {@code *}

@@ -1,46 +1,24 @@
+import { Appendable } from "../../common";
+
 class BlockContent {
-  private readonly sb: stringBuilder | null;
+  private readonly sb: Appendable;
 
-  private lineCount: int = 0;
+  private lineCount = 0;
 
-  public constructor();
-
-  public constructor(content: string | null);
-  public constructor(...args: unknown[]) {
-    switch (args.length) {
-      case 0: {
-        super();
-        this.sb = new stringBuilder();
-
-        break;
-      }
-
-      case 1: {
-        const [content] = args as [string];
-
-        super();
-        this.sb = new stringBuilder(content);
-
-        break;
-      }
-
-      default: {
-        throw new java.lang.IllegalArgumentException(
-          S`Invalid number of arguments`
-        );
-      }
-    }
+  public constructor(content: string = "") {
+    this.sb = new Appendable(content);
   }
 
-  public add(line: java.lang.CharSequence | null): void {
+  public add(line: string): void {
     if (this.lineCount !== 0) {
       this.sb.append("\n");
     }
+
     this.sb.append(line);
     this.lineCount++;
   }
 
-  public getString(): string | null {
+  public getString(): string {
     return this.sb.toString();
   }
 }

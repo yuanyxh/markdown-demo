@@ -10,14 +10,14 @@ abstract class BlockStart {
   }
 
   public static of(...blockParsers: BlockParser[]): BlockStart {
-    return new BlockStartImpl(blockParsers);
+    return new BlockStartImpl(...blockParsers);
   }
 
   public abstract atIndex(newIndex: number): BlockStart;
 
   public abstract atColumn(newColumn: number): BlockStart;
 
-  public abstract replaceActiveBlockParser(): BlockStart;
+  public abstract setReplaceActiveBlockParser(): BlockStart;
 }
 
 export default BlockStart;

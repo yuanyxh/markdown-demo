@@ -16,6 +16,12 @@ class Character {
     return this.map[type].test(char[0]);
   }
 
+  public static isISOControl(c: string) {
+    const codePoint = c.charCodeAt(0);
+
+    return codePoint <= 159 && (codePoint >= 127 || codePoint >>> 5 === 0);
+  }
+
   public static isLetter(char: string): boolean {
     return this.isUnicodeCharOfCategory(Character.UnicodeCategory.L, char);
   }

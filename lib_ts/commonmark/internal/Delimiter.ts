@@ -1,10 +1,13 @@
+import { Text } from "../node";
+import { DelimiterRun } from "../parser";
+
 /**
  * Delimiter (emphasis, strong emphasis or custom emphasis).
  */
 class Delimiter implements DelimiterRun {
-  public readonly characters: java.util.List<Text> | null;
-  public readonly delimiterChar: char;
-  private readonly originalLength: int;
+  public readonly characters: Text[];
+  public readonly delimiterChar: string;
+  private readonly originalLength: number;
 
   // Can open emphasis, see spec.
   private readonly canOpen: boolean;
@@ -12,70 +15,69 @@ class Delimiter implements DelimiterRun {
   // Can close emphasis, see spec.
   private readonly canClose: boolean;
 
-  public previous: Delimiter | null;
-  public next: Delimiter | null;
+  public previous: Delimiter | null = null;
+  public next: Delimiter | null = null;
 
   public constructor(
-    characters: java.util.List<Text> | null,
-    delimiterChar: char,
+    characters: Text[],
+    delimiterChar: string,
     canOpen: boolean,
     canClose: boolean,
     previous: Delimiter | null
   ) {
-    super();
     this.characters = characters;
     this.delimiterChar = delimiterChar;
     this.canOpen = canOpen;
     this.canClose = canClose;
     this.previous = previous;
-    this.originalLength = characters.size();
+    this.originalLength = characters.length;
   }
 
-  public canOpen(): boolean {
+  public getCanOpen(): boolean {
     return this.canOpen;
   }
 
-  public canClose(): boolean {
+  public getCanClose(): boolean {
     return this.canClose;
   }
 
-  public length(): int {
-    return this.characters.size();
+  public length(): number {
+    return this.characters.length;
   }
 
-  public originalLength(): int {
+  public getOriginalLength(): number {
     return this.originalLength;
   }
 
-  public getOpener(): Text | null {
-    return this.characters.get(this.characters.size() - 1);
+  public getOpener(): Text {
+    return this.characters[this.characters.length - 1];
   }
 
-  public getCloser(): Text | null {
-    return this.characters.get(0);
+  public getCloser(): Text {
+    return this.characters[0];
   }
 
-  public getOpeners(length: int): java.lang.Iterable<Text> | null {
-    if (!(length >= 1 && length <= length())) {
-      throw new java.lang.IllegalArgumentException(
-        "length must be between 1 and " + length() + ", was " + length
+  public getOpeners(length: number): Text[] {
+    if (!(length >= 1 && length <= this.length())) {
+      throw Error(
+        "length must be between 1 and " + this.length() + ", was " + length
       );
     }
 
-    return this.characters.subList(
-      this.characters.size() - length,
-      this.characters.size()
+    return this.characters.slice(
+      this.characters.length - length,
+      this.characters.length
     );
   }
 
-  public getClosers(length: int): java.lang.Iterable<Text> | null {
-    if (!(length >= 1 && length <= length())) {
-      throw new java.lang.IllegalArgumentException(
-        "length must be between 1 and " + length() + ", was " + length
+  public getClosers(length: number): Text[] {
+    if (!(length >= 1 && length <= this.length())) {
+      throw Error(
+        "length must be between 1 and " + this.length() + ", was " + length
       );
     }
 
-    return this.characters.subList(0, length);
+    return this.characters.slice(0, length);
   }
 }
 

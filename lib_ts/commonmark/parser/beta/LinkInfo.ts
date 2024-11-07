@@ -29,32 +29,32 @@ export interface LinkInfo {
    * The marker if present, or null. A marker is e.g. {@code !} for an image, or a custom marker as specified in
    * {@link org.commonmark.parser.Parser.Builder#linkMarker}.
    */
-  marker(): Text | null;
+  getMarker(): Text | null;
 
   /**
    * The text node of the opening bracket {@code [}.
    */
-  openingBracket(): Text;
+  getOpeningBracket(): Text;
 
   /**
    * The text between the first brackets, e.g. `foo` in `[foo][bar]`.
    */
-  text(): string;
+  getText(): string;
 
   /**
    * The label, or null for inline links or for shortcut links (in which case {@link #text()} should be used as the label).
    */
-  label(): string;
+  getLabel(): string;
 
   /**
    * The destination if available, e.g. in `[foo](destination)`, or null
    */
-  destination(): string;
+  getDestination(): string;
 
   /**
    * The title if available, e.g. in `[foo](destination "title")`, or null
    */
-  title(): string;
+  getTitle(): string;
 
   /**
    * The position after the closing text bracket, e.g.:
@@ -63,5 +63,5 @@ export interface LinkInfo {
    *      ^
    * </pre>
    */
-  afterTextBracket(): Position;
+  getAfterTextBracket(): Position;
 }

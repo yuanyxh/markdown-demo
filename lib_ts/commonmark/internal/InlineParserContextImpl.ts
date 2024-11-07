@@ -1,18 +1,27 @@
+import Character from "../../common/Character";
+import { LinkReferenceDefinition } from "../node";
+import {
+  DelimiterProcessor,
+  InlineContentParserFactory,
+  InlineParserContext,
+  LinkProcessor,
+} from "../parser";
+import Definitions from "./Definitions";
+
 class InlineParserContextImpl implements InlineParserContext {
-  private readonly inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null;
-  private readonly delimiterProcessors: java.util.List<DelimiterProcessor> | null;
-  private readonly linkProcessors: java.util.List<LinkProcessor> | null;
-  private readonly linkMarkers: java.util.Set<java.lang.Character> | null;
-  private readonly definitions: Definitions | null;
+  private readonly inlineContentParserFactories: InlineContentParserFactory[];
+  private readonly delimiterProcessors: DelimiterProcessor[];
+  private readonly linkProcessors: LinkProcessor[];
+  private readonly linkMarkers: Set<Character>;
+  private readonly definitions: Definitions;
 
   public constructor(
-    inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null,
-    delimiterProcessors: java.util.List<DelimiterProcessor> | null,
-    linkProcessors: java.util.List<LinkProcessor> | null,
-    linkMarkers: java.util.Set<java.lang.Character> | null,
-    definitions: Definitions | null
+    inlineContentParserFactories: InlineContentParserFactory[],
+    delimiterProcessors: DelimiterProcessor[],
+    linkProcessors: LinkProcessor[],
+    linkMarkers: Set<Character>,
+    definitions: Definitions
   ) {
-    super();
     this.inlineContentParserFactories = inlineContentParserFactories;
     this.delimiterProcessors = delimiterProcessors;
     this.linkProcessors = linkProcessors;
@@ -20,32 +29,32 @@ class InlineParserContextImpl implements InlineParserContext {
     this.definitions = definitions;
   }
 
-  public getCustomInlineContentParserFactories(): java.util.List<InlineContentParserFactory> | null {
+  public getCustomInlineContentParserFactories(): InlineContentParserFactory[] {
     return this.inlineContentParserFactories;
   }
 
-  public getCustomDelimiterProcessors(): java.util.List<DelimiterProcessor> | null {
+  public getCustomDelimiterProcessors(): DelimiterProcessor[] {
     return this.delimiterProcessors;
   }
 
-  public getCustomLinkProcessors(): java.util.List<LinkProcessor> | null {
+  public getCustomLinkProcessors(): LinkProcessor[] {
     return this.linkProcessors;
   }
 
-  public getCustomLinkMarkers(): java.util.Set<java.lang.Character> | null {
+  public getCustomLinkMarkers(): Set<Character> {
     return this.linkMarkers;
   }
 
   public getLinkReferenceDefinition(
-    label: string | null
+    label: string
   ): LinkReferenceDefinition | null {
-    return this.definitions.getDefinition(LinkReferenceDefinition.class, label);
+    return this.definitions.getDefinition(LinkReferenceDefinition, label);
   }
 
-  public getDefinition<D>(
-    type: java.lang.Class<D> | null,
-    label: string | null
-  ): D | null {
+  public getDefinition<D extends abstract new (...args: any) => any>(
+    type: D,
+    label: string
+  ): InstanceType<D> | null {
     return this.definitions.getDefinition(type, label);
   }
 }

@@ -1,20 +1,23 @@
+import { BlockContinue } from "../parser";
+
 class BlockContinueImpl extends BlockContinue {
-  private readonly newIndex: int;
-  private readonly newColumn: int;
+  private readonly newIndex: number;
+  private readonly newColumn: number;
   private readonly finalize: boolean;
 
-  public constructor(newIndex: int, newColumn: int, finalize: boolean) {
+  public constructor(newIndex: number, newColumn: number, finalize: boolean) {
     super();
+
     this.newIndex = newIndex;
     this.newColumn = newColumn;
     this.finalize = finalize;
   }
 
-  public getNewIndex(): int {
+  public getNewIndex(): number {
     return this.newIndex;
   }
 
-  public getNewColumn(): int {
+  public getNewColumn(): number {
     return this.newColumn;
   }
 

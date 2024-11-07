@@ -16,7 +16,7 @@ class BlockContinue {
     return new BlockContinueImpl(-1, newColumn, false);
   }
 
-  public static finished(): BlockContinue | null {
+  public static finished(): BlockContinue {
     return new BlockContinueImpl(-1, -1, true);
   }
 }

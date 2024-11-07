@@ -23,7 +23,7 @@ abstract class AbstractVisitor implements Visitor {
     while (node !== null) {
       // A subclass of this visitor might modify the node, resulting in getNext returning a different node or no
       // node after visiting it. So get the next node before visiting.
-      let next = node.getNext();
+      const next = node.getNext();
       node.accept(this);
       node = next;
     }

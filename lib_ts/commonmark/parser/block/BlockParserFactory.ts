@@ -11,5 +11,5 @@ export interface BlockParserFactory {
   tryStart(
     state: ParserState,
     matchedBlockParser: MatchedBlockParser
-  ): BlockStart;
+  ): BlockStart | null;
 }

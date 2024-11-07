@@ -2,6 +2,7 @@ export * from "./Delimited";
 export * from "./Visitor";
 export { default as Node } from "./Node";
 export { default as AbstractVisitor } from "./AbstractVisitor";
+export { default as Block } from "./Block";
 export { default as BlockQuote } from "./BlockQuote";
 export { default as BulletList } from "./BulletList";
 export { default as Code } from "./Code";
