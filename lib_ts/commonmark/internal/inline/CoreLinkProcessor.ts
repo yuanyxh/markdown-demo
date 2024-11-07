@@ -10,19 +10,19 @@ class CoreLinkProcessor implements LinkProcessor {
     linkInfo: LinkInfo,
     scanner: Scanner,
     context: InlineParserContext
-  ): LinkResult {
-    if (linkInfo.destination() !== "") {
+  ): LinkResult | null {
+    if (linkInfo.getDestination() !== "") {
       // Inline link
       return CoreLinkProcessor.process(
         linkInfo,
         scanner,
-        linkInfo.destination(),
-        linkInfo.title()
+        linkInfo.getDestination(),
+        linkInfo.getTitle()
       );
     }
 
-    const label = linkInfo.label();
-    const ref = label !== "" ? label : linkInfo.text();
+    const label = linkInfo.getLabel();
+    const ref = label !== "" ? label : linkInfo.getText();
     const def = context.getDefinition(LinkReferenceDefinition, ref);
 
     if (def !== null) {
@@ -44,13 +44,13 @@ class CoreLinkProcessor implements LinkProcessor {
     destination: string,
     title: string
   ): LinkResult {
-    const marker = linkInfo.marker();
+    const marker = linkInfo.getMarker();
 
     if (marker !== null && marker.getLiteral() === "!") {
       return LinkResult.wrapTextIn(
         new Image(destination, title),
         scanner.position()
-      ).includeMarker();
+      ).setIncludeMarker();
     }
     return LinkResult.wrapTextIn(
       new Link(destination, title),

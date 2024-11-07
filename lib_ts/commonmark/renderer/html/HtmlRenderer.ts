@@ -236,15 +236,15 @@ class RendererContext
     return this.context.softbreak;
   }
 
-  public render(node: Node | null) {
+  public render(node: Node) {
     this.nodeRendererMap.render(node);
   }
 
-  public beforeRoot(node: Node | null) {
+  public beforeRoot(node: Node) {
     this.nodeRendererMap.beforeRoot(node);
   }
 
-  public afterRoot(node: Node | null) {
+  public afterRoot(node: Node) {
     this.nodeRendererMap.afterRoot(node);
   }
 

@@ -24,8 +24,8 @@ class AutolinkInlineParser implements InlineContentParser {
   private static readonly EMAIL =
     /^([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)$/;
 
-  public tryParse(inlineParserState: InlineParserState): ParsedInline {
-    const scanner = inlineParserState.scanner();
+  public tryParse(inlineParserState: InlineParserState): ParsedInline | null {
+    const scanner = inlineParserState.getScanner();
     scanner.next();
 
     let textStart = scanner.position();

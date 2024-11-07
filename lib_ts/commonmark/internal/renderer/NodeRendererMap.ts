@@ -3,7 +3,7 @@ import { NodeRenderer } from "./../../renderer/NodeRenderer";
 
 class NodeRendererMap {
   private readonly nodeRenderers: NodeRenderer[] = [];
-  private readonly renderers = new Map<Node, NodeRenderer>();
+  private readonly renderers = new Map<typeof Node, NodeRenderer>();
 
   public add(nodeRenderer: NodeRenderer) {
     this.nodeRenderers.push(nodeRenderer);
@@ -17,7 +17,7 @@ class NodeRendererMap {
 
   public render(node: Node) {
     const nodeRenderer = this.renderers.get(
-      node.constructor as unknown as Node
+      node.constructor as unknown as typeof Node
     );
 
     if (nodeRenderer) {

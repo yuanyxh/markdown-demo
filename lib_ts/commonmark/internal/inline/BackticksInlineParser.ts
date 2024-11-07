@@ -20,7 +20,7 @@ class Factory implements InlineContentParserFactory {
  */
 class BackticksInlineParser implements InlineContentParser {
   public tryParse(inlineParserState: InlineParserState): ParsedInline {
-    const scanner = inlineParserState.scanner();
+    const scanner = inlineParserState.getScanner();
     const start = scanner.position();
     const openingTicks = scanner.matchMultiple("`");
     const afterOpening = scanner.position();

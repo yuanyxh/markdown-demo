@@ -1,4 +1,18 @@
+import {
+  Definitions,
+  DocumentParser,
+  InlineParserContextImpl,
+  InlineParserImpl,
+} from "../internal";
+import { Block, Node } from "../node";
 import { Extension } from "./../Extension";
+import { InlineContentParserFactory } from "./beta/InlineContentParserFactory";
+import { LinkProcessor } from "./beta/LinkProcessor";
+import { BlockParserFactory } from "./block/BlockParserFactory";
+import { DelimiterProcessor } from "./delimiter/DelimiterProcessor";
+import IncludeSourceSpans from "./IncludeSourceSpans";
+import { InlineParserFactory } from "./InlineParserFactory";
+import { PostProcessor } from "./PostProcessor";
 
 /**
  * Extension for {@link Parser}.
@@ -8,17 +22,17 @@ class ParserExtension implements Extension {
 }
 
 class Builder {
-  private readonly blockParserFactories: BlockParserFactory[] = [];
-  private readonly inlineContentParserFactories: InlineContentParserFactory[] =
+  public readonly blockParserFactories: BlockParserFactory[] = [];
+  public readonly inlineContentParserFactories: InlineContentParserFactory[] =
     [];
-  private readonly delimiterProcessors: DelimiterProcessor[] = [];
-  private readonly linkProcessors: LinkProcessor[] = [];
-  private readonly postProcessors: PostProcessor[] = [];
-  private readonly linkMarkers: Set<string> = new Set();
-  private enabledBlockTypes: Set<Block> =
+  public readonly delimiterProcessors: DelimiterProcessor[] = [];
+  public readonly linkProcessors: LinkProcessor[] = [];
+  public readonly postProcessors: PostProcessor[] = [];
+  public readonly linkMarkers: Set<string> = new Set();
+  public enabledBlockTypes: Set<typeof Block> =
     DocumentParser.getDefaultBlockParserTypes();
   private inlineParserFactory: InlineParserFactory;
-  private includeSourceSpans: IncludeSourceSpans = IncludeSourceSpans.NONE;
+  public includeSourceSpans = IncludeSourceSpans.NONE;
 
   /**
    * @return the configured {@link Parser}
@@ -67,7 +81,7 @@ class Builder {
    *                          If this list is empty, the parser will not recognize any CommonMark core features.
    * @return {@code this}
    */
-  public setEnabledBlockTypes(enabledBlockTypes: Set<Block>): Builder {
+  public setEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>): Builder {
     DocumentParser.checkEnabledBlockTypes(enabledBlockTypes);
     this.enabledBlockTypes = enabledBlockTypes;
     return this;
@@ -201,11 +215,13 @@ class Builder {
     return this;
   }
 
-  private getInlineParserFactory(): InlineParserFactory {
+  public getInlineParserFactory(): InlineParserFactory {
     if (this.inlineParserFactory) {
       return this.inlineParserFactory;
     }
 
+    // FIXME: type error
+    // @ts-ignore
     return new InlineParserImpl();
   }
 }
@@ -296,10 +312,18 @@ export class Parser {
    * @return the root node
    * @throws IOException when reading throws an exception
    */
-  public parseReader(input: File): Node {
-    let documentParser = this.createDocumentParser();
-    let document = documentParser.parse(input);
-    return this.postProcess(document);
+  public async parseReader(input: File): Promise<Node> {
+    return new Promise<Node>((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        let documentParser = this.createDocumentParser();
+        let document = documentParser.parse(reader.result as string);
+        resolve(this.postProcess(document));
+      };
+
+      reader.onerror = reject;
+    });
   }
 
   private createDocumentParser(): DocumentParser {

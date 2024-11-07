@@ -30,28 +30,6 @@ import {
   AbstractVisitor,
 } from "../../node";
 
-type VisitArgs =
-  | Document
-  | ThematicBreak
-  | IndentedCodeBlock
-  | FencedCodeBlock
-  | HtmlBlock
-  | Paragraph
-  | BlockQuote
-  | BulletList
-  | OrderedList
-  | ListItem
-  | Code
-  | Emphasis
-  | StrongEmphasis
-  | Link
-  | Image
-  | HtmlInline
-  | HardLineBreak
-  | SoftLineBreak
-  | Text
-  | Heading;
-
 class ListHolder {
   public readonly parent: ListHolder;
 
@@ -149,7 +127,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
   public beforeRoot(rootNode: Node) {}
   public afterRoot(rootNode: Node) {}
 
-  public getNodeTypes(): Set<Node> {
+  public getNodeTypes(): Set<typeof Node> {
     return new Set([
       BlockQuote,
       BulletList,
@@ -171,7 +149,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       StrongEmphasis,
       Text,
       ThematicBreak,
-    ]);
+    ] as unknown as (typeof Node)[]);
   }
 
   public render(node: Node) {
@@ -591,7 +569,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
         // So currently, when in doubt, we escape. For special characters only occurring at the beginning of a line,
         // we only escape them then (we wouldn't want to escape every `.` for example).
         let literal = text.getLiteral();
-        if (this.writer.isAtLineStart() && !literal.isEmpty()) {
+        if (this.writer.isAtLineStart() && literal) {
           const c = literal.charAt(0);
 
           switch (c) {
@@ -664,7 +642,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         if (literal.endsWith("!") && text.getNext() instanceof Link) {
           // If we wrote the `!` unescaped, it would turn the link into an image instead.
-          this.writer.text(literal.substring(0, literal.length() - 1), escape);
+          this.writer.text(literal.substring(0, literal.length - 1), escape);
           this.writer.raw("\\!");
         } else {
           this.writer.text(literal, escape);

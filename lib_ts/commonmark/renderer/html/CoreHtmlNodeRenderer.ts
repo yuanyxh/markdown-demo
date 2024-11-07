@@ -100,7 +100,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   public beforeRoot(rootNode: Node) {}
   public afterRoot(rootNode: Node) {}
 
-  public getNodeTypes(): Set<Node> {
+  public getNodeTypes(): Set<typeof Node> {
     return new Set([
       Document,
       Heading,
@@ -122,7 +122,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       HtmlInline,
       SoftLineBreak,
       HardLineBreak,
-    ]);
+    ] as unknown as (typeof Node)[]);
   }
 
   public render(node: Node) {
@@ -207,7 +207,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const attributes = new Map<string, string>();
         const info = fencedCodeBlock.getInfo();
 
-        if (info !== null && !info.isEmpty()) {
+        if (info !== null && info) {
           const space = info.indexOf(" ");
           let language: string;
 

@@ -1,4 +1,4 @@
-import { HardLineBreak } from "../../node";
+import { HardLineBreak, Text } from "../../node";
 import { InlineContentParserFactory } from "../../parser/beta/InlineContentParserFactory";
 import { InlineParserState } from "../../parser/beta/InlineParserState";
 import ParsedInline from "../../parser/beta/ParsedInline";
@@ -23,7 +23,7 @@ class BackslashInlineParser implements InlineContentParser {
   private static readonly ESCAPABLE = new RegExp("^" + Escaping.ESCAPABLE);
 
   public tryParse(inlineParserState: InlineParserState): ParsedInline {
-    const scanner = inlineParserState.scanner();
+    const scanner = inlineParserState.getScanner();
     // Backslash
     scanner.next();
 

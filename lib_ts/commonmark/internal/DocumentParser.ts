@@ -72,7 +72,7 @@ class OpenBlockParser {
 }
 
 class DocumentParser implements ParserState {
-  private static readonly CORE_FACTORY_TYPES = new Set<Block>([
+  private static readonly CORE_FACTORY_TYPES = new Set<typeof Block>([
     BlockQuote,
     Heading,
     FencedCodeBlock,
@@ -80,7 +80,7 @@ class DocumentParser implements ParserState {
     ThematicBreak,
     ListBlock,
     IndentedCodeBlock,
-  ] as unknown as Block[]);
+  ] as unknown as (typeof Block)[]);
 
   private static readonly NODES_TO_CORE_FACTORIES = new Map<
     typeof Block,
@@ -156,7 +156,7 @@ class DocumentParser implements ParserState {
     this.activateBlockParser(new OpenBlockParser(this.documentBlockParser, 0));
   }
 
-  public static getDefaultBlockParserTypes(): Set<Block> {
+  public static getDefaultBlockParserTypes(): Set<typeof Block> {
     return DocumentParser.CORE_FACTORY_TYPES;
   }
 

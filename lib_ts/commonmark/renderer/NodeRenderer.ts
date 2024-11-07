@@ -7,7 +7,7 @@ export interface NodeRenderer {
   /**
    * @return the types of nodes that this renderer handles
    */
-  getNodeTypes(): Set<Node>;
+  getNodeTypes(): Set<typeof Node>;
 
   /**
    * Render the specified node.

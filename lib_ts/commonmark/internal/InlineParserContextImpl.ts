@@ -12,14 +12,14 @@ class InlineParserContextImpl implements InlineParserContext {
   private readonly inlineContentParserFactories: InlineContentParserFactory[];
   private readonly delimiterProcessors: DelimiterProcessor[];
   private readonly linkProcessors: LinkProcessor[];
-  private readonly linkMarkers: Set<Character>;
+  private readonly linkMarkers: Set<string>;
   private readonly definitions: Definitions;
 
   public constructor(
     inlineContentParserFactories: InlineContentParserFactory[],
     delimiterProcessors: DelimiterProcessor[],
     linkProcessors: LinkProcessor[],
-    linkMarkers: Set<Character>,
+    linkMarkers: Set<string>,
     definitions: Definitions
   ) {
     this.inlineContentParserFactories = inlineContentParserFactories;
@@ -41,7 +41,7 @@ class InlineParserContextImpl implements InlineParserContext {
     return this.linkProcessors;
   }
 
-  public getCustomLinkMarkers(): Set<Character> {
+  public getCustomLinkMarkers(): Set<string> {
     return this.linkMarkers;
   }
 

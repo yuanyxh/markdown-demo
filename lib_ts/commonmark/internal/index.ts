@@ -36,6 +36,5 @@ export { default as ListHolder } from "./renderer/text/ListHolder";
 export { default as OrderedListHolder } from "./renderer/text/OrderedListHolder";
 export { default as Escaping } from "./util/Escaping";
 export { default as Html5Entities } from "./util/Html5Entities";
-export { default as LineReader } from "./util/LineReader";
 export { default as LinkScanner } from "./util/LinkScanner";
 export { default as Parsing } from "./util/Parsing";

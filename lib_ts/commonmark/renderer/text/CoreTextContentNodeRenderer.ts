@@ -7,7 +7,7 @@ import {
   ListHolder,
   OrderedListHolder,
   BulletListHolder,
-} from "../../renderer";
+} from "../../internal";
 
 import {
   Node,
@@ -76,7 +76,7 @@ class CoreTextContentNodeRenderer
   public beforeRoot(rootNode: Node): void {}
   public afterRoot(rootNode: Node): void {}
 
-  public getNodeTypes(): Set<Node> {
+  public getNodeTypes(): Set<typeof Node> {
     return new Set([
       Document,
       Heading,
@@ -98,7 +98,7 @@ class CoreTextContentNodeRenderer
       HtmlInline,
       SoftLineBreak,
       HardLineBreak,
-    ]);
+    ] as unknown as (typeof Node)[]);
   }
 
   public render(node: Node) {
@@ -123,7 +123,7 @@ class CoreTextContentNodeRenderer
 
       case node instanceof BulletList:
         this.textContent.pushTight(node.isTight());
-        this.listHolder = new BulletListHolder(this.listHolder, node);
+        this.listHolder = new BulletListHolder(this.listHolder!, node);
         this.visitChildren(node);
         this.textContent.popTight();
         this.textContent.block();
@@ -253,7 +253,7 @@ class CoreTextContentNodeRenderer
 
       case node instanceof OrderedList:
         this.textContent.pushTight(node.isTight());
-        this.listHolder = new OrderedListHolder(this.listHolder, node);
+        this.listHolder = new OrderedListHolder(this.listHolder!, node);
         this.visitChildren(node);
         this.textContent.popTight();
         this.textContent.block();

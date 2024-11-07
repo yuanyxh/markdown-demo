@@ -1,4 +1,5 @@
 import { Appendable } from "../../common";
+import { SourceSpan } from "../node";
 import SourceLine from "./SourceLine";
 
 /**

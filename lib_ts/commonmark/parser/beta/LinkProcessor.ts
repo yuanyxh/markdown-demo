@@ -40,5 +40,5 @@ export interface LinkProcessor {
     linkInfo: LinkInfo,
     scanner: Scanner,
     context: InlineParserContext
-  ): LinkResult;
+  ): LinkResult | null;
 }

@@ -17,5 +17,5 @@ export interface InlineContentParser {
    * @param inlineParserState the current state of the inline parser
    * @return the result of parsing; can indicate that this parser is not interested, or that parsing was successful
    */
-  tryParse(inlineParserState: InlineParserState): ParsedInline;
+  tryParse(inlineParserState: InlineParserState): ParsedInline | null;
 }

@@ -37,8 +37,8 @@ class EntityInlineParser implements InlineContentParser {
     .range("0", "9")
     .build();
 
-  public tryParse(inlineParserState: InlineParserState): ParsedInline {
-    const scanner = inlineParserState.scanner();
+  public tryParse(inlineParserState: InlineParserState): ParsedInline | null {
+    const scanner = inlineParserState.getScanner();
     const start = scanner.position();
     // Skip `&`
     scanner.next();

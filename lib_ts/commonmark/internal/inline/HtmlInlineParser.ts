@@ -63,8 +63,8 @@ class HtmlInlineParser implements InlineContentParser {
     .c("`")
     .build();
 
-  public tryParse(inlineParserState: InlineParserState): ParsedInline {
-    const scanner = inlineParserState.scanner();
+  public tryParse(inlineParserState: InlineParserState): ParsedInline | null {
+    const scanner = inlineParserState.getScanner();
     const start: Position = scanner.position();
     // Skip over `<`
     scanner.next();
