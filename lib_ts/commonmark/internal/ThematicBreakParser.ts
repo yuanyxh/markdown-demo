@@ -1,14 +1,14 @@
 import { Block, ThematicBreak } from "../node";
 import {
   AbstractBlockParser,
-  AbstractBlockParserFactory,
-  BlockContinue,
+  BlockParserFactory,
   BlockStart,
   MatchedBlockParser,
   ParserState,
 } from "../parser";
+import { BlockContinue } from "./BlockContinueImpl";
 
-class Factory extends AbstractBlockParserFactory {
+class Factory implements BlockParserFactory {
   public tryStart(
     state: ParserState,
     matchedBlockParser: MatchedBlockParser

@@ -34,7 +34,7 @@ class LinkReferenceDefinitionParser {
 
   private label: Appendable | null = null;
   private destination: string | null = null;
-  private titleDelimiter: string;
+  private titleDelimiter: string | null = null;
   private title: Appendable | null = null;
   private referenceValid = false;
 
@@ -244,7 +244,7 @@ class LinkReferenceDefinitionParser {
 
   private setTitle(scanner: Scanner): boolean {
     const start = scanner.position();
-    if (!LinkScanner.scanLinkTitleContent(scanner, this.titleDelimiter)) {
+    if (!LinkScanner.scanLinkTitleContent(scanner, this.titleDelimiter!)) {
       // Invalid title, stop. Title collected so far must not be used.
       this.title = null;
 

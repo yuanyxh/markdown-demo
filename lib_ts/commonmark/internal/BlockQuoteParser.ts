@@ -2,16 +2,16 @@ import { BlockQuote } from "../node";
 import Block from "../node/Block";
 import {
   AbstractBlockParser,
-  AbstractBlockParserFactory,
-  BlockContinue,
+  BlockParserFactory,
   BlockStart,
   MatchedBlockParser,
   ParserState,
 } from "../parser";
 import { Characters } from "../text";
+import { BlockContinue } from "./BlockContinueImpl";
 import Parsing from "./util/Parsing";
 
-class Factory extends AbstractBlockParserFactory {
+class Factory implements BlockParserFactory {
   public tryStart(
     state: ParserState,
     matchedBlockParser: MatchedBlockParser

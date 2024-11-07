@@ -7,7 +7,7 @@ import { SourceSpan } from "../node";
  */
 class SourceLine {
   private readonly content: string;
-  private readonly sourceSpan: SourceSpan | null;
+  private readonly sourceSpan: SourceSpan | null = null;
 
   public static of(content: string, sourceSpan: SourceSpan | null): SourceLine {
     return new SourceLine(content, sourceSpan);
@@ -29,7 +29,7 @@ class SourceLine {
   public substring(beginIndex: number, endIndex: number): SourceLine {
     const newContent = this.content.substring(beginIndex, endIndex);
 
-    let newSourceSpan!: SourceSpan;
+    let newSourceSpan: SourceSpan | null = null;
     if (this.sourceSpan !== null) {
       const length = endIndex - beginIndex;
 

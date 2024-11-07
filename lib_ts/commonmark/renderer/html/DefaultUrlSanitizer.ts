@@ -1,4 +1,3 @@
-import fromCodePoint from "../../../common/string-code-point";
 import { UrlSanitizer } from "./UrlSanitizer";
 
 /**

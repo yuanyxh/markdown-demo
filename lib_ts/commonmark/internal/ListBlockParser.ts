@@ -1,16 +1,16 @@
 import { Block, BulletList, ListBlock, ListItem, OrderedList } from "../node";
 import {
   AbstractBlockParser,
-  AbstractBlockParserFactory,
-  BlockContinue,
+  BlockParserFactory,
   BlockStart,
   MatchedBlockParser,
   ParserState,
 } from "../parser";
+import { BlockContinue } from "./BlockContinueImpl";
 import ListItemParser from "./ListItemParser";
 import Parsing from "./util/Parsing";
 
-class Factory extends AbstractBlockParserFactory {
+class Factory implements BlockParserFactory {
   public tryStart(
     state: ParserState,
     matchedBlockParser: MatchedBlockParser
@@ -86,8 +86,8 @@ class ListMarkerData {
 class ListBlockParser extends AbstractBlockParser {
   private readonly block: ListBlock;
 
-  private hadBlankLine: boolean;
-  private linesAfterBlank: number;
+  private hadBlankLine: boolean = false;
+  private linesAfterBlank: number = -1;
 
   public constructor(block: ListBlock) {
     super();

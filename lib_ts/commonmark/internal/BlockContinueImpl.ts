@@ -1,6 +1,25 @@
-import { BlockContinue } from "../parser";
+/**
+ * Result object for continuing parsing of a block, see static methods for constructors.
+ */
+export class BlockContinue {
+  public static none(): BlockContinue | null {
+    return null;
+  }
 
-class BlockContinueImpl extends BlockContinue {
+  public static atIndex(newIndex: number): BlockContinue {
+    return new BlockContinueImpl(newIndex, -1, false);
+  }
+
+  public static atColumn(newColumn: number): BlockContinue {
+    return new BlockContinueImpl(-1, newColumn, false);
+  }
+
+  public static finished(): BlockContinue {
+    return new BlockContinueImpl(-1, -1, true);
+  }
+}
+
+export class BlockContinueImpl extends BlockContinue {
   private readonly newIndex: number;
   private readonly newColumn: number;
   private readonly finalize: boolean;
@@ -25,5 +44,3 @@ class BlockContinueImpl extends BlockContinue {
     return this.finalize;
   }
 }
-
-export default BlockContinueImpl;

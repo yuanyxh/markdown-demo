@@ -1,5 +1,6 @@
 import { Block, ListBlock, ListItem, Paragraph } from "../node";
-import { AbstractBlockParser, BlockContinue, ParserState } from "../parser";
+import { AbstractBlockParser, ParserState } from "../parser";
+import { BlockContinue } from "./BlockContinueImpl";
 
 class ListItemParser extends AbstractBlockParser {
   private readonly block = new ListItem();
@@ -10,7 +11,7 @@ class ListItemParser extends AbstractBlockParser {
    */
   private contentIndent: number;
 
-  private hadBlankLine: boolean;
+  private hadBlankLine: boolean = false;
 
   public constructor(markerIndent: number, contentIndent: number) {
     super();

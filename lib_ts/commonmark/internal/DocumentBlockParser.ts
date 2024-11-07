@@ -1,10 +1,6 @@
 import { Block, Document } from "../node";
-import {
-  AbstractBlockParser,
-  BlockContinue,
-  ParserState,
-  SourceLine,
-} from "../parser";
+import { AbstractBlockParser, ParserState, SourceLine } from "../parser";
+import { BlockContinue } from "./BlockContinueImpl";
 
 class DocumentBlockParser extends AbstractBlockParser {
   private readonly document = new Document();

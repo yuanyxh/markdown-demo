@@ -1,16 +1,16 @@
 import { Block, HtmlBlock, Paragraph } from "../node";
 import {
   AbstractBlockParser,
-  AbstractBlockParserFactory,
-  BlockContinue,
+  BlockParserFactory,
   BlockStart,
   MatchedBlockParser,
   ParserState,
   SourceLine,
 } from "../parser";
 import BlockContent from "./BlockContent";
+import { BlockContinue } from "./BlockContinueImpl";
 
-class Factory extends AbstractBlockParserFactory {
+class Factory implements BlockParserFactory {
   public tryStart(
     state: ParserState,
     matchedBlockParser: MatchedBlockParser

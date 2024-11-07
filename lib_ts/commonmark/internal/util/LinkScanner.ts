@@ -1,4 +1,4 @@
-import Character from "../../../common/Character";
+import { Character } from "../../../common";
 import { Scanner } from "../../parser";
 
 class LinkScanner {

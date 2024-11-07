@@ -1,4 +1,4 @@
-import { Extension } from "./../../Extension";
+import { Extension } from "../../Extension";
 import { TextContentNodeRendererFactory } from "./TextContentNodeRendererFactory";
 import { Renderer } from "../Renderer";
 import LineBreakRendering from "./LineBreakRendering";

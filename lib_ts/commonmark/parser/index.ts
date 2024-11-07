@@ -15,8 +15,6 @@ export * from "./block/BlockParserFactory";
 export * from "./block/MatchedBlockParser";
 export * from "./block/ParserState";
 export { default as AbstractBlockParser } from "./block/AbstractBlockParser";
-export { default as AbstractBlockParserFactory } from "./block/AbstractBlockParserFactory";
-export { default as BlockContinue } from "./block/BlockContinue";
 export { default as BlockStart } from "./block/BlockStart";
 
 export * from "./beta/InlineContentParser";

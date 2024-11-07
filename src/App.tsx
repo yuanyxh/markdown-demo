@@ -4,6 +4,9 @@ import "./styles/App.less";
 import { useRef } from "react";
 
 import { readFileAsText } from "./utils";
+import { Parser } from "../lib_ts/commonmark";
+
+const parser = Parser.builder().build();
 
 const App: React.FC = () => {
   const triggerRef = useRef<HTMLInputElement>(null);
@@ -19,7 +22,9 @@ const App: React.FC = () => {
       return void 0;
     }
 
-    readFileAsText(file).then((text) => {});
+    readFileAsText(file).then((text) => {
+      console.log(parser.parse(text));
+    });
   };
 
   return (

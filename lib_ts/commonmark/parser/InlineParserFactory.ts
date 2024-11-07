@@ -1,3 +1,6 @@
+import { InlineParser } from "./InlineParser";
+import { InlineParserContext } from "./InlineParserContext";
+
 /**
  * Factory for custom inline parser.
  */

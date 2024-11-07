@@ -4,6 +4,8 @@
   "version": "0.31.2",
   "scripts": {
     "dev": "vite --mode dev",
+    "build": "vite build --mode prod",
+    "preview": "vite preview --outDir dist",
     "java2ts": "java2ts java2ts.config.json",
     "lint": "eslint ."
   },

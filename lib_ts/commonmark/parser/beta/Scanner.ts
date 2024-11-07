@@ -257,7 +257,7 @@ class Scanner {
       // Shortcut for common case of text from a single line
       const line: SourceLine = this.lines[begin.lineIndex];
       const newContent = line.getContent().substring(begin.index, end.index);
-      let newSourceSpan!: SourceSpan;
+      let newSourceSpan: SourceSpan | null = null;
       const sourceSpan = line.getSourceSpan();
 
       if (sourceSpan !== null) {
@@ -280,6 +280,7 @@ class Scanner {
 
       let lastLine: SourceLine = this.lines[end.lineIndex];
       sourceLines.addLine(lastLine.substring(0, end.index));
+
       return sourceLines;
     }
   }

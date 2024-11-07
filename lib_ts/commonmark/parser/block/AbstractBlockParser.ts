@@ -1,8 +1,8 @@
-import { BlockParser } from "./BlockParser";
-import { Block, DefinitionMap, SourceSpan } from "../../node";
-import SourceLine from "../SourceLine";
-import BlockContinue from "./BlockContinue";
-import { InlineParser } from "../InlineParser";
+import type { BlockParser } from "./BlockParser";
+import type { Block, DefinitionMap, SourceSpan } from "../../node";
+import type SourceLine from "../SourceLine";
+import type { InlineParser } from "../InlineParser";
+import type { BlockContinue } from "../../internal";
 
 abstract class AbstractBlockParser implements BlockParser {
   getBlock(): Block {
@@ -25,9 +25,9 @@ abstract class AbstractBlockParser implements BlockParser {
     return false;
   }
 
-  public addLine(line: SourceLine): void {}
+  public addLine(line: SourceLine) {}
 
-  public addSourceSpan(sourceSpan: SourceSpan): void {
+  public addSourceSpan(sourceSpan: SourceSpan) {
     this.getBlock().addSourceSpan(sourceSpan);
   }
 
@@ -35,7 +35,7 @@ abstract class AbstractBlockParser implements BlockParser {
     return [];
   }
 
-  public closeBlock(): void {}
+  public closeBlock() {}
 
   public parseInlines(inlineParser: InlineParser) {}
 }

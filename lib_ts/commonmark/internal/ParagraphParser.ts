@@ -7,12 +7,12 @@ import {
 } from "../node";
 import {
   AbstractBlockParser,
-  BlockContinue,
   InlineParser,
   ParserState,
   SourceLine,
   SourceLines,
 } from "../parser";
+import { BlockContinue } from "./BlockContinueImpl";
 import LinkReferenceDefinitionParser from "./LinkReferenceDefinitionParser";
 
 class ParagraphParser extends AbstractBlockParser {

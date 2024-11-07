@@ -1,13 +1,13 @@
-import { Extension } from "./../../Extension";
+import { Extension } from "../../Extension";
 import { HtmlNodeRendererContext } from "./HtmlNodeRendererContext";
 import { AttributeProviderFactory } from "./AttributeProviderFactory";
-import { Renderer } from "./../Renderer";
+import { Renderer } from "../Renderer";
 import { UrlSanitizer } from "./UrlSanitizer";
 import { HtmlNodeRendererFactory } from "./HtmlNodeRendererFactory";
 import { NodeRenderer } from "../NodeRenderer";
 import CoreHtmlNodeRenderer from "./CoreHtmlNodeRenderer";
 import HtmlWriter from "./HtmlWriter";
-import Appendable from "../../../common/Appendable";
+import { Appendable } from "../../../common";
 import { Node } from "../../node";
 import DefaultUrlSanitizer from "./DefaultUrlSanitizer";
 import { AttributeProviderContext } from "./AttributeProviderContext";

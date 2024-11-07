@@ -2,17 +2,17 @@ import Appendable from "../../common/Appendable";
 import { Block, IndentedCodeBlock, Paragraph } from "../node";
 import {
   AbstractBlockParser,
-  AbstractBlockParserFactory,
-  BlockContinue,
+  BlockParserFactory,
   BlockStart,
   MatchedBlockParser,
   ParserState,
   SourceLine,
 } from "../parser";
 import { Characters } from "../text";
+import { BlockContinue } from "./BlockContinueImpl";
 import Parsing from "./util/Parsing";
 
-class Factory extends AbstractBlockParserFactory {
+class Factory implements BlockParserFactory {
   public tryStart(
     state: ParserState,
     matchedBlockParser: MatchedBlockParser

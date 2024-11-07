@@ -1,7 +1,5 @@
 import { NodeRenderer } from "../NodeRenderer";
-
 import { AsciiMatcher, Characters, CharMatcher } from "../../text";
-
 import MarkdownWriter from "./MarkdownWriter";
 import { MarkdownNodeRendererContext } from "./MarkdownNodeRendererContext";
 

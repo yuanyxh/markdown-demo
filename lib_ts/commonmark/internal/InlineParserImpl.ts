@@ -1,6 +1,5 @@
 import Appendable from "../../common/Appendable";
 import BitSet from "../../common/BitSet";
-import Character from "../../common/Character";
 import { HardLineBreak, Node, SoftLineBreak, SourceSpans, Text } from "../node";
 import {
   DelimiterProcessor,
@@ -8,6 +7,7 @@ import {
   InlineContentParserFactory,
   InlineParser,
   InlineParserContext,
+  InlineParserFactory,
   InlineParserState,
   LinkInfo,
   LinkProcessor,
@@ -110,7 +110,9 @@ class LinkInfoImpl implements LinkInfo {
   }
 }
 
-class InlineParserImpl implements InlineParser, InlineParserState {
+class InlineParserImpl
+  implements InlineParser, InlineParserState, InlineParserFactory
+{
   private readonly context: InlineParserContext;
   private readonly inlineContentParserFactories: InlineContentParserFactory[];
   private readonly delimiterProcessors: Map<string, DelimiterProcessor>;
@@ -119,9 +121,9 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   private readonly linkMarkers: BitSet;
 
   private inlineParsers: Map<string, InlineContentParser[]> | null = null;
-  private scanner: Scanner;
-  private includeSourceSpans: boolean;
-  private trailingSpaces: number;
+  private scanner: Scanner | null = null;
+  private includeSourceSpans = false;
+  private trailingSpaces = -1;
 
   /**
    * Top delimiter (emphasis, strong emphasis or custom emphasis). (Brackets are on a separate stack, different
@@ -310,7 +312,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   }
 
   public getScanner(): Scanner {
-    return this.scanner;
+    return this.scanner!;
   }
 
   /**
@@ -356,7 +358,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * On failure, return null.
    */
   private parseInline(): Node[] | null {
-    const c = this.scanner.peek();
+    const c = this.scanner!.peek();
 
     switch (c) {
       case "[":
@@ -372,7 +374,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     }
 
     if (this.linkMarkers.get(c.charCodeAt(0))) {
-      let markerPosition = this.scanner.position();
+      let markerPosition = this.scanner!.position();
       let nodes = this.parseLinkMarker();
 
       if (nodes !== null) {
@@ -380,7 +382,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       }
 
       // Reset and try other things (e.g. inline parsers below)
-      this.scanner.setPosition(markerPosition);
+      this.scanner!.setPosition(markerPosition);
     }
 
     // No inline parser, delimiter or other special handling.
@@ -390,26 +392,27 @@ class InlineParserImpl implements InlineParser, InlineParserState {
 
     const inlineParsers = this.inlineParsers!.get(c);
     if (inlineParsers) {
-      const position = this.scanner.position();
+      const position = this.scanner!.position();
 
       for (const inlineParser of inlineParsers) {
         const parsedInline = inlineParser.tryParse(this);
 
         if (parsedInline instanceof ParsedInlineImpl) {
           const node = parsedInline.getNode();
-          this.scanner.setPosition(parsedInline.getPosition());
+          this.scanner!.setPosition(parsedInline.getPosition());
           if (this.includeSourceSpans && node.getSourceSpans().length === 0) {
             node.setSourceSpans(
-              this.scanner
-                .getSource(position, this.scanner.position())
-                .getSourceSpans()
+              this.scanner!.getSource(
+                position,
+                this.scanner!.position()
+              ).getSourceSpans()
             );
           }
 
           return [node];
         } else {
           // Reset position
-          this.scanner.setPosition(position);
+          this.scanner!.setPosition(position);
         }
       }
     }
@@ -462,11 +465,11 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * Add open bracket to delimiter stack and add a text node to block's children.
    */
   private parseOpenBracket(): Node | null {
-    let start: Position = this.scanner.position();
-    this.scanner.next();
-    let contentPosition: Position = this.scanner.position();
+    let start: Position = this.scanner!.position();
+    this.scanner!.next();
+    let contentPosition: Position = this.scanner!.position();
 
-    let node: Text = this.text(this.scanner.getSource(start, contentPosition));
+    let node: Text = this.text(this.scanner!.getSource(start, contentPosition));
 
     // Add entry to stack for this opener
     this.addBracket(
@@ -487,16 +490,16 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * Otherwise, return null.
    */
   private parseLinkMarker(): Node[] | null {
-    const markerPosition = this.scanner.position();
-    this.scanner.next();
-    const bracketPosition = this.scanner.position();
-    if (this.scanner.next("[")) {
-      const contentPosition = this.scanner.position();
+    const markerPosition = this.scanner!.position();
+    this.scanner!.next();
+    const bracketPosition = this.scanner!.position();
+    if (this.scanner!.next("[")) {
+      const contentPosition = this.scanner!.position();
       const bangNode = this.text(
-        this.scanner.getSource(markerPosition, bracketPosition)
+        this.scanner!.getSource(markerPosition, bracketPosition)
       );
       const bracketNode = this.text(
-        this.scanner.getSource(bracketPosition, contentPosition)
+        this.scanner!.getSource(bracketPosition, contentPosition)
       );
 
       // Add entry to stack for this opener
@@ -522,21 +525,21 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * plain [ character. If there is a matching delimiter, remove it from the delimiter stack.
    */
   private parseCloseBracket(): Node {
-    const beforeClose = this.scanner.position();
-    this.scanner.next();
-    const afterClose: Position = this.scanner.position();
+    const beforeClose = this.scanner!.position();
+    this.scanner!.next();
+    const afterClose: Position = this.scanner!.position();
 
     // Get previous `[` or `![`
     const opener = this.lastBracket;
     if (opener === null) {
       // No matching opener, just return a literal.
-      return this.text(this.scanner.getSource(beforeClose, afterClose));
+      return this.text(this.scanner!.getSource(beforeClose, afterClose));
     }
 
     if (!opener.allowed) {
       // Matching opener, but it's not allowed, just return a literal.
       this.removeLastBracket();
-      return this.text(this.scanner.getSource(beforeClose, afterClose));
+      return this.text(this.scanner!.getSource(beforeClose, afterClose));
     }
 
     let linkOrImage = this.parseLinkOrImage(opener, beforeClose);
@@ -544,11 +547,11 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       return linkOrImage;
     }
 
-    this.scanner.setPosition(afterClose);
+    this.scanner!.setPosition(afterClose);
 
     // Nothing parsed, just parse the bracket as text and continue
     this.removeLastBracket();
-    return this.text(this.scanner.getSource(beforeClose, afterClose));
+    return this.text(this.scanner!.getSource(beforeClose, afterClose));
   }
 
   private parseLinkOrImage(
@@ -559,17 +562,17 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     if (linkInfo === null) {
       return null;
     }
-    const processorStartPosition = this.scanner.position();
+    const processorStartPosition = this.scanner!.position();
 
     for (const linkProcessor of this.linkProcessors) {
       const linkResult = linkProcessor.process(
         linkInfo,
-        this.scanner,
+        this.scanner!,
         this.context
       );
       if (!(linkResult instanceof LinkResultImpl)) {
         // Reset position in case the processor used the scanner, and it didn't work out.
-        this.scanner.setPosition(processorStartPosition);
+        this.scanner!.setPosition(processorStartPosition);
         continue;
       }
 
@@ -580,10 +583,10 @@ class InlineParserImpl implements InlineParser, InlineParserState {
 
       switch (result.getType()) {
         case LinkResultImpl.Type.WRAP:
-          this.scanner.setPosition(position);
+          this.scanner!.setPosition(position);
           return this.wrapBracket(opener, node, includeMarker);
         case LinkResultImpl.Type.REPLACE:
-          this.scanner.setPosition(position);
+          this.scanner!.setPosition(position);
           return this.replaceBracket(opener, node, includeMarker);
 
         default:
@@ -604,16 +607,17 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     //   - Collapsed: `[foo][]`    (foo is both the text and label)
     //   - Shortcut:  `[foo]`      (foo is both the text and label)
 
-    const text: string = this.scanner
-      .getSource(opener.contentPosition!, beforeClose)
-      .getContent();
+    const text: string = this.scanner!.getSource(
+      opener.contentPosition!,
+      beforeClose
+    ).getContent();
 
     // Starting position is after the closing `]`
-    const afterClose = this.scanner.position();
+    const afterClose = this.scanner!.position();
 
     // Maybe an inline link/image
     const destinationTitle = InlineParserImpl.parseInlineDestinationTitle(
-      this.scanner
+      this.scanner!
     );
 
     if (destinationTitle !== null) {
@@ -628,17 +632,17 @@ class InlineParserImpl implements InlineParser, InlineParserState {
       );
     }
     // Not an inline link/image, rewind back to after `]`.
-    this.scanner.setPosition(afterClose);
+    this.scanner!.setPosition(afterClose);
 
     // Maybe a reference link/image like `[foo][bar]`, `[foo][]` or `[foo]`.
     // Note that even `[foo](` could be a valid link if foo is a reference, which is why we try this even if the `(`
     // failed to be parsed as an inline link/image before.
 
     // See if there's a link label like `[bar]` or `[]`
-    const label = InlineParserImpl.parseLinkLabel(this.scanner);
+    const label = InlineParserImpl.parseLinkLabel(this.scanner!);
     if (label === null) {
       // No label, rewind back
-      this.scanner.setPosition(afterClose);
+      this.scanner!.setPosition(afterClose);
     }
     const textIsReference = label === null || label === "";
     if (opener.bracketAfter && textIsReference && opener.markerNode === null) {
@@ -677,9 +681,10 @@ class InlineParserImpl implements InlineParser, InlineParserState {
           ? opener.markerPosition
           : opener.bracketPosition;
       wrapperNode.setSourceSpans(
-        this.scanner
-          .getSource(startPosition!, this.scanner.position())
-          .getSourceSpans()
+        this.scanner!.getSource(
+          startPosition!,
+          this.scanner!.position()
+        ).getSourceSpans()
       );
     }
 
@@ -729,9 +734,10 @@ class InlineParserImpl implements InlineParser, InlineParserState {
           ? opener.markerPosition
           : opener.bracketPosition;
       node.setSourceSpans(
-        this.scanner
-          .getSource(startPosition!, this.scanner.position())
-          .getSourceSpans()
+        this.scanner!.getSource(
+          startPosition!,
+          this.scanner!.position()
+        ).getSourceSpans()
       );
     }
 
@@ -863,7 +869,7 @@ class InlineParserImpl implements InlineParser, InlineParserState {
   }
 
   private parseLineBreak(): Node {
-    this.scanner.next();
+    this.scanner!.next();
 
     if (this.trailingSpaces >= 2) {
       return new HardLineBreak();
@@ -876,21 +882,21 @@ class InlineParserImpl implements InlineParser, InlineParserState {
    * Parse the next character as plain text, and possibly more if the following characters are non-special.
    */
   private parseText(): Node | null {
-    let start: Position = this.scanner.position();
-    this.scanner.next();
+    let start: Position = this.scanner!.position();
+    this.scanner!.next();
     let c: string;
 
     while (true) {
-      c = this.scanner.peek();
+      c = this.scanner!.peek();
 
       if (c === Scanner.END || this.specialCharacters.get(c.charCodeAt(0))) {
         break;
       }
 
-      this.scanner.next();
+      this.scanner!.next();
     }
 
-    const source = this.scanner.getSource(start, this.scanner.position());
+    const source = this.scanner!.getSource(start, this.scanner!.position());
     let content = source.getContent();
 
     if (c === "\n") {
@@ -921,32 +927,32 @@ class InlineParserImpl implements InlineParser, InlineParserState {
     delimiterProcessor: DelimiterProcessor,
     delimiterChar: string
   ): DelimiterData | null {
-    const before = this.scanner.peekPreviousCodePoint();
-    const start: Position = this.scanner.position();
+    const before = this.scanner!.peekPreviousCodePoint();
+    const start: Position = this.scanner!.position();
 
     // Quick check to see if we have enough delimiters.
-    const delimiterCount = this.scanner.matchMultiple(delimiterChar);
+    const delimiterCount = this.scanner!.matchMultiple(delimiterChar);
     if (delimiterCount < delimiterProcessor.getMinLength()) {
-      this.scanner.setPosition(start);
+      this.scanner!.setPosition(start);
       return null;
     }
 
     // We do have enough, extract a text node for each delimiter character.
     const delimiters: Text[] = [];
-    this.scanner.setPosition(start);
+    this.scanner!.setPosition(start);
     let positionBefore: Position = start;
 
-    while (this.scanner.next(delimiterChar)) {
+    while (this.scanner!.next(delimiterChar)) {
       delimiters.push(
         this.text(
-          this.scanner.getSource(positionBefore, this.scanner.position())
+          this.scanner!.getSource(positionBefore, this.scanner!.position())
         )
       );
 
-      positionBefore = this.scanner.position();
+      positionBefore = this.scanner!.position();
     }
 
-    const after = this.scanner.peekCodePoint();
+    const after = this.scanner!.peekCodePoint();
 
     // We could be more lazy here, in most cases we don't need to do every match case.
     const beforeIsPunctuation =
@@ -1208,6 +1214,10 @@ class InlineParserImpl implements InlineParser, InlineParserState {
         first.setSourceSpans(sourceSpans.getSourceSpans());
       }
     }
+  }
+
+  public create(inlineParserContext: InlineParserContext): InlineParser {
+    return new InlineParserImpl(inlineParserContext);
   }
 
   public static DelimiterData = DelimiterData;

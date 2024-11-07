@@ -26,7 +26,7 @@ import {
   SourceLines,
 } from "../parser";
 import { Characters } from "../text";
-import BlockContinueImpl from "./BlockContinueImpl";
+import { BlockContinueImpl } from "./BlockContinueImpl";
 import BlockQuoteParser from "./BlockQuoteParser";
 import BlockStartImpl from "./BlockStartImpl";
 import Definitions from "./Definitions";
@@ -95,7 +95,7 @@ class DocumentParser implements ParserState {
     [IndentedCodeBlock, new IndentedCodeBlockParser.Factory()],
   ]);
 
-  private line: SourceLine;
+  private line: SourceLine | null = null;
 
   /**
    * Line index (0-based)
@@ -115,12 +115,12 @@ class DocumentParser implements ParserState {
   /**
    * if the current column is within a tab character (partially consumed tab)
    */
-  private columnIsInTab: boolean;
+  private columnIsInTab: boolean = false;
 
   private nextNonSpace = 0;
   private nextNonSpaceColumn = 0;
   private indent = 0;
-  private blank: boolean;
+  private blank: boolean = false;
 
   private readonly blockParserFactories: BlockParserFactory[];
   private readonly inlineParserFactory: InlineParserFactory;
@@ -216,7 +216,7 @@ class DocumentParser implements ParserState {
   }
 
   public getLine(): SourceLine {
-    return this.line;
+    return this.line!;
   }
 
   public getIndex(): number {
@@ -301,7 +301,7 @@ class DocumentParser implements ParserState {
       if (
         this.isBlank() ||
         (this.indent < Parsing.CODE_BLOCK_INDENT &&
-          Characters.isLetter(this.line.getContent(), this.nextNonSpace))
+          Characters.isLetter(this.line!.getContent(), this.nextNonSpace))
       ) {
         this.setNewIndex(this.nextNonSpace);
         break;
@@ -414,10 +414,10 @@ class DocumentParser implements ParserState {
     let cols = this.column;
 
     this.blank = true;
-    let length = this.line.getContent().length;
+    let length = this.line!.getContent().length;
 
     while (i < length) {
-      const c = this.line.getContent().charAt(i);
+      const c = this.line!.getContent().charAt(i);
 
       switch (c) {
         case " ":
@@ -447,7 +447,7 @@ class DocumentParser implements ParserState {
       this.index = this.nextNonSpace;
       this.column = this.nextNonSpaceColumn;
     }
-    let length = this.line.getContent().length;
+    let length = this.line!.getContent().length;
 
     while (this.index < newIndex && this.index !== length) {
       this.advance();
@@ -464,7 +464,7 @@ class DocumentParser implements ParserState {
       this.column = this.nextNonSpaceColumn;
     }
 
-    let length = this.line.getContent().length;
+    let length = this.line!.getContent().length;
 
     while (this.column < newColumn && this.index !== length) {
       this.advance();
@@ -481,7 +481,7 @@ class DocumentParser implements ParserState {
   }
 
   private advance() {
-    const c = this.line.getContent().charAt(this.index);
+    const c = this.line!.getContent().charAt(this.index);
     this.index++;
     if (c === "\t") {
       this.column += Parsing.columnsToNextTabStop(this.column);
@@ -500,9 +500,10 @@ class DocumentParser implements ParserState {
     if (this.columnIsInTab) {
       // Our column is in a partially consumed tab. Expand the remaining columns (to the next tab stop) to spaces.
       const afterTab = this.index + 1;
-      const rest = this.line
-        .getContent()
-        .substring(afterTab, this.line.getContent().length);
+      const rest = this.line!.getContent().substring(
+        afterTab,
+        this.line!.getContent().length
+      );
       const spaces = Parsing.columnsToNextTabStop(this.column);
       const sb = new Appendable();
 
@@ -513,20 +514,21 @@ class DocumentParser implements ParserState {
       sb.append(rest);
       content = sb.toString();
     } else if (this.index === 0) {
-      content = this.line.getContent();
+      content = this.line!.getContent();
     } else {
-      content = this.line
-        .getContent()
-        .substring(this.index, this.line.getContent().length);
+      content = this.line!.getContent().substring(
+        this.index,
+        this.line!.getContent().length
+      );
     }
 
-    let sourceSpan!: SourceSpan;
+    let sourceSpan: SourceSpan | null = null;
     if (
       this.includeSourceSpans === IncludeSourceSpans.BLOCKS_AND_INLINES &&
-      this.index < this.line.getSourceSpan()!.getLength()
+      this.index < this.line!.getSourceSpan()!.getLength()
     ) {
       // Note that if we're in a partially-consumed tab the length of the source span and the content don't match.
-      sourceSpan = this.line.getSourceSpan()!.subSpan(this.index);
+      sourceSpan = this.line!.getSourceSpan()!.subSpan(this.index);
     }
 
     this.getActiveBlockParser().addLine(SourceLine.of(content, sourceSpan));
@@ -541,11 +543,11 @@ class DocumentParser implements ParserState {
         // In case of a lazy continuation line, the index is less than where the block parser would expect the
         // contents to start, so let's use whichever is smaller.
         const blockIndex = Math.min(openBlockParser.sourceIndex, this.index);
-        const length = this.line.getContent().length - blockIndex;
+        const length = this.line!.getContent().length - blockIndex;
 
         if (length !== 0) {
           openBlockParser.blockParser.addSourceSpan(
-            this.line.getSourceSpan()!.subSpan(blockIndex)
+            this.line!.getSourceSpan()!.subSpan(blockIndex)
           );
         }
       }

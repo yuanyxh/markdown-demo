@@ -1,5 +1,5 @@
 import { Node } from "../../node";
-import { NodeRenderer } from "./../../renderer/NodeRenderer";
+import { NodeRenderer } from "./../../renderer";
 
 class NodeRendererMap {
   private readonly nodeRenderers: NodeRenderer[] = [];

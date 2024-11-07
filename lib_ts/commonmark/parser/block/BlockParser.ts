@@ -1,7 +1,7 @@
 import { Block, DefinitionMap, SourceSpan } from "../../node";
 import { InlineParser } from "../InlineParser";
 import SourceLine from "../SourceLine";
-import BlockContinue from "./BlockContinue";
+import { BlockContinue } from "../../internal";
 import { ParserState } from "./ParserState";
 
 /**

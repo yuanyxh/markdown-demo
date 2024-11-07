@@ -7,7 +7,7 @@ import Node from "./Node";
  * @since 0.16.0
  */
 class SourceSpans {
-  private sourceSpans: SourceSpan[];
+  private sourceSpans: SourceSpan[] | null = null;
 
   public static empty(): SourceSpans {
     return new SourceSpans();

@@ -2,7 +2,7 @@ import Block from "./Block";
 import { Visitor } from "./Visitor";
 
 class FencedCodeBlock extends Block {
-  private fenceCharacter: string;
+  private fenceCharacter = "";
   private openingFenceLength = -1;
   private closingFenceLength = -1;
   private fenceIndent = -1;

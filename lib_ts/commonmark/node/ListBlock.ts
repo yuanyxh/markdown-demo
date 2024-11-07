@@ -1,7 +1,7 @@
 import Block from "./Block";
 
 abstract class ListBlock extends Block {
-  private tight: boolean;
+  private tight = true;
 
   /**
    * @return whether this list is tight or loose
@@ -11,7 +11,7 @@ abstract class ListBlock extends Block {
     return this.tight;
   }
 
-  public setTight(tight: boolean): void {
+  public setTight(tight: boolean) {
     this.tight = tight;
   }
 }

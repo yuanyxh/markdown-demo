@@ -1,5 +1,5 @@
 export { default as BlockContent } from "./BlockContent";
-export { default as BlockContinueImpl } from "./BlockContinueImpl";
+export * from "./BlockContinueImpl";
 export { default as BlockQuoteParser } from "./BlockQuoteParser";
 export { default as BlockStartImpl } from "./BlockStartImpl";
 export { default as Bracket } from "./Bracket";

@@ -1,10 +1,10 @@
-import { Extension } from "./../../Extension";
+import { Extension } from "../../Extension";
 import { MarkdownNodeRendererContext } from "./MarkdownNodeRendererContext";
 import { Renderer } from "../Renderer";
 import CoreMarkdownNodeRenderer from "./CoreMarkdownNodeRenderer";
 import { MarkdownNodeRendererFactory } from "./MarkdownNodeRendererFactory";
 import { NodeRenderer } from "../NodeRenderer";
-import Appendable from "../../../common/Appendable";
+import { Appendable } from "../../../common";
 import MarkdownWriter from "./MarkdownWriter";
 import { Node } from "../../node";
 import { NodeRendererMap } from "../../internal";

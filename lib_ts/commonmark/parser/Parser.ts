@@ -31,7 +31,7 @@ class Builder {
   public readonly linkMarkers: Set<string> = new Set();
   public enabledBlockTypes: Set<typeof Block> =
     DocumentParser.getDefaultBlockParserTypes();
-  private inlineParserFactory: InlineParserFactory;
+  private inlineParserFactory: InlineParserFactory | null = null;
   public includeSourceSpans = IncludeSourceSpans.NONE;
 
   /**
@@ -221,8 +221,7 @@ class Builder {
     }
 
     // FIXME: type error
-    // @ts-ignore
-    return new InlineParserImpl();
+    return null as unknown as InlineParserFactory;
   }
 }
 
@@ -251,7 +250,7 @@ export class Parser {
       builder.enabledBlockTypes
     );
 
-    this.inlineParserFactory = builder.getInlineParserFactory();
+    // this.inlineParserFactory = builder.getInlineParserFactory();
     this.postProcessors = builder.postProcessors;
     this.inlineContentParserFactories = builder.inlineContentParserFactories;
     this.delimiterProcessors = builder.delimiterProcessors;
@@ -268,7 +267,8 @@ export class Parser {
       this.linkMarkers,
       new Definitions()
     );
-    this.inlineParserFactory.create(context);
+
+    this.inlineParserFactory = new InlineParserImpl(context);
   }
 
   /**
