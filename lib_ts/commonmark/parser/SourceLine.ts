@@ -7,7 +7,7 @@ import { SourceSpan } from "../node";
  */
 class SourceLine {
   private readonly content: string;
-  private readonly sourceSpan: SourceSpan | null = null;
+  private readonly sourceSpan: SourceSpan | null;
 
   public static of(content: string, sourceSpan: SourceSpan | null): SourceLine {
     return new SourceLine(content, sourceSpan);

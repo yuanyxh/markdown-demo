@@ -1,91 +1,149 @@
-class DocumentParser implements ParserState {
-  private static readonly CORE_FACTORY_TYPES: java.util.Set<
-    java.lang.Class<Block>
-  > | null = new java.util.LinkedHashSet(
-    java.util.List.of(
-      BlockQuote.class,
-      Heading.class,
-      FencedCodeBlock.class,
-      HtmlBlock.class,
-      ThematicBreak.class,
-      ListBlock.class,
-      IndentedCodeBlock.class
-    )
-  );
+import Appendable from "../../common/Appendable";
+import {
+  Block,
+  BlockQuote,
+  Document,
+  FencedCodeBlock,
+  Heading,
+  HtmlBlock,
+  IndentedCodeBlock,
+  ListBlock,
+  Paragraph,
+  SourceSpan,
+  ThematicBreak,
+} from "../node";
+import {
+  BlockParser,
+  BlockParserFactory,
+  DelimiterProcessor,
+  IncludeSourceSpans,
+  InlineContentParserFactory,
+  InlineParserFactory,
+  LinkProcessor,
+  MatchedBlockParser,
+  ParserState,
+  SourceLine,
+  SourceLines,
+} from "../parser";
+import { Characters } from "../text";
+import BlockContinueImpl from "./BlockContinueImpl";
+import BlockQuoteParser from "./BlockQuoteParser";
+import BlockStartImpl from "./BlockStartImpl";
+import Definitions from "./Definitions";
+import DocumentBlockParser from "./DocumentBlockParser";
+import FencedCodeBlockParser from "./FencedCodeBlockParser";
+import HeadingParser from "./HeadingParser";
+import HtmlBlockParser from "./HtmlBlockParser";
+import IndentedCodeBlockParser from "./IndentedCodeBlockParser";
+import InlineParserContextImpl from "./InlineParserContextImpl";
+import ListBlockParser from "./ListBlockParser";
+import ParagraphParser from "./ParagraphParser";
+import ThematicBreakParser from "./ThematicBreakParser";
+import Parsing from "./util/Parsing";
 
-  private static readonly NODES_TO_CORE_FACTORIES: java.util.Map<
-    java.lang.Class<Block>,
-    BlockParserFactory
-  > | null;
+class MatchedBlockParserImpl implements MatchedBlockParser {
+  private readonly matchedBlockParser: BlockParser;
 
-  static {
-    let map: java.util.Map<
-      java.lang.Class<Block>,
-      BlockParserFactory
-    > = new java.util.HashMap();
-    map.put(BlockQuote.class, new BlockQuoteParser.Factory());
-    map.put(Heading.class, new HeadingParser.Factory());
-    map.put(FencedCodeBlock.class, new FencedCodeBlockParser.Factory());
-    map.put(HtmlBlock.class, new HtmlBlockParser.Factory());
-    map.put(ThematicBreak.class, new ThematicBreakParser.Factory());
-    map.put(ListBlock.class, new ListBlockParser.Factory());
-    map.put(IndentedCodeBlock.class, new IndentedCodeBlockParser.Factory());
-    DocumentParser.NODES_TO_CORE_FACTORIES =
-      java.util.Collections.unmodifiableMap(map);
+  public constructor(matchedBlockParser: BlockParser) {
+    this.matchedBlockParser = matchedBlockParser;
   }
 
-  private line: SourceLine | null;
+  public getMatchedBlockParser(): BlockParser {
+    return this.matchedBlockParser;
+  }
+
+  public getParagraphLines(): SourceLines {
+    if (this.matchedBlockParser instanceof ParagraphParser) {
+      return this.matchedBlockParser.getParagraphLines();
+    }
+
+    return SourceLines.empty();
+  }
+}
+
+class OpenBlockParser {
+  public readonly blockParser: BlockParser;
+  public sourceIndex: number;
+
+  public constructor(blockParser: BlockParser, sourceIndex: number) {
+    this.blockParser = blockParser;
+    this.sourceIndex = sourceIndex;
+  }
+}
+
+class DocumentParser implements ParserState {
+  private static readonly CORE_FACTORY_TYPES = new Set<Block>([
+    BlockQuote,
+    Heading,
+    FencedCodeBlock,
+    HtmlBlock,
+    ThematicBreak,
+    ListBlock,
+    IndentedCodeBlock,
+  ] as unknown as Block[]);
+
+  private static readonly NODES_TO_CORE_FACTORIES = new Map<
+    typeof Block,
+    BlockParserFactory
+  >([
+    [BlockQuote, new BlockQuoteParser.Factory()],
+    [Heading, new HeadingParser.Factory()],
+    [FencedCodeBlock, new FencedCodeBlockParser.Factory()],
+    [HtmlBlock, new HtmlBlockParser.Factory()],
+    [ThematicBreak, new ThematicBreakParser.Factory()],
+    [ListBlock, new ListBlockParser.Factory()],
+    [IndentedCodeBlock, new IndentedCodeBlockParser.Factory()],
+  ]);
+
+  private line: SourceLine;
 
   /**
    * Line index (0-based)
    */
-  private lineIndex: int = -1;
+  private lineIndex = -1;
 
   /**
    * current index (offset) in input line (0-based)
    */
-  private index: int = 0;
+  private index = 0;
 
   /**
    * current column of input line (tab causes column to go to next 4-space tab stop) (0-based)
    */
-  private column: int = 0;
+  private column = 0;
 
   /**
    * if the current column is within a tab character (partially consumed tab)
    */
   private columnIsInTab: boolean;
 
-  private nextNonSpace: int = 0;
-  private nextNonSpaceColumn: int = 0;
-  private indent: int = 0;
+  private nextNonSpace = 0;
+  private nextNonSpaceColumn = 0;
+  private indent = 0;
   private blank: boolean;
 
-  private readonly blockParserFactories: java.util.List<BlockParserFactory> | null;
-  private readonly inlineParserFactory: InlineParserFactory | null;
-  private readonly inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null;
-  private readonly delimiterProcessors: java.util.List<DelimiterProcessor> | null;
-  private readonly linkProcessors: java.util.List<LinkProcessor> | null;
-  private readonly linkMarkers: java.util.Set<java.lang.Character> | null;
-  private readonly includeSourceSpans: IncludeSourceSpans | null;
-  private readonly documentBlockParser: DocumentBlockParser | null;
-  private readonly definitions: Definitions | null = new Definitions();
+  private readonly blockParserFactories: BlockParserFactory[];
+  private readonly inlineParserFactory: InlineParserFactory;
+  private readonly inlineContentParserFactories: InlineContentParserFactory[];
+  private readonly delimiterProcessors: DelimiterProcessor[];
+  private readonly linkProcessors: LinkProcessor[];
+  private readonly linkMarkers: Set<string>;
+  private readonly includeSourceSpans: IncludeSourceSpans;
+  private readonly documentBlockParser: DocumentBlockParser;
+  private readonly definitions = new Definitions();
 
-  private readonly openBlockParsers: java.util.List<DocumentParser.OpenBlockParser> | null =
-    new java.util.ArrayList();
-  private readonly allBlockParsers: java.util.List<BlockParser> | null =
-    new java.util.ArrayList();
+  private readonly openBlockParsers: OpenBlockParser[] = [];
+  private readonly allBlockParsers: BlockParser[] = [];
 
   public constructor(
-    blockParserFactories: java.util.List<BlockParserFactory> | null,
-    inlineParserFactory: InlineParserFactory | null,
-    inlineContentParserFactories: java.util.List<InlineContentParserFactory> | null,
-    delimiterProcessors: java.util.List<DelimiterProcessor> | null,
-    linkProcessors: java.util.List<LinkProcessor> | null,
-    linkMarkers: java.util.Set<java.lang.Character> | null,
-    includeSourceSpans: IncludeSourceSpans | null
+    blockParserFactories: BlockParserFactory[],
+    inlineParserFactory: InlineParserFactory,
+    inlineContentParserFactories: InlineContentParserFactory[],
+    delimiterProcessors: DelimiterProcessor[],
+    linkProcessors: LinkProcessor[],
+    linkMarkers: Set<string>,
+    includeSourceSpans: IncludeSourceSpans
   ) {
-    super();
     this.blockParserFactories = blockParserFactories;
     this.inlineParserFactory = inlineParserFactory;
     this.inlineContentParserFactories = inlineContentParserFactories;
@@ -95,42 +153,35 @@ class DocumentParser implements ParserState {
     this.includeSourceSpans = includeSourceSpans;
 
     this.documentBlockParser = new DocumentBlockParser();
-    this.activateBlockParser(
-      new DocumentParser.OpenBlockParser(this.documentBlockParser, 0)
-    );
+    this.activateBlockParser(new OpenBlockParser(this.documentBlockParser, 0));
   }
 
-  public static getDefaultBlockParserTypes(): java.util.Set<
-    java.lang.Class<Block>
-  > | null {
+  public static getDefaultBlockParserTypes(): Set<Block> {
     return DocumentParser.CORE_FACTORY_TYPES;
   }
 
   public static calculateBlockParserFactories(
-    customBlockParserFactories: java.util.List<BlockParserFactory> | null,
-    enabledBlockTypes: java.util.Set<java.lang.Class<Block>> | null
-  ): java.util.List<BlockParserFactory> | null {
-    let list: java.util.List<BlockParserFactory> = new java.util.ArrayList();
+    customBlockParserFactories: BlockParserFactory[],
+    enabledBlockTypes: Set<typeof Block>
+  ): BlockParserFactory[] {
+    const list: BlockParserFactory[] = [];
     // By having the custom factories come first, extensions are able to change behavior of core syntax.
-    list.addAll(customBlockParserFactories);
+    list.push(...customBlockParserFactories);
     for (let blockType of enabledBlockTypes) {
-      list.add(DocumentParser.NODES_TO_CORE_FACTORIES.get(blockType));
+      list.push(DocumentParser.NODES_TO_CORE_FACTORIES.get(blockType)!);
     }
+
     return list;
   }
 
-  public static checkEnabledBlockTypes(
-    enabledBlockTypes: java.util.Set<java.lang.Class<Block>> | null
-  ): void {
-    for (let enabledBlockType of enabledBlockTypes) {
-      if (
-        !DocumentParser.NODES_TO_CORE_FACTORIES.containsKey(enabledBlockType)
-      ) {
-        throw new java.lang.IllegalArgumentException(
+  public static checkEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>) {
+    for (const enabledBlockType of enabledBlockTypes) {
+      if (!DocumentParser.NODES_TO_CORE_FACTORIES.has(enabledBlockType)) {
+        throw new Error(
           "Can't enable block type " +
             enabledBlockType +
             ", possible options are: " +
-            DocumentParser.NODES_TO_CORE_FACTORIES.keySet()
+            DocumentParser.NODES_TO_CORE_FACTORIES.keys()
         );
       }
     }
@@ -139,89 +190,48 @@ class DocumentParser implements ParserState {
   /**
    * The main parsing function. Returns a parsed document AST.
    */
-  public parse(input: string | null): Document | null;
-
-  public parse(input: java.io.Reader | null): Document | null;
-  public parse(...args: unknown[]): Document | null {
-    switch (args.length) {
-      case 1: {
-        const [input] = args as [string];
-
-        let lineStart: int = 0;
-        let lineBreak: int;
-        while (
-          (lineBreak = Characters.findLineBreak(input, lineStart)) !== -1
-        ) {
-          let line: string = input.substring(lineStart, lineBreak);
-          this.parseLine(line, lineStart);
-          if (
-            lineBreak + 1 < input.length() &&
-            input.charAt(lineBreak) === "\r" &&
-            input.charAt(lineBreak + 1) === "\n"
-          ) {
-            lineStart = lineBreak + 2;
-          } else {
-            lineStart = lineBreak + 1;
-          }
-        }
-        if (
-          !input.isEmpty() &&
-          (lineStart === 0 || lineStart < input.length())
-        ) {
-          let line: string = input.substring(lineStart);
-          this.parseLine(line, lineStart);
-        }
-
-        return this.finalizeAndProcess();
-
-        break;
-      }
-
-      case 1: {
-        const [input] = args as [java.io.Reader];
-
-        let lineReader = new LineReader(input);
-        let inputIndex: int = 0;
-        let line: string;
-        while ((line = lineReader.readLine()) !== null) {
-          this.parseLine(line, inputIndex);
-          inputIndex += line.length();
-          let eol = lineReader.getLineTerminator();
-          if (eol !== null) {
-            inputIndex += eol.length();
-          }
-        }
-
-        return this.finalizeAndProcess();
-
-        break;
-      }
-
-      default: {
-        throw new java.lang.IllegalArgumentException(
-          S`Invalid number of arguments`
-        );
+  public parse(input: string): Document {
+    let lineStart = 0;
+    let lineBreak: number;
+    while ((lineBreak = Characters.findLineBreak(input, lineStart)) !== -1) {
+      let line: string = input.substring(lineStart, lineBreak);
+      this.parseLine(line, lineStart);
+      if (
+        lineBreak + 1 < input.length &&
+        input.charAt(lineBreak) === "\r" &&
+        input.charAt(lineBreak + 1) === "\n"
+      ) {
+        lineStart = lineBreak + 2;
+      } else {
+        lineStart = lineBreak + 1;
       }
     }
+
+    if (input !== "" && (lineStart === 0 || lineStart < input.length)) {
+      let line: string = input.substring(lineStart);
+      this.parseLine(line, lineStart);
+    }
+
+    return this.finalizeAndProcess();
   }
 
-  public getLine(): SourceLine | null {
+  public getLine(): SourceLine {
     return this.line;
   }
 
-  public getIndex(): int {
+  public getIndex(): number {
     return this.index;
   }
 
-  public getNextNonSpaceIndex(): int {
+  public getNextNonSpaceIndex(): number {
     return this.nextNonSpace;
   }
 
-  public getColumn(): int {
+  public getColumn(): number {
     return this.column;
   }
 
-  public getIndent(): int {
+  public getIndent(): number {
     return this.indent;
   }
 
@@ -229,34 +239,33 @@ class DocumentParser implements ParserState {
     return this.blank;
   }
 
-  public getActiveBlockParser(): BlockParser | null {
-    return this.openBlockParsers.get(this.openBlockParsers.size() - 1)
-      .blockParser;
+  public getActiveBlockParser(): BlockParser {
+    return this.openBlockParsers[this.openBlockParsers.length - 1].blockParser;
   }
 
   /**
    * Analyze a line of text and update the document appropriately. We parse markdown text by calling this on each
    * line of input, then finalizing the document.
    */
-  private parseLine(ln: string | null, inputIndex: int): void {
+  private parseLine(ln: string, inputIndex: number) {
     this.setLine(ln, inputIndex);
 
     // For each containing block, try to parse the associated line start.
     // The document will always match, so we can skip the first block parser and start at 1 matches
-    let matches: int = 1;
-    for (let i: int = 1; i < this.openBlockParsers.size(); i++) {
-      let openBlockParser: DocumentParser.OpenBlockParser =
-        this.openBlockParsers.get(i);
-      let blockParser: BlockParser = openBlockParser.blockParser;
+    let matches = 1;
+    for (let i = 1; i < this.openBlockParsers.length; i++) {
+      const openBlockParser = this.openBlockParsers[i];
+      const blockParser: BlockParser = openBlockParser.blockParser;
       this.findNextNonSpace();
 
-      let result: BlockContinue = blockParser.tryContinue(this);
+      const result = blockParser.tryContinue(this);
       if (result instanceof BlockContinueImpl) {
-        let blockContinue: BlockContinueImpl = result as BlockContinueImpl;
+        const blockContinue = result;
         openBlockParser.sourceIndex = this.getIndex();
         if (blockContinue.isFinalize()) {
           this.addSourceSpans();
-          this.closeBlockParsers(this.openBlockParsers.size() - i);
+          this.closeBlockParsers(this.openBlockParsers.length - i);
+
           return;
         } else {
           if (blockContinue.getNewIndex() !== -1) {
@@ -264,6 +273,7 @@ class DocumentParser implements ParserState {
           } else if (blockContinue.getNewColumn() !== -1) {
             this.setNewColumn(blockContinue.getNewColumn());
           }
+
           matches++;
         }
       } else {
@@ -271,18 +281,18 @@ class DocumentParser implements ParserState {
       }
     }
 
-    let unmatchedBlocks: int = this.openBlockParsers.size() - matches;
-    let blockParser: BlockParser = this.openBlockParsers.get(
-      matches - 1
-    ).blockParser;
+    let unmatchedBlocks = this.openBlockParsers.length - matches;
+    let blockParser: BlockParser =
+      this.openBlockParsers[matches - 1].blockParser;
     let startedNewBlock: boolean = false;
 
-    let lastIndex: int = this.index;
+    let lastIndex = this.index;
 
     // Unless last matched container is a code block, try new container starts,
     // adding children to the last matched container:
     let tryBlockStarts: boolean =
       blockParser.getBlock() instanceof Paragraph || blockParser.isContainer();
+
     while (tryBlockStarts) {
       lastIndex = this.index;
       this.findNextNonSpace();
@@ -297,14 +307,14 @@ class DocumentParser implements ParserState {
         break;
       }
 
-      let blockStart: BlockStartImpl = this.findBlockStart(blockParser);
+      const blockStart = this.findBlockStart(blockParser);
       if (blockStart === null) {
         this.setNewIndex(this.nextNonSpace);
         break;
       }
 
       startedNewBlock = true;
-      let sourceIndex: int = this.getIndex();
+      const sourceIndex = this.getIndex();
 
       // We're starting a new block. If we have any previous blocks that need to be closed, we need to do it now.
       if (unmatchedBlocks > 0) {
@@ -318,10 +328,9 @@ class DocumentParser implements ParserState {
         this.setNewColumn(blockStart.getNewColumn());
       }
 
-      let replacedSourceSpans: java.util.List<SourceSpan> = null;
+      let replacedSourceSpans: SourceSpan[] | null = null;
       if (blockStart.isReplaceActiveBlockParser()) {
-        let replacedBlock: Block =
-          this.prepareActiveBlockParserForReplacement();
+        const replacedBlock = this.prepareActiveBlockParserForReplacement();
         replacedSourceSpans = replacedBlock.getSourceSpans();
       }
 
@@ -329,9 +338,11 @@ class DocumentParser implements ParserState {
         this.addChild(
           new DocumentParser.OpenBlockParser(newBlockParser, sourceIndex)
         );
+
         if (replacedSourceSpans !== null) {
           newBlockParser.getBlock().setSourceSpans(replacedSourceSpans);
         }
+
         blockParser = newBlockParser;
         tryBlockStarts = newBlockParser.isContainer();
       }
@@ -346,7 +357,7 @@ class DocumentParser implements ParserState {
       !this.isBlank() &&
       this.getActiveBlockParser().canHaveLazyContinuationLines()
     ) {
-      this.openBlockParsers.get(this.openBlockParsers.size() - 1).sourceIndex =
+      this.openBlockParsers[this.openBlockParsers.length - 1].sourceIndex =
         lastIndex;
       // lazy paragraph continuation
       this.addLine();
@@ -378,33 +389,36 @@ class DocumentParser implements ParserState {
     }
   }
 
-  private setLine(ln: string | null, inputIndex: int): void {
+  private setLine(ln: string, inputIndex: number) {
     this.lineIndex++;
     this.index = 0;
     this.column = 0;
     this.columnIsInTab = false;
 
-    let lineContent: string = DocumentParser.prepareLine(ln);
-    let sourceSpan: SourceSpan = null;
+    let lineContent = DocumentParser.prepareLine(ln);
+    let sourceSpan: SourceSpan | null = null;
     if (this.includeSourceSpans !== IncludeSourceSpans.NONE) {
       sourceSpan = SourceSpan.of(
         this.lineIndex,
         0,
         inputIndex,
-        lineContent.length()
+        lineContent.length
       );
     }
+
     this.line = SourceLine.of(lineContent, sourceSpan);
   }
 
-  private findNextNonSpace(): void {
-    let i: int = this.index;
-    let cols: int = this.column;
+  private findNextNonSpace() {
+    let i = this.index;
+    let cols = this.column;
 
     this.blank = true;
-    let length: int = this.line.getContent().length();
+    let length = this.line.getContent().length;
+
     while (i < length) {
-      let c: char = this.line.getContent().charAt(i);
+      const c = this.line.getContent().charAt(i);
+
       switch (c) {
         case " ":
           i++;
@@ -417,6 +431,7 @@ class DocumentParser implements ParserState {
 
         default:
       }
+
       this.blank = false;
       break;
     }
@@ -426,30 +441,35 @@ class DocumentParser implements ParserState {
     this.indent = this.nextNonSpaceColumn - this.column;
   }
 
-  private setNewIndex(newIndex: int): void {
+  private setNewIndex(newIndex: number): void {
     if (newIndex >= this.nextNonSpace) {
       // We can start from here, no need to calculate tab stops again
       this.index = this.nextNonSpace;
       this.column = this.nextNonSpaceColumn;
     }
-    let length: int = this.line.getContent().length();
+    let length = this.line.getContent().length;
+
     while (this.index < newIndex && this.index !== length) {
       this.advance();
     }
+
     // If we're going to an index as opposed to a column, we're never within a tab
     this.columnIsInTab = false;
   }
 
-  private setNewColumn(newColumn: int): void {
+  private setNewColumn(newColumn: number): void {
     if (newColumn >= this.nextNonSpaceColumn) {
       // We can start from here, no need to calculate tab stops again
       this.index = this.nextNonSpace;
       this.column = this.nextNonSpaceColumn;
     }
-    let length: int = this.line.getContent().length();
+
+    let length = this.line.getContent().length;
+
     while (this.column < newColumn && this.index !== length) {
       this.advance();
     }
+
     if (this.column > newColumn) {
       // Last character was a tab and we overshot our target
       this.index--;
@@ -460,8 +480,8 @@ class DocumentParser implements ParserState {
     }
   }
 
-  private advance(): void {
-    let c: char = this.line.getContent().charAt(this.index);
+  private advance() {
+    const c = this.line.getContent().charAt(this.index);
     this.index++;
     if (c === "\t") {
       this.column += Parsing.columnsToNextTabStop(this.column);
@@ -474,19 +494,22 @@ class DocumentParser implements ParserState {
    * Add line content to the active block parser. We assume it can accept lines -- that check should be done before
    * calling this.
    */
-  private addLine(): void {
-    let content: java.lang.CharSequence;
+  private addLine() {
+    let content: string;
+
     if (this.columnIsInTab) {
       // Our column is in a partially consumed tab. Expand the remaining columns (to the next tab stop) to spaces.
-      let afterTab: int = this.index + 1;
-      let rest: java.lang.CharSequence = this.line
+      const afterTab = this.index + 1;
+      const rest = this.line
         .getContent()
-        .subSequence(afterTab, this.line.getContent().length());
-      let spaces: int = Parsing.columnsToNextTabStop(this.column);
-      let sb: stringBuilder = new stringBuilder(spaces + rest.length());
-      for (let i: int = 0; i < spaces; i++) {
+        .substring(afterTab, this.line.getContent().length);
+      const spaces = Parsing.columnsToNextTabStop(this.column);
+      const sb = new Appendable();
+
+      for (let i = 0; i < spaces; i++) {
         sb.append(" ");
       }
+
       sb.append(rest);
       content = sb.toString();
     } else if (this.index === 0) {
@@ -494,55 +517,52 @@ class DocumentParser implements ParserState {
     } else {
       content = this.line
         .getContent()
-        .subSequence(this.index, this.line.getContent().length());
+        .substring(this.index, this.line.getContent().length);
     }
-    let sourceSpan: SourceSpan = null;
+
+    let sourceSpan!: SourceSpan;
     if (
       this.includeSourceSpans === IncludeSourceSpans.BLOCKS_AND_INLINES &&
-      this.index < this.line.getSourceSpan().getLength()
+      this.index < this.line.getSourceSpan()!.getLength()
     ) {
       // Note that if we're in a partially-consumed tab the length of the source span and the content don't match.
-      sourceSpan = this.line.getSourceSpan().subSpan(this.index);
+      sourceSpan = this.line.getSourceSpan()!.subSpan(this.index);
     }
+
     this.getActiveBlockParser().addLine(SourceLine.of(content, sourceSpan));
     this.addSourceSpans();
   }
 
-  private addSourceSpans(): void {
+  private addSourceSpans() {
     if (this.includeSourceSpans !== IncludeSourceSpans.NONE) {
       // Don't add source spans for Document itself (it would get the whole source text), so start at 1, not 0
-      for (let i: int = 1; i < this.openBlockParsers.size(); i++) {
-        let openBlockParser = this.openBlockParsers.get(i);
+      for (let i = 1; i < this.openBlockParsers.length; i++) {
+        const openBlockParser = this.openBlockParsers[i];
         // In case of a lazy continuation line, the index is less than where the block parser would expect the
         // contents to start, so let's use whichever is smaller.
-        let blockIndex: int = java.lang.Math.min(
-          openBlockParser.sourceIndex,
-          this.index
-        );
-        let length: int = this.line.getContent().length() - blockIndex;
+        const blockIndex = Math.min(openBlockParser.sourceIndex, this.index);
+        const length = this.line.getContent().length - blockIndex;
+
         if (length !== 0) {
           openBlockParser.blockParser.addSourceSpan(
-            this.line.getSourceSpan().subSpan(blockIndex)
+            this.line.getSourceSpan()!.subSpan(blockIndex)
           );
         }
       }
     }
   }
 
-  private findBlockStart(
-    blockParser: BlockParser | null
-  ): BlockStartImpl | null {
-    let matchedBlockParser: MatchedBlockParser =
+  private findBlockStart(blockParser: BlockParser): BlockStartImpl | null {
+    const matchedBlockParser: MatchedBlockParser =
       new DocumentParser.MatchedBlockParserImpl(blockParser);
-    for (let blockParserFactory of this.blockParserFactories) {
-      let result: BlockStart = blockParserFactory.tryStart(
-        this,
-        matchedBlockParser
-      );
+    for (const blockParserFactory of this.blockParserFactories) {
+      const result = blockParserFactory.tryStart(this, matchedBlockParser);
+
       if (result instanceof BlockStartImpl) {
-        return result as BlockStartImpl;
+        return result;
       }
     }
+
     return null;
   }
 
@@ -550,16 +570,16 @@ class DocumentParser implements ParserState {
    * Walk through a block & children recursively, parsing string content into inline content where appropriate.
    */
   private processInlines(): void {
-    let context = new InlineParserContextImpl(
+    const context = new InlineParserContextImpl(
       this.inlineContentParserFactories,
       this.delimiterProcessors,
       this.linkProcessors,
       this.linkMarkers,
       this.definitions
     );
-    let inlineParser = this.inlineParserFactory.create(context);
+    const inlineParser = this.inlineParserFactory.create(context);
 
-    for (let blockParser of this.allBlockParsers) {
+    for (const blockParser of this.allBlockParsers) {
       blockParser.parseInlines(inlineParser);
     }
   }
@@ -568,9 +588,7 @@ class DocumentParser implements ParserState {
    * Add block of type tag as a child of the tip. If the tip can't accept children, close and finalize it and try
    * its parent, and so on until we find a block that can accept children.
    */
-  private addChild(
-    openBlockParser: DocumentParser.OpenBlockParser | null
-  ): void {
+  private addChild(openBlockParser: OpenBlockParser) {
     while (
       !this.getActiveBlockParser().canContain(
         openBlockParser.blockParser.getBlock()
@@ -585,19 +603,17 @@ class DocumentParser implements ParserState {
     this.activateBlockParser(openBlockParser);
   }
 
-  private activateBlockParser(
-    openBlockParser: DocumentParser.OpenBlockParser | null
-  ): void {
-    this.openBlockParsers.add(openBlockParser);
+  private activateBlockParser(openBlockParser: OpenBlockParser) {
+    this.openBlockParsers.push(openBlockParser);
   }
 
-  private deactivateBlockParser(): DocumentParser.OpenBlockParser | null {
-    return this.openBlockParsers.remove(this.openBlockParsers.size() - 1);
+  private deactivateBlockParser(): OpenBlockParser {
+    return this.openBlockParsers.splice(this.openBlockParsers.length - 1, 1)[0];
   }
 
-  private prepareActiveBlockParserForReplacement(): Block | null {
+  private prepareActiveBlockParserForReplacement(): Block {
     // Note that we don't want to parse inlines, as it's getting replaced.
-    let old: BlockParser = this.deactivateBlockParser().blockParser;
+    const old: BlockParser = this.deactivateBlockParser().blockParser;
 
     if (old instanceof ParagraphParser) {
       let paragraphParser: ParagraphParser = old as ParagraphParser;
@@ -615,20 +631,21 @@ class DocumentParser implements ParserState {
     return old.getBlock();
   }
 
-  private finalizeAndProcess(): Document | null {
-    this.closeBlockParsers(this.openBlockParsers.size());
+  private finalizeAndProcess(): Document {
+    this.closeBlockParsers(this.openBlockParsers.length);
     this.processInlines();
+
     return this.documentBlockParser.getBlock();
   }
 
-  private closeBlockParsers(count: int): void {
-    for (let i: int = 0; i < count; i++) {
-      let blockParser: BlockParser = this.deactivateBlockParser().blockParser;
+  private closeBlockParsers(count: number): void {
+    for (let i = 0; i < count; i++) {
+      const blockParser = this.deactivateBlockParser().blockParser;
       this.finalize(blockParser);
       // Remember for inline parsing. Note that a lot of blocks don't need inline parsing. We could have a
       // separate interface (e.g. BlockParserWithInlines) so that we only have to remember those that actually
       // have inlines to parse.
-      this.allBlockParsers.add(blockParser);
+      this.allBlockParsers.push(blockParser);
     }
   }
 
@@ -636,12 +653,12 @@ class DocumentParser implements ParserState {
    * Finalize a block. Close it and do any necessary postprocessing, e.g. setting the content of blocks and
    * collecting link reference definitions from paragraphs.
    */
-  private override finalize(blockParser: BlockParser | null): void {
+  private finalize(blockParser: BlockParser) {
     this.addDefinitionsFrom(blockParser);
     blockParser.closeBlock();
   }
 
-  private addDefinitionsFrom(blockParser: BlockParser | null): void {
+  private addDefinitionsFrom(blockParser: BlockParser) {
     for (let definitionMap of blockParser.getDefinitions()) {
       this.definitions.addDefinitions(definitionMap);
     }
@@ -650,7 +667,7 @@ class DocumentParser implements ParserState {
   /**
    * Prepares the input line replacing {@code \0}
    */
-  private static prepareLine(line: string | null): string | null {
+  private static prepareLine(line: string): string {
     if (line.indexOf("\0") === -1) {
       return line;
     } else {
@@ -658,40 +675,9 @@ class DocumentParser implements ParserState {
     }
   }
 
-  public static MatchedBlockParserImpl = class MatchedBlockParserImpl
-    implements MatchedBlockParser
-  {
-    private readonly matchedBlockParser: BlockParser | null;
+  public static MatchedBlockParserImpl = MatchedBlockParserImpl;
 
-    public constructor(matchedBlockParser: BlockParser | null) {
-      super();
-      this.matchedBlockParser = matchedBlockParser;
-    }
-
-    public getMatchedBlockParser(): BlockParser | null {
-      return this.matchedBlockParser;
-    }
-
-    public getParagraphLines(): SourceLines | null {
-      if (this.matchedBlockParser instanceof ParagraphParser) {
-        let paragraphParser: ParagraphParser = this
-          .matchedBlockParser as ParagraphParser;
-        return paragraphParser.getParagraphLines();
-      }
-      return SourceLines.empty();
-    }
-  };
-
-  public static OpenBlockParser = class OpenBlockParser {
-    private readonly blockParser: BlockParser | null;
-    private sourceIndex: int;
-
-    protected constructor(blockParser: BlockParser | null, sourceIndex: int) {
-      super();
-      this.blockParser = blockParser;
-      this.sourceIndex = sourceIndex;
-    }
-  };
+  public static OpenBlockParser = OpenBlockParser;
 }
 
 export default DocumentParser;
