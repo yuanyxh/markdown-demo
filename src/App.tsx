@@ -4,9 +4,15 @@ import "./styles/App.less";
 import { useRef } from "react";
 
 import { readFileAsText } from "./utils";
-import { Parser } from "../lib_ts/commonmark";
+import {
+  HtmlRenderer,
+  IncludeSourceSpans,
+  Parser,
+} from "./packages/commonmark";
 
-const parser = Parser.builder().build();
+const parser = Parser.builder()
+  .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
+  .build();
 
 const App: React.FC = () => {
   const triggerRef = useRef<HTMLInputElement>(null);
@@ -23,7 +29,19 @@ const App: React.FC = () => {
     }
 
     readFileAsText(file).then((text) => {
-      console.log(parser.parse(text));
+      const document = parser.parse(text);
+      const htmlRenderer = HtmlRenderer.builder().build();
+      const html = htmlRenderer.render(document);
+
+      console.log(html);
+
+      const input = document
+        .getFirstChild()
+        ?.getFirstChild()
+        ?.getSourceSpans()[0]
+        .getInputIndex();
+
+      console.log(input);
     });
   };
 
