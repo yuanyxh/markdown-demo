@@ -20,7 +20,7 @@ export interface AttributeProvider {
    * @param attributes the attributes, with any default attributes already set in the map
    */
   setAttributes(
-    node: Node | null,
+    node: Node,
     tagName: string,
     attributes: Map<string, string>
   ): void;

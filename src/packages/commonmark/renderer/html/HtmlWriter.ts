@@ -35,7 +35,7 @@ class HtmlWriter {
         this.append(Escaping.escapeHtml(attr[0]));
 
         this.append('="');
-        this.append(Escaping.escapeHtml(attr[0]));
+        this.append(Escaping.escapeHtml(attr[1]));
         this.append('"');
       }
     }
