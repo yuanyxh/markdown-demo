@@ -6,6 +6,7 @@ export type {
   HtmlNodeRendererFactory,
   UrlSanitizer,
   MarkdownNodeRendererFactory,
+  AttributeProviderContext,
   TextContentNodeRendererFactory,
 } from "./renderer";
 export {

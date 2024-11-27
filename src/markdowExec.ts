@@ -1,21 +1,3 @@
-import { Button } from "antd";
-
-import "./styles/App.less";
-import { useRef } from "react";
-
-import { readFileAsText } from "./utils";
-import {
-  HtmlRenderer,
-  IncludeSourceSpans,
-  Parser,
-} from "./packages/commonmark";
-import type {
-  AttributeProvider,
-  AttributeProviderFactory,
-  MarkdownNode,
-} from "./packages/commonmark";
-import { AttributeProviderContext } from "./packages/commonmark/renderer";
-
 class NodeMapAttributeProvider implements AttributeProvider {
   setAttributes(
     node: MarkdownNode,
@@ -39,10 +21,9 @@ class NodeMapAttributeProviderFactory implements AttributeProviderFactory {
 
 const markdownNodeMap = new Map<string, MarkdownNode>();
 const markdownNodeRecordMap = new Map<MarkdownNode, string>();
-let nextId = 1;
 
+let nextId = 1;
 let markdownText = "";
-let ele!: HTMLElement;
 let markdownNode!: MarkdownNode;
 
 const parser = Parser.builder()
@@ -53,8 +34,7 @@ const htmlRenderer = HtmlRenderer.builder()
   .attributeProviderFactory(new NodeMapAttributeProviderFactory())
   .build();
 
-/** 重渲染 */
-function reRender(markdownText: string) {
+function render(markdownText: string) {
   markdownNodeMap.clear();
   markdownNodeRecordMap.clear();
   nextId = 1;
@@ -200,7 +180,6 @@ function getNewMarkdownNodeOffset(
 const onBeforeInput = (e: InputEvent) => {
   e.preventDefault();
 
-  // the insertText process
   const ranges = e.getTargetRanges();
 
   const [range] = ranges;
@@ -234,7 +213,7 @@ const onBeforeInput = (e: InputEvent) => {
     e.data || ""
   );
 
-  reRender(markdownText);
+  render(markdownText);
 
   getNewMarkdownNodeOffset(
     markdownNode,
@@ -243,62 +222,3 @@ const onBeforeInput = (e: InputEvent) => {
     markdownRangeEndOffset
   );
 };
-
-const App: React.FC = () => {
-  const triggerRef = useRef<HTMLInputElement>(null);
-  const editorRef = useRef<HTMLDivElement>(null);
-
-  const handleSelectMarkdown = () => {
-    triggerRef.current?.click();
-  };
-
-  const handleFileSelectChange = () => {
-    const [file] = triggerRef.current?.files || [];
-
-    if (!file) {
-      return void 0;
-    }
-
-    readFileAsText(file).then((text) => {
-      markdownText = text;
-
-      const document = parser.parse(text);
-
-      markdownNode = document;
-
-      const html = htmlRenderer.render(document);
-
-      if (editorRef.current) {
-        ele = editorRef.current;
-        editorRef.current.innerHTML = html;
-
-        editorRef.current.addEventListener("beforeinput", onBeforeInput);
-      }
-    });
-  };
-
-  return (
-    <div className="app">
-      <Button type="primary" onClick={handleSelectMarkdown}>
-        选择 Markdown
-      </Button>
-
-      <div
-        ref={editorRef}
-        className="container"
-        spellCheck={false}
-        contentEditable={true}
-      ></div>
-
-      <input
-        ref={triggerRef}
-        hidden
-        type="file"
-        accept=".md"
-        onChange={handleFileSelectChange}
-      />
-    </div>
-  );
-};
-
-export default App;

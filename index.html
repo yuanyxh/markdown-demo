@@ -9,6 +9,12 @@
     <title>Markdown & Typora</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <input id="fileSelect" type="file" hidden accept=".md" />
+
+      <button id="fileTrigger">上传 Markdown 文件</button>
+
+      <div id="editor" contenteditable="true" spellcheck="false"></div>
+    </div>
   </body>
 </html>
