@@ -1,8 +1,8 @@
 import type { Visitor } from "./interfaces/Visitor";
 
-import Node from "./abstracts/Node";
+import MarkdownNode from "./abstracts/MarkdownNode";
 
-class Image extends Node {
+class Image extends MarkdownNode {
   private destination = "";
   private title: string | undefined;
 

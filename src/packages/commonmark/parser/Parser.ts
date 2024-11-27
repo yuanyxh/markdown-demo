@@ -1,4 +1,4 @@
-import type { Block, Node } from "../node";
+import type { Block, MarkdownNode } from "../node";
 import type { Extension } from "../Extension";
 import type { InlineContentParserFactory } from "./interfaces/InlineContentParserFactory";
 import type { LinkProcessor } from "./interfaces/LinkProcessor";
@@ -89,7 +89,7 @@ class Builder {
   }
 
   /**
-   * Whether to calculate source positions for parsed {@link Node Nodes}, see {@link Node#getSourceSpans()}.
+   * Whether to calculate source positions for parsed {@link MarkdownNode Nodes}, see {@link MarkdownNode#getSourceSpans()}.
    * <p>
    * By default, source spans are disabled.
    *
@@ -235,7 +235,7 @@ class Builder {
  * Start with the {@link #builder} method, configure the parser and build it. Example:
  * <pre><code>
  * Parser parser = Parser.builder().build();
- * Node document = parser.parse("input text");
+ * MarkdownNode document = parser.parse("input text");
  * </code></pre>
  */
 export class Parser {
@@ -292,7 +292,7 @@ export class Parser {
    * @param input the text to parse - must not be null
    * @return the root node
    */
-  public parse(input: string): Node {
+  public parse(input: string): MarkdownNode {
     let documentParser = this.createDocumentParser();
     let document = documentParser.parse(input);
     return this.postProcess(document);
@@ -303,7 +303,7 @@ export class Parser {
    * <pre><code>
    * Parser parser = Parser.builder().build();
    * try (InputStreamReader reader = new InputStreamReader(new FileInputStream("file.md"), StandardCharsets.UTF_8)) {
-   *     Node document = parser.parseReader(reader);
+   *     MarkdownNode document = parser.parseReader(reader);
    *     // ...
    * }
    * </code></pre>
@@ -316,8 +316,8 @@ export class Parser {
    * @return the root node
    * @throws IOException when reading throws an exception
    */
-  public async parseReader(input: File): Promise<Node> {
-    return new Promise<Node>((resolve, reject) => {
+  public async parseReader(input: File): Promise<MarkdownNode> {
+    return new Promise<MarkdownNode>((resolve, reject) => {
       const reader = new FileReader();
 
       reader.onload = () => {
@@ -344,7 +344,7 @@ export class Parser {
     );
   }
 
-  private postProcess(document: Node): Node {
+  private postProcess(document: MarkdownNode): MarkdownNode {
     for (const postProcessor of this.postProcessors) {
       document = postProcessor.process(document);
     }

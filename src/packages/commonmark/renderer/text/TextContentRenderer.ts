@@ -1,6 +1,6 @@
 import type { Extension } from "../../Extension";
 import type { TextContentNodeRendererFactory } from "./interfaces/TextContentNodeRendererFactory";
-import type { Node } from "../../node";
+import type { MarkdownNode } from "../../node";
 import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";
 import type { Renderer } from "../interfaces/Renderer";
 import type { Appendable } from "../../../common";
@@ -121,7 +121,7 @@ class RendererContext implements TextContentNodeRendererContext {
     return this.textContentWriter;
   }
 
-  public render(node: Node) {
+  public render(node: MarkdownNode) {
     this.nodeRendererMap.render(node);
   }
 }
@@ -156,7 +156,7 @@ class TextContentRenderer implements Renderer {
     return new Builder();
   }
 
-  public render(node: Node, output: Appendable) {
+  public render(node: MarkdownNode, output: Appendable) {
     const context = new RendererContext(
       this,
       new TextContentWriter(output, this.lineBreakRendering)

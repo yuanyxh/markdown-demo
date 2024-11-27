@@ -5,7 +5,7 @@ import type { Renderer } from "../interfaces/Renderer";
 import type { UrlSanitizer } from "./interfaces/UrlSanitizer";
 import type { HtmlNodeRendererFactory } from "./interfaces/HtmlNodeRendererFactory";
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { Node } from "../../node";
+import type { MarkdownNode } from "../../node";
 import type { AttributeProvider } from "./interfaces/AttributeProvider";
 import type { AttributeProviderContext } from "./interfaces/AttributeProviderContext";
 
@@ -219,7 +219,7 @@ class RendererContext
   }
 
   public extendAttributes(
-    node: Node,
+    node: MarkdownNode,
     tagName: string,
     attributes: Map<string, string>
   ): Map<string, string> {
@@ -237,20 +237,20 @@ class RendererContext
     return this.context.softbreak;
   }
 
-  public render(node: Node) {
+  public render(node: MarkdownNode) {
     this.nodeRendererMap.render(node);
   }
 
-  public beforeRoot(node: Node) {
+  public beforeRoot(node: MarkdownNode) {
     this.nodeRendererMap.beforeRoot(node);
   }
 
-  public afterRoot(node: Node) {
+  public afterRoot(node: MarkdownNode) {
     this.nodeRendererMap.afterRoot(node);
   }
 
   private setCustomAttributes(
-    node: Node,
+    node: MarkdownNode,
     tagName: string,
     attrs: Map<string, string>
   ) {
@@ -308,7 +308,7 @@ class HtmlRenderer implements Renderer {
     return new Builder();
   }
 
-  public render(node: Node, output?: Appendable) {
+  public render(node: MarkdownNode, output?: Appendable) {
     if (!output) {
       output = new Appendable();
     }

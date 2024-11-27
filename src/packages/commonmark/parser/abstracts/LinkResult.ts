@@ -1,5 +1,5 @@
 import type Position from "../parser_utils/Position";
-import type { Node } from "../../node";
+import type { MarkdownNode } from "../../node";
 
 import { LinkResultImpl } from "../../internal";
 
@@ -25,7 +25,7 @@ abstract class LinkResult {
    * @param node     the node to which the link text nodes will be added as child nodes
    * @param position the position to continue parsing from
    */
-  public static wrapTextIn(node: Node, position: Position): LinkResult {
+  public static wrapTextIn(node: MarkdownNode, position: Position): LinkResult {
     return new LinkResultImpl(LinkResultImpl.Type.WRAP, node, position);
   }
 
@@ -39,7 +39,10 @@ abstract class LinkResult {
    * @param node     the node to replace the link with
    * @param position the position to continue parsing from
    */
-  public static replaceWith(node: Node, position: Position): LinkResult {
+  public static replaceWith(
+    node: MarkdownNode,
+    position: Position
+  ): LinkResult {
     return new LinkResultImpl(LinkResultImpl.Type.REPLACE, node, position);
   }
 

@@ -16,7 +16,7 @@ import { Appendable, BitSet } from "../../../common";
 import { Scanner } from "../../parser";
 import {
   HardLineBreak,
-  Node,
+  MarkdownNode,
   SoftLineBreak,
   SourceSpans,
   Text,
@@ -329,7 +329,7 @@ class InlineParserImpl
   /**
    * Parse content in block into inline children, appending them to the block node.
    */
-  public parse(lines: SourceLines, block: Node) {
+  public parse(lines: SourceLines, block: MarkdownNode) {
     this.reset(lines);
 
     while (true) {
@@ -368,7 +368,7 @@ class InlineParserImpl
    * On success, return the new inline node.
    * On failure, return null.
    */
-  private parseInline(): Node[] | null {
+  private parseInline(): MarkdownNode[] | null {
     const c = this.scanner.peek();
 
     switch (c) {
@@ -446,7 +446,7 @@ class InlineParserImpl
   private parseDelimiters(
     delimiterProcessor: DelimiterProcessor,
     delimiterChar: string
-  ): Node[] | null {
+  ): MarkdownNode[] | null {
     const res = this.scanDelimiters(delimiterProcessor, delimiterChar);
 
     if (res === null) {
@@ -474,7 +474,7 @@ class InlineParserImpl
   /**
    * Add open bracket to delimiter stack and add a text node to block's children.
    */
-  private parseOpenBracket(): Node {
+  private parseOpenBracket(): MarkdownNode {
     const start: Position = this.scanner.position();
     this.scanner.next();
     const contentPosition: Position = this.scanner.position();
@@ -499,7 +499,7 @@ class InlineParserImpl
    * If next character is {@code [}, add a bracket to the stack.
    * Otherwise, return null.
    */
-  private parseLinkMarker(): Node[] | null {
+  private parseLinkMarker(): MarkdownNode[] | null {
     const markerPosition = this.scanner.position();
     this.scanner.next();
     const bracketPosition = this.scanner.position();
@@ -535,7 +535,7 @@ class InlineParserImpl
    * Try to match close bracket against an opening in the delimiter stack. Return either a link or image, or a
    * plain [ character. If there is a matching delimiter, remove it from the delimiter stack.
    */
-  private parseCloseBracket(): Node {
+  private parseCloseBracket(): MarkdownNode {
     const beforeClose = this.scanner.position();
     this.scanner.next();
     const afterClose: Position = this.scanner.position();
@@ -568,7 +568,7 @@ class InlineParserImpl
   private parseLinkOrImage(
     opener: Bracket,
     beforeClose: Position
-  ): Node | null {
+  ): MarkdownNode | null {
     const linkInfo = this.parseLinkInfo(opener, beforeClose);
     if (linkInfo === null) {
       return null;
@@ -676,9 +676,9 @@ class InlineParserImpl
 
   private wrapBracket(
     opener: Bracket,
-    wrapperNode: Node,
+    wrapperNode: MarkdownNode,
     includeMarker: boolean
-  ): Node {
+  ): MarkdownNode {
     // Add all nodes between the opening bracket and now (closing bracket) as child nodes of the link
     let n = opener.bracketNode?.getNext() || null;
     while (n !== null) {
@@ -731,9 +731,9 @@ class InlineParserImpl
 
   private replaceBracket(
     opener: Bracket,
-    node: Node,
+    node: MarkdownNode,
     includeMarker: boolean
-  ): Node {
+  ): MarkdownNode {
     // Remove delimiters (but keep text nodes)
     while (
       this.lastDelimiter !== null &&
@@ -757,7 +757,7 @@ class InlineParserImpl
     this.removeLastBracket();
 
     // Remove nodes that we added since the opener, because we're replacing them
-    let n: Node | null =
+    let n: MarkdownNode | null =
       includeMarker && opener.markerNode !== null
         ? opener.markerNode
         : opener.bracketNode;
@@ -886,7 +886,7 @@ class InlineParserImpl
     return content;
   }
 
-  private parseLineBreak(): Node {
+  private parseLineBreak(): MarkdownNode {
     this.scanner.next();
 
     if (this.trailingSpaces >= 2) {
@@ -899,7 +899,7 @@ class InlineParserImpl
   /**
    * Parse the next character as plain text, and possibly more if the following characters are non-special.
    */
-  private parseText(): Node {
+  private parseText(): MarkdownNode {
     const start: Position = this.scanner.position();
     this.scanner.next();
 
@@ -1153,7 +1153,7 @@ class InlineParserImpl
     }
   }
 
-  private mergeChildTextNodes(node: Node) {
+  private mergeChildTextNodes(node: MarkdownNode) {
     // No children, no need for merging
     if (node.getFirstChild() === null) {
       return;
@@ -1163,14 +1163,14 @@ class InlineParserImpl
   }
 
   private mergeTextNodesInclusive(
-    fromNode: Node | null,
-    toNode: Node | null
+    fromNode: MarkdownNode | null,
+    toNode: MarkdownNode | null
   ): void {
     let first: Text | null = null;
     let last: Text | null = null;
     let length = 0;
 
-    let node: Node | null = fromNode;
+    let node: MarkdownNode | null = fromNode;
     while (node !== null) {
       if (node instanceof Text) {
         let text = node;

@@ -1,10 +1,10 @@
-import type Node from "../abstracts/Node";
+import type MarkdownNode from "../abstracts/MarkdownNode";
 
 /**
- * Node visitor.
+ * MarkdownNode visitor.
  * <p>
  * Implementations should subclass {@link AbstractVisitor} instead of implementing this directly.
  */
 export interface Visitor {
-  visit(node: Node): void;
+  visit(node: MarkdownNode): void;
 }

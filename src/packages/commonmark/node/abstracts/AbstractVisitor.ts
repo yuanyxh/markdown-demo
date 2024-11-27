@@ -1,4 +1,4 @@
-import type Node from "./Node";
+import type MarkdownNode from "./MarkdownNode";
 import type { Visitor } from "../interfaces/Visitor";
 
 /**
@@ -8,7 +8,7 @@ import type { Visitor } from "../interfaces/Visitor";
  * call {@link #visitChildren}.
  */
 abstract class AbstractVisitor implements Visitor {
-  public visit(node: Node) {
+  public visit(node: MarkdownNode) {
     this.visitChildren(node);
   }
 
@@ -17,7 +17,7 @@ abstract class AbstractVisitor implements Visitor {
    *
    * @param parent the parent node whose children should be visited
    */
-  protected visitChildren(parent: Node): void {
+  protected visitChildren(parent: MarkdownNode): void {
     let node = parent.getFirstChild();
 
     while (node !== null) {

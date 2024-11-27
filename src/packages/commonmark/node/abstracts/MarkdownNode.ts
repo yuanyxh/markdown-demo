@@ -6,41 +6,41 @@ import type { Visitor } from "../interfaces/Visitor";
  * <p>
  * A node can have multiple children, and a parent (except for the root node).
  */
-abstract class Node {
-  private parent: Node | null = null;
-  private firstChild: Node | null = null;
-  private lastChild: Node | null = null;
-  private prev: Node | null = null;
-  private next: Node | null = null;
+abstract class MarkdownNode {
+  private parent: MarkdownNode | null = null;
+  private firstChild: MarkdownNode | null = null;
+  private lastChild: MarkdownNode | null = null;
+  private prev: MarkdownNode | null = null;
+  private next: MarkdownNode | null = null;
   private sourceSpans: SourceSpan[] | null = null;
 
   public abstract accept(visitor: Visitor): void;
 
-  public getNext(): Node | null {
+  public getNext(): MarkdownNode | null {
     return this.next;
   }
 
-  public getPrevious(): Node | null {
+  public getPrevious(): MarkdownNode | null {
     return this.prev;
   }
 
-  public getFirstChild(): Node | null {
+  public getFirstChild(): MarkdownNode | null {
     return this.firstChild;
   }
 
-  public getLastChild(): Node | null {
+  public getLastChild(): MarkdownNode | null {
     return this.lastChild;
   }
 
-  public getParent(): Node | null {
+  public getParent(): MarkdownNode | null {
     return this.parent;
   }
 
-  public setParent(parent: Node) {
+  public setParent(parent: MarkdownNode) {
     this.parent = parent;
   }
 
-  public appendChild(child: Node) {
+  public appendChild(child: MarkdownNode) {
     child.unlink();
     child.setParent(this);
 
@@ -54,7 +54,7 @@ abstract class Node {
     }
   }
 
-  public prependChild(child: Node) {
+  public prependChild(child: MarkdownNode) {
     child.unlink();
     child.setParent(this);
 
@@ -89,7 +89,7 @@ abstract class Node {
   /**
    * Inserts the {@code sibling} node after {@code this} node.
    */
-  public insertAfter(sibling: Node): void {
+  public insertAfter(sibling: MarkdownNode): void {
     sibling.unlink();
 
     sibling.next = this.next;
@@ -109,7 +109,7 @@ abstract class Node {
   /**
    * Inserts the {@code sibling} node before {@code this} node.
    */
-  public insertBefore(sibling: Node): void {
+  public insertBefore(sibling: MarkdownNode): void {
     sibling.unlink();
 
     sibling.prev = this.prev;
@@ -163,4 +163,4 @@ abstract class Node {
   }
 }
 
-export default Node;
+export default MarkdownNode;

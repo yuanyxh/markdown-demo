@@ -1,4 +1,4 @@
-import type { Node } from "../../../node";
+import type { MarkdownNode } from "../../../node";
 
 /**
  * Extension point for adding/changing attributes on HTML tags for a node.
@@ -20,7 +20,7 @@ export interface AttributeProvider {
    * @param attributes the attributes, with any default attributes already set in the map
    */
   setAttributes(
-    node: Node,
+    node: MarkdownNode,
     tagName: string,
     attributes: Map<string, string>
   ): void;

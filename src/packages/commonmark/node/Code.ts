@@ -1,8 +1,8 @@
 import type { Visitor } from "./interfaces/Visitor";
 
-import Node from "./abstracts/Node";
+import MarkdownNode from "./abstracts/MarkdownNode";
 
-class Code extends Node {
+class Code extends MarkdownNode {
   private literal: string;
 
   public constructor(literal = "") {

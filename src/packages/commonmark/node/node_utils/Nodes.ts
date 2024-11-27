@@ -1,28 +1,28 @@
-import type Node from "../abstracts/Node";
+import type MarkdownNode from "../abstracts/MarkdownNode";
 
-class NodeIterable implements Iterable<Node> {
-  private readonly first: Node;
-  private readonly end: Node;
+class NodeIterable implements Iterable<MarkdownNode> {
+  private readonly first: MarkdownNode;
+  private readonly end: MarkdownNode;
 
-  public constructor(first: Node, end: Node) {
+  public constructor(first: MarkdownNode, end: MarkdownNode) {
     this.first = first;
     this.end = end;
   }
 
-  [Symbol.iterator](): Iterator<Node, any, any> {
+  [Symbol.iterator](): Iterator<MarkdownNode, any, any> {
     return this.iterator();
   }
 
-  public iterator(): Iterator<Node> {
+  public iterator(): Iterator<MarkdownNode> {
     return new NodeIterator(this.first, this.end);
   }
 }
 
-class NodeIterator implements Iterator<Node> {
-  private node: Node | null;
-  private readonly end: Node;
+class NodeIterator implements Iterator<MarkdownNode> {
+  private node: MarkdownNode | null;
+  private readonly end: MarkdownNode;
 
-  public constructor(first: Node, end: Node) {
+  public constructor(first: MarkdownNode, end: MarkdownNode) {
     this.node = first;
     this.end = end;
   }
@@ -31,7 +31,7 @@ class NodeIterator implements Iterator<Node> {
     return this.node !== null && this.node !== this.end;
   }
 
-  public next(): IteratorResult<Node> {
+  public next(): IteratorResult<MarkdownNode> {
     const result = this.node;
     this.node = this.node ? this.node.getNext() : null;
 
@@ -48,7 +48,7 @@ class NodeIterator implements Iterator<Node> {
 }
 
 /**
- * Utility class for working with multiple {@link Node}s.
+ * Utility class for working with multiple {@link MarkdownNode}s.
  *
  * @since 0.16.0
  */
@@ -56,7 +56,7 @@ class Nodes {
   /**
    * The nodes between (not including) start and end.
    */
-  public static between(start: Node, end: Node): NodeIterable {
+  public static between(start: MarkdownNode, end: MarkdownNode): NodeIterable {
     const first = start.getNext();
     if (first !== null) {
       return new NodeIterable(first, end);

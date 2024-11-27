@@ -1,9 +1,9 @@
 import type { Delimited } from "./interfaces/Delimited";
 import type { Visitor } from "./interfaces/Visitor";
 
-import Node from "./abstracts/Node";
+import MarkdownNode from "./abstracts/MarkdownNode";
 
-class Emphasis extends Node implements Delimited {
+class Emphasis extends MarkdownNode implements Delimited {
   private delimiter: string | undefined;
 
   public constructor(delimiter = "") {

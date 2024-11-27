@@ -1,5 +1,5 @@
 import type MarkdownWriter from "../MarkdownWriter";
-import type { Node } from "../../../node";
+import type { MarkdownNode } from "../../../node";
 
 /**
  * Context that is passed to custom node renderers, see {@link MarkdownNodeRendererFactory#create}.
@@ -16,7 +16,7 @@ export interface MarkdownNodeRendererContext {
    *
    * @param node the node to render
    */
-  render(node: Node): void;
+  render(node: MarkdownNode): void;
 
   /**
    * @return additional special characters that need to be escaped if they occur in normal text; currently only ASCII

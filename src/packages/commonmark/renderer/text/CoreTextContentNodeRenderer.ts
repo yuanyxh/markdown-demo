@@ -2,7 +2,7 @@ import type { NodeRenderer } from "../interfaces/NodeRenderer";
 import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";
 import type TextContentWriter from "./TextContentWriter";
 import type { ListHolder } from "../../internal";
-import type { Node } from "../../node";
+import type { MarkdownNode } from "../../node";
 
 import LineBreakRendering from "./enums/LineBreakRendering";
 import { OrderedListHolder, BulletListHolder } from "../../internal";
@@ -49,10 +49,10 @@ class CoreTextContentNodeRenderer
     this.textContent = context.getWriter();
   }
 
-  public beforeRoot(rootNode: Node): void {}
-  public afterRoot(rootNode: Node): void {}
+  public beforeRoot(rootNode: MarkdownNode): void {}
+  public afterRoot(rootNode: MarkdownNode): void {}
 
-  public getNodeTypes(): Set<typeof Node> {
+  public getNodeTypes(): Set<typeof MarkdownNode> {
     return new Set([
       Document,
       Heading,
@@ -74,14 +74,14 @@ class CoreTextContentNodeRenderer
       HtmlInline,
       SoftLineBreak,
       HardLineBreak,
-    ] as unknown as (typeof Node)[]);
+    ] as unknown as (typeof MarkdownNode)[]);
   }
 
-  public render(node: Node) {
+  public render(node: MarkdownNode) {
     node.accept(this);
   }
 
-  public override visit(node: Node) {
+  public override visit(node: MarkdownNode) {
     switch (true) {
       case node instanceof Document:
         this.visitChildren(node);
@@ -262,7 +262,7 @@ class CoreTextContentNodeRenderer
     }
   }
 
-  protected override visitChildren(parent: Node) {
+  protected override visitChildren(parent: MarkdownNode) {
     let node = parent.getFirstChild();
 
     while (node !== null) {
@@ -280,7 +280,11 @@ class CoreTextContentNodeRenderer
     }
   }
 
-  private writeLink(node: Node, title: string, destination: string): void {
+  private writeLink(
+    node: MarkdownNode,
+    title: string,
+    destination: string
+  ): void {
     const hasChild = node.getFirstChild() !== null;
     const hasTitle = title !== destination;
     const hasDestination = destination !== "";

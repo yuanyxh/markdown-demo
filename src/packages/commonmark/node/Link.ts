@@ -1,6 +1,6 @@
 import type { Visitor } from "./interfaces/Visitor";
 
-import Node from "./abstracts/Node";
+import MarkdownNode from "./abstracts/MarkdownNode";
 
 /**
  * A link with a destination and an optional title; the link text is in child nodes.
@@ -22,7 +22,7 @@ import Node from "./abstracts/Node";
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#links">CommonMark Spec for links</a>
  */
-class Link extends Node {
+class Link extends MarkdownNode {
   private destination = "";
   private title: string | undefined;
 

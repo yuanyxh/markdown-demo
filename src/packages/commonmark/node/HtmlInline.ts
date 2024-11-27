@@ -1,13 +1,13 @@
 import type { Visitor } from "./interfaces/Visitor";
 
-import Node from "./abstracts/Node";
+import MarkdownNode from "./abstracts/MarkdownNode";
 
 /**
  * Inline HTML element.
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#raw-html">CommonMark Spec</a>
  */
-class HtmlInline extends Node {
+class HtmlInline extends MarkdownNode {
   private literal = "";
 
   public override accept(visitor: Visitor) {

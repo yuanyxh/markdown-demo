@@ -1,4 +1,4 @@
-import type Node from "../abstracts/Node";
+import type MarkdownNode from "../abstracts/MarkdownNode";
 
 import SourceSpan from "./SourceSpan";
 
@@ -18,7 +18,7 @@ class SourceSpans {
     return this.sourceSpans ? this.sourceSpans : [];
   }
 
-  public addAllFrom(nodes: Node[]): void {
+  public addAllFrom(nodes: MarkdownNode[]): void {
     for (const node of nodes) {
       this.addAll(node.getSourceSpans());
     }

@@ -1,6 +1,6 @@
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
 import type { HtmlNodeRendererContext } from "./interfaces/HtmlNodeRendererContext";
-import type { Node } from "../../node";
+import type { MarkdownNode } from "../../node";
 
 import HtmlWriter from "./HtmlWriter";
 import { Appendable, isNotUnDef } from "../../../common";
@@ -74,10 +74,10 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.html = context.getWriter();
   }
 
-  public beforeRoot(rootNode: Node) {}
-  public afterRoot(rootNode: Node) {}
+  public beforeRoot(rootNode: MarkdownNode) {}
+  public afterRoot(rootNode: MarkdownNode) {}
 
-  public getNodeTypes(): Set<typeof Node> {
+  public getNodeTypes(): Set<typeof MarkdownNode> {
     return new Set([
       Document,
       Heading,
@@ -99,14 +99,14 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       HtmlInline,
       SoftLineBreak,
       HardLineBreak,
-    ] as unknown as (typeof Node)[]);
+    ] as unknown as (typeof MarkdownNode)[]);
   }
 
-  public render(node: Node) {
+  public render(node: MarkdownNode) {
     node.accept(this);
   }
 
-  public override visit(node: Node) {
+  public override visit(node: MarkdownNode) {
     switch (true) {
       case node instanceof Document: {
         const document = node;
@@ -395,7 +395,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     }
   }
 
-  protected override visitChildren(parent: Node) {
+  protected override visitChildren(parent: MarkdownNode) {
     let node = parent.getFirstChild();
 
     while (node !== null) {
@@ -407,7 +407,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
   private renderCodeBlock(
     literal: string,
-    node: Node,
+    node: MarkdownNode,
     attributes: Map<string, string>
   ) {
     this.html.line();
@@ -447,7 +447,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   }
 
   private getAttrs(
-    node: Node,
+    node: MarkdownNode,
     tagName: string,
     defaultAttributes = new Map<string, string>()
   ): Map<string, string> {

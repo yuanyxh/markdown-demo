@@ -1,5 +1,5 @@
 import type Position from "../parser_utils/Position";
-import type { Node } from "../../node";
+import type { MarkdownNode } from "../../node";
 
 import { ParsedInlineImpl } from "../../internal";
 
@@ -13,7 +13,7 @@ abstract class ParsedInline {
     return null;
   }
 
-  public static of(node: Node, position: Position): ParsedInline {
+  public static of(node: MarkdownNode, position: Position): ParsedInline {
     return new ParsedInlineImpl(node, position);
   }
 }

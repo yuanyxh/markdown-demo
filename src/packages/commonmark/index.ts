@@ -24,7 +24,7 @@ export type {
 export { Parser, IncludeSourceSpans } from "./parser";
 
 export {
-  Node,
+  MarkdownNode,
   Block,
   CustomNode,
   CustomBlock,

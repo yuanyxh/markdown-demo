@@ -1,6 +1,6 @@
 export * from "./interfaces/Delimited";
 export * from "./interfaces/Visitor";
-export { default as Node } from "./abstracts/Node";
+export { default as MarkdownNode } from "./abstracts/MarkdownNode";
 export { default as AbstractVisitor } from "./abstracts/AbstractVisitor";
 export { default as Block } from "./abstracts/Block";
 export { default as CustomBlock } from "./abstracts/CustomBlock";

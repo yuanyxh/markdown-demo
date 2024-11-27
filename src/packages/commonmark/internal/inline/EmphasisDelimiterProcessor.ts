@@ -1,4 +1,4 @@
-import type { Node } from "../../node";
+import type { MarkdownNode } from "../../node";
 import type { DelimiterProcessor, DelimiterRun } from "../../parser";
 
 import { Emphasis, Nodes, SourceSpans, StrongEmphasis } from "../../node";
@@ -34,7 +34,7 @@ abstract class EmphasisDelimiterProcessor implements DelimiterProcessor {
     }
 
     let usedDelimiters: number;
-    let emphasis: Node;
+    let emphasis: MarkdownNode;
     // calculate actual number of delimiters used from this closer
     if (openingRun.length() >= 2 && closingRun.length() >= 2) {
       usedDelimiters = 2;
