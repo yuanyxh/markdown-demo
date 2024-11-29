@@ -121,6 +121,9 @@ class Escaping {
         case '"':
           replacement = "&quot;";
           break;
+        case " ":
+          replacement = "&nbsp;";
+          break;
         default:
           if (sb !== null) {
             sb.append(c);
