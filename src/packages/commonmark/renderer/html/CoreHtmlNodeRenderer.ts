@@ -131,26 +131,33 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       }
 
       case node instanceof Paragraph: {
+        // const paragraph = node;
+
+        // const omitP: boolean =
+        //   this.isInTightList(paragraph) || //
+        //   (this.context.shouldOmitSingleParagraphP() &&
+        //     paragraph.getParent() instanceof Document && //
+        //     paragraph.getPrevious() === null &&
+        //     paragraph.getNext() === null);
+
+        // if (!omitP) {
+        //   this.html.line();
+        //   this.html.tag("p", this.getAttrs(paragraph, "p"));
+        // }
+
+        // this.visitChildren(paragraph);
+
+        // if (!omitP) {
+        //   this.html.tag("/p");
+        //   this.html.line();
+        // }
+
         const paragraph = node;
-
-        const omitP: boolean =
-          this.isInTightList(paragraph) || //
-          (this.context.shouldOmitSingleParagraphP() &&
-            paragraph.getParent() instanceof Document && //
-            paragraph.getPrevious() === null &&
-            paragraph.getNext() === null);
-
-        if (!omitP) {
-          this.html.line();
-          this.html.tag("p", this.getAttrs(paragraph, "p"));
-        }
-
+        this.html.line();
+        this.html.tag("p", this.getAttrs(paragraph, "p"));
         this.visitChildren(paragraph);
-
-        if (!omitP) {
-          this.html.tag("/p");
-          this.html.line();
-        }
+        this.html.tag("/p");
+        this.html.line();
 
         break;
       }

@@ -23,6 +23,7 @@ const fileSelect = window.document.getElementById(
 )! as HTMLInputElement;
 /** 文件选择触发器 */
 const fileTrigger = window.document.getElementById("fileTrigger")!;
+const resetMarkdown = window.document.getElementById("reset")!;
 
 /** 触发文件选择 */
 fileTrigger.addEventListener("click", () => {
@@ -43,11 +44,18 @@ fileSelect.addEventListener("change", () => {
 
   readFileAsText(file).then((text) => {
     renderToHTML(text);
+
+    backupMarkdownText = text;
   });
 
   fileSelect.value = "";
 });
 
+resetMarkdown.addEventListener("click", () => {
+  renderToHTML(backupMarkdownText);
+});
+
+/** 侦听 beforeinput 事件，可修改默认行为 */
 editor.addEventListener("beforeinput", onBeforeInput);
 
 /** 生成唯一 id，绑定 dom 和 markdownNode */
@@ -68,13 +76,32 @@ let markdownText = "";
 /** markdown ast 根节点 */
 let markdownDocument!: MarkdownNode;
 
+/** 备份 */
+let backupMarkdownText = markdownText;
+
+function getSourcePosition(node?: MarkdownNode | null) {
+  if (!node) {
+    throw new Error("Must be have a node param");
+  }
+
+  const spans = node.getSourceSpans();
+  const inputIndex = spans[0].getInputIndex();
+  const inputLength = spans[spans.length - 1].getLength();
+
+  return { inputIndex, inputLength, inputEndIndex: inputIndex + inputLength };
+}
+
 /** 将 markdown 文本解析渲染为 html */
 function renderToHTML(markdown: string) {
   markdownText = markdown;
+
+  /** markdown 文本解析为 MarkdownNode */
   markdownDocument = parser.parse(markdown);
 
+  /** 渲染为 html */
   const html = htmlRenderer.render(markdownDocument);
 
+  /** set innerHTML */
   editor.innerHTML = html;
 }
 
@@ -89,14 +116,17 @@ function getUpdatedMarkdown(
   let newMarkdown = "";
 
   switch (type) {
+    /** 插入文本 */
     case "insertText":
       newMarkdown = markdown.slice(0, start) + data + markdown.slice(end);
       break;
+    /** 删除文本 */
     case "deleteContentBackward":
       console.log(markdown.slice(start, end));
 
       newMarkdown = markdown.slice(0, start) + markdown.slice(end);
       break;
+    /** 插入段落 */
     case "insertParagraph":
       newMarkdown = markdown.slice(0, start) + "\n\n" + markdown.slice(end);
       break;
@@ -140,7 +170,7 @@ function getMarkdownChangeOffset(
     // 需要手动加去围栏代码块的开始长度以匹配文本的源码偏移
     if (parentMarkdownNode instanceof FencedCodeBlock) {
       // 找到围栏代码块的源码偏移
-      markdownOffset = parentMarkdownNode.getSourceSpans()[0].getInputIndex();
+      ({ inputIndex: markdownOffset } = getSourcePosition(parentMarkdownNode));
 
       // 加上缩进，不超过 4
       markdownOffset += parentMarkdownNode.getFenceIndent() || 0;
@@ -168,7 +198,7 @@ function getMarkdownChangeOffset(
       }
 
       // 获取源码偏移
-      markdownOffset = childMarkdownNode.getSourceSpans()[0].getInputIndex();
+      ({ inputIndex: markdownOffset } = getSourcePosition(childMarkdownNode));
     }
 
     // 源码偏移 + range.[start|end]Offset 等于改变位置的源码偏移
@@ -192,27 +222,13 @@ function getMarkdownChangeOffset(
 
   // 如果 offset 为 0，默认取 container 的源码偏移
   if (offset === 0) {
-    const markdownOffset = parentMarkdownNode
-      ?.getSourceSpans()[0]
-      .getInputIndex();
+    const { inputIndex: markdownOffset } =
+      getSourcePosition(parentMarkdownNode);
 
     // 如果是 endContainer，需要加上 endContainer 元素的源码长度，表示完全选中此元素
     if (isEnd) {
-      const markdownLength = parentMarkdownNode
-        ?.getSourceSpans()[0]
-        .getLength();
-
-      // 取得的数据异常
-      if (
-        typeof markdownOffset === "undefined" ||
-        typeof markdownLength === "undefined"
-      ) {
-        console.error(container, offset);
-
-        throw new Error(
-          "Can not get number value with markdown offset or markdown length"
-        );
-      }
+      const { inputIndex: markdownLength } =
+        getSourcePosition(parentMarkdownNode);
 
       // 返回源码偏移加表示此节点的源码长度
       return markdownOffset + markdownLength;
@@ -236,8 +252,8 @@ function getMarkdownChangeOffset(
     childMarkdownNode = childMarkdownNode?.getNext();
   }
 
-  const markdownOffset = childMarkdownNode?.getSourceSpans()[0].getInputIndex();
-  const markdownLength = childMarkdownNode?.getSourceSpans()[0].getLength();
+  const { inputIndex: markdownOffset, inputLength: markdownLength } =
+    getSourcePosition(childMarkdownNode);
 
   // 取得的数据异常
   if (
@@ -295,20 +311,19 @@ function findMarkdownNodeByRange(
   // 迭代子节点
   while (curr) {
     // 获取当前节点的源码偏移与节点的源码长度
-    const offset = curr?.getSourceSpans()[0].getInputIndex() || 0;
-    const length = curr?.getSourceSpans()[0].getLength() || 0;
+    const { inputIndex: offset, inputLength: length } = getSourcePosition(curr);
     // 获取到节点在源码中的结束位置
     const endOffset = offset + length;
 
     const child = curr.getFirstChild();
 
     // 位置与开始或结束相等，直接返回当前元素
-    if (position === offset || position === endOffset) {
-      return curr;
-    }
+    // if (position === offset || position === endOffset) {
+    //   return curr;
+    // }
 
     // 如果位置在当前节点内
-    if (position > offset && position < endOffset) {
+    if (position >= offset && position <= endOffset) {
       // 如果包含子节点，递归执行此任务
       if (child) {
         const result = findMarkdownNodeByRange(curr, position);
@@ -316,6 +331,8 @@ function findMarkdownNodeByRange(
         // 找到直接返回
         if (result) {
           return result;
+        } else {
+          return curr;
         }
       } else {
         // 没有子节点直接返回当前节点
@@ -329,43 +346,44 @@ function findMarkdownNodeByRange(
 }
 
 /** 根据源码位置找到新的文档选区 */
-function findSelectionByRange(
-  startChangeOffset: number,
-  endChangeOffset: number
-) {
+function findSelectionByRange(changeOffset: number) {
   /** 找到新的开始 MarkdownNode */
-  const startMarkdownNode = findMarkdownNodeByRange(
-    markdownDocument,
-    startChangeOffset
-  );
+  const markdownNode = findMarkdownNodeByRange(markdownDocument, changeOffset);
 
   // 必须存在且为 Text 节点
-  if (!startMarkdownNode) {
-    throw new Error("Can not find the markdown node by startChangeOffset");
+  if (!markdownNode) {
+    // FIXME: 删除图片报错
+    throw new Error("Can not find the markdown node by changeOffset");
   }
-  if (!(startMarkdownNode instanceof MarkdownText)) {
+
+  if (!(markdownNode instanceof MarkdownText)) {
     throw new Error("find markdown node is not a Text Node");
   }
 
   // 找到此节点的父级
-  const parentMarkdownNode = startMarkdownNode.getParent();
+  const parentMarkdownNode = markdownNode.getParent();
 
   // 必须存在
   if (!parentMarkdownNode) {
-    throw new Error("Can not get startMarkdownNode parent");
+    throw new Error("Can not get markdownNode parent");
   }
 
   let index = 0;
   let child = parentMarkdownNode.getFirstChild();
 
   // 找到节点在父级中的位置
-  while (child && child !== startMarkdownNode) {
+  while (child && child !== markdownNode) {
     index++;
     child = child.getNext();
   }
 
   // 找到父级 Markdown 对应的 HTML 元素
   const id = nodeMapAttributeProviderFactory.getId(parentMarkdownNode);
+
+  if (typeof id === "undefined") {
+    throw new Error("Can not get id from the binding parentMarkdownNode");
+  }
+
   const parent = getElementById(id);
 
   // 必须存在
@@ -373,7 +391,7 @@ function findSelectionByRange(
     throw new Error("Can not get the parent element");
   }
 
-  // 找到 startMarkdownNode 对应的 Dom 节点
+  // 找到 markdownNode 对应的 Dom 节点
   const target = parent.childNodes[index];
 
   // 必须存在
@@ -382,11 +400,11 @@ function findSelectionByRange(
   }
 
   // 获取选区在 DOM 节点中的偏移
-  const startOffset =
-    startChangeOffset - startMarkdownNode.getSourceSpans()[0].getInputIndex();
+  const rangeOffset = changeOffset - getSourcePosition(markdownNode).inputIndex;
 
   return {
-    startOffset: startOffset,
+    rangeContainer: target,
+    rangeOffset: rangeOffset,
   };
 }
 
@@ -403,11 +421,14 @@ function processRange(range: StaticRange, type: string, data: string) {
     )
   );
 
-  findSelectionByRange(startChangeOffset, endChangeOffset);
+  const { rangeContainer, rangeOffset } =
+    findSelectionByRange(startChangeOffset);
 
-  console.log(type);
-  console.log(data);
-  console.log(startChangeOffset, endChangeOffset);
+  console.log(rangeContainer, rangeOffset);
+
+  // console.log(type);
+  // console.log(data);
+  // console.log(startChangeOffset, endChangeOffset);
 }
 
 function onBeforeInput(e: InputEvent) {

@@ -8,19 +8,14 @@ import type {
 class NodeMapAttributeProvider implements AttributeProvider {
   private nextId = 1;
   private markdownNodeMap = new Map<string, MarkdownNode>();
+  private markdownIdRecordMap = new Map<MarkdownNode, string>();
 
   getNodeForId(id: string) {
     return this.markdownNodeMap.get(id);
   }
 
   getIdForNode(node: MarkdownNode) {
-    for (const [id, recordNode] of this.markdownNodeMap) {
-      if (node === recordNode) {
-        return id;
-      }
-    }
-
-    throw new Error("Can not find id by node");
+    return this.markdownIdRecordMap.get(node);
   }
 
   setAttributes(
@@ -33,6 +28,7 @@ class NodeMapAttributeProvider implements AttributeProvider {
     attributes.set("data-id", id);
 
     this.markdownNodeMap.set(id, node);
+    this.markdownIdRecordMap.set(node, id);
   }
 }
 
