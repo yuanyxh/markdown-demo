@@ -2,6 +2,7 @@
   "name": "commonmark",
   "description": "a strongly specified, highly compatible variant of Markdown",
   "version": "0.31.2",
+  "type": "module",
   "scripts": {
     "dev": "vite --mode dev",
     "build": "vite build --mode prod",

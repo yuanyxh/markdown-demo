@@ -6,7 +6,7 @@ import react from "@vitejs/plugin-react";
 export default ({ command, mode }: ConfigEnv): UserConfig => {
   return defineConfig({
     root: ".",
-    base: ".",
+    base: "./",
     plugins: [react()],
     server: {
       port: 9089,
