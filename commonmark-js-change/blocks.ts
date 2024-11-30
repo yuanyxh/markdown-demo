@@ -17,15 +17,34 @@ type TBlockParserContinueGroup = {
 
 type TBlockStartMatch = (parser: Parser, node: MarkdownNode) => number;
 
+/** 缩进代码块，4 空白符限制 */
 const CODE_INDENT = 4;
 
+/** 制表符码点 \t */
 const C_TAB = 9;
+/** 换行符码点 \n */
 const C_NEWLINE = 10;
+/** 大于号码点 > */
 const C_GREATERTHAN = 62;
+/** 小于号码点 < */
 const C_LESSTHAN = 60;
+/** 空格 */
 const C_SPACE = 32;
+/** 左中括号 [ */
 const C_OPEN_BRACKET = 91;
 
+/**
+ * html 块开始解析正则
+ *
+ * 0: 无匹配
+ * 1: 匹配 script pre textarea style
+ * 2: 匹配注释
+ * 3: 匹配指令
+ * 4: 匹配声明
+ * 5: 匹配 CDATA
+ * 6: 匹配 html 块元素
+ * 7: 匹配自定义 html 块元素
+ * */
 const reHtmlBlockOpen = [
   /./, // dummy for 0
   /^<(?:script|pre|textarea|style)(?:\s|>|$)/i,
@@ -37,6 +56,16 @@ const reHtmlBlockOpen = [
   new RegExp("^(?:" + OPENTAG + "|" + CLOSETAG + ")\\s*$", "i"),
 ];
 
+/**
+ * html 块结束解析
+ *
+ * 0: 无匹配
+ * 1: 匹配 script pre textarea style
+ * 2: 匹配注释
+ * 3: 匹配指令
+ * 4: 匹配声明
+ * 5: 匹配 CDATA
+ */
 const reHtmlBlockClose = [
   /./, // dummy for 0
   /<\/(?:script|pre|textarea|style)>/i,
@@ -46,36 +75,49 @@ const reHtmlBlockClose = [
   /\]\]>/,
 ];
 
+/** 匹配主题分割 */
 const reThematicBreak =
   /^(?:\*[ \t]*){3,}$|^(?:_[ \t]*){3,}$|^(?:-[ \t]*){3,}$/;
 
+/** 匹配可能的块内容 */
 const reMaybeSpecial = /^[#`~*+_=<>0-9-]/;
 
+/** 匹配非空白行 */
 const reNonSpace = /[^ \t\f\v\r\n]/;
 
+/** 匹配无序列表 */
 const reBulletListMarker = /^[*+-]/;
 
+/** 匹配有序列表 */
 const reOrderedListMarker = /^(\d{1,9})([.)])/;
 
+/** 匹配 ATX 标题 */
 const reATXHeadingMarker = /^#{1,6}(?:[ \t]+|$)/;
 
+/** 匹配开始代码围栏块 */
 const reCodeFence = /^`{3,}(?!.*`)|^~{3,}/;
 
+/** 匹配结束代码围栏块 */
 const reClosingCodeFence = /^(?:`{3,}|~{3,})(?=[ \t]*$)/;
 
+/** 匹配 Setext 标题 */
 const reSetextHeadingLine = /^(?:=+|-+)[ \t]*$/;
 
+/** 换行符 */
 const reLineEnding = /\r\n|\n|\r/;
 
 // Returns true if string contains only space characters.
+/** 如果字符串仅包含空格字符，则返回 true */
 const isBlank = function (s: string) {
   return !reNonSpace.test(s);
 };
 
+/** codePoint 是空格或制表符 */
 const isSpaceOrTab = function (c: number) {
   return c === C_SPACE || c === C_TAB;
 };
 
+/** 获取指定位置字符串的码点 */
 const peek = function (ln: string, pos: number) {
   if (pos < ln.length) {
     return ln.charCodeAt(pos);
@@ -84,17 +126,14 @@ const peek = function (ln: string, pos: number) {
   }
 };
 
-// DOC PARSER
-
-// These are methods of a Parser object, defined below.
-
 // Returns true if block ends with a blank line.
+/** 如果块以空行结束则返回 true */
 const endsWithBlankLine = function (block: MarkdownNode) {
   return block.next && block.sourcepos[1][0] !== block.next.sourcepos[0][0] - 1;
 };
 
-// Parse a list marker and return data on the marker (type,
-// start, delimiter, bullet character, padding) or null.
+// Parse a list marker and return data on the marker (type, start, delimiter, bullet character, padding) or null.
+/** 解析列表标记并返回标记上的数据（类型、开始数字、分隔符、项目符号字符、填充）或 null */
 const parseListMarker = function (parser: Parser, container: MarkdownNode) {
   const rest = parser.currentLine.slice(parser.nextNonspace);
   let match: RegExpMatchArray | null;
@@ -170,9 +209,8 @@ const parseListMarker = function (parser: Parser, container: MarkdownNode) {
   return data;
 };
 
-// Returns true if the two list items are of the same type,
-// with the same delimiter and bullet character.  This is used
-// in agglomerating list items into lists.
+// Returns true if the two list items are of the same type, with the same delimiter and bullet character.  This is used in agglomerating list items into lists.
+/** 如果两个列表项具有相同的类型、相同的分隔符和项目符号字符，则返回 true；用于将列表项聚合到列表中 */
 const listsMatch = function (list_data: IListData, item_data: IListData) {
   return (
     list_data.type === item_data.type &&
@@ -182,6 +220,7 @@ const listsMatch = function (list_data: IListData, item_data: IListData) {
 };
 
 // Remove link reference definitions from given tree.
+/** 从给定树中删除链接引用定义 */
 const removeLinkReferenceDefinitions = function (
   parser: Parser,
   tree: MarkdownNode
@@ -868,32 +907,38 @@ class Parser {
     return newBlock;
   }
 
-  // Analyze a line of text and update the document appropriately.
-  // We parse markdown text by calling this on each line of input,
-  // then finalizing the document.
+  // Analyze a line of text and update the document appropriately. We parse markdown text by calling this on each line of input, then finalizing the document.
+  /** 分析一行文本并适当更新文档；通过在每一行输入字符串上调用它来解析 Markdown 文本，然后完成文档 */
   incorporateLine(ln: string) {
     let all_matched = true;
+    // node type
     let t: string;
 
+    // 块容器
     let container: MarkdownNode | null = this.doc;
+    // 备份块作用域
     this.oldtip = this.tip;
 
+    // 重置
     this.offset = 0;
     this.column = 0;
     this.blank = false;
     this.partiallyConsumedTab = false;
+
+    // 行号加一
     this.lineNumber += 1;
 
     // replace NUL characters for security
+    // 替换所有不安全的码点 0 字符
     if (ln.indexOf("\u0000") !== -1) {
       ln = ln.replace(/\0/g, "\uFFFD");
     }
 
+    // 设置当前行字符串
     this.currentLine = ln;
 
-    // For each containing block, try to parse the associated line start.
-    // Bail out on failure: container will point to the last matching block.
-    // Set all_matched to false if not all containers match.
+    // For each containing block, try to parse the associated line start. Bail out on failure: container will point to the last matching block. Set all_matched to false if not all containers match.
+    // 对于每个包含块，尝试解析关联的行开头，失败时退出：容器将指向最后一个匹配的块；如果并非所有容器都匹配，将 all_matched 设置为 false
     let lastChild: MarkdownNode | null;
     while ((lastChild = container.lastChild) && lastChild.open) {
       container = lastChild;
@@ -1077,17 +1122,24 @@ class Parser {
 
   // The main parsing function.  Returns a parsed document AST.
   parse(input: string) {
+    // 构造根文档
     this.doc = new Document();
 
+    // 设置当前块作用域
     this.tip = this.doc;
 
+    // 链接引用的映射
     this.refmap = {};
 
+    // 行数
     this.lineNumber = 0;
+    // 当前最后行的长度
     this.lastLineLength = 0;
+    // 当前偏移
     this.offset = 0;
     this.column = 0;
 
+    // 最后匹配的块
     this.lastMatchedContainer = this.doc;
     this.currentLine = "";
 
@@ -1095,10 +1147,12 @@ class Parser {
       console.time("preparing input");
     }
 
+    // 切割为多行
     const lines = input.split(reLineEnding);
 
     let len = lines.length;
 
+    // 如果最后一个字符是换行符，忽略最后一行
     if (input.charCodeAt(input.length - 1) === C_NEWLINE) {
       // ignore last blank line created by final newline
       len -= 1;
@@ -1112,6 +1166,7 @@ class Parser {
       console.time("block parsing");
     }
 
+    // 遍历分析行
     for (let i = 0; i < len; i++) {
       this.incorporateLine(lines[i]);
     }
@@ -1133,6 +1188,7 @@ class Parser {
     if (this.options.time) {
       console.timeEnd("inline parsing");
     }
+
     return this.doc;
   }
 }
