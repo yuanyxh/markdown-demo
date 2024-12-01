@@ -15,6 +15,13 @@ type TBlockParserContinueGroup = {
   [key: string]: IBlockParserContinue;
 };
 
+/**
+ * 解析块开始的函数
+ * 返回值：
+ *   0: 没有匹配到块
+ *   1: 匹配到了容器块
+ *   2: 匹配到了叶块，没有更多内部块
+ *  */
 type TBlockStartMatch = (parser: Parser, node: MarkdownNode) => number;
 
 /** 缩进代码块，4 空白符限制 */
@@ -146,14 +153,17 @@ const parseListMarker = function (parser: Parser, container: MarkdownNode) {
     markerOffset: parser.indent,
   };
 
+  // 确保不在缩进代码块的范围
   if (parser.indent >= 4) {
     return null;
   }
 
+  // 匹配无序列表
   if ((match = rest.match(reBulletListMarker))) {
     data.type = "bullet";
     data.bulletChar = match[0][0];
   } else if (
+    // 匹配有序列表
     (match = rest.match(reOrderedListMarker)) &&
     (container.type !== "paragraph" || Number(match[1]) === 1)
   ) {
@@ -165,12 +175,14 @@ const parseListMarker = function (parser: Parser, container: MarkdownNode) {
   }
 
   // make sure we have spaces after
+  // 确保后面有空格（后续要么没有字符要么有一个空白字符）
   nextc = peek(parser.currentLine, parser.nextNonspace + match[0].length);
   if (!(nextc === -1 || nextc === C_TAB || nextc === C_SPACE)) {
     return null;
   }
 
   // if it interrupts paragraph, make sure first line isn't blank
+  // 如果它打断段落，确保第一行不是空白
   if (
     container.type === "paragraph" &&
     !parser.currentLine
@@ -181,12 +193,17 @@ const parseListMarker = function (parser: Parser, container: MarkdownNode) {
   }
 
   // we've got a match! advance offset and calculate padding
+  // 匹配到了列表项，提前偏移并计算填充
+  // 前进到非空白字符
   parser.advanceNextNonspace(); // to start of marker
+  // 跳过匹配的语法数量
   parser.advanceOffset(match[0].length, true); // to end of marker
 
   spacesStartCol = parser.column;
   spacesStartOffset = parser.offset;
 
+  // 前进后续的空格数量，只要小于 5 个空白字符内（列表项语法后必须有一个空白字符，而缩进代码块需要 4 个空白字符）
+  // 此处最多前进 4 个空白字符
   do {
     parser.advanceOffset(1, true);
     nextc = peek(parser.currentLine, parser.offset);
@@ -195,10 +212,12 @@ const parseListMarker = function (parser: Parser, container: MarkdownNode) {
   const blank_item = peek(parser.currentLine, parser.offset) === -1;
   const spaces_after_marker = parser.column - spacesStartCol;
 
+  // 如果内部是缩进代码块、没有空格符或空项目
   if (spaces_after_marker >= 5 || spaces_after_marker < 1 || blank_item) {
     data.padding = match[0].length + 1;
     parser.column = spacesStartCol;
     parser.offset = spacesStartOffset;
+
     if (isSpaceOrTab(peek(parser.currentLine, parser.offset))) {
       parser.advanceOffset(1, true);
     }
@@ -380,6 +399,7 @@ const blocks: TBlockParserContinueGroup = {
       } else {
         return 1;
       }
+
       return 0;
     },
     finalize: function (parser, block) {
@@ -576,18 +596,26 @@ const blockStarts: TBlockStartMatch[] = [
         .slice(parser.nextNonspace)
         .match(reATXHeadingMarker))
     ) {
+      // 匹配到 ATX 标题，前进到下一个非空白字符
       parser.advanceNextNonspace();
+      // 跳过匹配到的 markdown 语法关键字的数量
       parser.advanceOffset(match[0].length, false);
+      // 关闭所有未完成的块
       parser.closeUnmatchedBlocks();
 
+      // 当前块作用域 this.tip 添加一个子节点
       const container = parser.addChild("heading", parser.nextNonspace);
+      // 设置标题级别为 # 的数量
       container.level = match[0].trim().length; // number of #s
+
       // remove trailing ###s:
+      // 删除尾随的 ###：
       container.string_content = parser.currentLine
         .slice(parser.offset)
         .replace(/^[ \t]*#+[ \t]*$/, "")
         .replace(/[ \t]+#+[ \t]*$/, "");
 
+      // 前进到行尾
       parser.advanceOffset(parser.currentLine.length - parser.offset);
       return 2;
     } else {
@@ -870,23 +898,25 @@ class Parser {
     this.partiallyConsumedTab = false;
   }
 
-  // Add a line to the block at the tip.  We assume the tip
-  // can accept lines -- that check should be done before calling this.
+  // Add a line to the block at the tip.  We assume the tip can accept lines -- that check should be done before calling this.
+  // 在块的尖端添加一条线，我们假设提示可以接受行 (应该在调用它之前完成检查)
   addLine() {
     if (this.partiallyConsumedTab) {
+      // 跳过 tab
       this.offset += 1; // skip over tab
 
       // add space characters:
+      // 添加空格（将 tab 转化为 4 个空格）
       const charsToTab = 4 - (this.column % 4);
       this.tip.string_content += " ".repeat(charsToTab);
     }
 
+    // 设置当前块作用域的 string_content 内容
     this.tip.string_content += this.currentLine.slice(this.offset) + "\n";
   }
 
-  // Add block of type tag as a child of the tip.  If the tip can't
-  // accept children, close and finalize it and try its parent,
-  // and so on til we find a block that can accept children.
+  // Add block of type tag as a child of the tip.  If the tip can't accept children, close and finalize it and try its parent, and so on til we find a block that can accept children.
+  // 添加类型标记块作为 tip 的子项；如果 tip 无法接受子项，请关闭并完成它并尝试其父项，依此类推，直到找到可以接受子项的块
   addChild(tag: string, offset: number) {
     while (!this.blocks[this.tip.type].canContain(tag)) {
       this.finalize(this.tip, this.lineNumber - 1);
@@ -911,7 +941,7 @@ class Parser {
   /** 分析一行文本并适当更新文档；通过在每一行输入字符串上调用它来解析 Markdown 文本，然后完成文档 */
   incorporateLine(ln: string) {
     let all_matched = true;
-    // node type
+    // 节点类型
     let t: string;
 
     // 块容器
@@ -940,23 +970,28 @@ class Parser {
     // For each containing block, try to parse the associated line start. Bail out on failure: container will point to the last matching block. Set all_matched to false if not all containers match.
     // 对于每个包含块，尝试解析关联的行开头，失败时退出：容器将指向最后一个匹配的块；如果并非所有容器都匹配，将 all_matched 设置为 false
     let lastChild: MarkdownNode | null;
+    // 从 doc 开始，向内部查找最后一个打开的块（未完成的、可能有后续内容的块）
     while ((lastChild = container.lastChild) && lastChild.open) {
       container = lastChild;
 
       this.findNextNonspace();
 
       switch (this.blocks[container.type].continue(this, container)) {
+        // 匹配到一个容器块
         case 0: // we've matched, keep going
           break;
+        // 没有匹配到一个容器块
         case 1: // we've failed to match a block
           all_matched = false;
           break;
+        // 我们已经到达受防护代码关闭的行尾并且可以返回
         case 2: // we've hit end of line for fenced code close and can return
           return;
         default:
           throw "continue returned illegal value, must be 0, 1, or 2";
       }
 
+      // 没有匹配到容器块则回退到父容器
       if (!all_matched) {
         container = container.parent; // back up to last matching block
 
@@ -969,34 +1004,68 @@ class Parser {
       throw new Error("Not have a container.");
     }
 
+    // container 是原备份的块作用域，说明内部的块是全部关闭的
+    // 相当于没有未解析完成的块
     this.allClosed = container === this.oldtip;
+
+    // 备份最后匹配的容器块
     this.lastMatchedContainer = container;
 
+    // 匹配到的最后的块是否是叶块（除了段落外）
     let matchedLeaf =
       container.type !== "paragraph" && blocks[container.type].acceptsLines;
 
+    // 运行块开始匹配函数
+    /**
+     * 尝试匹配:
+     *   块引用
+     *   ATX 标题
+     *   代码围栏块
+     *   HTML 块
+     *   Setext 标题
+     *   分割主题块
+     *   列表项
+     *   缩进代码块
+     */
     const starts = this.blockStarts;
     const startsLen = starts.length;
 
-    // Unless last matched container is a code block, try new container starts,
-    // adding children to the last matched container:
+    // Unless last matched container is a code block, try new container starts, adding children to the last matched container:
+    // 除非最后一个匹配的容器是代码块，否则尝试启动新容器，将子容器添加到最后一个匹配的容器
+
+    /**
+     * 每次对一行匹配容器块，如果是缩进代码块，则后续内容都视为代码块范围，不需要在解析
+     * 如果是叶块，则后续内容都视为叶块内容，不需要在解析
+     * 如果是容器块，则块可以包含另一个块，以新的行偏移位置开始，继续解析内部块
+     *
+     * 1. 找到下一个非空白字符，记录相关信息
+     * 2. 如果是缩进代码块或没有匹配到任何容器块，将偏移移动到下一个非空白字符，跳出循环
+     * 3. 运行块开始解析函数
+     *    1. 如果匹配到了容器块，将 container 设置为当前块作用域，跳出循环，继续执行上述步骤
+     *    2. 如果匹配到了页块，将 container 设置为当前块作用域，matchedLeaf 设置为 true， 跳出循环
+     */
     while (!matchedLeaf) {
       this.findNextNonspace();
 
       // this is a little performance optimization:
+      // 性能优化，如果没有任何可能的容器块，前进到下一个非空白字符，并跳出循环
       if (!this.indented && !reMaybeSpecial.test(ln.slice(this.nextNonspace))) {
         this.advanceNextNonspace();
         break;
       }
 
       let i = 0;
+
+      // 循环运行容器块解析函数（此处跳出到外层继续迭代）
       while (i < startsLen) {
         const res = starts[i](this, container);
 
+        // 匹配到了容器块，container 设置为当前的块作用域（匹配到的容器块包含在当前块作用域中）
         if (res === 1) {
           container = this.tip;
 
           break;
+          // 匹配到了叶块，container 设置为当前的块作用域（匹配到的容器块包含在当前块作用域中）
         } else if (res === 2) {
           container = this.tip;
           matchedLeaf = true;
@@ -1007,6 +1076,7 @@ class Parser {
         }
       }
 
+      // 运行到此处表明无任何匹配的块，前进到下一个非空白字符
       if (i === startsLen) {
         // nothing matched
         this.advanceNextNonspace();
@@ -1015,17 +1085,21 @@ class Parser {
       }
     }
 
-    // What remains at the offset is a text line.  Add the text to the
-    // appropriate container.
+    // What remains at the offset is a text line.  Add the text to the appropriate container.
+    // 保留在偏移处的是文本行，将文本添加到适当的容器中
 
     // First check for a lazy paragraph continuation:
+    // 首先检查是否存在惰性段落延续（段落跨越两行（多行？），且未被其他块中断的被称为 [惰性段落]）
     if (!this.allClosed && !this.blank && this.tip.type === "paragraph") {
       // lazy paragraph continuation
+      // 惰性段落的后续内容（运行到此处说明当前行前面有未被中断的段落行）
       this.addLine();
     } else {
       // not a lazy continuation
+      // 不是惰性段落
 
       // finalize any blocks not matched
+      // 完成任何不匹配的块
       this.closeUnmatchedBlocks();
 
       t = container.type;
@@ -1046,24 +1120,27 @@ class Parser {
           this.finalize(container, this.lineNumber);
         }
       } else if (this.offset < ln.length && !this.blank) {
+        // 如果最终的偏移小于当前行的长度且未到行的结尾，则添加一个段落节点到当前块作用域 this.tip, 并设置 container 为 新的段落节点
         // create paragraph container for line
         container = this.addChild("paragraph", this.offset);
 
+        // 前进到下一个非空白字符
         this.advanceNextNonspace();
+        // 添加段落文本数据
         this.addLine();
       }
     }
 
+    // 最后一行的长度设置为当前行的长度
     this.lastLineLength = ln.length;
   }
 
-  // Finalize a block.  Close it and do any necessary postprocessing,
-  // e.g. creating string_content from strings, setting the 'tight'
-  // or 'loose' status of a list, and parsing the beginnings
-  // of paragraphs for reference definitions.  Reset the tip to the
-  // parent of the closed block.
+  // Finalize a block.  Close it and do any necessary postprocessing, e.g. creating string_content from strings, setting the 'tight' or 'loose' status of a list, and parsing the beginnings of paragraphs for reference definitions.  Reset the tip to the parent of the closed block.
+  // 完成一个块；关闭它并进行任何必要的后处理，例如从字符串创建 string_content，设置列表的 “紧” 或 “松” 状态，并解析段落的开头以获取参考定义；将 tip 重置为闭合块的父级
   finalize(block: MarkdownNode, lineNumber: number) {
+    // 即将回退的块，this.tip 回退到当前块作用域的父级
     const above = block.parent;
+    // 当前的块被关闭，不再有后续内容追加
     block.open = false;
     block.sourcepos[1] = [lineNumber, this.lastLineLength];
 
@@ -1074,6 +1151,7 @@ class Parser {
     //   throw new Error("Not have a above.");
     // }
 
+    // 块作用域回退至当前块作用域的父级
     this.tip = above as MarkdownNode;
   }
 
@@ -1100,12 +1178,18 @@ class Parser {
   }
 
   // Finalize and close any unmatched blocks.
+  // 完成并关闭任何不匹配的块
   closeUnmatchedBlocks() {
+    // 如果存在未关闭的块
     if (!this.allClosed) {
       // finalize any blocks not matched
+      // 完成任何不匹配的块
+      // 迭代直到 oldtip 等于 lastMatchedContainer
       while (this.oldtip !== this.lastMatchedContainer) {
+        // 备份 parent
         const parent = this.oldtip.parent;
 
+        // 完成并关闭内部块
         this.finalize(this.oldtip, this.lineNumber - 1);
 
         // TODO: new add
@@ -1116,6 +1200,7 @@ class Parser {
         this.oldtip = parent;
       }
 
+      // 全部块都已关闭
       this.allClosed = true;
     }
   }
