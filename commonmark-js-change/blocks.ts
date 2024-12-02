@@ -247,20 +247,22 @@ const removeLinkReferenceDefinitions = function (
   let event: IWalker | null;
   let node: MarkdownNode | null;
 
+  // 创建 tree 迭代器
   const walker = tree.walker();
+  // 空节点集合
   const emptyNodes: MarkdownNode[] = [];
 
+  // 迭代树
   while ((event = walker.next())) {
     node = event.node;
 
+    // 如果是段落
     if (event.entering && node.type === "paragraph") {
       let pos: number;
       let hasReferenceDefs = false;
 
-      // Try parsing the beginning as link reference definitions;
-      // Note that link reference definitions must be the beginning of a
-      // paragraph node since link reference definitions cannot interrupt
-      // paragraphs.
+      // Try parsing the beginning as link reference definitions; Note that link reference definitions must be the beginning of a paragraph node since link reference definitions cannot interrupt paragraphs.
+      // 尝试将开头解析为链接引用定义；请注意，链接引用定义必须是段落节点的开头，因为链接引用定义不能中断段落。
       while (
         peek(node.string_content, 0) === C_OPEN_BRACKET &&
         (pos = parser.inlineParser.parseReference(
@@ -318,13 +320,15 @@ const blocks: TBlockParserContinueGroup = {
 
       while (item) {
         // check for non-final list item ending with blank line:
+        // 检查以空行结尾的非最终列表项：
+        // 如果不是最后一个列表项，且当前列表项以空行结束，则列表是松散的
         if (item.next && endsWithBlankLine(item)) {
           block.listData.tight = false;
           break;
         }
 
-        // recurse into children of list item, to see if there are
-        // spaces between any of them:
+        // recurse into children of list item, to see if there are spaces between any of them:
+        // 递归到列表项的子项，查看它们之间是否有空格：
         let subitem = item.firstChild;
         while (subitem) {
           if (subitem.next && endsWithBlankLine(subitem)) {
@@ -381,6 +385,7 @@ const blocks: TBlockParserContinueGroup = {
       if (parser.blank) {
         if (container.firstChild === null) {
           // Blank line after empty list item
+          // 空列表项后的空行
           return 1;
         } else {
           parser.advanceNextNonspace();
@@ -407,6 +412,7 @@ const blocks: TBlockParserContinueGroup = {
         block.sourcepos[1] = block.lastChild.sourcepos[1];
       } else {
         // Empty list item
+        // 空列表项
         block.sourcepos[1][0] = block.sourcepos[0][0];
 
         // TODO: new add
@@ -457,6 +463,7 @@ const blocks: TBlockParserContinueGroup = {
       const ln = parser.currentLine;
       const indent = parser.indent;
 
+      // 围栏代码块
       if (container.isFenced) {
         // fenced
         const match =
@@ -466,12 +473,14 @@ const blocks: TBlockParserContinueGroup = {
 
         if (match && match[0].length >= container.fenceLength) {
           // closing fence - we're at end of line, so we can return
+          // 关闭栅栏 - 我们已经到了队伍的尽头，所以我们可以返回
           parser.lastLineLength = parser.offset + indent + match[0].length;
           parser.finalize(container, parser.lineNumber);
 
           return 2;
         } else {
           // skip optional spaces of fence offset
+          // 跳过栅栏偏移的可选空格
           let i = container.fenceOffset;
 
           // TODO: new add
@@ -485,6 +494,7 @@ const blocks: TBlockParserContinueGroup = {
         }
       } else {
         // indented
+        // 缩进代码块
         if (indent >= CODE_INDENT) {
           parser.advanceOffset(CODE_INDENT, true);
         } else if (parser.blank) {
@@ -497,8 +507,10 @@ const blocks: TBlockParserContinueGroup = {
     },
     finalize: function (parser, block) {
       if (block.isFenced) {
+        // 围栏代码块
         // fenced
         // first line becomes info string
+        // 第一行成为信息字符串
         const content = block.string_content;
         const newlinePos = content.indexOf("\n");
         const firstLine = content.slice(0, newlinePos);
@@ -508,9 +520,10 @@ const blocks: TBlockParserContinueGroup = {
         block.literal = rest;
       } else {
         // indented
+        // 缩进代码块
         const lines = block.string_content.split("\n");
-        // Note that indented code block cannot be empty, so
-        // lines.length cannot be zero.
+        // Note that indented code block cannot be empty, so lines.length cannot be zero.
+        // 请注意，缩进的代码块不能为空，因此 lines.length 不能为零
         while (/^[ \t]*$/.test(lines[lines.length - 1])) {
           lines.pop();
         }
@@ -699,6 +712,7 @@ const blockStarts: TBlockStartMatch[] = [
       parser.closeUnmatchedBlocks();
 
       // resolve reference link definitiosn
+      // 解析参考链接定义
       let pos: number;
       while (
         peek(container.string_content, 0) === C_OPEN_BRACKET &&
@@ -756,12 +770,14 @@ const blockStarts: TBlockStartMatch[] = [
       parser.closeUnmatchedBlocks();
 
       // add the list if needed
+      // 如果需要添加列表
       if (parser.tip.type !== "list" || !listsMatch(container.listData, data)) {
         container = parser.addChild("list", parser.nextNonspace);
         container.listData = data;
       }
 
       // add the list item
+      // 添加列表项
       container = parser.addChild("item", parser.nextNonspace);
       container.listData = data;
 
@@ -1155,8 +1171,8 @@ class Parser {
     this.tip = above as MarkdownNode;
   }
 
-  // Walk through a block & children recursively, parsing string content
-  // into inline content where appropriate.
+  // Walk through a block & children recursively, parsing string content into inline content where appropriate.
+  // 递归地遍历块和子级，在适当的情况下将字符串内容解析为内联内容
   processInlines(block: MarkdownNode) {
     let node: MarkdownNode;
     let event: IWalker | null;
@@ -1171,6 +1187,7 @@ class Parser {
       node = event.node;
       t = node.type;
 
+      // 解析段落和标题中的内联内容
       if (!event.entering && (t === "paragraph" || t === "heading")) {
         this.inlineParser.parse(node);
       }
@@ -1256,6 +1273,7 @@ class Parser {
       this.incorporateLine(lines[i]);
     }
 
+    // 迭代，完成未完成的块 -> 冒泡到 document
     while (this.tip) {
       this.finalize(this.tip, len);
     }
@@ -1268,6 +1286,7 @@ class Parser {
       console.time("inline parsing");
     }
 
+    // 解析行内
     this.processInlines(this.doc);
 
     if (this.options.time) {

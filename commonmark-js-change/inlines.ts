@@ -112,6 +112,7 @@ const reLinkLabel = /^\[(?:[^\\\[\]]|\\.){0,1000}\]/s;
 // Matches a string of non-special characters.
 const reMain = /^[^\n`\[\]\\!<&*_'"]+/m;
 
+/** 创建一个文本节点 */
 const text = function (s: string) {
   const node = new MarkdownNode("text");
   node.literal = s;
@@ -174,8 +175,8 @@ class InlineParser {
     }
   }
 
-  // Returns the code for the character at the current subject position, or -1
-  // there are no more characters.
+  // Returns the code for the character at the current subject position, or -1 there are no more characters.
+  // 返回当前主题位置处的字符的代码，如果没有更多字符，则返回 -1。
   peek() {
     if (this.pos < this.subject.length) {
       return this.subject.charCodeAt(this.pos);
@@ -199,6 +200,7 @@ class InlineParser {
   // literal sequence of backticks.
   parseBackticks(block: MarkdownNode) {
     const ticks = this.match(reTicksHere);
+
     if (ticks === null) {
       return false;
     }
@@ -239,10 +241,8 @@ class InlineParser {
     return true;
   }
 
-  // Parse a backslash-escaped special character, adding either the escaped
-  // character, a hard line break (if the backslash is followed by a newline),
-  // or a literal backslash to the block's children.  Assumes current character
-  // is a backslash.
+  // Parse a backslash-escaped special character, adding either the escaped character, a hard line break (if the backslash is followed by a newline), or a literal backslash to the block's children.  Assumes current character is a backslash.
+  // 解析反斜杠转义的特殊字符，添加转义字符、硬换行符（如果反斜杠后跟换行符）或文本反斜杠到块的子级。  假设当前字符是反斜杠。
   parseBackslash(block: MarkdownNode) {
     const subj = this.subject;
 
@@ -783,11 +783,13 @@ class InlineParser {
     }
   }
 
-  // Parse a newline.  If it was preceded by two spaces, return a hard
-  // line break; otherwise a soft line break.
+  // Parse a newline.  If it was preceded by two spaces, return a hard line break; otherwise a soft line break.
+  // 解析换行符。  如果前面有两个空格，则返回硬换行符；否则会出现软断线。
   parseNewline(block: MarkdownNode) {
+    // 假设我们处于 \n
     this.pos += 1; // assume we're at a \n
     // check previous node for trailing spaces
+    // 检查前一个节点的尾随空格
 
     const lastc = block.lastChild;
 
@@ -905,9 +907,8 @@ class InlineParser {
     return this.pos - startpos;
   }
 
-  // Parse the next inline element in subject, advancing subject position.
-  // On success, add the result to block's children and return true.
-  // On failure, return false.
+  // Parse the next inline element in subject, advancing subject position. On success, add the result to block's children and return true. On failure, return false.
+  // 解析主题中的下一个内联元素，推进主题位置。成功后，将结果添加到块的子级并返回 true。失败时返回 false。
   parseInline(block: MarkdownNode) {
     let res = false;
 
@@ -918,19 +919,24 @@ class InlineParser {
     }
 
     switch (c) {
+      // \n
       case C_NEWLINE:
         res = this.parseNewline(block);
         break;
+      // \\
       case C_BACKSLASH:
         res = this.parseBackslash(block);
         break;
+      // `
       case C_BACKTICK:
         res = this.parseBackticks(block);
         break;
+      // * or _
       case C_ASTERISK:
       case C_UNDERSCORE:
         res = this.handleDelim(c, block);
         break;
+      // ' or "
       case C_SINGLEQUOTE:
       case C_DOUBLEQUOTE:
         if (this.options.smart) {
@@ -938,18 +944,23 @@ class InlineParser {
         }
 
         break;
+      // [
       case C_OPEN_BRACKET:
         res = this.parseOpenBracket(block);
         break;
+      // !
       case C_BANG:
         res = this.parseBang(block);
         break;
+      // ]
       case C_CLOSE_BRACKET:
         res = this.parseCloseBracket(block);
         break;
+      // <
       case C_LESSTHAN:
         res = this.parseAutolink(block) || this.parseHtmlTag(block);
         break;
+      // &
       case C_AMPERSAND:
         res = this.parseEntity(block);
         break;
@@ -1171,8 +1182,8 @@ class InlineParser {
     }
   }
 
-  // Parse string content in block into inline children,
-  // using refmap to resolve references.
+  // Parse string content in block into inline children, using refmap to resolve references.
+  // 将块中的字符串内容解析为内联子级，使用 refmap 来解析引用。
   parse(block: MarkdownNode) {
     // trim() removes non-ASCII whitespaces, vertical tab, form feed and so on.
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trim#return_value
