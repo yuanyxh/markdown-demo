@@ -32,6 +32,8 @@ import {
 
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).
+ *
+ * 渲染所有核心节点的默认节点渲染器（按节点渲染器的顺序排在最后）
  */
 class CoreTextContentNodeRenderer
   extends AbstractVisitor
@@ -52,6 +54,11 @@ class CoreTextContentNodeRenderer
   public beforeRoot(rootNode: MarkdownNode): void {}
   public afterRoot(rootNode: MarkdownNode): void {}
 
+  /**
+   * 默认处理渲染的节点类型
+   *
+   * @returns
+   */
   public getNodeTypes(): Set<typeof MarkdownNode> {
     return new Set([
       Document,
@@ -77,10 +84,20 @@ class CoreTextContentNodeRenderer
     ] as unknown as (typeof MarkdownNode)[]);
   }
 
+  /**
+   * 渲染方法
+   *
+   * @param node
+   */
   public render(node: MarkdownNode) {
     node.accept(this);
   }
 
+  /**
+   * 访问节点，转化为 markdown 文本
+   *
+   * @param node
+   */
   public override visit(node: MarkdownNode) {
     switch (true) {
       case node instanceof Document:
@@ -177,6 +194,7 @@ class CoreTextContentNodeRenderer
       case node instanceof IndentedCodeBlock:
         const indentedCodeBlockLiteral =
           CoreTextContentNodeRenderer.stripTrailingNewline(node.getLiteral());
+
         if (this.stripNewlines()) {
           this.textContent.writeStripped(indentedCodeBlockLiteral);
         } else {
@@ -208,6 +226,7 @@ class CoreTextContentNodeRenderer
               orderedListHolder.getDelimiter() +
               " "
           );
+
           this.visitChildren(node);
           this.textContent.block();
 
@@ -262,6 +281,11 @@ class CoreTextContentNodeRenderer
     }
   }
 
+  /**
+   * 访问子节点列表，写入 markdown 文本
+   *
+   * @param parent
+   */
   protected override visitChildren(parent: MarkdownNode) {
     let node = parent.getFirstChild();
 
@@ -272,6 +296,11 @@ class CoreTextContentNodeRenderer
     }
   }
 
+  /**
+   * 写入文本
+   *
+   * @param text
+   */
   private writeText(text: string) {
     if (this.stripNewlines()) {
       this.textContent.writeStripped(text);
@@ -280,6 +309,13 @@ class CoreTextContentNodeRenderer
     }
   }
 
+  /**
+   * 写入链接
+   *
+   * @param node
+   * @param title
+   * @param destination
+   */
   private writeLink(
     node: MarkdownNode,
     title: string,
@@ -318,10 +354,21 @@ class CoreTextContentNodeRenderer
     }
   }
 
+  /**
+   * 换行符的呈现方式
+   *
+   * @returns
+   */
   private stripNewlines() {
     return this.context.lineBreakRendering() === LineBreakRendering.STRIP;
   }
 
+  /**
+   * 去掉尾随换行符
+   *
+   * @param s
+   * @returns
+   */
   private static stripTrailingNewline(s: string) {
     if (s.endsWith("\n")) {
       return s.substring(0, s.length - 1);

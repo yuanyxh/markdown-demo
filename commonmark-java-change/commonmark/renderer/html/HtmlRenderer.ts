@@ -12,7 +12,7 @@ import type { AttributeProviderContext } from "./interfaces/AttributeProviderCon
 import CoreHtmlNodeRenderer from "./CoreHtmlNodeRenderer";
 import DefaultUrlSanitizer from "./html_utils/DefaultUrlSanitizer";
 import HtmlWriter from "./HtmlWriter";
-import { Appendable } from "../../../common";
+import { Appendable } from "../../../helpers";
 import { NodeRendererMap, Escaping } from "../../internal";
 
 /**

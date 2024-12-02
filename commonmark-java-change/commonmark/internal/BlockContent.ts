@@ -1,4 +1,4 @@
-import { Appendable } from "../../common";
+import { Appendable } from "../../helpers";
 
 class BlockContent {
   private readonly sb: Appendable;

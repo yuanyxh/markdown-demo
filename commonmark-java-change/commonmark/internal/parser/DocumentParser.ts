@@ -24,7 +24,7 @@ import ListBlockParser from "./ListBlockParser";
 import ParagraphParser from "./ParagraphParser";
 import ThematicBreakParser from "./ThematicBreakParser";
 import Parsing from "../internal_util/Parsing";
-import { Appendable } from "../../../common";
+import { Appendable } from "../../../helpers";
 import {
   BlockQuote,
   FencedCodeBlock,

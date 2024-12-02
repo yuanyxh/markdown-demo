@@ -1,6 +1,6 @@
 import type { Visitor } from "./interfaces/Visitor";
 
-import { isNotUnDef } from "../../common";
+import { isNotUnDef } from "../../helpers";
 import ListBlock from "./ListBlock";
 
 class BulletList extends ListBlock {

@@ -3,7 +3,7 @@ import type { MarkdownNodeRendererContext } from "./interfaces/MarkdownNodeRende
 import type { Renderer } from "../interfaces/Renderer";
 import type { MarkdownNodeRendererFactory } from "./interfaces/MarkdownNodeRendererFactory";
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { Appendable } from "../../../common";
+import type { Appendable } from "../../../helpers";
 import type { MarkdownNode } from "../../node";
 
 import CoreMarkdownNodeRenderer from "./CoreMarkdownNodeRenderer";

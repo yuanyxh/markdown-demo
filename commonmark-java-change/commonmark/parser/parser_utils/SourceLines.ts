@@ -1,7 +1,7 @@
 import type SourceLine from "./SourceLine";
 import type { SourceSpan } from "../../node";
 
-import { Appendable } from "../../../common";
+import { Appendable } from "../../../helpers";
 
 /**
  * A set of lines ({@link SourceLine}) from the input source.

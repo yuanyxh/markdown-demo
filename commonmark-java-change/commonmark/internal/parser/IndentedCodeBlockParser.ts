@@ -2,7 +2,7 @@ import type { Block } from "../../node";
 import type { BlockParserFactory, ParserState, SourceLine } from "../../parser";
 
 import Parsing from "../internal_util/Parsing";
-import { Appendable } from "../../../common";
+import { Appendable } from "../../../helpers";
 import { IndentedCodeBlock, Paragraph } from "../../node";
 import {
   AbstractBlockParser,

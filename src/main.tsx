@@ -1,14 +1,14 @@
 import "normalize.css";
 import "./styles/global.less";
 
-import { Parser, HtmlRenderer } from "../commonmark-js-change";
+import { Parser, HtmlRenderer } from "../commonmark-java-change/commonmark";
 
 import markdown from "./example.md?raw";
 
-const reader = new Parser({ time: true });
-const writer = new HtmlRenderer({ softbreak: "<br />" });
-const parsed = reader.parse(markdown);
-const result = writer.render(parsed);
-
-console.log(parsed);
-console.log(result);
+console.time("start");
+const parser = Parser.builder().build();
+const document = parser.parse(markdown);
+console.timeEnd("end");
+const renderer = HtmlRenderer.builder().build();
+const html = renderer.render(document);
+console.log(html);

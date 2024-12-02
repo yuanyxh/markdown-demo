@@ -4,7 +4,7 @@ import type { CharMatcher } from "../../text";
 import SourceLine from "./SourceLine";
 import SourceLines from "./SourceLines";
 import Position from "./Position";
-import { Character, fromCodePoint } from "../../../common";
+import { Character, fromCodePoint } from "../../../helpers";
 
 class Scanner {
   /**

@@ -1,7 +1,7 @@
 import type { Visitor } from "./interfaces/Visitor";
 
 import Block from "./abstracts/Block";
-import { isNotUnDef } from "../../common";
+import { isNotUnDef } from "../../helpers";
 
 class FencedCodeBlock extends Block {
   private fenceCharacter: string | undefined;

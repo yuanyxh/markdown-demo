@@ -7,7 +7,7 @@ import type {
 
 import ListItemParser from "./ListItemParser";
 import Parsing from "../internal_util/Parsing";
-import { isNotUnDef } from "../../../common";
+import { isNotUnDef } from "../../../helpers";
 import { BulletList, ListItem, OrderedList } from "../../node";
 import { AbstractBlockParser, BlockStart, BlockContinue } from "../../parser";
 

@@ -8,7 +8,7 @@ import type { Block } from "../../node";
 
 import Escaping from "../internal_util/Escaping";
 import Parsing from "../internal_util/Parsing";
-import { Appendable } from "../../../common";
+import { Appendable } from "../../../helpers";
 import { FencedCodeBlock } from "../../node";
 import { AbstractBlockParser, BlockStart, BlockContinue } from "../../parser";
 import { Characters } from "../../text";

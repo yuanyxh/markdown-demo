@@ -27,7 +27,7 @@ import {
   HardLineBreak,
   AbstractVisitor,
 } from "../../node";
-import { isNotUnDef, isUnDef } from "../../../common";
+import { isNotUnDef, isUnDef } from "../../../helpers";
 
 class ListHolder {
   public readonly parent: ListHolder;

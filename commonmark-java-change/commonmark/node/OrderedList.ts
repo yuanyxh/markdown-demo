@@ -1,7 +1,7 @@
 import type { Visitor } from "./interfaces/Visitor";
 
 import ListBlock from "./ListBlock";
-import { isNotUnDef } from "../../common";
+import { isNotUnDef } from "../../helpers";
 
 class OrderedList extends ListBlock {
   private markerDelimiter: string | undefined;

@@ -1,4 +1,4 @@
-import { fromCodePoint } from "../../../common";
+import { fromCodePoint } from "../../../helpers";
 import { EntitiesMap } from "./Entities";
 
 class Html5Entities {
