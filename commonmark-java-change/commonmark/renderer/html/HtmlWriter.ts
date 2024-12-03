@@ -3,6 +3,9 @@ import type { Appendable } from "../../../helpers";
 import { fromCodePoint } from "../../../helpers";
 import { Escaping } from "../../internal";
 
+/**
+ * html 写入器
+ */
 class HtmlWriter {
   private static readonly NO_ATTRIBUTES = new Map<string, string>();
 
@@ -13,14 +16,31 @@ class HtmlWriter {
     this.buffer = out;
   }
 
+  /**
+   * 写入原始文本
+   *
+   * @param s
+   */
   public raw(s: string) {
     this.append(s);
   }
 
+  /**
+   * 写入文本（对 html 标记字符进行编码保证安全）
+   *
+   * @param text
+   */
   public text(text: string) {
     this.append(Escaping.escapeHtml(text));
   }
 
+  /**
+   * 写入一个 html 标记
+   *
+   * @param name
+   * @param attrs
+   * @param voidElement
+   */
   public tag(
     name: string,
     attrs = HtmlWriter.NO_ATTRIBUTES,
@@ -47,12 +67,20 @@ class HtmlWriter {
     this.append(">");
   }
 
+  /**
+   * 写入换行符
+   */
   public line() {
     if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== "\n") {
       this.append("\n");
     }
   }
 
+  /**
+   * 追加文本
+   *
+   * @param s
+   */
   protected append(s: string) {
     this.buffer.append(s);
 

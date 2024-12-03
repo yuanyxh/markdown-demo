@@ -315,9 +315,10 @@ class InlineParserImpl
       const parser = factory.create();
 
       for (const c of factory.getTriggerCharacters()) {
-        if (!map.has(c)) {
-          map.set(c, [parser]);
-        }
+        const parserMap = map.get(c) || [];
+        parserMap.push(parser);
+
+        map.set(c, parserMap);
       }
     }
 

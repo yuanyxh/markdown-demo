@@ -29,6 +29,9 @@ import {
   AbstractVisitor,
 } from "../../node";
 
+/**
+ * 文本节点、换行节点的访问器
+ */
 class AltTextVisitor extends AbstractVisitor {
   private readonly sb: Appendable = new Appendable();
 
@@ -63,6 +66,8 @@ class AltTextVisitor extends AbstractVisitor {
 
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).
+ *
+ * 渲染所有核心节点的节点渲染器（按节点渲染器的顺序排在最后）
  */
 class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   protected readonly context: HtmlNodeRendererContext;
@@ -77,6 +82,11 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   public beforeRoot(rootNode: MarkdownNode) {}
   public afterRoot(rootNode: MarkdownNode) {}
 
+  /**
+   * 返回渲染器处理的节点类型
+   *
+   * @returns
+   */
   public getNodeTypes(): Set<typeof MarkdownNode> {
     return new Set([
       Document,
@@ -102,10 +112,20 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     ] as unknown as (typeof MarkdownNode)[]);
   }
 
+  /**
+   * 渲染
+   *
+   * @param node
+   */
   public render(node: MarkdownNode) {
     node.accept(this);
   }
 
+  /**
+   * 访问节点
+   *
+   * @param node
+   */
   public override visit(node: MarkdownNode) {
     switch (true) {
       case node instanceof Document: {
@@ -131,33 +151,33 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       }
 
       case node instanceof Paragraph: {
-        // const paragraph = node;
-
-        // const omitP: boolean =
-        //   this.isInTightList(paragraph) || //
-        //   (this.context.shouldOmitSingleParagraphP() &&
-        //     paragraph.getParent() instanceof Document && //
-        //     paragraph.getPrevious() === null &&
-        //     paragraph.getNext() === null);
-
-        // if (!omitP) {
-        //   this.html.line();
-        //   this.html.tag("p", this.getAttrs(paragraph, "p"));
-        // }
-
-        // this.visitChildren(paragraph);
-
-        // if (!omitP) {
-        //   this.html.tag("/p");
-        //   this.html.line();
-        // }
-
         const paragraph = node;
-        this.html.line();
-        this.html.tag("p", this.getAttrs(paragraph, "p"));
+
+        const omitP: boolean =
+          this.isInTightList(paragraph) || //
+          (this.context.shouldOmitSingleParagraphP() &&
+            paragraph.getParent() instanceof Document && //
+            paragraph.getPrevious() === null &&
+            paragraph.getNext() === null);
+
+        if (!omitP) {
+          this.html.line();
+          this.html.tag("p", this.getAttrs(paragraph, "p"));
+        }
+
         this.visitChildren(paragraph);
-        this.html.tag("/p");
-        this.html.line();
+
+        if (!omitP) {
+          this.html.tag("/p");
+          this.html.line();
+        }
+
+        // const paragraph = node;
+        // this.html.line();
+        // this.html.tag("p", this.getAttrs(paragraph, "p"));
+        // this.visitChildren(paragraph);
+        // this.html.tag("/p");
+        // this.html.line();
 
         break;
       }
@@ -402,6 +422,11 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     }
   }
 
+  /**
+   * 访问子节点
+   *
+   * @param parent
+   */
   protected override visitChildren(parent: MarkdownNode) {
     let node = parent.getFirstChild();
 
@@ -412,6 +437,13 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     }
   }
 
+  /**
+   * 渲染代码块
+   *
+   * @param literal
+   * @param node
+   * @param attributes
+   */
   private renderCodeBlock(
     literal: string,
     node: MarkdownNode,
@@ -426,6 +458,13 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.html.line();
   }
 
+  /**
+   * 渲染列表块
+   *
+   * @param listBlock
+   * @param tagName
+   * @param attributes
+   */
   private renderListBlock(
     listBlock: ListBlock,
     tagName: string,
@@ -440,6 +479,12 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.html.line();
   }
 
+  /**
+   * 在紧凑列表中
+   *
+   * @param paragraph
+   * @returns
+   */
   private isInTightList(paragraph: Paragraph): boolean {
     let parent = paragraph.getParent();
 
@@ -453,6 +498,14 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     return false;
   }
 
+  /**
+   * 获取应设置的 html 属性
+   *
+   * @param node
+   * @param tagName
+   * @param defaultAttributes
+   * @returns
+   */
   private getAttrs(
     node: MarkdownNode,
     tagName: string,

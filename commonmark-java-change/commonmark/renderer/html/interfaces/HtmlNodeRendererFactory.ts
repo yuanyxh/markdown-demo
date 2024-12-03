@@ -3,6 +3,8 @@ import type { HtmlNodeRendererContext } from "./HtmlNodeRendererContext";
 
 /**
  * Factory for instantiating new node renderers when rendering is done.
+ *
+ * 用于在渲染完成时实例化新节点渲染器的工厂
  */
 export interface HtmlNodeRendererFactory {
   /**
