@@ -19,8 +19,8 @@ class CoreLinkProcessor implements LinkProcessor {
       return CoreLinkProcessor.process(
         linkInfo,
         scanner,
-        linkInfo.getDestination() || "",
-        linkInfo.getTitle() || ""
+        linkInfo.getDestination(),
+        linkInfo.getTitle()
       );
     }
 
@@ -44,19 +44,20 @@ class CoreLinkProcessor implements LinkProcessor {
   private static process(
     linkInfo: LinkInfo,
     scanner: Scanner,
-    destination: string,
-    title: string
+    destination: string | null,
+    title: string | null
   ): LinkResult {
     const marker = linkInfo.getMarker();
 
     if (marker !== null && marker.getLiteral() === "!") {
       return LinkResult.wrapTextIn(
-        new Image(destination, title),
+        new Image(destination || "", title || void 0),
         scanner.position()
       ).setIncludeMarker();
     }
+
     return LinkResult.wrapTextIn(
-      new Link(destination, title),
+      new Link(destination || "", title || void 0),
       scanner.position()
     );
   }

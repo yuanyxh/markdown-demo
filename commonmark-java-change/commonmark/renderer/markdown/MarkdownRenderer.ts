@@ -16,10 +16,10 @@ class MarkdownRendererExtension implements Extension {
    *
    * @param rendererBuilder the renderer builder to extend
    */
-  extend(rendererBuilder: Builder) {}
+  extend(rendererBuilder: MarkdownNodeRendererBuilder) {}
 }
 
-class Builder {
+class MarkdownNodeRendererBuilder {
   public readonly nodeRendererFactories: MarkdownNodeRendererFactory[] = [];
 
   /**
@@ -41,7 +41,7 @@ class Builder {
    */
   public nodeRendererFactory(
     nodeRendererFactory: MarkdownNodeRendererFactory
-  ): Builder {
+  ): MarkdownNodeRendererBuilder {
     this.nodeRendererFactories.push(nodeRendererFactory);
 
     return this;
@@ -51,7 +51,7 @@ class Builder {
    * @param extensions extensions to use on this renderer
    * @return {@code this}
    */
-  public extensions(extensions: Extension[]): Builder {
+  public extensions(extensions: Extension[]): MarkdownNodeRendererBuilder {
     for (const extension of extensions) {
       if (extension instanceof MarkdownRendererExtension) {
         extension.extend(this);
@@ -121,7 +121,7 @@ class RendererContext implements MarkdownNodeRendererContext {
 export class MarkdownRenderer implements Renderer {
   public readonly nodeRendererFactories: MarkdownNodeRendererFactory[];
 
-  public constructor(builder: Builder) {
+  public constructor(builder: MarkdownNodeRendererBuilder) {
     this.nodeRendererFactories = [];
 
     this.nodeRendererFactories.push(...builder.nodeRendererFactories);
@@ -143,8 +143,8 @@ export class MarkdownRenderer implements Renderer {
    *
    * @return a builder
    */
-  public static builder(): Builder {
-    return new Builder();
+  public static builder(): MarkdownNodeRendererBuilder {
+    return new MarkdownNodeRendererBuilder();
   }
 
   public render(node: MarkdownNode, output: Appendable) {
@@ -156,7 +156,7 @@ export class MarkdownRenderer implements Renderer {
   /**
    * Builder for configuring a {@link MarkdownRenderer}. See methods for default configuration.
    */
-  public static Builder = Builder;
+  public static Builder = MarkdownNodeRendererBuilder;
 
   public static MarkdownRendererExtension = MarkdownRendererExtension;
 }

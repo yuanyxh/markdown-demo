@@ -46,7 +46,7 @@ class AutolinkInlineParser implements InlineContentParser {
       }
 
       if (destination !== "") {
-        const link = new Link(destination, "");
+        const link = new Link(destination);
         const text = new Text(content);
         text.setSourceSpans(textSource.getSourceSpans());
         link.appendChild(text);

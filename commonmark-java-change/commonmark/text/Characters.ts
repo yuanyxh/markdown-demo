@@ -114,72 +114,14 @@ class Characters {
     switch (true) {
       // General category "P" (punctuation)
       // 类别为 P
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Pd,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Pi,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Pf,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Pc,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Po,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Pi,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Pf,
-        char
-      ):
-
+      case Character.isUnicodeCharOfCategory(Character.UnicodeCategory.P, char):
       // General category "S" (symbol)
       // 类别为 S
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Sm,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Sc,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.Sk,
-        char
-      ):
-      case Character.isUnicodeCharOfCategory(
-        Character.UnicodeCategory.So,
-        char
-      ):
+      case Character.isUnicodeCharOfCategory(Character.UnicodeCategory.S, char):
         return true;
 
       default:
-        // ASCII 中的部分标点字符
-        switch (char) {
-          case "$":
-          case "+":
-          case "<":
-          case "=":
-          case ">":
-          case "^":
-          case "`":
-          case "|":
-          case "~":
-            return true;
-
-          default:
-            return false;
-        }
+        return false;
     }
   }
 

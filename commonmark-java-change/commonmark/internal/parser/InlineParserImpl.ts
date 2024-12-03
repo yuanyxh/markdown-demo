@@ -144,6 +144,7 @@ class InlineParserImpl
 
   public constructor(context: InlineParserContext) {
     this.context = context;
+
     this.inlineContentParserFactories =
       this.calculateInlineContentParserFactories(
         context.getCustomInlineContentParserFactories()
@@ -157,6 +158,7 @@ class InlineParserImpl
     this.linkMarkers = InlineParserImpl.calculateLinkMarkers(
       context.getCustomLinkMarkers()
     );
+
     this.specialCharacters = InlineParserImpl.calculateSpecialCharacters(
       this.linkMarkers,
       new Set(this.delimiterProcessors.keys()),
@@ -545,24 +547,23 @@ class InlineParserImpl
     if (opener === null) {
       // No matching opener, just return a literal.
       return this.text(this.scanner.getSource(beforeClose, afterClose));
-    }
-
-    if (!opener.allowed) {
+    } else if (!opener.allowed) {
       // Matching opener, but it's not allowed, just return a literal.
       this.removeLastBracket();
       return this.text(this.scanner.getSource(beforeClose, afterClose));
+    } else {
+      const linkOrImage = this.parseLinkOrImage(opener, beforeClose);
+
+      if (linkOrImage !== null) {
+        return linkOrImage;
+      } else {
+        this.scanner.setPosition(afterClose);
+
+        // Nothing parsed, just parse the bracket as text and continue
+        this.removeLastBracket();
+        return this.text(this.scanner.getSource(beforeClose, afterClose));
+      }
     }
-
-    let linkOrImage = this.parseLinkOrImage(opener, beforeClose);
-    if (linkOrImage !== null) {
-      return linkOrImage;
-    }
-
-    this.scanner.setPosition(afterClose);
-
-    // Nothing parsed, just parse the bracket as text and continue
-    this.removeLastBracket();
-    return this.text(this.scanner.getSource(beforeClose, afterClose));
   }
 
   private parseLinkOrImage(
@@ -976,17 +977,13 @@ class InlineParserImpl
 
     // We could be more lazy here, in most cases we don't need to do every match case.
     const beforeIsPunctuation =
-      before === Scanner.END.charCodeAt(0) ||
-      Characters.isPunctuationCodePoint(before);
+      before === 0 || Characters.isPunctuationCodePoint(before);
     const beforeIsWhitespace: boolean =
-      before === Scanner.END.charCodeAt(0) ||
-      Characters.isWhitespaceCodePoint(before);
+      before === 0 || Characters.isWhitespaceCodePoint(before);
     const afterIsPunctuation: boolean =
-      after === Scanner.END.charCodeAt(0) ||
-      Characters.isPunctuationCodePoint(after);
+      after === 0 || Characters.isPunctuationCodePoint(after);
     const afterIsWhitespace: boolean =
-      after === Scanner.END.charCodeAt(0) ||
-      Characters.isWhitespaceCodePoint(after);
+      after === 0 || Characters.isWhitespaceCodePoint(after);
 
     const leftFlanking: boolean =
       !afterIsWhitespace &&

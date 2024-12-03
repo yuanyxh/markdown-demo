@@ -26,7 +26,7 @@ class Link extends MarkdownNode {
   private destination = "";
   private title: string | undefined;
 
-  public constructor(destination = "", title: string | undefined) {
+  public constructor(destination = "", title?: string) {
     super();
 
     this.destination = destination;

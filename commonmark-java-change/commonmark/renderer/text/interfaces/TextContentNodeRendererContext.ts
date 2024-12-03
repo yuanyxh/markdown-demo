@@ -3,7 +3,7 @@ import type TextContentWriter from "../TextContentWriter";
 import type { MarkdownNode } from "../../../node";
 
 /**
- * 将节点渲染为 markdown 文本的渲染上下文接口
+ * 将节点渲染为文本的渲染上下文接口
  */
 export interface TextContentNodeRendererContext {
   /**
