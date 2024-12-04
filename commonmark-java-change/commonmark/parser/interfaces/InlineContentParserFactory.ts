@@ -4,6 +4,10 @@ import type { InlineContentParser } from "./InlineContentParser";
  * A factory for extending inline content parsing.
  * <p>
  * See {@link org.commonmark.parser.Parser.Builder#customInlineContentParserFactory} for how to register it.
+ *
+ * 用于扩展内联内容解析的工厂
+ * <p>
+ * 请参阅 {@link org.commonmark.parser.Parser.Builder#customInlineContentParserFactory} 了解如何注册它
  */
 export interface InlineContentParserFactory {
   /**

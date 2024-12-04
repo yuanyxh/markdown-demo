@@ -23,6 +23,28 @@ import type { Text } from "../../node";
  * [text]
  * </pre>
  * Images use the same syntax as links but with a {@code !} {@link #marker()} front, e.g. {@code ![text](destination)}.
+ *
+ * 已解析的链接/图像; 有不同类型的链接
+ * <p>
+ * 内嵌链接：
+ * ```md
+ * [text](destination)
+ * [text](destination "title")
+ * ```
+ * <>
+ * 引用链接, 具有不同的子类型:
+ * ```md
+ * [text][label]
+ * ```
+ * label:
+ * ```md
+ * [text][]
+ * ```
+ * Shortcut:
+ * ```md
+ * [text]
+ * ```
+ * 图像使用与链接相同的语法, 但前面有一个 {@code !} {@link #marker()},例如 {@code ![text](destination)}
  */
 export interface LinkInfo {
   /**

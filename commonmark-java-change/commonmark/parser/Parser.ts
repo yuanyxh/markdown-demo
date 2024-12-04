@@ -19,10 +19,13 @@ import {
  * Extension for {@link Parser}.
  */
 class ParserExtension implements Extension {
-  extend(parserBuilder: Builder) {}
+  extend(parserBuilder: ParserBuilder) {}
 }
 
-class Builder {
+/**
+ * Parser 的编译器
+ */
+class ParserBuilder {
   public readonly blockParserFactories: BlockParserFactory[] = [];
   public readonly inlineContentParserFactories: InlineContentParserFactory[] =
     [];
@@ -46,7 +49,7 @@ class Builder {
    * @param extensions extensions to use on this parser
    * @return {@code this}
    */
-  public extensions(extensions: Extension[]): Builder {
+  public extensions(extensions: Extension[]): ParserBuilder {
     for (const extension of extensions) {
       if (extension instanceof ParserExtension) {
         extension.extend(this);
@@ -78,11 +81,22 @@ class Builder {
    *     }
    * </pre>
    *
+   * 设置需要解析的 markdown 块节点, 默认解析:
+   *   - Heading
+   *   - HtmlBlock
+   *   - ThematicBreak
+   *   - FencedCodeBlock
+   *   - IndentedCodeBlock
+   *   - BlockQuote
+   *   - ListBlock
+   *
    * @param enabledBlockTypes A list of block nodes the parser will parse.
    *                          If this list is empty, the parser will not recognize any CommonMark core features.
    * @return {@code this}
    */
-  public setEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>): Builder {
+  public setEnabledBlockTypes(
+    enabledBlockTypes: Set<typeof Block>
+  ): ParserBuilder {
     DocumentParser.checkEnabledBlockTypes(enabledBlockTypes);
     this.enabledBlockTypes = enabledBlockTypes;
     return this;
@@ -93,13 +107,16 @@ class Builder {
    * <p>
    * By default, source spans are disabled.
    *
+   * 是否计算已解析的 {@link MarkdownNode Nodes} 的源码位置, 请参阅 {@link MarkdownNode#getSourceSpans()}
+   * 默认情况下处于禁用状态
+   *
    * @param includeSourceSpans which kind of source spans should be included
    * @return {@code this}
    * @since 0.16.0
    */
   public setIncludeSourceSpans(
     includeSourceSpans: IncludeSourceSpans
-  ): Builder {
+  ): ParserBuilder {
     this.includeSourceSpans = includeSourceSpans;
     return this;
   }
@@ -111,12 +128,17 @@ class Builder {
    * extensions can change how some syntax is parsed that would otherwise be handled by built-in factories.
    * "With great power comes great responsibility."
    *
+   * 添加自定义块解析器工厂类
+   * <p>
+   * 请注意，自定义解析工厂在内置解析工厂之前应用,
+   * 扩展可以改变某些语法的解析方式, 否则这些语法将由内置解析工厂处理
+   *
    * @param blockParserFactory a block parser factory implementation
    * @return {@code this}
    */
   public customBlockParserFactory(
     blockParserFactory: BlockParserFactory
-  ): Builder {
+  ): ParserBuilder {
     this.blockParserFactories.push(blockParserFactory);
     return this;
   }
@@ -128,10 +150,17 @@ class Builder {
    * {@link InlineContentParserFactory#getTriggerCharacters()}. It is possible to register multiple parsers for the same
    * character, or even for some built-in special character such as {@code `}. The custom parsers are tried first
    * in order in which they are registered, and then the built-in ones.
+   *
+   * 为自定义内联内容解析器添加工厂, 用于扩展内联解析或覆盖内置解析
+   * <p>
+   * 请注意，解析器是根据指定的特殊字符触发的
+   * {@link InlineContentParserFactory#getTriggerCharacters()}
+   * 可以为同一个解析器注册多个解析器字符, 甚至某些内置特殊字符, 例如 {@code `}
+   * 首先按照注册的顺序应用自定义内联内容解析器, 然后应用内置的内联内容解析器
    */
   public customInlineContentParserFactory(
     inlineContentParserFactory: InlineContentParserFactory
-  ): Builder {
+  ): ParserBuilder {
     this.inlineContentParserFactories.push(inlineContentParserFactory);
     return this;
   }
@@ -146,12 +175,20 @@ class Builder {
    * If you want more control over how parsing is done, you might want to use
    * {@link #customInlineContentParserFactory} instead.
    *
+   * 添加自定义分隔符处理器以进行内联解析
+   * <p>
+   * 注意, 可以添加多个具有相同字符的分隔符处理器, 只要它们有一个不同的最小长度
+   * 在这种情况下, 将使用具有最短匹配长度的处理器
+   * 添加更多超过一个具有相同字符和最小长度的定界符处理器无效
+   * <p>
+   * 如果想更多地控制解析的完成方式, 可能需要使用 {@link #customInlineContentParserFactory}
+   *
    * @param delimiterProcessor a delimiter processor implementation
    * @return {@code this}
    */
   public customDelimiterProcessor(
     delimiterProcessor: DelimiterProcessor
-  ): Builder {
+  ): ParserBuilder {
     this.delimiterProcessors.push(delimiterProcessor);
     return this;
   }
@@ -162,10 +199,16 @@ class Builder {
    * Multiple link processors can be added, and will be tried in order in which they were added. If no link
    * processor applies, the normal behavior applies. That means these can override built-in link parsing.
    *
+   * 添加自定义链接/图像处理器以进行内联解析
+   * <p>
+   * 可以添加多个链接处理器, 并且将按照添加的顺序进行尝试
+   * 如果没有链接处理器适用, 内置处理器会进行处理适用
+   * 这意味着它们可以覆盖内置链接解析
+   *
    * @param linkProcessor a link processor implementation
    * @return {@code this}
    */
-  public linkProcessor(linkProcessor: LinkProcessor): Builder {
+  public linkProcessor(linkProcessor: LinkProcessor): ParserBuilder {
     this.linkProcessors.push(linkProcessor);
     return this;
   }
@@ -178,15 +221,29 @@ class Builder {
    * that is passed to {@link LinkProcessor} will have its {@link LinkInfo#marker()} set. A link processor should
    * check the {@link Text#getLiteral()} and then do any processing, and will probably want to use {@link LinkResult#includeMarker()}.
    *
+   * 添加自定义链接标记以进行链接处理
+   * 链接标记是一个类似于 {@code !} 的字符,
+   * 如果它出现在链接的{@code [}之前, 改变链接的含义
+   * <p>
+   * 如果解析了后面跟有有效链接的链接标记, 则 {@link org.commonmark.parser.beta.LinkInfo}
+   * 传递给 {@link LinkProcessor} 的内容将设置其 {@link LinkInfo#marker()}
+   * 链接处理器应该检查 {@link Text#getLiteral()}, 然后进行任何处理, 并且可能需要使用 {@link LinkResult#includeMarker()}
+   *
    * @param linkMarker a link marker character
    * @return {@code this}
    */
-  public linkMarker(linkMarker: string): Builder {
+  public linkMarker(linkMarker: string): ParserBuilder {
     this.linkMarkers.add(linkMarker);
     return this;
   }
 
-  public postProcessor(postProcessor: PostProcessor): Builder {
+  /**
+   * 添加后置处理器
+   *
+   * @param postProcessor
+   * @returns
+   */
+  public postProcessor(postProcessor: PostProcessor): ParserBuilder {
     this.postProcessors.push(postProcessor);
     return this;
   }
@@ -206,16 +263,34 @@ class Builder {
    * Note that if this method is not called or the inline parser factory is set to null, then the default
    * implementation will be used.
    *
+   * 覆盖用于内联解析处理的解析器
+   * <p>
+   * 提供 InlineParserFactory 的实现, 它提供自定义内联解析器
+   * 修改以下内容的解析方式：
+   *   粗体 （**）
+   *   斜体 (*)
+   *   删除线 (~~)
+   *   反引号 (`)
+   *   链接（[标题](http://)）
+   *   图片 (![alt](http://))
+   * <p>
+   * 注意, 如果没有调用该方法或者内联解析器工厂设置为 null, 则将使用默认实现
+   *
    * @param inlineParserFactory an inline parser factory implementation
    * @return {@code this}
    */
   public setInlineParserFactory(
     inlineParserFactory: InlineParserFactory | null
-  ): Builder {
+  ): ParserBuilder {
     this.inlineParserFactory = inlineParserFactory;
     return this;
   }
 
+  /**
+   * 获取内联内容解析器工厂
+   *
+   * @returns
+   */
   public getInlineParserFactory(): InlineParserFactory {
     if (this.inlineParserFactory) {
       return this.inlineParserFactory;
@@ -237,6 +312,10 @@ class Builder {
  * Parser parser = Parser.builder().build();
  * MarkdownNode document = parser.parse("input text");
  * </code></pre>
+ *
+ * 将输入文本解析为节点树
+ * <p>
+ * 从 {@link #builder} 方法开始, 配置解析器并构建它
  */
 export class Parser {
   private readonly blockParserFactories: BlockParserFactory[];
@@ -248,7 +327,7 @@ export class Parser {
   private readonly postProcessors: PostProcessor[];
   private readonly includeSourceSpans: IncludeSourceSpans;
 
-  public constructor(builder: Builder) {
+  public constructor(builder: ParserBuilder) {
     this.blockParserFactories = DocumentParser.calculateBlockParserFactories(
       builder.blockParserFactories,
       builder.enabledBlockTypes
@@ -262,8 +341,8 @@ export class Parser {
     this.linkMarkers = builder.linkMarkers;
     this.includeSourceSpans = builder.includeSourceSpans;
 
-    // Try to construct an inline parser. Invalid configuration might result in an exception, which we want to
-    // detect as soon as possible.
+    // Try to construct an inline parser. Invalid configuration might result in an exception, which we want to detect as soon as possible.
+    // 尝试构建一个内联解析器, 无效的配置可能会导致异常, 我们希望尽快检测到
     const context = new InlineParserContextImpl(
       this.inlineContentParserFactories,
       this.delimiterProcessors,
@@ -280,14 +359,18 @@ export class Parser {
    *
    * @return a builder
    */
-  public static builder(): Builder {
-    return new Builder();
+  public static builder(): ParserBuilder {
+    return new ParserBuilder();
   }
 
   /**
    * Parse the specified input text into a tree of nodes.
    * <p>
    * This method is thread-safe (a new parser state is used for each invocation).
+   *
+   * 将指定的输入文本解析为节点树
+   * <p>
+   * 每次调用都会使用新的解析器状态
    *
    * @param input the text to parse - must not be null
    * @return the root node
@@ -312,6 +395,10 @@ export class Parser {
    * <p>
    * This method is thread-safe (a new parser state is used for each invocation).
    *
+   * 将指定的 Markdown 文件解析为节点树
+   * <p>
+   * 每次调用都会使用新的解析器状态
+   *
    * @param input the reader to parse - must not be null
    * @return the root node
    * @throws IOException when reading throws an exception
@@ -332,6 +419,11 @@ export class Parser {
     });
   }
 
+  /**
+   * 创建文档解析器
+   *
+   * @returns
+   */
   private createDocumentParser(): DocumentParser {
     return new DocumentParser(
       this.blockParserFactories,
@@ -344,6 +436,12 @@ export class Parser {
     );
   }
 
+  /**
+   * 后置处理
+   *
+   * @param document
+   * @returns
+   */
   private postProcess(document: MarkdownNode): MarkdownNode {
     for (const postProcessor of this.postProcessors) {
       document = postProcessor.process(document);
@@ -355,7 +453,7 @@ export class Parser {
   /**
    * Builder for configuring a {@link Parser}.
    */
-  public static Builder = Builder;
+  public static Builder = ParserBuilder;
 
   public static ParserExtension = ParserExtension;
 }

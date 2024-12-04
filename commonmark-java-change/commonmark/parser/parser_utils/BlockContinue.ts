@@ -2,6 +2,8 @@ import { BlockContinueImpl } from "../../internal";
 
 /**
  * Result object for continuing parsing of a block, see static methods for constructors.
+ *
+ * 用于继续解析块的结果对象
  */
 class BlockContinue {
   public static none(): BlockContinue | null {

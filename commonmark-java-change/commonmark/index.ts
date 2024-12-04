@@ -21,8 +21,10 @@ export type {
   DelimiterProcessor,
   LinkProcessor,
   PostProcessor,
+  LinkInfo,
+  InlineParserContext,
 } from "./parser";
-export { Parser, IncludeSourceSpans } from "./parser";
+export { Parser, IncludeSourceSpans, Scanner, LinkResult } from "./parser";
 
 export {
   MarkdownNode,
