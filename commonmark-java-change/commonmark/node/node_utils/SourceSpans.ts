@@ -5,25 +5,39 @@ import SourceSpan from "./SourceSpan";
 /**
  * A list of source spans that can be added to. Takes care of merging adjacent source spans.
  *
+ * 可添加的源范围列表；负责合并相邻的源跨度
+ *
  * @since 0.16.0
  */
 class SourceSpans {
   private sourceSpans: SourceSpan[] | null = null;
 
-  public static empty(): SourceSpans {
-    return new SourceSpans();
-  }
-
+  /**
+   * 获取 SourceSpan 列表
+   *
+   * @returns
+   */
   public getSourceSpans(): SourceSpan[] {
     return this.sourceSpans ? this.sourceSpans : [];
   }
 
+  /**
+   * 添加指定节点的 SourceSpan 列表
+   *
+   * @param nodes
+   */
   public addAllFrom(nodes: MarkdownNode[]): void {
     for (const node of nodes) {
       this.addAll(node.getSourceSpans());
     }
   }
 
+  /**
+   * 添加 SourceSpan 列表
+   *
+   * @param other
+   * @returns
+   */
   public addAll(other: SourceSpan[]) {
     if (other.length === 0) {
       return;
@@ -52,6 +66,15 @@ class SourceSpans {
         this.sourceSpans.push(...other);
       }
     }
+  }
+
+  /**
+   * 返回空的 SourceSpans
+   *
+   * @returns
+   */
+  public static empty(): SourceSpans {
+    return new SourceSpans();
   }
 }
 

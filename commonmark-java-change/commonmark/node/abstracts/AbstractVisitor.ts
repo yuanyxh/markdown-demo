@@ -6,14 +6,26 @@ import type { Visitor } from "../interfaces/Visitor";
  * <p>
  * Can be used to only process certain nodes. If you override a method and want visiting to descend into children,
  * call {@link #visitChildren}.
+ *
+ * 默认情况下访问所有子级的抽象访问者
+ * <p>
+ * 可用于仅处理某些节点；
+ * 如果重写 visit 方法并希望访问子节点，调用 {@link #visitChildren}
  */
 abstract class AbstractVisitor implements Visitor {
+  /**
+   * 访问节点
+   *
+   * @param node
+   */
   public visit(node: MarkdownNode) {
     this.visitChildren(node);
   }
 
   /**
    * Visit the child nodes.
+   *
+   * 访问子节点
    *
    * @param parent the parent node whose children should be visited
    */
