@@ -25,6 +25,7 @@ class Factory implements BlockParserFactory {
       ) {
         newColumn++;
       }
+
       return BlockStart.of(new BlockQuoteParser()).atColumn(newColumn);
     } else {
       return BlockStart.none();

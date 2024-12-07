@@ -9,7 +9,7 @@ enum IncludeSourceSpans {
    */
   NONE = "NONE",
   /**
-   * Include source spans on {@link org.commonmark.node.Block} nodes.
+   * Include source spans on {@link Block} nodes.
    *
    * 生成块节点的源码映射
    */

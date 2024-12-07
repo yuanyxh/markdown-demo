@@ -3,6 +3,9 @@ import type { Visitor } from "./interfaces/Visitor";
 import ListBlock from "./ListBlock";
 import { isNotUnDef } from "../../helpers";
 
+/**
+ * 有序列表
+ */
 class OrderedList extends ListBlock {
   private markerDelimiter: string | undefined;
   private markerStartNumber: number | undefined;
@@ -12,55 +15,39 @@ class OrderedList extends ListBlock {
   }
 
   /**
+   * 获取有序列表的开始序号
+   *
    * @return the start number used in the marker, e.g. {@code 1}, if available, or null otherwise
    */
   public getMarkerStartNumber(): number | undefined {
     return this.markerStartNumber;
   }
 
+  /**
+   * 设置有序列表的开始序号
+   *
+   * @param markerStartNumber
+   */
   public setMarkerStartNumber(markerStartNumber: number) {
     this.markerStartNumber = markerStartNumber;
   }
 
   /**
+   * 获取有序列表数字序号后的隔断符
+   *
    * @return the delimiter used in the marker, e.g. {@code .} or {@code )}, if available, or null otherwise
    */
   public getMarkerDelimiter(): string | undefined {
     return this.markerDelimiter;
   }
 
+  /**
+   * 设置有序列表数字序号后的隔断符
+   *
+   * @param markerDelimiter
+   */
   public setMarkerDelimiter(markerDelimiter: string) {
     this.markerDelimiter = markerDelimiter;
-  }
-
-  /**
-   * @deprecated use {@link #getMarkerStartNumber()} instead
-   */
-  public getStartNumber(): number {
-    return isNotUnDef(this.markerStartNumber) ? this.markerStartNumber : 0;
-  }
-
-  /**
-   * @deprecated use {@link #setMarkerStartNumber} instead
-   */
-  public setStartNumber(startNumber: number) {
-    this.markerStartNumber = startNumber !== 0 ? startNumber : void 0;
-  }
-
-  /**
-   * @deprecated use {@link #getMarkerDelimiter()} instead
-   */
-  public getDelimiter(): string {
-    return isNotUnDef(this.markerDelimiter)
-      ? this.markerDelimiter.charAt(0)
-      : "\0";
-  }
-
-  /**
-   * @deprecated use {@link #setMarkerDelimiter} instead
-   */
-  public setDelimiter(delimiter: string): void {
-    this.markerDelimiter = delimiter !== "\0" ? delimiter : void 0;
   }
 }
 

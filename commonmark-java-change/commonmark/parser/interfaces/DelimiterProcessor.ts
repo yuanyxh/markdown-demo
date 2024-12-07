@@ -9,7 +9,7 @@ import type { DelimiterRun } from "./DelimiterRun";
  * <p>
  * 请注意, 同一个实例可能被多个解析器使用
  *
- * @see org.commonmark.parser.beta.InlineContentParserFactory
+ * @see parser.beta.InlineContentParserFactory
  */
 export interface DelimiterProcessor {
   /**

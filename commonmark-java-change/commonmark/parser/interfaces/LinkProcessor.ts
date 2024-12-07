@@ -6,7 +6,7 @@ import type { LinkInfo } from "./LinkInfo";
 /**
  * An interface to decide how links/images are handled.
  * <p>
- * Implementations need to be registered with a parser via {@link org.commonmark.parser.Parser.Builder#linkProcessor}.
+ * Implementations need to be registered with a parser via {@link Parser.Builder#linkProcessor}.
  * Then, when inline parsing is run, each parsed link/image is passed to the processor. This includes links like these:
  * <p>
  * <pre><code>
@@ -30,7 +30,7 @@ import type { LinkInfo } from "./LinkInfo";
  *
  * 决定如何处理链接/图像的处理器
  * <p>
- * 实现需要通过 {@link org.commonmark.parser.Parser.Builder#linkProcessor} 向解析器注册
+ * 实现需要通过 {@link Parser.Builder#linkProcessor} 向解析器注册
  * 然后, 当运行内联解析时, 每个解析的链接/图像都会传递到处理器; 包括如下链接：
  * <p>
  * ```md

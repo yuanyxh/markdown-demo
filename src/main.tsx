@@ -5,7 +5,7 @@ import { Parser, HtmlRenderer } from "../commonmark-java-change/commonmark";
 
 import markdown from "./example.md?raw";
 
-const parser = Parser.builder().build();
+const parser = Parser.builder().linkMarker("{").build();
 console.time("parser");
 const document = parser.parse(markdown);
 console.timeEnd("parser");

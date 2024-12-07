@@ -4,7 +4,7 @@ import type { Visitor } from "./interfaces/Visitor";
 import MarkdownNode from "./abstracts/MarkdownNode";
 
 /**
- * 斜体
+ * 粗体
  */
 class Emphasis extends MarkdownNode implements Delimited {
   private delimiter: string | undefined;
@@ -20,7 +20,7 @@ class Emphasis extends MarkdownNode implements Delimited {
   }
 
   /**
-   * 设置斜体的分割符
+   * 设置粗体的分割符
    *
    * @param delimiter
    */

@@ -151,6 +151,7 @@ class DocumentParser implements ParserState {
     this.includeSourceSpans = includeSourceSpans;
 
     this.documentBlockParser = new DocumentBlockParser();
+
     this.activateBlockParser(new OpenBlockParser(this.documentBlockParser, 0));
   }
 

@@ -4,6 +4,8 @@ import type { Position } from "../parser";
 
 /**
  * Opening bracket for links ({@code [}), images ({@code ![}), or links with other markers.
+ *
+ * 用于链接 ({@code [})、图像 ({@code ![}) 或带有其他标记的链接的左括号
  */
 class Bracket {
   /**
@@ -51,6 +53,24 @@ class Bracket {
    */
   public bracketAfter: boolean = false;
 
+  private constructor(
+    markerNode: Text | null,
+    markerPosition: Position | null,
+    bracketNode: Text | null,
+    bracketPosition: Position | null,
+    contentPosition: Position | null,
+    previous: Bracket | null,
+    previousDelimiter: Delimiter | null
+  ) {
+    this.markerNode = markerNode;
+    this.markerPosition = markerPosition;
+    this.bracketNode = bracketNode;
+    this.bracketPosition = bracketPosition;
+    this.contentPosition = contentPosition;
+    this.previous = previous;
+    this.previousDelimiter = previousDelimiter;
+  }
+
   public static link(
     bracketNode: Text,
     bracketPosition: Position,
@@ -87,24 +107,6 @@ class Bracket {
       previous,
       previousDelimiter
     );
-  }
-
-  private constructor(
-    markerNode: Text | null,
-    markerPosition: Position | null,
-    bracketNode: Text | null,
-    bracketPosition: Position | null,
-    contentPosition: Position | null,
-    previous: Bracket | null,
-    previousDelimiter: Delimiter | null
-  ) {
-    this.markerNode = markerNode;
-    this.markerPosition = markerPosition;
-    this.bracketNode = bracketNode;
-    this.bracketPosition = bracketPosition;
-    this.contentPosition = contentPosition;
-    this.previous = previous;
-    this.previousDelimiter = previousDelimiter;
   }
 }
 

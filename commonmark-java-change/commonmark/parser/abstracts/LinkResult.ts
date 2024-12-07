@@ -24,14 +24,14 @@ abstract class LinkResult {
    * [my *text*](destination)
    * </code></pre>
    * The text is {@code my *text*}, a text node and emphasis. The text is wrapped in a
-   * {@link org.commonmark.node.Link} node, which means the text is added as child nodes to it.
+   * {@link Link} node, which means the text is added as child nodes to it.
    *
    * 将链接文本包装在节点中, 这是链接的正常行为, 例如：
    * ```md
    * [my *text*](destination)
    * ```
    * 文本是 {@code `my *text*`}, 一个文本节点和强调,
-   * 文本被包裹在 {@link org.commonmark.node.Link} 节点,
+   * 文本被包裹在 {@link Link} 节点,
    * 表示文本作为子节点添加到其中
    *
    * @param node     the node to which the link text nodes will be added as child nodes

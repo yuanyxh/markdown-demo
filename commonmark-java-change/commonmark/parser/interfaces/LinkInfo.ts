@@ -49,7 +49,7 @@ import type { Text } from "../../node";
 export interface LinkInfo {
   /**
    * The marker if present, or null. A marker is e.g. {@code !} for an image, or a custom marker as specified in
-   * {@link org.commonmark.parser.Parser.Builder#linkMarker}.
+   * {@link Parser.Builder#linkMarker}.
    */
   getMarker(): Text | null;
 

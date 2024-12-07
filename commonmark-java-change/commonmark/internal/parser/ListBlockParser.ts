@@ -176,7 +176,7 @@ class ListBlockParser extends AbstractBlockParser {
       // If the list item is ordered, the start number must be 1 to interrupt a paragraph.
       if (
         listBlock instanceof OrderedList &&
-        isNotUnDef(listBlock.getMarkerStartNumber())
+        listBlock.getMarkerStartNumber() !== 1
       ) {
         return null;
       }

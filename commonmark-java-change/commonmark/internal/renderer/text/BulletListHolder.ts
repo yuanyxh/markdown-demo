@@ -7,6 +7,7 @@ class BulletListHolder extends ListHolder {
 
   public constructor(parent: ListHolder | null, list: BulletList) {
     super(parent);
+
     this.marker = list.getMarker();
   }
 

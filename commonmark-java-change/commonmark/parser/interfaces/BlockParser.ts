@@ -80,10 +80,10 @@ export interface BlockParser {
 
   /**
    * Return definitions parsed by this parser. The definitions returned here can later be accessed during inline
-   * parsing via {@link org.commonmark.parser.InlineParserContext#getDefinition}.
+   * parsing via {@link InlineParserContext#getDefinition}.
    *
    * 返回由该解析器解析的定义, 稍后可以在内联期间访问此处返回的定义
-   * 通过 {@link org.commonmark.parser.InlineParserContext#getDefinition} 进行解析
+   * 通过 {@link InlineParserContext#getDefinition} 进行解析
    */
   getDefinitions(): DefinitionMap<any>[];
 

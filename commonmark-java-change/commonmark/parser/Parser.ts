@@ -98,6 +98,7 @@ class ParserBuilder {
     enabledBlockTypes: Set<typeof Block>
   ): ParserBuilder {
     DocumentParser.checkEnabledBlockTypes(enabledBlockTypes);
+
     this.enabledBlockTypes = enabledBlockTypes;
     return this;
   }
@@ -202,7 +203,7 @@ class ParserBuilder {
    * 添加自定义链接/图像处理器以进行内联解析
    * <p>
    * 可以添加多个链接处理器, 并且将按照添加的顺序进行尝试
-   * 如果没有链接处理器适用, 内置处理器会进行处理适用
+   * 如果没有链接处理器适用, 内置处理器会进行处理
    * 这意味着它们可以覆盖内置链接解析
    *
    * @param linkProcessor a link processor implementation
@@ -217,7 +218,7 @@ class ParserBuilder {
    * Add a custom link marker for link processing. A link marker is a character like {@code !} which, if it
    * appears before the {@code [} of a link, changes the meaning of the link.
    * <p>
-   * If a link marker followed by a valid link is parsed, the {@link org.commonmark.parser.beta.LinkInfo}
+   * If a link marker followed by a valid link is parsed, the {@link LinkInfo}
    * that is passed to {@link LinkProcessor} will have its {@link LinkInfo#marker()} set. A link processor should
    * check the {@link Text#getLiteral()} and then do any processing, and will probably want to use {@link LinkResult#includeMarker()}.
    *
@@ -225,9 +226,9 @@ class ParserBuilder {
    * 链接标记是一个类似于 {@code !} 的字符,
    * 如果它出现在链接的{@code [}之前, 改变链接的含义
    * <p>
-   * 如果解析了后面跟有有效链接的链接标记, 则 {@link org.commonmark.parser.beta.LinkInfo}
+   * 如果解析了后面跟有有效链接的链接标记, 则 {@link LinkInfo}
    * 传递给 {@link LinkProcessor} 的内容将设置其 {@link LinkInfo#marker()}
-   * 链接处理器应该检查 {@link Text#getLiteral()}, 然后进行任何处理, 并且可能需要使用 {@link LinkResult#includeMarker()}
+   * 链接处理器应该检查 {@link Text#getLiteral()}, 然后进行任何处理, 并且可能需要使用 {@link LinkResult#setIncludeMarker()}
    *
    * @param linkMarker a link marker character
    * @return {@code this}
@@ -271,7 +272,7 @@ class ParserBuilder {
    *   斜体 (*)
    *   删除线 (~~)
    *   反引号 (`)
-   *   链接（[标题](http://)）
+   *   链接（[title](http://)）
    *   图片 (![alt](http://))
    * <p>
    * 注意, 如果没有调用该方法或者内联解析器工厂设置为 null, 则将使用默认实现
@@ -323,8 +324,8 @@ export class Parser {
   private readonly delimiterProcessors: DelimiterProcessor[];
   private readonly linkProcessors: LinkProcessor[];
   private readonly linkMarkers: Set<string>;
-  private readonly inlineParserFactory: InlineParserFactory;
   private readonly postProcessors: PostProcessor[];
+  private readonly inlineParserFactory: InlineParserFactory;
   private readonly includeSourceSpans: IncludeSourceSpans;
 
   public constructor(builder: ParserBuilder) {
@@ -334,6 +335,7 @@ export class Parser {
     );
 
     const createFactory = builder.getInlineParserFactory();
+
     this.postProcessors = builder.postProcessors;
     this.inlineContentParserFactories = builder.inlineContentParserFactories;
     this.delimiterProcessors = builder.delimiterProcessors;
@@ -376,8 +378,9 @@ export class Parser {
    * @return the root node
    */
   public parse(input: string): MarkdownNode {
-    let documentParser = this.createDocumentParser();
-    let document = documentParser.parse(input);
+    const documentParser = this.createDocumentParser();
+    const document = documentParser.parse(input);
+
     return this.postProcess(document);
   }
 
@@ -408,8 +411,9 @@ export class Parser {
       const reader = new FileReader();
 
       reader.onload = () => {
-        let documentParser = this.createDocumentParser();
-        let document = documentParser.parse(reader.result as string);
+        const documentParser = this.createDocumentParser();
+        const document = documentParser.parse(reader.result as string);
+
         resolve(this.postProcess(document));
       };
 

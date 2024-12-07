@@ -4,7 +4,7 @@ import Block from "./abstracts/Block";
  * 列表块的抽象类
  */
 abstract class ListBlock extends Block {
-  private tight = true;
+  private tight = false;
 
   /**
    * 是否是紧凑列表
