@@ -51,24 +51,6 @@ class TextContentRendererBuilder {
   }
 
   /**
-   * Set the value of flag for stripping new lines.
-   *
-   * 设置用于剥离新行的标志值
-   *
-   * @param stripNewlines true for stripping new lines and render text as "single line",
-   *                      false for keeping all line breaks
-   * @return {@code this}
-   * @deprecated Use {@link #lineBreakRendering(LineBreakRendering)} with {@link LineBreakRendering#STRIP} instead
-   */
-  public stripNewlines(stripNewlines: boolean): TextContentRendererBuilder {
-    this.lineBreakRendering = stripNewlines
-      ? LineBreakRendering.STRIP
-      : LineBreakRendering.COMPACT;
-
-    return this;
-  }
-
-  /**
    * Add a factory for instantiating a node renderer (done when rendering). This allows to override the rendering
    * of node types or define rendering for custom node types.
    * <p>
