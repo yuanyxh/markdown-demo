@@ -2,6 +2,9 @@ import type { Visitor } from "./interfaces/Visitor";
 
 import Block from "./abstracts/Block";
 
+/**
+ * 列表项
+ */
 class ListItem extends Block {
   private markerIndent: number | undefined;
   private contentIndent: number | undefined;
@@ -11,6 +14,8 @@ class ListItem extends Block {
   }
 
   /**
+   * 获取列表项的缩进
+   *
    * Returns the indent of the marker such as "-" or "1." in columns (spaces or tab stop of 4) if available, or null
    * otherwise.
    * <p>

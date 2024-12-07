@@ -3,6 +3,9 @@ import type { Visitor } from "./interfaces/Visitor";
 import { isNotUnDef } from "../../helpers";
 import ListBlock from "./ListBlock";
 
+/**
+ * 无序列表
+ */
 class BulletList extends ListBlock {
   private marker: string | undefined;
 
@@ -11,28 +14,21 @@ class BulletList extends ListBlock {
   }
 
   /**
+   * 返回无序列表的标记（*、+、-）
+   *
    * @return the bullet list marker that was used, e.g. {@code -}, {@code *} or {@code +}, if available, or null otherwise
    */
   public getMarker(): string | undefined {
     return this.marker;
   }
 
+  /**
+   * 设置无序列表的标记
+   *
+   * @param marker
+   */
   public setMarker(marker: string | undefined) {
     this.marker = marker;
-  }
-
-  /**
-   * @deprecated use {@link #getMarker()} instead
-   */
-  public getBulletMarker(): string {
-    return isNotUnDef(this.marker) ? this.marker.charAt(0) : "\0";
-  }
-
-  /**
-   * @deprecated use {@link #getMarker()} instead
-   */
-  public setBulletMarker(bulletMarker: string) {
-    this.marker = bulletMarker !== "\0" ? bulletMarker : void 0;
   }
 }
 
