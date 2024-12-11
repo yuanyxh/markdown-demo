@@ -43,6 +43,16 @@ class NodeMap implements AttributeProviderFactory {
   getNodeById(nodeId: string) {
     return this.nodeAttributeProvider.getNodeById(nodeId);
   }
+
+  getNodeByElement(element: HTMLElement) {
+    const nodeId = element.dataset.cid;
+
+    if (nodeId) {
+      return this.getNodeById(nodeId);
+    }
+
+    return void 0;
+  }
 }
 
 export default NodeMap;

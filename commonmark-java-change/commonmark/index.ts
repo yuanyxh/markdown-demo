@@ -55,6 +55,7 @@ export {
   StrongEmphasis,
   Text,
   ThematicBreak,
+  SourceSpan,
 } from "./node";
 
 export * from "./internal";
