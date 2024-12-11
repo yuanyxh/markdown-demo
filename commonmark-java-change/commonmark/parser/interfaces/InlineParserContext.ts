@@ -5,8 +5,6 @@ import type { LinkReferenceDefinition } from "../../node";
 
 /**
  * Context for inline parsing.
- *
- * 内联解析的上下文
  */
 export interface InlineParserContext {
   /**
@@ -47,10 +45,6 @@ export interface InlineParserContext {
    * Look up a definition of a type for a given label.
    * <p>
    * Note that the passed in label does not need to be normalized; implementations are responsible for doing the normalization before lookup.
-   *
-   * 查找给定标签的类型定义
-   * <p>
-   * 注意传入的标签不需要标准化; 实现负责在查找之前进行规范化
    *
    * @return the definition if one exists, null otherwise
    */

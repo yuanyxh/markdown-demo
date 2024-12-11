@@ -2,10 +2,11 @@ import type { Visitor } from "./interfaces/Visitor";
 
 import Block from "./abstracts/Block";
 
-/**
- * 文档
- */
 class Document extends Block {
+  public constructor() {
+    super("document");
+  }
+
   public override accept(visitor: Visitor) {
     visitor.visit(this);
   }

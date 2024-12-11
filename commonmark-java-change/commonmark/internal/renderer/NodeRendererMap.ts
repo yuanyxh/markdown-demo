@@ -1,20 +1,10 @@
 import type { MarkdownNode } from "../../node";
 import type { NodeRenderer } from "./../../renderer";
 
-/**
- * 节点渲染器的映射类
- *
- * 通过节点的类型获取对应节点类型中优先级最高的 Renderer 实例
- */
 class NodeRendererMap {
   private readonly nodeRenderers: NodeRenderer[] = [];
   private readonly renderers = new Map<typeof MarkdownNode, NodeRenderer>();
 
-  /**
-   * 添加一个节点渲染器
-   *
-   * @param nodeRenderer
-   */
   public add(nodeRenderer: NodeRenderer) {
     this.nodeRenderers.push(nodeRenderer);
 
@@ -26,11 +16,6 @@ class NodeRendererMap {
     }
   }
 
-  /**
-   * 渲染节点
-   *
-   * @param node
-   */
   public render(node: MarkdownNode) {
     const nodeRenderer = this.renderers.get(
       node.constructor as unknown as typeof MarkdownNode

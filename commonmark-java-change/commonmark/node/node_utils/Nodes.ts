@@ -1,8 +1,5 @@
 import type MarkdownNode from "../abstracts/MarkdownNode";
 
-/**
- * 迭代节点的迭代者
- */
 class MarkdownNodeIterable implements Iterable<MarkdownNode> {
   private readonly first: MarkdownNode;
   private readonly end: MarkdownNode;
@@ -16,19 +13,11 @@ class MarkdownNodeIterable implements Iterable<MarkdownNode> {
     return this.iterator();
   }
 
-  /**
-   * 获取迭代器
-   *
-   * @returns
-   */
   public iterator(): Iterator<MarkdownNode> {
     return new MarkdownNodeIterator(this.first, this.end);
   }
 }
 
-/**
- * 迭代节点的迭代器
- */
 class MarkdownNodeIterator implements Iterator<MarkdownNode> {
   private node: MarkdownNode | null;
   private readonly end: MarkdownNode;
@@ -57,15 +46,11 @@ class MarkdownNodeIterator implements Iterator<MarkdownNode> {
 /**
  * Utility class for working with multiple {@link MarkdownNode}s.
  *
- * 用于处理多个 {@link MarkdownNode} 的实用程序类
- *
  * @since 0.16.0
  */
 class Nodes {
   /**
    * The nodes between (not including) start and end.
-   *
-   * 从开始节点迭代至结束节点
    */
   public static between(
     start: MarkdownNode,

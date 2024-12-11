@@ -5,11 +5,16 @@ import "./styles/editor-init.less";
 
 import { createEditorElement } from "./utils";
 
+import source from "./example.md?raw";
+
 import {
   Paragraph,
+  Parser,
   HtmlRenderer,
   MarkdownRenderer,
+  IncludeSourceSpans,
 } from "../commonmark-java-change/commonmark";
+import NodeMap from "./nodemap";
 
 // 创建一个 Editor 实例
 const editorElement = createEditorElement();
@@ -25,8 +30,17 @@ editorElement.addEventListener("compositionend", onCompositionEnd);
 // 处理选区变化事件
 window.document.addEventListener("selectionchange", onSelectionChange);
 
+const nodeMap = new NodeMap();
+
+/** markdown 解析器 */
+const markdownParser = Parser.builder()
+  .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
+  .build();
 /** html 渲染器 */
-const htmlRenderer = HtmlRenderer.builder().build();
+const htmlRenderer = HtmlRenderer.builder()
+  .attributeProviderFactory(nodeMap)
+  .build();
+/** markdown 渲染器 */
 const markdownRenderer = MarkdownRenderer.builder().build();
 
 // 当前选区范围

@@ -7,8 +7,6 @@ import { ParsedInlineImpl } from "../../internal";
  * The result of a single inline parser. Use the static methods to create instances.
  * <p>
  * <em>This interface is not intended to be implemented by clients.</em>
- *
- * 单个内联解析器的结果
  */
 abstract class ParsedInline {
   public static none(): ParsedInline | null {

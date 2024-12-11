@@ -1,9 +1,3 @@
-/**
- * String.fromCodePoint 的包装函数
- *
- * @param codes
- * @returns
- */
 function fromCodePoint(...codes: number[]) {
   try {
     return String.fromCodePoint(...codes);

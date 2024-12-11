@@ -2,8 +2,6 @@ import type { Text } from "../../node";
 
 /**
  * A delimiter run is one or more of the same delimiter character, e.g. {@code ***}.
- *
- * 分隔符串是一个或多个相同的分隔符，例如{@code ***}
  */
 export interface DelimiterRun {
   /**

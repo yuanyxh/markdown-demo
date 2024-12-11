@@ -2,18 +2,8 @@ import { fromCodePoint, Character } from "../../helpers";
 
 /**
  * Class for finding characters in strings or checking characters.
- *
- * 用于在字符串中查找字符或检查字符的类
  */
 class Characters {
-  /**
-   * 在给定字符串中找到指定字符的位置
-   *
-   * @param c
-   * @param s
-   * @param startIndex
-   * @returns
-   */
   public static find(c: string, s: string, startIndex: number): number {
     let length = s.length;
 
@@ -26,13 +16,6 @@ class Characters {
     return -1;
   }
 
-  /**
-   * 在给定字符串中找到换行符的位置
-   *
-   * @param s
-   * @param startIndex
-   * @returns
-   */
   public static findLineBreak(s: string, startIndex: number): number {
     let length: number = s.length;
 
@@ -51,19 +34,11 @@ class Characters {
 
   /**
    * @see <a href="https://spec.commonmark.org/0.31.2/#blank-line">blank line</a>
-   *
-   * 判断当前行是否是空行
    */
   public static isBlank(s: string): boolean {
     return Characters.skipSpaceTab(s, 0, s.length) === s.length;
   }
 
-  /**
-   * 判断当前行是否包含非空白字符
-   *
-   * @param s
-   * @returns
-   */
   public static hasNonSpace(s: string): boolean {
     let length = s.length;
     let skipped = Characters.skip(" ", s, 0, length);
@@ -71,24 +46,10 @@ class Characters {
     return skipped !== length;
   }
 
-  /**
-   * 判断某个字符是否是字母
-   *
-   * @param s
-   * @param index
-   * @returns
-   */
   public static isLetter(s: string, index: number): boolean {
     return Character.isLetter(s[index]);
   }
 
-  /**
-   * 判断指定位置处的字符是否是空格或制表符
-   *
-   * @param s
-   * @param index
-   * @returns
-   */
   public static isSpaceOrTab(s: string, index: number): boolean {
     if (index < s.length) {
       switch (s.charAt(index)) {
@@ -105,8 +66,6 @@ class Characters {
 
   /**
    * @see <a href="https://spec.commonmark.org/0.31.2/#unicode-punctuation-character">Unicode punctuation character</a>
-   *
-   * 判断某个码点对应字符是否是 Unicode 标点符号（Unicode 类别为 P 或 S）
    */
   public static isPunctuationCodePoint(codePoint: number): boolean {
     const char = fromCodePoint(codePoint);
@@ -129,8 +88,6 @@ class Characters {
    * Check whether the provided code point is a Unicode whitespace character as defined in the spec.
    *
    * @see <a href="https://spec.commonmark.org/0.31.2/#unicode-whitespace-character">Unicode whitespace character</a>
-   *
-   * 检查提供的代码点是否是规范中定义的 Unicode 空白字符
    */
   public static isWhitespaceCodePoint(codePoint: number): boolean {
     const char = fromCodePoint(codePoint);
@@ -150,15 +107,6 @@ class Characters {
     }
   }
 
-  /**
-   * 跳过任意个字符，直到遇到除 skip 外的字符，返回新位置
-   *
-   * @param skip
-   * @param s
-   * @param startIndex 开始位置
-   * @param endIndex 结束位置
-   * @returns
-   */
   public static skip(
     skip: string,
     s: string,
@@ -174,15 +122,6 @@ class Characters {
     return endIndex;
   }
 
-  /**
-   * 反方向的 skip 方法
-   *
-   * @param skip
-   * @param s
-   * @param startIndex
-   * @param lastIndex
-   * @returns
-   */
   public static skipBackwards(
     skip: string,
     s: string,
@@ -198,14 +137,6 @@ class Characters {
     return lastIndex - 1;
   }
 
-  /**
-   * 跳过空格与制表符
-   *
-   * @param s
-   * @param startIndex
-   * @param endIndex
-   * @returns
-   */
   public static skipSpaceTab(
     s: string,
     startIndex: number,
@@ -223,14 +154,6 @@ class Characters {
     return endIndex;
   }
 
-  /**
-   * 反方向的 skipSpaceTab
-   *
-   * @param s
-   * @param startIndex
-   * @param lastIndex
-   * @returns
-   */
   public static skipSpaceTabBackwards(
     s: string,
     startIndex: number,

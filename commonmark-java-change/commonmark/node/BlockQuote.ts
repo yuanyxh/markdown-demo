@@ -2,10 +2,11 @@ import type { Visitor } from "./interfaces/Visitor";
 
 import Block from "./abstracts/Block";
 
-/**
- * 块引用
- */
 class BlockQuote extends Block {
+  public constructor() {
+    super("blockquote");
+  }
+
   public override accept(visitor: Visitor) {
     visitor.visit(this);
   }

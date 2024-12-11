@@ -4,8 +4,6 @@ import type { Position } from "../parser";
 
 /**
  * Opening bracket for links ({@code [}), images ({@code ![}), or links with other markers.
- *
- * 用于链接 ({@code [})、图像 ({@code ![}) 或带有其他标记的链接的左括号
  */
 class Bracket {
   /**

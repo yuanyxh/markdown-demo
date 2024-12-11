@@ -1,8 +1,5 @@
 import type { MarkdownNode } from "../../node";
 
-/**
- * 后置处理的处理器接口
- */
 export interface PostProcessor {
   /**
    * @param node the node to post-process

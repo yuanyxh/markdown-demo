@@ -17,23 +17,6 @@
  * to be consumed by another programming language, e.g. one that uses UTF-8 strings, you will need to translate them,
  * otherwise characters such as emojis will result in incorrect positions.
  *
- * SourceSpan 记录在源码中的位置与长度
- * <p>
- * 它有一个起始位置（行和列索引）和它跨越的字符长度
- * <p>
- * 例如，此 CommonMark 源文本：
- * ```md
- * > foo
- * ```
- * {@link BlockQuote} 节点将具有以下源范围：第 0 行，第 0 列，长度 5
- * <p>
- * 其中的 {@link Paragraph} 节点将具有：第 0 行，第 2 列，长度 3
- * <p>
- * 如果一个块有多行，则每行都有一个源跨度
- * <p>
- * 请注意，列索引和长度以 Java 字符（UTF-16 代码单元）测量
- * 如果由另一种编程语言使用，例如如果使用 UTF-8 字符串，则需要翻译它们，否则诸如表情符号之类的字符将导致位置不正确
- *
  * @since 0.16.0
  */
 class SourceSpan {
@@ -68,8 +51,6 @@ class SourceSpan {
   }
 
   /**
-   * 从 0 开始的行索引，例如 0 表示第一行，1 表示第二行，依此类推
-   *
    * @return 0-based line index, e.g. 0 for first line, 1 for the second line, etc
    */
   public getLineIndex(): number {
@@ -77,9 +58,6 @@ class SourceSpan {
   }
 
   /**
-   * 源中从 0 开始的列索引（行上的字符），例如 0 表示一行的第一个字符，1 表示
-   * 第二个字符等
-   *
    * @return 0-based index of column (character on line) in source, e.g. 0 for the first character of a line, 1 for
    * the second character, etc
    */
@@ -88,8 +66,6 @@ class SourceSpan {
   }
 
   /**
-   * 获取在源码中的索引
-   *
    * @return 0-based index in whole input
    * @since 0.24.0
    */
@@ -98,21 +74,12 @@ class SourceSpan {
   }
 
   /**
-   * 获取在源码中的长度
-   *
    * @return length of the span in characters
    */
   public getLength(): number {
     return this.length;
   }
 
-  /**
-   * 从 beginIndex 切割到 endIndex 并生成新的 SourceSpan
-   *
-   * @param beginIndex
-   * @param endIndex
-   * @returns
-   */
   public subSpan(
     beginIndex: number,
     endIndex: number = this.length
@@ -151,12 +118,6 @@ class SourceSpan {
     );
   }
 
-  /**
-   * 判断两个 SourceSpan 记录的源码信息是否相同
-   *
-   * @param o
-   * @returns
-   */
   public equals(o: any): boolean {
     if (this === o) {
       return true;
@@ -179,9 +140,6 @@ class SourceSpan {
   /**
    * Use {{@link #of(int, int, int, int)}} instead to also specify input index. Using the deprecated one
    * will set {@link #inputIndex} to 0.
-   *
-   * 使用 {{@link #of(int, int, int, int)}} 来指定输入索引
-   * 使用已弃用的将把 {@link #inputIndex} 设置为 0
    */
   public static of(
     line: number,

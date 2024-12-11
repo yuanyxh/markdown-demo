@@ -3,8 +3,6 @@ import type { InlineParserContext } from "./InlineParserContext";
 
 /**
  * Factory for custom inline parser.
- *
- * 自定义内联解析器的工厂
  */
 export interface InlineParserFactory {
   /**

@@ -2,9 +2,6 @@ import type { BlockParser } from "../parser";
 
 import { BlockStart } from "../parser";
 
-/**
- * 块开始时的解析实现
- */
 class BlockStartImpl extends BlockStart {
   private readonly blockParsers: BlockParser[];
   private newIndex = -1;

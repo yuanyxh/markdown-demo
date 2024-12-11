@@ -5,8 +5,6 @@ import { fromCodePoint } from "../../../helpers";
 
 /**
  * Writer for Markdown (CommonMark) text.
- *
- * Markdown (CommonMark) 文本的编写器
  */
 class MarkdownWriter {
   private readonly buffer: Appendable;
@@ -17,8 +15,6 @@ class MarkdownWriter {
 
   // Stacks of settings that affect various rendering behaviors. The common pattern here is that callers use "push" to
   // change a setting, render some nodes, and then "pop" the setting off the stack again to restore previous state.
-
-  // 影响各种渲染行为的设置堆栈；这里的常见模式是调用者使用 push 来更改设置，渲染一些节点，然后再次将设置从堆栈中 pop 以恢复之前的状态。
   private readonly prefixes: string[] = [];
   private readonly tight: boolean[] = [];
   private readonly rawEscapes: CharMatcher[] = [];
@@ -29,8 +25,6 @@ class MarkdownWriter {
 
   /**
    * Write the supplied string (raw/unescaped except if {@link #pushRawEscape} was used).
-   *
-   * 写入提供的字符串（原始/未转义，除非使用了 {@link #pushRawEscape}）
    */
   public raw(s: string): void {
     this.flushBlockSeparator();
@@ -39,8 +33,6 @@ class MarkdownWriter {
 
   /**
    * Write the supplied string with escaping.
-   *
-   * 使用转义写入提供的字符串
    *
    * @param s      the string to write
    * @param escape which characters to escape
@@ -59,8 +51,6 @@ class MarkdownWriter {
 
   /**
    * Write a newline (line terminator).
-   *
-   * 写入换行符
    */
   public line() {
     this.write("\n", null);
@@ -71,8 +61,6 @@ class MarkdownWriter {
   /**
    * Enqueue a block separator to be written before the next text is written. Block separators are not written
    * straight away because if there are no more blocks to write we don't want a separator (at the end of the document).
-   *
-   * 设置块分割符
    */
   public block() {
     // Remember whether this should be a tight or loose separator now because tight could get changed in between
@@ -85,8 +73,6 @@ class MarkdownWriter {
    * Push a prefix onto the top of the stack. All prefixes are written at the beginning of each line, until the
    * prefix is popped again.
    *
-   * 设置每行开头的字符
-   *
    * @param prefix the raw prefix string
    */
   public pushPrefix(prefix: string) {
@@ -95,8 +81,6 @@ class MarkdownWriter {
 
   /**
    * Write a prefix.
-   *
-   * 写入前缀
    *
    * @param prefix the raw prefix string to write
    */
@@ -108,8 +92,6 @@ class MarkdownWriter {
 
   /**
    * Remove the last prefix from the top of the stack.
-   *
-   * 移除前缀
    */
   public popPrefix() {
     this.prefixes.pop();
@@ -122,8 +104,6 @@ class MarkdownWriter {
    * <p>
    * Note that changing this does not affect block separators that have already been enqueued with {@link #block()},
    * only future ones.
-   *
-   * 设置间隔模式是紧凑还是松散的
    */
   public pushTight(tight: boolean) {
     this.tight.push(tight);
@@ -131,8 +111,6 @@ class MarkdownWriter {
 
   /**
    * Remove the last "tight" setting from the top of the stack.
-   *
-   * 移除设置的间隔模式
    */
   public popTight() {
     this.tight.pop();
