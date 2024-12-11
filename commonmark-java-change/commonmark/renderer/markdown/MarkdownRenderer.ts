@@ -3,7 +3,7 @@ import type { MarkdownNodeRendererContext } from "./interfaces/MarkdownNodeRende
 import type { Renderer } from "../interfaces/Renderer";
 import type { MarkdownNodeRendererFactory } from "./interfaces/MarkdownNodeRendererFactory";
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { Appendable } from "../../../helpers";
+import { Appendable } from "../../../helpers";
 import type { MarkdownNode } from "../../node";
 
 import CoreMarkdownNodeRenderer from "./CoreMarkdownNodeRenderer";
@@ -147,10 +147,14 @@ export class MarkdownRenderer implements Renderer {
     return new MarkdownNodeRendererBuilder();
   }
 
-  public render(node: MarkdownNode, output: Appendable) {
+  public render(node: MarkdownNode, output?: Appendable) {
+    output = output ? output : new Appendable();
+
     let context = new RendererContext(this, new MarkdownWriter(output));
 
     context.render(node);
+
+    return output.toString();
   }
 
   /**
