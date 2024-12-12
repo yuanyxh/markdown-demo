@@ -10,7 +10,6 @@ import {
   Paragraph,
   Parser,
   HtmlRenderer,
-  MarkdownRenderer,
   IncludeSourceSpans,
   SourceSpan,
   Block,
@@ -48,12 +47,23 @@ const htmlRenderer = HtmlRenderer.builder()
   .attributeProviderFactory(nodeMap)
   .setEscapeHtml(true)
   .build();
-/** markdown 渲染器 */
-const markdownRenderer = MarkdownRenderer.builder().build();
 
 // 当前选区范围
 let rangeInDocument: Range | null = null;
-let documentSource = "";
+/** 变更范围 */
+let changeRange: IChangeRange;
+/** 变更范围的共同父级 */
+let commonAncestor: ICommonAncestor | null;
+/** 文档源码 */
+let source = "";
+/** 块源码 */
+let blockSource = "";
+/** 输入数据 */
+let inputData: string | File[] = "";
+/** 光标方向 */
+let cursorDir: TCursorDir = "forward";
+/** 光标在源码中的位置 */
+let cursor = 0;
 
 /**
  * 获取文档选区
@@ -77,7 +87,6 @@ function resetEditor() {
   const paragraph = new Paragraph();
 
   paragraph.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
-
   document.appendChild(paragraph);
 
   editorElement.innerHTML = htmlRenderer.render(document);
@@ -92,6 +101,9 @@ function resetEditor() {
   }
 }
 
+/**
+ * 初始化
+ */
 function init() {
   resetEditor();
 }
@@ -124,32 +136,13 @@ function onBeforeInput(e: InputEvent) {
   }
 
   const range = e.getTargetRanges()[0];
-  const data = e.data;
 
-  const changeRange = getMarkdownChangeRange(range);
-  const commonAncestor = getCommonBlockAncestor(range);
+  changeRange = getMarkdownChangeRange(range);
+  commonAncestor = getCommonBlockAncestor(range);
 
-  e.preventDefault();
-  console.log(changeRange);
-
-  console.log(range);
-
-  if (commonAncestor === null) {
-    return false;
-  }
-
-  // e.preventDefault();
-
-  // const { element, blockAncestor } = commonAncestor;
-
-  // documentSource =
-  //   documentSource.slice(0, startChangeOffset) +
-  //   data +
-  //   documentSource.slice(endChangeOffset);
-
-  // console.log(range);
-
-  // console.log(changeRange);
+  setInputData(e);
+  setCursorDir(e);
+  setCursor(e, changeRange, getPlainSource());
 }
 
 /**
@@ -158,11 +151,28 @@ function onBeforeInput(e: InputEvent) {
  * @param e
  * @returns
  */
-function onInput(e: Event) {
+function onInput(event: Event) {
+  const e = event as InputEvent;
+
+  if (e.isComposing) {
+    return false;
+  }
+
   // 当编辑器为空时，添加一个空段落
   if (isEmptyEditor()) {
     return resetEditor();
   }
+
+  console.log(cursor);
+
+  console.log(inputData);
+
+  // 新的源码
+  // source =
+  //   source.slice(0, changeRange.start) + data + source.slice(changeRange.end);
+
+  // 新块
+  // setNewBlock(commonAncestor, changeRange, data || "");
 }
 
 // 处理 composition 输入事件
@@ -185,8 +195,12 @@ function isEmptyEditor() {
   );
 }
 
-// ----------------------------
-
+/**
+ * 获取源码位置
+ *
+ * @param node
+ * @returns
+ */
 function getSourcePosition(node?: MarkdownNode) {
   if (!node) {
     throw new Error("Must be have a node param");
@@ -262,25 +276,18 @@ function getMarkdownChangeOffset(
 }
 
 /** 获取此次输入 markdown 变化的源码范围 */
-function getMarkdownChangeRange(range: StaticRange) {
+function getMarkdownChangeRange(range: StaticRange): IChangeRange {
   const { startContainer, endContainer, startOffset, endOffset } = range;
 
   // 获取开始的源码偏移
-  const startChangeOffset = getMarkdownChangeOffset(
-    startContainer,
-    startOffset
-  );
+  const start = getMarkdownChangeOffset(startContainer, startOffset);
   // 获取结束的源码偏移
-  const endChangeOffset = getMarkdownChangeOffset(
-    endContainer,
-    endOffset,
-    true
-  );
+  const end = getMarkdownChangeOffset(endContainer, endOffset, true);
 
-  return { startChangeOffset, endChangeOffset };
+  return { start, end };
 }
 
-function getCommonBlockAncestor(range: StaticRange) {
+function getCommonBlockAncestor(range: StaticRange): ICommonAncestor | null {
   const { startContainer, endContainer } = range;
 
   if (startContainer === endContainer) {
@@ -313,8 +320,232 @@ function getCommonBlockAncestor(range: StaticRange) {
   return null;
 }
 
+/**
+ * 获取块 markdown 节点
+ *
+ * @param element
+ * @returns
+ */
 function getBlock(element: HTMLElement) {
   const block = nodeMap.getNodeByElement(element);
 
   return block instanceof Block ? block : null;
 }
+
+/**
+ * 重新计算布局
+ *
+ * @param commonAncestor
+ * @param range
+ * @param data
+ */
+function reLayoutBlock(
+  commonAncestor: ICommonAncestor,
+  range: IChangeRange,
+  data: string
+) {
+  const { element, blockAncestor } = commonAncestor;
+  const { inputIndex, inputEndIndex } = getSourcePosition(blockAncestor);
+
+  const blockSource = source.slice(inputIndex, inputEndIndex);
+
+  const blockChangeRange = {
+    start: range.start - inputIndex,
+    end: range.end - inputIndex,
+  };
+
+  const newBlockSource =
+    blockSource.slice(blockChangeRange.start) +
+    data +
+    blockSource.slice(blockChangeRange.end);
+
+  element.outerHTML = htmlRenderer.render(markdownParser.parse(newBlockSource));
+
+  return element;
+}
+
+function setNewBlock(
+  commonAncestor: ICommonAncestor,
+  range: IChangeRange,
+  data: string
+) {
+  const { blockAncestor } = commonAncestor;
+  const { inputIndex, inputEndIndex } = getSourcePosition(blockAncestor);
+
+  const oldBlock = source.slice(inputIndex, inputEndIndex);
+
+  const blockChangeRange = {
+    start: range.start - inputIndex,
+    end: range.end - inputIndex,
+  };
+
+  blockSource =
+    oldBlock.slice(blockChangeRange.start) +
+    data +
+    oldBlock.slice(blockChangeRange.end);
+}
+
+function setSource() {}
+
+/**
+ * 设置输入数据
+ *
+ * @param e
+ * @returns
+ */
+function setInputData(e: InputEvent) {
+  if (e.dataTransfer) {
+    if (e.dataTransfer.files.length) {
+      const originFiles = Array.from(e.dataTransfer.files);
+
+      const files = originFiles.filter((file) => isImageFile(file));
+
+      if (files.length) {
+        return (inputData = files);
+      }
+    }
+
+    const plainText = getTextFromTransfer(e.dataTransfer);
+
+    if (plainText) {
+      return (inputData = plainText);
+    }
+  }
+
+  if (e.data) {
+    return (inputData = e.data);
+  }
+
+  inputData = "";
+}
+
+/**
+ * 是否是图片文件
+ *
+ * @param file
+ * @returns
+ */
+function isImageFile(file: File) {
+  return file.type.startsWith("image/");
+}
+
+/**
+ * 获取文本
+ *
+ * @param dataTransfer
+ * @returns
+ */
+function getTextFromTransfer(dataTransfer: DataTransfer) {
+  let text = dataTransfer.getData("text/plain");
+
+  if (!text) {
+    return dataTransfer.getData("text/html");
+  }
+
+  return text;
+}
+
+/**
+ * 设置光标向前或向后（取开始还是结束）
+ *
+ * @param e
+ */
+function setCursorDir(e: InputEvent) {
+  switch (e.inputType) {
+    // insert
+    case "insertText":
+    case "insertReplacementText":
+    case "insertLineBreak":
+    case "insertParagraph":
+    case "insertOrderedList":
+    case "insertUnorderedList":
+    case "insertFromYank":
+    case "insertFromDrop":
+    case "insertFromPaste":
+    case "insertTranspose":
+    case "insertLink":
+
+    // delete
+    case "deleteWordForward":
+    case "deleteContentForward":
+    case "deleteSoftLineForward":
+      cursorDir = "forward";
+      break;
+
+    case "deleteWordBackward":
+    case "deleteByDrag":
+    case "deleteByCut":
+    case "deleteContentBackward":
+    case "deleteSoftLineBackward":
+    case "deleteEntireSoftLine":
+      cursorDir = "back";
+      break;
+    default:
+      cursorDir = "forward";
+      break;
+  }
+}
+
+function setCursor(e: InputEvent, changeRange: IChangeRange, data = "") {
+  switch (e.inputType) {
+    // insert
+    case "insertText":
+    case "insertReplacementText":
+    case "insertLineBreak":
+    case "insertParagraph":
+    case "insertOrderedList":
+    case "insertUnorderedList":
+    case "insertFromYank":
+    case "insertFromDrop":
+    case "insertFromPaste":
+    case "insertTranspose":
+    case "insertLink":
+      cursor = changeRange.start + data.length;
+
+      break;
+
+    // delete forward
+    case "deleteWordForward":
+    case "deleteContentForward":
+    case "deleteSoftLineForward":
+      cursor = changeRange.end;
+
+      break;
+
+    // delete backward
+    case "deleteWordBackward":
+    case "deleteByDrag":
+    case "deleteByCut":
+    case "deleteContentBackward":
+    case "deleteSoftLineBackward":
+    case "deleteEntireSoftLine":
+      cursor = changeRange.start;
+
+      break;
+    default:
+      cursor = changeRange.start;
+
+      break;
+  }
+}
+
+/**
+ * 获取纯源码文本
+ *
+ * @returns
+ */
+function getPlainSource() {
+  if (typeof inputData === "string") {
+    return inputData;
+  }
+
+  return "";
+}
+
+/**
+ * 计算编辑器光标
+ *
+ * @param block
+ * @param sourceOffset
+ */
+function editorCursorCalculator(block: Block, sourceOffset: number) {}
