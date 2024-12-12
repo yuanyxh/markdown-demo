@@ -1,14 +1,30 @@
 import type { Block } from "../commonmark-java-change/commonmark";
 
 declare global {
+  /** 变更范围 */
   interface IChangeRange {
     start: number;
     end: number;
   }
 
+  /** 公共祖先 */
   interface ICommonAncestor {
     element: HTMLElement;
     blockAncestor: Block;
+  }
+
+  /** 新块的信息 */
+  interface INewBlockInfo {
+    /** 缩进 */
+    indent: number;
+    /** 是否是列表 */
+    isList: boolean;
+    /** 是否紧凑 */
+    isTight?: boolean;
+    /** 列表标记 */
+    marker?: string;
+    /** 有序列表的序号 */
+    startNumber?: number;
   }
 
   type TCursorDir = "forward" | "back";

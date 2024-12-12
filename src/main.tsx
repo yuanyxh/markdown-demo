@@ -13,6 +13,7 @@ import {
   IncludeSourceSpans,
   SourceSpan,
   Block,
+  Text as MarkdownText,
 } from "../commonmark-java-change/commonmark";
 
 import type { MarkdownNode } from "../commonmark-java-change/commonmark";
@@ -52,12 +53,11 @@ const htmlRenderer = HtmlRenderer.builder()
 let rangeInDocument: Range | null = null;
 /** 变更范围 */
 let changeRange: IChangeRange;
-/** 变更范围的共同父级 */
-let commonAncestor: ICommonAncestor | null;
+/** 输入事件对象 */
+let event: InputEvent;
 /** 文档源码 */
-let source = "";
-/** 块源码 */
-let blockSource = "";
+let documentSource = "";
+let documentNode: MarkdownNode;
 /** 输入数据 */
 let inputData: string | File[] = "";
 /** 光标方向 */
@@ -83,13 +83,16 @@ function resetEditor() {
     resetCursor = true;
   }
 
-  const document = new Document();
+  documentNode = new Document();
   const paragraph = new Paragraph();
+  const text = new MarkdownText("");
+
+  documentNode.appendChild(paragraph);
 
   paragraph.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
-  document.appendChild(paragraph);
+  text.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
 
-  editorElement.innerHTML = htmlRenderer.render(document);
+  editorElement.innerHTML = htmlRenderer.render(documentNode);
 
   if (resetCursor) {
     const range = window.document.createRange();
@@ -138,11 +141,13 @@ function onBeforeInput(e: InputEvent) {
   const range = e.getTargetRanges()[0];
 
   changeRange = getMarkdownChangeRange(range);
-  commonAncestor = getCommonBlockAncestor(range);
 
   setInputData(e);
   setCursorDir(e);
   setCursor(e, changeRange, getPlainSource());
+  setDocument();
+
+  event = e;
 }
 
 /**
@@ -163,16 +168,12 @@ function onInput(event: Event) {
     return resetEditor();
   }
 
-  console.log(cursor);
-
-  console.log(inputData);
-
-  // 新的源码
-  // source =
-  //   source.slice(0, changeRange.start) + data + source.slice(changeRange.end);
-
-  // 新块
-  // setNewBlock(commonAncestor, changeRange, data || "");
+  console.log("changeRange", changeRange);
+  console.log("source", documentSource);
+  console.log("sourcenode", documentNode);
+  console.log("inputdata", inputData);
+  console.log("cursordir", cursorDir);
+  console.log("cursor", cursor);
 }
 
 // 处理 composition 输入事件
@@ -287,6 +288,12 @@ function getMarkdownChangeRange(range: StaticRange): IChangeRange {
   return { start, end };
 }
 
+/**
+ * 获取双边共同块级祖先
+ *
+ * @param range
+ * @returns
+ */
 function getCommonBlockAncestor(range: StaticRange): ICommonAncestor | null {
   const { startContainer, endContainer } = range;
 
@@ -333,59 +340,19 @@ function getBlock(element: HTMLElement) {
 }
 
 /**
- * 重新计算布局
- *
- * @param commonAncestor
- * @param range
- * @param data
+ * 设置新的源码
  */
-function reLayoutBlock(
-  commonAncestor: ICommonAncestor,
-  range: IChangeRange,
-  data: string
-) {
-  const { element, blockAncestor } = commonAncestor;
-  const { inputIndex, inputEndIndex } = getSourcePosition(blockAncestor);
+function setDocument() {
+  documentSource =
+    documentSource.slice(0, changeRange.start) +
+    inputData +
+    documentSource.slice(changeRange.end);
 
-  const blockSource = source.slice(inputIndex, inputEndIndex);
+  const oldDocumentNode = documentNode;
+  documentNode = markdownParser.parse(documentSource);
 
-  const blockChangeRange = {
-    start: range.start - inputIndex,
-    end: range.end - inputIndex,
-  };
-
-  const newBlockSource =
-    blockSource.slice(blockChangeRange.start) +
-    data +
-    blockSource.slice(blockChangeRange.end);
-
-  element.outerHTML = htmlRenderer.render(markdownParser.parse(newBlockSource));
-
-  return element;
+  console.log(compareTrees(documentNode, oldDocumentNode));
 }
-
-function setNewBlock(
-  commonAncestor: ICommonAncestor,
-  range: IChangeRange,
-  data: string
-) {
-  const { blockAncestor } = commonAncestor;
-  const { inputIndex, inputEndIndex } = getSourcePosition(blockAncestor);
-
-  const oldBlock = source.slice(inputIndex, inputEndIndex);
-
-  const blockChangeRange = {
-    start: range.start - inputIndex,
-    end: range.end - inputIndex,
-  };
-
-  blockSource =
-    oldBlock.slice(blockChangeRange.start) +
-    data +
-    oldBlock.slice(blockChangeRange.end);
-}
-
-function setSource() {}
 
 /**
  * 设置输入数据
@@ -416,7 +383,24 @@ function setInputData(e: InputEvent) {
     return (inputData = e.data);
   }
 
-  inputData = "";
+  switch (e.inputType) {
+    case "insertParagraph":
+      inputData = "\n\n";
+
+      break;
+
+    case "insertUnorderedList":
+      inputData = "\n- ";
+
+      break;
+
+    case "insertOrderedList":
+      inputData = "1. ";
+      break;
+    default:
+      inputData = "";
+      break;
+  }
 }
 
 /**
@@ -486,6 +470,13 @@ function setCursorDir(e: InputEvent) {
   }
 }
 
+/**
+ * 设置光标在源码中的位置
+ *
+ * @param e
+ * @param changeRange
+ * @param data
+ */
 function setCursor(e: InputEvent, changeRange: IChangeRange, data = "") {
   switch (e.inputType) {
     // insert
@@ -530,6 +521,67 @@ function setCursor(e: InputEvent, changeRange: IChangeRange, data = "") {
 }
 
 /**
+ * 插入文本
+ *
+ * @returns
+ */
+function isInsert() {
+  let isInsert = false;
+
+  switch (event.inputType) {
+    // insert
+    case "insertText":
+    case "insertReplacementText":
+    case "insertLineBreak":
+    case "insertParagraph":
+    case "insertOrderedList":
+    case "insertUnorderedList":
+    case "insertFromYank":
+    case "insertFromDrop":
+    case "insertFromPaste":
+    case "insertTranspose":
+    case "insertLink":
+      isInsert = true;
+
+      break;
+
+    default:
+      break;
+  }
+
+  return isInsert;
+}
+
+/**
+ * 删除文本
+ *
+ * @returns
+ */
+function isDelete() {
+  let isDelete = false;
+
+  switch (event.inputType) {
+    // delete
+    case "deleteWordForward":
+    case "deleteContentForward":
+    case "deleteSoftLineForward":
+    case "deleteWordBackward":
+    case "deleteByDrag":
+    case "deleteByCut":
+    case "deleteContentBackward":
+    case "deleteSoftLineBackward":
+    case "deleteEntireSoftLine":
+      isDelete = true;
+
+      break;
+    default:
+      break;
+  }
+
+  return isDelete;
+}
+
+/**
  * 获取纯源码文本
  *
  * @returns
@@ -540,6 +592,41 @@ function getPlainSource() {
   }
 
   return "";
+}
+
+function compareTrees(
+  newNode: MarkdownNode | null,
+  oldNode: MarkdownNode | null
+) {
+  const changedNodes: MarkdownNode[] = [];
+
+  let childChangedNodes: MarkdownNode[] | false;
+
+  let n = newNode?.getFirstChild();
+  let o = oldNode?.getFirstChild();
+
+  while (n) {
+    if (n.type !== o?.type) {
+      changedNodes.push(n);
+    } else {
+      if (
+        (childChangedNodes = compareTrees(n.getFirstChild(), o.getFirstChild()))
+      ) {
+        changedNodes.push(...childChangedNodes);
+      }
+    }
+
+    n = n.getNext();
+    o = o?.getNext();
+  }
+
+  if (changedNodes.length) {
+    return changedNodes;
+  }
+
+  // remvoe o exis but n delete
+
+  return false;
 }
 
 /**
