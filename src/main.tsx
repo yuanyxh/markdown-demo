@@ -58,6 +58,7 @@ let event: InputEvent;
 /** 文档源码 */
 let documentSource = "";
 let documentNode: MarkdownNode;
+let previousDocumentNode: MarkdownNode;
 /** 输入数据 */
 let inputData: string | File[] = "";
 /** 光标方向 */
@@ -168,12 +169,18 @@ function onInput(event: Event) {
     return resetEditor();
   }
 
-  console.log("changeRange", changeRange);
-  console.log("source", documentSource);
-  console.log("sourcenode", documentNode);
-  console.log("inputdata", inputData);
-  console.log("cursordir", cursorDir);
-  console.log("cursor", cursor);
+  const changedNodes = compareTrees(documentNode, previousDocumentNode);
+
+  if (!changedNodes) {
+    return false;
+  }
+
+  // console.log("changeRange", changeRange);
+  // console.log("source", documentSource);
+  // console.log("sourcenode", documentNode);
+  // console.log("inputdata", inputData);
+  // console.log("cursordir", cursorDir);
+  // console.log("cursor", cursor);
 }
 
 // 处理 composition 输入事件
@@ -289,45 +296,6 @@ function getMarkdownChangeRange(range: StaticRange): IChangeRange {
 }
 
 /**
- * 获取双边共同块级祖先
- *
- * @param range
- * @returns
- */
-function getCommonBlockAncestor(range: StaticRange): ICommonAncestor | null {
-  const { startContainer, endContainer } = range;
-
-  if (startContainer === endContainer) {
-    let element = startContainer;
-
-    if (!(element instanceof HTMLElement)) {
-      element = element.parentElement!;
-    }
-
-    const block = getBlock(element as HTMLElement);
-
-    if (block) {
-      return { element: element as HTMLElement, blockAncestor: block };
-    }
-  }
-
-  let node = startContainer;
-  while (node) {
-    if (node instanceof HTMLElement && node.contains(endContainer)) {
-      const block = getBlock(node);
-
-      if (block) {
-        return { element: node, blockAncestor: block };
-      }
-    }
-
-    node = node.parentElement!;
-  }
-
-  return null;
-}
-
-/**
  * 获取块 markdown 节点
  *
  * @param element
@@ -348,10 +316,8 @@ function setDocument() {
     inputData +
     documentSource.slice(changeRange.end);
 
-  const oldDocumentNode = documentNode;
+  previousDocumentNode = documentNode;
   documentNode = markdownParser.parse(documentSource);
-
-  console.log(compareTrees(documentNode, oldDocumentNode));
 }
 
 /**
