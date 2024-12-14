@@ -31,8 +31,10 @@ editorElement.addEventListener("beforeinput", onBeforeInput);
 
 // 侦听 input 事件
 editorElement.addEventListener("input", onInput);
+
 // 处理 composition 输入事件
 editorElement.addEventListener("compositionend", onCompositionEnd);
+
 // 处理选区变化事件
 window.document.addEventListener("selectionchange", onSelectionChange);
 
@@ -46,18 +48,17 @@ const markdownParser = Parser.builder()
 /** html 渲染器 */
 const htmlRenderer = HtmlRenderer.builder()
   .attributeProviderFactory(nodeMap)
-  .setEscapeHtml(true)
   .build();
 
-// 当前选区范围
-let rangeInDocument: Range | null = null;
 /** 变更范围 */
 let changeRange: IChangeRange;
 /** 输入事件对象 */
 let event: InputEvent;
 /** 文档源码 */
 let documentSource = "";
+/** 文档节点 */
 let documentNode: MarkdownNode;
+/** 旧文档节点 */
 let previousDocumentNode: MarkdownNode;
 /** 输入数据 */
 let inputData: string | File[] = "";
@@ -98,7 +99,6 @@ function resetEditor() {
   if (resetCursor) {
     const range = window.document.createRange();
     range.setStart(editorElement.firstElementChild!, 0);
-    range.setEnd(editorElement.firstElementChild!, 0);
     range.collapse(true);
 
     getSelection()?.addRange(range);
@@ -119,10 +119,10 @@ function onSelectionChange() {
     return false;
   }
 
-  const selection = window.document.getSelection();
+  const selection = getSelection();
 
   if (selection && selection.rangeCount) {
-    rangeInDocument = selection.getRangeAt(selection.rangeCount - 1);
+    selection.getRangeAt(selection.rangeCount - 1);
 
     // 保证只有一个选区范围
     if (selection.rangeCount > 1) {
@@ -175,12 +175,7 @@ function onInput(event: Event) {
     return false;
   }
 
-  // console.log("changeRange", changeRange);
-  // console.log("source", documentSource);
-  // console.log("sourcenode", documentNode);
-  // console.log("inputdata", inputData);
-  // console.log("cursordir", cursorDir);
-  // console.log("cursor", cursor);
+  patch(changedNodes);
 }
 
 // 处理 composition 输入事件
@@ -188,6 +183,20 @@ function onCompositionEnd(e: CompositionEvent) {
   if (!e.data) {
     return false;
   }
+}
+
+function patch(changedNodes: INodeHolder[]) {
+  for (let i = 0; i < changedNodes.length; i++) {
+    const { node, element } = changedNodes[i];
+
+    console.log(element, node);
+  }
+}
+
+function getElementByNodeId(nodeId: string | null) {
+  return editorElement.querySelector(
+    '[data-cid="' + nodeId + '"]'
+  ) as HTMLElement;
 }
 
 /**
@@ -293,18 +302,6 @@ function getMarkdownChangeRange(range: StaticRange): IChangeRange {
   const end = getMarkdownChangeOffset(endContainer, endOffset, true);
 
   return { start, end };
-}
-
-/**
- * 获取块 markdown 节点
- *
- * @param element
- * @returns
- */
-function getBlock(element: HTMLElement) {
-  const block = nodeMap.getNodeByElement(element);
-
-  return block instanceof Block ? block : null;
 }
 
 /**
@@ -428,7 +425,7 @@ function setCursorDir(e: InputEvent) {
     case "deleteContentBackward":
     case "deleteSoftLineBackward":
     case "deleteEntireSoftLine":
-      cursorDir = "back";
+      cursorDir = "backword";
       break;
     default:
       cursorDir = "forward";
@@ -563,17 +560,20 @@ function getPlainSource() {
 function compareTrees(
   newNode: MarkdownNode | null,
   oldNode: MarkdownNode | null
-) {
-  const changedNodes: MarkdownNode[] = [];
+): INodeHolder[] | false {
+  const changedNodes: INodeHolder[] = [];
 
-  let childChangedNodes: MarkdownNode[] | false;
+  let childChangedNodes: INodeHolder[] | false;
 
   let n = newNode?.getFirstChild();
   let o = oldNode?.getFirstChild();
 
   while (n) {
     if (n.type !== o?.type) {
-      changedNodes.push(n);
+      changedNodes.push({
+        element: getElementByNodeId(nodeMap.getNodeIdByMap(o)),
+        node: n,
+      });
     } else {
       if (
         (childChangedNodes = compareTrees(n.getFirstChild(), o.getFirstChild()))

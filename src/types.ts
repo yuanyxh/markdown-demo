@@ -1,4 +1,4 @@
-import type { Block } from "../commonmark-java-change/commonmark";
+import type { Block, MarkdownNode } from "../commonmark-java-change/commonmark";
 
 declare global {
   /** 变更范围 */
@@ -27,5 +27,10 @@ declare global {
     startNumber?: number;
   }
 
-  type TCursorDir = "forward" | "back";
+  interface INodeHolder {
+    element: HTMLElement;
+    node: MarkdownNode;
+  }
+
+  type TCursorDir = "forward" | "backword";
 }

@@ -29,14 +29,22 @@ class NodeAttributeProvider implements AttributeProvider {
   getNodeById(nodeId: string) {
     return this.map.get(nodeId);
   }
+
+  getNodeIdByMap(node: MarkdownNode) {
+    for (const [nodeId, mapNode] of this.map) {
+      if (node === mapNode) {
+        return nodeId;
+      }
+    }
+
+    return null;
+  }
 }
 
 class NodeMap implements AttributeProviderFactory {
-  private nodeAttributeProvider!: NodeAttributeProvider;
+  private nodeAttributeProvider = new NodeAttributeProvider();
 
   create(context: AttributeProviderContext): AttributeProvider {
-    this.nodeAttributeProvider = new NodeAttributeProvider();
-
     return this.nodeAttributeProvider;
   }
 
@@ -52,6 +60,10 @@ class NodeMap implements AttributeProviderFactory {
     }
 
     return void 0;
+  }
+
+  getNodeIdByMap(node: MarkdownNode) {
+    return this.nodeAttributeProvider.getNodeIdByMap(node);
   }
 }
 
