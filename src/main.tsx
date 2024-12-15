@@ -13,14 +13,13 @@ import {
   IncludeSourceSpans,
   SourceSpan,
   Block,
-  Text as MarkdownText,
 } from "../commonmark-java-change/commonmark";
 
 import type { MarkdownNode } from "../commonmark-java-change/commonmark";
 
 import NodeMap from "./nodemap";
 
-// import example from "./example.md?raw";
+import example from "./example.md?raw";
 
 // 创建一个 Editor 实例
 const editorElement = createEditorElement();
@@ -30,7 +29,7 @@ window.document.getElementById("root")!.appendChild(editorElement);
 editorElement.addEventListener("beforeinput", onBeforeInput);
 
 // 侦听 input 事件
-editorElement.addEventListener("input", onInput);
+// editorElement.addEventListener("input", onInput);
 
 // 处理 composition 输入事件
 editorElement.addEventListener("compositionend", onCompositionEnd);
@@ -50,6 +49,8 @@ const htmlRenderer = HtmlRenderer.builder()
   .attributeProviderFactory(nodeMap)
   .build();
 
+editorElement.innerHTML = htmlRenderer.render(markdownParser.parse(example));
+
 /** 变更范围 */
 let changeRange: IChangeRange;
 /** 输入事件对象 */
@@ -67,51 +68,14 @@ let cursorDir: TCursorDir = "forward";
 /** 光标在源码中的位置 */
 let cursor = 0;
 
-/**
- * 获取文档选区
- *
- * @returns
- */
-function getSelection() {
-  return window.document.getSelection();
-}
+// (function initEditor() {
+//   resetEditor();
+// })();
 
-/**
- * 重置编辑器与光标
- */
-function resetEditor() {
-  let resetCursor = false;
-  if (window.document.activeElement === editorElement) {
-    resetCursor = true;
-  }
+// ---------------------
+// =====================
 
-  documentNode = new Document();
-  const paragraph = new Paragraph();
-  const text = new MarkdownText("");
-
-  documentNode.appendChild(paragraph);
-
-  paragraph.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
-  text.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
-
-  editorElement.innerHTML = htmlRenderer.render(documentNode);
-
-  if (resetCursor) {
-    const range = window.document.createRange();
-    range.setStart(editorElement.firstElementChild!, 0);
-    range.collapse(true);
-
-    getSelection()?.addRange(range);
-  }
-}
-
-/**
- * 初始化
- */
-function init() {
-  resetEditor();
-}
-init();
+// #region event
 
 // 处理编辑器选区变化事件，获取当前编辑的作用域范围
 function onSelectionChange() {
@@ -135,20 +99,34 @@ function onSelectionChange() {
 
 // 处理除 composition 外的所有输入事件
 function onBeforeInput(e: InputEvent) {
+  event = e;
+
   if (e.isComposing) {
     return false;
   }
 
   const range = e.getTargetRanges()[0];
+  const { startContainer, endContainer } = range;
 
-  changeRange = getMarkdownChangeRange(range);
+  if (
+    startContainer instanceof HTMLElement ||
+    endContainer instanceof HTMLElement
+  ) {
+    e.preventDefault();
+    console.log(range);
+  }
 
-  setInputData(e);
-  setCursorDir(e);
-  setCursor(e, changeRange, getPlainSource());
-  setDocument();
+  // const range = e.getTargetRanges()[0];
 
-  event = e;
+  // setInputData(event);
+  // setChangeRange(range);
+  // setCursor(event, changeRange, getPlainSource());
+  // setCursorDir(event);
+  // setDocument();
+
+  // if (documentSource === "") {
+  //   resetEditor();
+  // }
 }
 
 /**
@@ -176,6 +154,8 @@ function onInput(event: Event) {
   }
 
   patch(changedNodes);
+
+  console.log("cursor", editorCursorCalculator(documentNode));
 }
 
 // 处理 composition 输入事件
@@ -185,123 +165,254 @@ function onCompositionEnd(e: CompositionEvent) {
   }
 }
 
-function patch(changedNodes: INodeHolder[]) {
-  for (let i = 0; i < changedNodes.length; i++) {
-    const { node, element } = changedNodes[i];
+// #endregion
 
-    console.log(element, node);
+// ---------------------
+// =====================
+
+// #region editor & node tools
+
+/**
+ * 重置编辑器与光标
+ */
+function resetEditor() {
+  let resetCursor = false;
+  if (window.document.activeElement === editorElement) {
+    resetCursor = true;
   }
-}
 
-function getElementByNodeId(nodeId: string | null) {
-  return editorElement.querySelector(
-    '[data-cid="' + nodeId + '"]'
-  ) as HTMLElement;
+  documentNode = new Document();
+
+  const paragraph = new Paragraph();
+
+  documentNode.appendChild(paragraph);
+
+  paragraph.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
+
+  editorElement.innerHTML = htmlRenderer.render(documentNode);
+
+  if (resetCursor) {
+    const range = window.document.createRange();
+    range.setStart(editorElement.firstElementChild!, 0);
+    range.collapse(true);
+
+    getSelection()?.addRange(range);
+  }
 }
 
 /**
- * 编辑器内容是否为空
+ * diff node tree
  *
+ * @param newNode
+ * @param oldNode
  * @returns
  */
-function isEmptyEditor() {
-  return (
-    editorElement.childNodes.length === 0 ||
-    (editorElement.childNodes.length === 1 &&
-      editorElement.firstElementChild?.tagName.toLocaleLowerCase() === "br")
-  );
-}
+function compareTrees(
+  newNode: MarkdownNode | null,
+  oldNode: MarkdownNode | null
+): INodeHolder[] | false {
+  const changedNodes: INodeHolder[] = [];
 
-/**
- * 获取源码位置
- *
- * @param node
- * @returns
- */
-function getSourcePosition(node?: MarkdownNode) {
-  if (!node) {
-    throw new Error("Must be have a node param");
-  }
+  let childChangedNodes: INodeHolder[] | false;
 
-  const spans = node.getSourceSpans();
-  const inputIndex = spans[0].getInputIndex();
-  const inputLength = spans[spans.length - 1].getLength();
+  let nChildren = newNode?.getChildren() || [];
+  let oChildren = oldNode?.getChildren() || [];
 
-  return { inputIndex, inputLength, inputEndIndex: inputIndex + inputLength };
-}
+  let prevOldNode: MarkdownNode | null = null;
 
-/** 获取此次输入 markdown 改变的源码范围 */
-function getMarkdownChangeOffset(
-  container: Node,
-  offset: number,
-  isEnd = false
-) {
-  // 如果 container 为文本，找到父元素 (文本节点无法添加 attribute)
-  if (container instanceof Text) {
-    const span = container.parentElement as HTMLElement;
+  for (let i = 0; i < nChildren.length; i++) {
+    const currN = nChildren[i];
+    const currO = oChildren[i];
 
-    // 找到父元素对应的 MarkdownNode
-    const textNode = nodeMap.getNodeByElement(span);
+    // 插入新的节点
+    if (currN && !currO) {
+      // 如果是内联节点需要重渲染父节点
+      if (isInlineNode(currN) || isInlineNode(currO)) {
+        changedNodes.push({
+          type: "replace",
+          target: oldNode ? getElement(oldNode) : null,
+          node: newNode,
+        });
 
-    // 获取源码偏移
-    const { inputIndex: markdownOffset } = getSourcePosition(textNode);
+        if (newNode && oldNode) {
+          nodeMap.replaceNode(newNode, oldNode);
+        }
 
-    // 源码偏移 + range.[start|end]Offset 等于改变位置的源码偏移
-    return markdownOffset + offset;
-  }
+        // 在上一个节点后插入
+      } else if (prevOldNode) {
+        changedNodes.push({
+          type: "insertAfter",
+          target: getElement(prevOldNode),
+          node: currN,
+        });
 
-  // 如果 container 不为文本，默认为 HTML 元素
-  const element = container as HTMLElement;
+        // 父级插入第一个子节点
+      } else {
+        changedNodes.push({
+          type: "insertFirstChild",
+          target: oldNode ? getElement(oldNode) : null,
+          node: currN,
+        });
+      }
 
-  // 找到元素对应的 MarkdownNode
-  const markdownNode = nodeMap.getNodeByElement(element);
+      // 节点类型被更改
+    } else if (currN.type !== currO.type) {
+      // 如果是内联节点需要重渲染父节点
+      if (isInlineNode(currN) || isInlineNode(currO)) {
+        changedNodes.push({
+          type: "replace",
+          target: oldNode ? getElement(oldNode) : null,
+          node: newNode,
+        });
 
-  // 如果 offset 为 0，默认取 container 的源码偏移
-  if (offset === 0) {
-    const { inputIndex } = getSourcePosition(markdownNode);
+        if (newNode && oldNode) {
+          nodeMap.replaceNode(newNode, oldNode);
+        }
+      } else {
+        changedNodes.push({
+          type: "replace",
+          target: getElement(currO),
+          node: currN,
+        });
+      }
 
-    // 如果是 endContainer，需要加上 endContainer 元素的源码长度，表示完全选中此元素
-    if (isEnd) {
-      const { inputIndex } = getSourcePosition(markdownNode);
+      // 后辈节点有更改
+    } else if ((childChangedNodes = compareTrees(currN, currO))) {
+      changedNodes.push(...childChangedNodes);
 
-      // 返回源码偏移加表示此节点的源码长度
-      return inputIndex + inputIndex;
+      // 无更改，使用新节点继承节点
+    } else {
+      nodeMap.replaceNode(currN, currO);
     }
 
-    // 返回源码偏移
-    return inputIndex;
+    prevOldNode = currO;
   }
 
-  // 如果 offset 不为 0，取对应位置的 MarkdownNode 的源码偏移
-  let childMarkdownNode = markdownNode?.getFirstChild();
+  // 新节点中不存在的节点，需要被删除
+  for (let i = nChildren.length; i < oChildren.length; i++) {
+    const oNode = oChildren[i];
 
-  while (--offset > 1) {
-    childMarkdownNode = childMarkdownNode?.getNext();
+    if (isInlineNode(oNode)) {
+      changedNodes.push({
+        type: "replace",
+        target: oldNode ? getElement(oldNode) : null,
+        node: newNode,
+      });
+
+      if (newNode && oldNode) {
+        nodeMap.replaceNode(newNode, oldNode);
+      }
+    } else {
+      changedNodes.push({
+        type: "remove",
+        target: getElement(oNode),
+        node: null,
+      });
+    }
+
+    // 删除不再需要的节点
+    nodeMap.deleteNode(oNode);
   }
 
-  const { inputIndex, inputLength } = getSourcePosition(
-    childMarkdownNode || void 0
-  );
-
-  // endContainer 加上此节点的源码长度
-  if (isEnd) {
-    return inputIndex + inputLength;
+  if (changedNodes.length) {
+    return changedNodes;
   }
 
-  // 返回源码偏移
-  return inputIndex;
+  return false;
 }
 
-/** 获取此次输入 markdown 变化的源码范围 */
-function getMarkdownChangeRange(range: StaticRange): IChangeRange {
-  const { startContainer, endContainer, startOffset, endOffset } = range;
+/**
+ * 打补丁
+ *
+ * @param changedNodes
+ */
+function patch(changedNodes: INodeHolder[]) {
+  for (let i = 0; i < changedNodes.length; i++) {
+    const { type, node, target } = changedNodes[i];
 
-  // 获取开始的源码偏移
-  const start = getMarkdownChangeOffset(startContainer, startOffset);
-  // 获取结束的源码偏移
-  const end = getMarkdownChangeOffset(endContainer, endOffset, true);
+    if (target === null) {
+      continue;
+    }
 
-  return { start, end };
+    const getHtml = () => (node ? htmlRenderer.render(node) : "");
+
+    switch (type) {
+      case "insertFirstChild":
+        if (target.firstElementChild) {
+          target.firstElementChild.outerHTML = getHtml();
+        } else {
+          target.innerHTML = getHtml();
+        }
+
+        break;
+      case "insertAfter":
+        target.insertAdjacentHTML("afterend", getHtml());
+
+        break;
+      case "remove":
+        target.remove();
+
+        break;
+      case "replace":
+        target.outerHTML = getHtml();
+
+        break;
+    }
+  }
+}
+
+/**
+ * 计算编辑器光标
+ *
+ * @param block
+ */
+function editorCursorCalculator(node: MarkdownNode): MarkdownNode | null {
+  // 获取父节点的第一个子节点
+  let curr = node.getFirstChild();
+
+  // 迭代子节点
+  while (curr) {
+    // 获取当前节点的源码偏移与节点的源码长度
+    const { inputIndex: offset, inputLength: length } = getSourcePosition(curr);
+    // 获取到节点在源码中的结束位置
+    const endOffset = offset + length;
+
+    const child = curr.getFirstChild();
+
+    // 如果位置在当前节点内
+    if (cursor >= offset && cursor <= endOffset) {
+      // 如果包含子节点，递归执行此任务
+      if (child) {
+        const result = editorCursorCalculator(curr);
+
+        // 找到直接返回
+        if (result) {
+          return result;
+        } else {
+          return curr;
+        }
+      } else {
+        // 没有子节点直接返回当前节点
+        return curr;
+      }
+    }
+
+    // 查找下一个节点
+    curr = curr.getNext();
+  }
+
+  return null;
+}
+
+// #endregion
+
+// ---------------------
+// =====================
+
+// #region set
+
+function setChangeRange(range: StaticRange) {
+  changeRange = getMarkdownChangeRange(range);
 }
 
 /**
@@ -364,32 +475,6 @@ function setInputData(e: InputEvent) {
       inputData = "";
       break;
   }
-}
-
-/**
- * 是否是图片文件
- *
- * @param file
- * @returns
- */
-function isImageFile(file: File) {
-  return file.type.startsWith("image/");
-}
-
-/**
- * 获取文本
- *
- * @param dataTransfer
- * @returns
- */
-function getTextFromTransfer(dataTransfer: DataTransfer) {
-  let text = dataTransfer.getData("text/plain");
-
-  if (!text) {
-    return dataTransfer.getData("text/html");
-  }
-
-  return text;
 }
 
 /**
@@ -483,6 +568,199 @@ function setCursor(e: InputEvent, changeRange: IChangeRange, data = "") {
   }
 }
 
+// #endregion
+
+// ---------------------
+// =====================
+
+// #region get
+
+/**
+ * 获取文档选区
+ *
+ * @returns
+ */
+function getSelection() {
+  return window.document.getSelection();
+}
+
+/**
+ * 获取纯源码文本
+ *
+ * @returns
+ */
+function getPlainSource() {
+  if (typeof inputData === "string") {
+    return inputData;
+  }
+
+  return "";
+}
+
+/**
+ * 获取文本
+ *
+ * @param dataTransfer
+ * @returns
+ */
+function getTextFromTransfer(dataTransfer: DataTransfer) {
+  let text = dataTransfer.getData("text/plain");
+
+  if (!text) {
+    return dataTransfer.getData("text/html");
+  }
+
+  return text;
+}
+
+/**
+ * 获取源码位置
+ *
+ * @param node
+ * @returns
+ */
+function getSourcePosition(node?: MarkdownNode) {
+  if (!node) {
+    throw new Error("Must be have a node param");
+  }
+
+  const spans = node.getSourceSpans();
+  const inputIndex = spans[0].getInputIndex();
+  const inputLength = spans[spans.length - 1].getLength();
+
+  return { inputIndex, inputLength, inputEndIndex: inputIndex + inputLength };
+}
+
+/** 获取此次输入 markdown 变化的源码范围 */
+function getMarkdownChangeRange(range: StaticRange): IChangeRange {
+  const { startContainer, endContainer, startOffset, endOffset } = range;
+
+  // 获取开始的源码偏移
+  const start = getMarkdownChangeOffset(startContainer, startOffset);
+  // 获取结束的源码偏移
+  const end = getMarkdownChangeOffset(endContainer, endOffset, true);
+
+  return { start, end };
+}
+
+/** 获取此次输入 markdown 改变的源码范围 */
+function getMarkdownChangeOffset(
+  container: Node,
+  offset: number,
+  isEnd = false
+) {
+  // 如果 container 为文本，找到父元素 (文本节点无法添加 attribute)
+  if (container instanceof Text) {
+    const span = container.parentElement as HTMLElement;
+
+    // 找到父元素对应的 MarkdownNode
+    const textNode = nodeMap.getNodeByElement(span);
+
+    // 获取源码偏移
+    const { inputIndex: markdownOffset } = getSourcePosition(textNode);
+
+    // 源码偏移 + range.[start|end]Offset 等于改变位置的源码偏移
+    return markdownOffset + offset;
+  }
+
+  // 如果 container 不为文本，默认为 HTML 元素
+  const element = container as HTMLElement;
+
+  // 找到元素对应的 MarkdownNode
+  const markdownNode = nodeMap.getNodeByElement(element);
+
+  // 如果 offset 为 0，默认取 container 的源码偏移
+  if (offset === 0) {
+    let { inputIndex, inputLength } = getSourcePosition(markdownNode);
+
+    // 如果是 endContainer，需要加上 endContainer 元素的源码长度，表示完全选中此元素
+    if (isEnd) {
+      // 返回源码偏移加表示此节点的源码长度
+      return inputIndex + inputLength;
+    }
+
+    // 返回源码偏移
+    return inputIndex;
+  }
+
+  // 如果 offset 不为 0，取对应位置的 MarkdownNode 的源码偏移
+  let childMarkdownNode = markdownNode?.getFirstChild();
+
+  while (--offset > 1) {
+    childMarkdownNode = childMarkdownNode?.getNext();
+  }
+
+  const { inputIndex, inputLength } = getSourcePosition(
+    childMarkdownNode || void 0
+  );
+
+  // endContainer 加上此节点的源码长度
+  if (isEnd) {
+    return inputIndex + inputLength;
+  }
+
+  // 返回源码偏移
+  return inputIndex;
+}
+
+/**
+ * 获取 HTMLElement
+ *
+ * @param node
+ * @returns
+ */
+function getElement(node: MarkdownNode) {
+  const nodeId = nodeMap.getNodeIdByMap(node);
+
+  if (nodeId) {
+    return getElementByNodeId(nodeId);
+  }
+
+  return null;
+}
+
+/**
+ * 获取 HTMLElement
+ *
+ * @param nodeId
+ * @returns
+ */
+function getElementByNodeId(nodeId: string | null) {
+  return editorElement.querySelector(
+    '[data-cid="' + nodeId + '"]'
+  ) as HTMLElement;
+}
+
+// #endregion
+
+// ---------------------
+// =====================
+
+// #region is
+
+/**
+ * 编辑器内容是否为空
+ *
+ * @returns
+ */
+function isEmptyEditor() {
+  return (
+    editorElement.childNodes.length === 0 ||
+    (editorElement.childNodes.length === 1 &&
+      editorElement.firstElementChild?.tagName.toLocaleLowerCase() === "br")
+  );
+}
+
+/**
+ * 是否是图片文件
+ *
+ * @param file
+ * @returns
+ */
+function isImageFile(file: File) {
+  return file.type.startsWith("image/");
+}
+
 /**
  * 插入文本
  *
@@ -545,60 +823,13 @@ function isDelete() {
 }
 
 /**
- * 获取纯源码文本
+ * 是内联节点
  *
+ * @param node
  * @returns
  */
-function getPlainSource() {
-  if (typeof inputData === "string") {
-    return inputData;
-  }
-
-  return "";
+function isInlineNode(node: MarkdownNode) {
+  return !(node instanceof Block);
 }
 
-function compareTrees(
-  newNode: MarkdownNode | null,
-  oldNode: MarkdownNode | null
-): INodeHolder[] | false {
-  const changedNodes: INodeHolder[] = [];
-
-  let childChangedNodes: INodeHolder[] | false;
-
-  let n = newNode?.getFirstChild();
-  let o = oldNode?.getFirstChild();
-
-  while (n) {
-    if (n.type !== o?.type) {
-      changedNodes.push({
-        element: getElementByNodeId(nodeMap.getNodeIdByMap(o)),
-        node: n,
-      });
-    } else {
-      if (
-        (childChangedNodes = compareTrees(n.getFirstChild(), o.getFirstChild()))
-      ) {
-        changedNodes.push(...childChangedNodes);
-      }
-    }
-
-    n = n.getNext();
-    o = o?.getNext();
-  }
-
-  if (changedNodes.length) {
-    return changedNodes;
-  }
-
-  // remvoe o exis but n delete
-
-  return false;
-}
-
-/**
- * 计算编辑器光标
- *
- * @param block
- * @param sourceOffset
- */
-function editorCursorCalculator(block: Block, sourceOffset: number) {}
+// #endregion

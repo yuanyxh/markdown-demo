@@ -28,8 +28,9 @@ declare global {
   }
 
   interface INodeHolder {
-    element: HTMLElement;
-    node: MarkdownNode;
+    type: "insertFirstChild" | "insertAfter" | "remove" | "replace";
+    target: HTMLElement | null;
+    node: MarkdownNode | null;
   }
 
   type TCursorDir = "forward" | "backword";

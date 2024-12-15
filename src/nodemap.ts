@@ -9,35 +9,61 @@ import type { MarkdownNode } from "../commonmark-java-change/commonmark";
 let nodeId = 1;
 
 class NodeAttributeProvider implements AttributeProvider {
-  private map = new Map<string, MarkdownNode>();
+  private mapNode = new Map<string, MarkdownNode>();
+  private mapNodeId = new Map<MarkdownNode, string>();
 
   setAttributes(
     node: MarkdownNode,
     tagName: string,
     attributes: Map<string, string>
   ) {
-    const curId = nodeId.toString();
-
-    attributes.set("data-cid", curId);
     attributes.set("data-type", node.type);
 
-    this.map.set(curId, node);
+    let existNodeId = this.mapNodeId.get(node);
+    if (existNodeId) {
+      attributes.set("data-cid", existNodeId);
 
-    nodeId++;
+      this.mapNode.set(existNodeId, node);
+      this.mapNodeId.set(node, existNodeId);
+    } else {
+      const curId = nodeId.toString();
+
+      this.mapNode.set(curId, node);
+      this.mapNodeId.set(node, curId);
+
+      attributes.set("data-cid", curId);
+
+      nodeId++;
+    }
   }
 
   getNodeById(nodeId: string) {
-    return this.map.get(nodeId);
+    return this.mapNode.get(nodeId);
   }
 
   getNodeIdByMap(node: MarkdownNode) {
-    for (const [nodeId, mapNode] of this.map) {
-      if (node === mapNode) {
-        return nodeId;
-      }
+    return this.mapNodeId.get(node) || null;
+  }
+
+  replaceNode(n: MarkdownNode, o: MarkdownNode) {
+    const nodeId = this.mapNodeId.get(o);
+
+    if (nodeId) {
+      this.mapNodeId.set(n, nodeId);
+      this.mapNode.set(nodeId, n);
     }
 
-    return null;
+    this.mapNodeId.delete(o);
+  }
+
+  deleteNode(node: MarkdownNode) {
+    const nodeId = this.mapNodeId.get(node);
+
+    if (nodeId) {
+      this.mapNode.delete("nodeId");
+    }
+
+    this.mapNodeId.delete(node);
   }
 }
 
@@ -64,6 +90,14 @@ class NodeMap implements AttributeProviderFactory {
 
   getNodeIdByMap(node: MarkdownNode) {
     return this.nodeAttributeProvider.getNodeIdByMap(node);
+  }
+
+  replaceNode(n: MarkdownNode, o: MarkdownNode) {
+    return this.nodeAttributeProvider.replaceNode(n, o);
+  }
+
+  deleteNode(node: MarkdownNode) {
+    return this.nodeAttributeProvider.deleteNode(node);
   }
 }
 
