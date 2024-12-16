@@ -99,6 +99,24 @@ class NodeMap implements AttributeProviderFactory {
   deleteNode(node: MarkdownNode) {
     return this.nodeAttributeProvider.deleteNode(node);
   }
+
+  replaceTree(newDoc: MarkdownNode | null, oldDoc: MarkdownNode | null) {
+    const nChildren = newDoc?.getChildren() || [];
+    const oChlldren = oldDoc?.getChildren() || [];
+
+    for (let i = 0; i < oChlldren.length; i++) {
+      const n = nChildren[i];
+      const o = oChlldren[i];
+
+      if (n) {
+        this.replaceNode(n, o);
+      } else {
+        this.deleteNode(o);
+      }
+
+      this.replaceTree(n, o);
+    }
+  }
 }
 
 export default NodeMap;

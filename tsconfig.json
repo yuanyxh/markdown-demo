@@ -12,10 +12,10 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/*",
-    "./commonmark-js",
-    "./commonmark-java",
-    "./commonmark-js-change",
-    "./commonmark-java-change"
+    "src/**/*",
+    "./commonmark-js/**/*",
+    "./commonmark-java/**/*",
+    "./commonmark-js-change/**/*",
+    "./commonmark-java-change/**/*"
   ]
 }

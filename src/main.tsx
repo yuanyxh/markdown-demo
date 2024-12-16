@@ -13,102 +13,47 @@ import {
   IncludeSourceSpans,
   SourceSpan,
   Block,
-  Text as MarkdownText,
 } from "../commonmark-java-change/commonmark";
 
-import { MarkdownNode } from "../commonmark-java-change/commonmark";
+import type { MarkdownNode } from "../commonmark-java-change/commonmark";
 
 import NodeMap from "./nodemap";
 
-class MarkdownEditor {
-  options: IEditorOptions;
+const editorElement = createEditorElement();
+window.document.getElementById("root")!.appendChild(editorElement);
 
-  editorEl: HTMLElement;
+editorElement.addEventListener("beforeinput", onBeforeInput);
 
-  nodeMap = new NodeMap();
+editorElement.addEventListener("input", onInput);
 
-  markdownParser = Parser.builder()
-    .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
-    .build();
+editorElement.addEventListener("compositionend", onCompositionEnd);
 
-  htmlRenderer = HtmlRenderer.builder()
-    .attributeProviderFactory(this.nodeMap)
-    .build();
+window.document.addEventListener("selectionchange", onSelectionChange);
 
-  changeRange: IChangeRange = {
-    start: 0,
-    end: 0,
-  };
+const nodeMap = new NodeMap();
 
-  event: InputEvent = new InputEvent("input");
+const markdownParser = Parser.builder()
+  .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
+  .build();
 
-  documentSource = "";
+const htmlRenderer = HtmlRenderer.builder()
+  .attributeProviderFactory(nodeMap)
+  .build();
 
-  documentNode: MarkdownNode = new Document();
-
-  previousDocumentNode: MarkdownNode = new Document();
-
-  inputData: string | File[] = "";
-
-  cursorDir: TCursorDir = "forward";
-
-  cursor = 0;
-
-  scope: IScope = {
-    start: new Document(),
-    end: new Document(),
-  };
-
-  constructor(options: IEditorOptions) {
-    this.options = options;
-
-    this.editorEl = createEditorElement();
-    this.options.root.appendChild(this.editorEl);
-
-    this.initEditor();
-  }
-
-  initEditor() {
-    this.on();
-  }
-
-  on() {
-    this.editorEl.addEventListener("beforeinput", onBeforeInput);
-    this.editorEl.addEventListener("input", onInput);
-    this.editorEl.addEventListener("compositionend", onCompositionEnd);
-
-    window.document.addEventListener("selectionchange", onSelectionChange);
-  }
-
-  off() {
-    this.editorEl.removeEventListener("beforeinput", onBeforeInput);
-    this.editorEl.removeEventListener("input", onInput);
-    this.editorEl.removeEventListener("compositionend", onCompositionEnd);
-
-    window.document.removeEventListener("selectionchange", onSelectionChange);
-  }
-
-  destory() {
-    this.off();
-
-    this.editorEl.remove();
-  }
-
-  static init(options: IEditorOptions) {
-    return new MarkdownEditor(options);
-  }
-}
+let changeRange: IChangeRange;
+let event: InputEvent;
+let documentSource = "";
+let documentNode: MarkdownNode;
+let previousDocumentNode: MarkdownNode;
+let inputData: string | File[] = "";
+let isEmpty = false;
+let cursorDir: TCursorDir = "forward";
+let cursor = 0;
 
 (function initEditor() {
   resetEditor();
 })();
 
-// ---------------------
-// =====================
-
-// #region event
-
-// 处理编辑器选区变化事件，获取当前编辑的作用域范围
 function onSelectionChange() {
   if (window.document.activeElement !== editorElement) {
     return false;
@@ -119,9 +64,6 @@ function onSelectionChange() {
   if (selection && selection.rangeCount) {
     const range = selection.getRangeAt(selection.rangeCount - 1);
 
-    range.startContainer;
-
-    // 保证只有一个选区范围
     if (selection.rangeCount > 1) {
       for (let i = selection.rangeCount - 2; i >= 0; i--) {
         selection.removeRange(selection.getRangeAt(i));
@@ -130,7 +72,6 @@ function onSelectionChange() {
   }
 }
 
-// 处理除 composition 外的所有输入事件
 function onBeforeInput(e: InputEvent) {
   event = e;
 
@@ -140,24 +81,23 @@ function onBeforeInput(e: InputEvent) {
 
   const range = e.getTargetRanges()[0];
 
-  setInputData(event);
-  setChangeRange(range);
+  setInputData();
+  setCursorDir();
 
-  setCursor(event, changeRange, getPlainSource());
-  setCursorDir(event);
+  setChangeRange(range);
+  setCursor(getPlainSource());
+
+  console.log(documentSource, changeRange);
+
   setDocument();
 
-  if (documentSource === "") {
-    resetEditor();
+  console.log("newdocument--::", documentSource);
+
+  if (!documentSource) {
+    isEmpty = true;
   }
 }
 
-/**
- * 处理 input 事件
- *
- * @param e
- * @returns
- */
 function onInput(event: Event) {
   const e = event as InputEvent;
 
@@ -165,97 +105,50 @@ function onInput(event: Event) {
     return false;
   }
 
-  // 当编辑器为空时，添加一个空段落
-  if (isEmptyEditor()) {
+  if (isEmpty) {
     return resetEditor();
   }
 
   const changedNodes = compareTrees(documentNode, previousDocumentNode);
+  nodeMap.replaceTree(documentNode, previousDocumentNode);
 
   if (!changedNodes) {
     return false;
   }
 
   patch(changedNodes);
-
-  const cursorNode = editorCursorCalculator(documentNode);
-
-  if (cursorNode) {
-    const isText = cursorNode instanceof MarkdownText;
-
-    const range = window.document.createRange();
-
-    const { inputIndex } = getSourcePosition(cursorNode);
-
-    const element = getElement(cursorNode);
-    let startOffset = -1;
-
-    if (!isText) {
-      startOffset = 0;
-    } else {
-      startOffset = cursor - inputIndex - 1;
-    }
-
-    if (element) {
-      range.setStart(element, startOffset);
-      range.setEnd(element, startOffset);
-      range.collapse(true);
-
-      getSelection()?.removeAllRanges();
-      getSelection()?.addRange(range);
-    }
-  }
 }
 
-// 处理 composition 输入事件
 function onCompositionEnd(e: CompositionEvent) {
   if (!e.data) {
     return false;
   }
 }
 
-// #endregion
-
-// ---------------------
-// =====================
-
-// #region editor & node tools
-
-/**
- * 重置编辑器与光标
- */
 function resetEditor() {
-  let resetCursor = false;
-  if (window.document.activeElement === editorElement) {
-    resetCursor = true;
-  }
+  const paragraph = new Paragraph();
+  paragraph.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
+
+  previousDocumentNode = documentNode;
 
   documentNode = new Document();
-
-  const paragraph = new Paragraph();
-
   documentNode.appendChild(paragraph);
 
-  paragraph.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
+  nodeMap.replaceTree(documentNode, previousDocumentNode);
 
   editorElement.innerHTML = htmlRenderer.render(documentNode);
 
-  if (resetCursor) {
+  if (window.document.activeElement === editorElement) {
     const range = window.document.createRange();
     range.setStart(editorElement.firstElementChild!, 0);
     range.collapse(true);
 
     getSelection()?.addRange(range);
   }
+
+  isEmpty = false;
 }
 
-/**
- * diff node tree
- *
- * @param newNode
- * @param oldNode
- * @returns
- */
 function compareTrees(
   newNode: MarkdownNode | null,
   oldNode: MarkdownNode | null
@@ -283,10 +176,6 @@ function compareTrees(
           node: newNode,
         });
 
-        if (newNode && oldNode) {
-          nodeMap.replaceNode(newNode, oldNode);
-        }
-
         // 在上一个节点后插入
       } else if (prevOldNode) {
         changedNodes.push({
@@ -313,10 +202,6 @@ function compareTrees(
           target: oldNode ? getElement(oldNode) : null,
           node: newNode,
         });
-
-        if (newNode && oldNode) {
-          nodeMap.replaceNode(newNode, oldNode);
-        }
       } else {
         changedNodes.push({
           type: "replace",
@@ -328,10 +213,6 @@ function compareTrees(
       // 后辈节点有更改
     } else if ((childChangedNodes = compareTrees(currN, currO))) {
       changedNodes.push(...childChangedNodes);
-
-      // 无更改，使用新节点继承节点
-    } else {
-      nodeMap.replaceNode(currN, currO);
     }
 
     prevOldNode = currO;
@@ -347,10 +228,6 @@ function compareTrees(
         target: oldNode ? getElement(oldNode) : null,
         node: newNode,
       });
-
-      if (newNode && oldNode) {
-        nodeMap.replaceNode(newNode, oldNode);
-      }
     } else {
       changedNodes.push({
         type: "remove",
@@ -358,9 +235,6 @@ function compareTrees(
         node: null,
       });
     }
-
-    // 删除不再需要的节点
-    nodeMap.deleteNode(oNode);
   }
 
   if (changedNodes.length) {
@@ -370,11 +244,6 @@ function compareTrees(
   return false;
 }
 
-/**
- * 打补丁
- *
- * @param changedNodes
- */
 function patch(changedNodes: INodeHolder[]) {
   for (let i = 0; i < changedNodes.length; i++) {
     const { type, node, target } = changedNodes[i];
@@ -403,79 +272,14 @@ function patch(changedNodes: INodeHolder[]) {
 
         break;
       case "replace":
-        target.outerHTML = getHtml();
+        if (target.parentNode !== null) {
+          target.outerHTML = getHtml();
+        }
 
         break;
     }
   }
 }
-
-/**
- * 计算编辑器光标
- *
- * @param block
- */
-function editorCursorCalculator(node: MarkdownNode): MarkdownNode | null {
-  // 获取父节点的第一个子节点
-  let curr = node.getFirstChild();
-  // 向前或向后
-  const forward = isForward();
-
-  // 迭代子节点
-  while (curr) {
-    let target: MarkdownNode | null;
-
-    if (forward) {
-      target = getNextNode(curr);
-    } else {
-      target = getPrevNode(curr);
-    }
-
-    // 获取当前节点的源码偏移与节点的源码长度
-    const { inputIndex: offset, inputEndIndex: endOffset } =
-      getSourcePosition(curr);
-
-    const child = curr.getFirstChild();
-
-    // 如果位置在当前节点内
-    if (cursor >= offset && cursor <= endOffset) {
-      // 如果包含子节点，递归执行此任务
-      if (child) {
-        const result = editorCursorCalculator(curr);
-
-        // 找到直接返回
-        if (result) {
-          return result;
-        } else {
-          return curr;
-        }
-      } else {
-        // 没有子节点直接返回当前节点
-        return curr;
-      }
-    } else if (target) {
-      const { inputIndex: targetOffset } = getSourcePosition(target);
-
-      if (forward && cursor > endOffset && cursor < targetOffset) {
-        return target;
-      } else if (!forward && cursor > targetOffset && cursor < endOffset) {
-        return target;
-      }
-    }
-
-    // 查找下一个节点
-    curr = curr.getNext();
-  }
-
-  return null;
-}
-
-// #endregion
-
-// ---------------------
-// =====================
-
-// #region set
 
 function setChangeRange(range: StaticRange) {
   changeRange = getMarkdownChangeRange(range);
@@ -500,10 +304,10 @@ function setDocument() {
  * @param e
  * @returns
  */
-function setInputData(e: InputEvent) {
-  if (e.dataTransfer) {
-    if (e.dataTransfer.files.length) {
-      const originFiles = Array.from(e.dataTransfer.files);
+function setInputData() {
+  if (event.dataTransfer) {
+    if (event.dataTransfer.files.length) {
+      const originFiles = Array.from(event.dataTransfer.files);
 
       const files = originFiles.filter((file) => isImageFile(file));
 
@@ -512,18 +316,18 @@ function setInputData(e: InputEvent) {
       }
     }
 
-    const plainText = getTextFromTransfer(e.dataTransfer);
+    const plainText = getTextFromTransfer(event.dataTransfer);
 
     if (plainText) {
       return (inputData = plainText);
     }
   }
 
-  if (e.data) {
-    return (inputData = e.data);
+  if (event.data) {
+    return (inputData = event.data);
   }
 
-  switch (e.inputType) {
+  switch (event.inputType) {
     case "insertParagraph":
       inputData = "\n\n";
 
@@ -543,13 +347,8 @@ function setInputData(e: InputEvent) {
   }
 }
 
-/**
- * 设置光标向前或向后（取开始还是结束）
- *
- * @param e
- */
-function setCursorDir(e: InputEvent) {
-  switch (e.inputType) {
+function setCursorDir() {
+  switch (event.inputType) {
     // insert
     case "insertText":
     case "insertReplacementText":
@@ -584,15 +383,8 @@ function setCursorDir(e: InputEvent) {
   }
 }
 
-/**
- * 设置光标在源码中的位置
- *
- * @param e
- * @param changeRange
- * @param data
- */
-function setCursor(e: InputEvent, changeRange: IChangeRange, data = "") {
-  switch (e.inputType) {
+function setCursor(data = "") {
+  switch (event.inputType) {
     // insert
     case "insertText":
     case "insertReplacementText":
@@ -634,27 +426,10 @@ function setCursor(e: InputEvent, changeRange: IChangeRange, data = "") {
   }
 }
 
-// #endregion
-
-// ---------------------
-// =====================
-
-// #region get
-
-/**
- * 获取文档选区
- *
- * @returns
- */
 function getSelection() {
   return window.document.getSelection();
 }
 
-/**
- * 获取纯源码文本
- *
- * @returns
- */
 function getPlainSource() {
   if (typeof inputData === "string") {
     return inputData;
@@ -663,12 +438,6 @@ function getPlainSource() {
   return "";
 }
 
-/**
- * 获取文本
- *
- * @param dataTransfer
- * @returns
- */
 function getTextFromTransfer(dataTransfer: DataTransfer) {
   let text = dataTransfer.getData("text/plain");
 
@@ -679,13 +448,7 @@ function getTextFromTransfer(dataTransfer: DataTransfer) {
   return text;
 }
 
-/**
- * 获取源码位置
- *
- * @param node
- * @returns
- */
-function getSourcePosition(node?: MarkdownNode) {
+function getSourcePosition(node?: MarkdownNode | null) {
   if (!node) {
     throw new Error("Must be have a node param");
   }
@@ -697,137 +460,55 @@ function getSourcePosition(node?: MarkdownNode) {
   return { inputIndex, inputLength, inputEndIndex: inputIndex + inputLength };
 }
 
-/** 获取此次输入 markdown 变化的源码范围 */
 function getMarkdownChangeRange(range: StaticRange): IChangeRange {
-  const { startContainer, endContainer, startOffset, endOffset } = range;
+  const { startContainer, endContainer, startOffset, endOffset, collapsed } =
+    range;
 
-  // 获取开始的源码偏移
   const start = getMarkdownChangeOffset(startContainer, startOffset);
-  // 获取结束的源码偏移
   const end = getMarkdownChangeOffset(endContainer, endOffset);
 
   return { start, end };
 }
 
-/**
- * 获取下一个节点
- *
- * @param node
- */
-function getNextNode(node: MarkdownNode) {
-  let curr: MarkdownNode | null = node.getNext();
-
-  if (curr) {
-    return curr;
-  }
-
-  let parent: MarkdownNode | null = node.getParent();
-
-  while (parent && !(curr = parent.getNext())) {
-    parent = parent.getParent();
-  }
-
-  while (curr) {
-    const firstChild = curr.getFirstChild();
-
-    if (firstChild) {
-      curr = firstChild;
-    } else {
-      return curr;
-    }
-  }
-
-  return null;
-}
-
-/**
- * 获取上一个节点
- *
- * @param node
- */
-function getPrevNode(node: MarkdownNode) {
-  let curr: MarkdownNode | null = node.getNext();
-
-  if (curr) {
-    return curr;
-  }
-
-  let parent: MarkdownNode | null = node.getParent();
-
-  while (parent && !(curr = parent.getPrevious())) {
-    parent = parent.getParent();
-  }
-
-  while (curr) {
-    const firstChild = curr.getLastChild();
-
-    if (firstChild) {
-      curr = firstChild;
-    } else {
-      return curr;
-    }
-  }
-
-  return null;
-}
-
-/** 获取此次输入 markdown 改变的源码范围 */
+// FIXME:
 function getMarkdownChangeOffset(container: Node, offset: number) {
-  // 如果 container 为文本，找到父元素 (文本节点无法添加 attribute)
   if (container instanceof Text) {
-    const span = container.parentElement as HTMLElement;
+    const span = container.parentElement as HTMLSpanElement;
 
-    // 找到父元素对应的 MarkdownNode
     const textNode = nodeMap.getNodeByElement(span);
 
-    // 获取源码偏移
-    const { inputIndex: markdownOffset } = getSourcePosition(textNode);
+    const { inputIndex } = getSourcePosition(textNode);
 
-    // 源码偏移 + range.[start|end]Offset 等于改变位置的源码偏移
-    return markdownOffset + offset;
+    return inputIndex + offset;
   }
 
-  // 如果 container 不为文本，默认为 HTML 元素
   const element = container as HTMLElement;
 
-  // 找到元素对应的 MarkdownNode
   const markdownNode = nodeMap.getNodeByElement(element);
 
-  // 如果 offset 为 0，默认取 container 的源码偏移
   if (offset === 0) {
-    const firstChild = markdownNode?.getFirstChild();
-
     let index: number;
 
-    if (firstChild) {
-      ({ inputIndex: index } = getSourcePosition(firstChild));
+    if (cursorDir === "forward") {
+      index = getSourcePosition(markdownNode).inputEndIndex;
     } else {
-      ({ inputEndIndex: index } = getSourcePosition(markdownNode));
+      index = getSourcePosition(markdownNode).inputIndex;
     }
 
-    // 返回源码偏移
     return index;
   }
 
-  // 如果 offset 不为 0，取对应位置的 MarkdownNode 的源码偏移
   let childMarkdownNode = markdownNode?.getFirstChild();
 
   while (--offset > 1) {
     childMarkdownNode = childMarkdownNode?.getNext();
   }
 
-  const { inputEndIndex } = getSourcePosition(childMarkdownNode || void 0);
+  const { inputEndIndex } = getSourcePosition(childMarkdownNode);
 
-  // 返回源码偏移
   return inputEndIndex;
 }
 
-/**
- * 获取 HTMLElement
- *
- * @param node
- * @returns
- */
 function getElement(node: MarkdownNode) {
   const nodeId = nodeMap.getNodeIdByMap(node);
 
@@ -838,36 +519,10 @@ function getElement(node: MarkdownNode) {
   return null;
 }
 
-/**
- * 获取 HTMLElement
- *
- * @param nodeId
- * @returns
- */
 function getElementByNodeId(nodeId: string | null) {
   return editorElement.querySelector(
     '[data-cid="' + nodeId + '"]'
   ) as HTMLElement;
-}
-
-// #endregion
-
-// ---------------------
-// =====================
-
-// #region is
-
-/**
- * 编辑器内容是否为空
- *
- * @returns
- */
-function isEmptyEditor() {
-  return (
-    editorElement.childNodes.length === 0 ||
-    (editorElement.childNodes.length === 1 &&
-      editorElement.firstElementChild?.tagName.toLocaleLowerCase() === "br")
-  );
 }
 
 /**
@@ -878,109 +533,6 @@ function isEmptyEditor() {
  */
 function isImageFile(file: File) {
   return file.type.startsWith("image/");
-}
-
-/**
- * 插入文本
- *
- * @returns
- */
-function isInsert() {
-  let isInsert = false;
-
-  switch (event.inputType) {
-    // insert
-    case "insertText":
-    case "insertReplacementText":
-    case "insertLineBreak":
-    case "insertParagraph":
-    case "insertOrderedList":
-    case "insertUnorderedList":
-    case "insertFromYank":
-    case "insertFromDrop":
-    case "insertFromPaste":
-    case "insertTranspose":
-    case "insertLink":
-      isInsert = true;
-
-      break;
-
-    default:
-      break;
-  }
-
-  return isInsert;
-}
-
-function isForward() {
-  let isForward = false;
-
-  switch (event.inputType) {
-    // insert
-    case "insertText":
-    case "insertReplacementText":
-    case "insertLineBreak":
-    case "insertParagraph":
-    case "insertOrderedList":
-    case "insertUnorderedList":
-    case "insertFromYank":
-    case "insertFromDrop":
-    case "insertFromPaste":
-    case "insertTranspose":
-    case "insertLink":
-
-    // delete forward
-    case "deleteWordForward":
-    case "deleteContentForward":
-    case "deleteSoftLineForward":
-      isForward = true;
-
-      break;
-
-    // delete backward
-    case "deleteWordBackward":
-    case "deleteByDrag":
-    case "deleteByCut":
-    case "deleteContentBackward":
-    case "deleteSoftLineBackward":
-    case "deleteEntireSoftLine":
-      isForward = false;
-
-      break;
-    default:
-      break;
-  }
-
-  return isForward;
-}
-
-/**
- * 删除文本
- *
- * @returns
- */
-function isDelete() {
-  let isDelete = false;
-
-  switch (event.inputType) {
-    // delete
-    case "deleteWordForward":
-    case "deleteContentForward":
-    case "deleteSoftLineForward":
-    case "deleteWordBackward":
-    case "deleteByDrag":
-    case "deleteByCut":
-    case "deleteContentBackward":
-    case "deleteSoftLineBackward":
-    case "deleteEntireSoftLine":
-      isDelete = true;
-
-      break;
-    default:
-      break;
-  }
-
-  return isDelete;
 }
 
 /**
