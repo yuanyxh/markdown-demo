@@ -1,6 +1,10 @@
 import type { Block, MarkdownNode } from "../commonmark-java-change/commonmark";
 
 declare global {
+  interface IEditorOptions {
+    root: HTMLElement;
+  }
+
   /** 变更范围 */
   interface IChangeRange {
     start: number;
@@ -31,6 +35,11 @@ declare global {
     type: "insertFirstChild" | "insertAfter" | "remove" | "replace";
     target: HTMLElement | null;
     node: MarkdownNode | null;
+  }
+
+  interface IScope {
+    start: MarkdownNode;
+    end: MarkdownNode;
   }
 
   type TCursorDir = "forward" | "backword";

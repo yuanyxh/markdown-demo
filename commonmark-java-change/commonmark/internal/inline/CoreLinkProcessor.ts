@@ -14,7 +14,7 @@ class CoreLinkProcessor implements LinkProcessor {
     scanner: Scanner,
     context: InlineParserContext
   ): LinkResult | null {
-    if (linkInfo.getDestination() !== "") {
+    if (linkInfo.getDestination() !== null) {
       // Inline link
       return CoreLinkProcessor.process(
         linkInfo,
