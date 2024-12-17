@@ -197,6 +197,7 @@ class DocumentParser implements ParserState {
     while ((lineBreak = Characters.findLineBreak(input, lineStart)) !== -1) {
       let line: string = input.substring(lineStart, lineBreak);
       this.parseLine(line, lineStart);
+
       if (
         lineBreak + 1 < input.length &&
         input.charAt(lineBreak) === "\r" &&
@@ -257,12 +258,15 @@ class DocumentParser implements ParserState {
     for (let i = 1; i < this.openBlockParsers.length; i++) {
       const openBlockParser = this.openBlockParsers[i];
       const blockParser: BlockParser = openBlockParser.blockParser;
+
       this.findNextNonSpace();
 
       const result = blockParser.tryContinue(this);
+
       if (result instanceof BlockContinueImpl) {
         const blockContinue = result;
         openBlockParser.sourceIndex = this.getIndex();
+
         if (blockContinue.isFinalize()) {
           this.addSourceSpans();
           this.closeBlockParsers(this.openBlockParsers.length - i);
@@ -296,6 +300,7 @@ class DocumentParser implements ParserState {
 
     while (tryBlockStarts) {
       lastIndex = this.index;
+
       this.findNextNonSpace();
 
       // this is a little performance optimization:
@@ -305,12 +310,14 @@ class DocumentParser implements ParserState {
           Characters.isLetter(this.line.getContent(), this.nextNonSpace))
       ) {
         this.setNewIndex(this.nextNonSpace);
+
         break;
       }
 
       const blockStart = this.findBlockStart(blockParser);
       if (blockStart === null) {
         this.setNewIndex(this.nextNonSpace);
+
         break;
       }
 
@@ -320,6 +327,7 @@ class DocumentParser implements ParserState {
       // We're starting a new block. If we have any previous blocks that need to be closed, we need to do it now.
       if (unmatchedBlocks > 0) {
         this.closeBlockParsers(unmatchedBlocks);
+
         unmatchedBlocks = 0;
       }
 
@@ -398,6 +406,7 @@ class DocumentParser implements ParserState {
 
     let lineContent = DocumentParser.prepareLine(ln);
     let sourceSpan: SourceSpan | null = null;
+
     if (this.includeSourceSpans !== IncludeSourceSpans.NONE) {
       sourceSpan = SourceSpan.of(
         this.lineIndex,
@@ -424,10 +433,13 @@ class DocumentParser implements ParserState {
         case " ":
           i++;
           cols++;
+
           continue;
+
         case "\t":
           i++;
           cols += 4 - (cols % 4);
+
           continue;
 
         default:
@@ -543,6 +555,7 @@ class DocumentParser implements ParserState {
       // Don't add source spans for Document itself (it would get the whole source text), so start at 1, not 0
       for (let i = 1; i < this.openBlockParsers.length; i++) {
         const openBlockParser = this.openBlockParsers[i];
+
         // In case of a lazy continuation line, the index is less than where the block parser would expect the
         // contents to start, so let's use whichever is smaller.
         const blockIndex = Math.min(openBlockParser.sourceIndex, this.index);
@@ -560,6 +573,7 @@ class DocumentParser implements ParserState {
   private findBlockStart(blockParser: BlockParser): BlockStartImpl | null {
     const matchedBlockParser: MatchedBlockParser =
       new DocumentParser.MatchedBlockParserImpl(blockParser);
+
     for (const blockParserFactory of this.blockParserFactories) {
       const result = blockParserFactory.tryStart(this, matchedBlockParser);
 
@@ -647,7 +661,9 @@ class DocumentParser implements ParserState {
   private closeBlockParsers(count: number): void {
     for (let i = 0; i < count; i++) {
       const blockParser = this.deactivateBlockParser().blockParser;
+
       this.finalize(blockParser);
+
       // Remember for inline parsing. Note that a lot of blocks don't need inline parsing. We could have a
       // separate interface (e.g. BlockParserWithInlines) so that we only have to remember those that actually
       // have inlines to parse.
@@ -661,6 +677,7 @@ class DocumentParser implements ParserState {
    */
   private finalize(blockParser: BlockParser) {
     this.addDefinitionsFrom(blockParser);
+
     blockParser.closeBlock();
   }
 

@@ -164,6 +164,7 @@ class FencedCodeBlockParser extends AbstractBlockParser {
 
     if (after === line.length) {
       this.block.setClosingFenceLength(fences);
+
       return true;
     }
 

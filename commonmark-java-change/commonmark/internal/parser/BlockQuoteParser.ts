@@ -16,6 +16,7 @@ class Factory implements BlockParserFactory {
     matchedBlockParser: MatchedBlockParser
   ): BlockStart | null {
     const nextNonSpace = state.getNextNonSpaceIndex();
+
     if (BlockQuoteParser.isMarker(state, nextNonSpace)) {
       let newColumn = state.getColumn() + state.getIndent() + 1;
 

@@ -10,6 +10,7 @@ class BlockStartImpl extends BlockStart {
 
   public constructor(...blockParsers: BlockParser[]) {
     super();
+
     this.blockParsers = blockParsers;
   }
 
@@ -37,11 +38,13 @@ class BlockStartImpl extends BlockStart {
 
   public override atColumn(newColumn: number): BlockStart {
     this.newColumn = newColumn;
+
     return this;
   }
 
   public override setReplaceActiveBlockParser(): BlockStart {
     this.replaceActiveBlockParser = true;
+
     return this;
   }
 }
