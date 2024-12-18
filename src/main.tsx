@@ -27,6 +27,8 @@ editor.addEventListener("beforeinput", (e) => {
 
   const range = e.getTargetRanges()[0];
 
+  console.log(range);
+
   const changedRange = getMarkdownChangeRange(range);
 
   console.log(changedRange);
@@ -41,6 +43,7 @@ const markdownParser = Parser.builder()
 
 const htmlRenderer = HtmlRenderer.builder()
   .attributeProviderFactory(nodeMap)
+  .setSoftbreak("<br />")
   .build();
 
 editor.innerHTML = htmlRenderer.render(markdownParser.parse(example));
