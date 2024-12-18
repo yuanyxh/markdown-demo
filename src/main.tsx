@@ -85,11 +85,8 @@ function getMarkdownChangeOffset(container: Node, offset: number) {
     return block.getContentIndex();
   }
 
-  let childMarkdownNode = block.getFirstChild();
-
-  while (--offset > 1) {
-    childMarkdownNode = childMarkdownNode!.getNext();
-  }
+  const children = block.getChildren();
+  let childMarkdownNode = children[offset];
 
   const { inputEndIndex } = getSourcePosition(childMarkdownNode!);
 

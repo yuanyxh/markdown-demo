@@ -1,3 +1,2 @@
-  Foo *bar
-baz*→
-====
+    a simple
+      indented code block
