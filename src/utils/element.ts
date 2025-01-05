@@ -8,6 +8,7 @@ export function createEditorElement() {
   editorElement.translate = false;
   editorElement.role = "textbox";
   editorElement.ariaMultiLine = "true";
+  editorElement.classList.add("editor");
 
   return editorElement;
 }

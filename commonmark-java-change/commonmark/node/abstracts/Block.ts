@@ -4,30 +4,6 @@ import MarkdownNode from "./MarkdownNode";
  * Block nodes such as paragraphs, list blocks, code blocks etc.
  */
 abstract class Block extends MarkdownNode {
-  public getContentIndex() {
-    const child = this.getFirstChild();
-
-    if (child === null) {
-      const sources = this.getSourceSpans();
-      const source = sources[0];
-
-      if (source) {
-        return source.getInputIndex() + source.getLength();
-      }
-
-      return -1;
-    }
-
-    const childSources = child.getSourceSpans();
-    const source = childSources[0];
-
-    if (source) {
-      return source.getInputIndex();
-    }
-
-    return -1;
-  }
-
   public override getParent(): Block | null {
     const parent = super.getParent();
 

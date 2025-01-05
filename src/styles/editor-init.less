@@ -1,9 +1,115 @@
-h1:empty::after,
-h2:empty::after,
-h3:empty::after,
-h4:empty::after,
-h5:empty::after,
-h6:empty::after,
-p:empty::after {
-  content: "\200B";
+.editor {
+  display: block;
+  padding: 20px 15px;
+  min-height: 300px;
+  height: max-content;
+  border: 1px solid #dfdfdf;
+  border-radius: 4px;
+  outline: 0;
+  font-size: 14px;
+  font-family: -apple-system, blinkmacsystemfont, "Segoe UI", roboto, oxygen,
+    ubuntu, cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", stheiti,
+    "Microsoft YaHei", simsun, sans-serif;
+
+  h1:empty::after,
+  h2:empty::after,
+  h3:empty::after,
+  h4:empty::after,
+  h5:empty::after,
+  h6:empty::after,
+  p:empty::after {
+    content: "\200B";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  pre,
+  p,
+  hr,
+  ul,
+  ol,
+  blockquote {
+    margin-top: 1.5em;
+  }
+
+  pre {
+    padding: 1em;
+    overflow: auto;
+    border-radius: 0.3em;
+    background: #282c34;
+  }
+
+  pre code {
+    color: #abb2bf;
+    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+    font-family: Fira Code, Fira Mono, Menlo, Consolas, DejaVu Sans Mono,
+      monospace;
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    line-height: 1.5;
+    -moz-tab-size: 2;
+    tab-size: 2;
+    -webkit-hyphens: none;
+    hyphens: none;
+  }
+
+  ul,
+  ol {
+    padding-left: 14px;
+  }
+
+  blockquote :first-child,
+  ul li:first-child,
+  ul li:first-child :first-child,
+  ol li:first-child,
+  ol li:first-child :first-child {
+    margin-top: 0;
+  }
+
+  ul > li:not(:first-child),
+  ol > li:not(:first-child) {
+    margin-top: 0.5em;
+  }
+
+  li:not(:first-child) {
+    > p,
+    > ul,
+    > ol,
+    > blockquote,
+    > pre {
+      margin-top: 0.5em;
+    }
+  }
+
+  p {
+    line-height: 1.6em;
+  }
+
+  img {
+    vertical-align: middle;
+  }
+
+  hr {
+    border: 0;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+
+  blockquote {
+    padding: 1rem 0.5rem 1rem 1rem;
+    margin: 25px 0;
+    background-color: #ffefe5;
+    border-left: 0.2rem solid #ff6000;
+  }
+
+  & > :first-child {
+    margin-top: 0;
+  }
 }

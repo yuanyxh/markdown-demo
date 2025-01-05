@@ -42,5 +42,11 @@ declare global {
     end: MarkdownNode;
   }
 
+  interface INodeRange {
+    node: Node;
+    offset: number;
+    source: string;
+  }
+
   type TCursorDir = "forward" | "backword";
 }

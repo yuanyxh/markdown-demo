@@ -11,31 +11,16 @@ import {
   IncludeSourceSpans,
 } from "../commonmark-java-change/commonmark";
 
-import type { Block, MarkdownNode } from "../commonmark-java-change/commonmark";
-
 import example from "./example.md?raw";
 
 import NodeMap from "./nodemap";
+
+import offsetTools from "./offset";
 
 const nodeMap = new NodeMap();
 
 const editor = createEditorElement();
 window.document.getElementById("root")!.appendChild(editor);
-
-editor.addEventListener("beforeinput", (e) => {
-  e.preventDefault();
-
-  const range = e.getTargetRanges()[0];
-
-  console.log(range);
-
-  const changedRange = getMarkdownChangeRange(range);
-
-  console.log(changedRange);
-
-  console.log(example.charAt(changedRange.start));
-  console.log(example.charAt(changedRange.end));
-});
 
 const markdownParser = Parser.builder()
   .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
@@ -48,47 +33,55 @@ const htmlRenderer = HtmlRenderer.builder()
 
 editor.innerHTML = htmlRenderer.render(markdownParser.parse(example));
 
-function getSourcePosition(node: MarkdownNode) {
-  const spans = node.getSourceSpans();
-  const inputIndex = spans[0].getInputIndex();
-  const inputLength = spans[spans.length - 1].getLength();
-
-  return { inputIndex, inputLength, inputEndIndex: inputIndex + inputLength };
-}
-
-function getMarkdownChangeRange(range: StaticRange): IChangeRange {
-  const { startContainer, endContainer, startOffset, endOffset, collapsed } =
-    range;
-
-  const start = getMarkdownChangeOffset(startContainer, startOffset);
-  const end = getMarkdownChangeOffset(endContainer, endOffset);
-
-  return { start, end };
-}
-
-function getMarkdownChangeOffset(container: Node, offset: number) {
-  if (container instanceof Text) {
-    const span = container.parentElement as HTMLSpanElement;
-
-    const textNode = nodeMap.getNodeByElement(span);
-
-    const { inputIndex } = getSourcePosition(textNode!);
-
-    return inputIndex + offset;
+function getOffset(
+  this: INodeRange,
+  offset: number,
+  get: (typeof offsetTools)[number]
+) {
+  if (offset === -1) {
+    return get.call(this, this.node, this.offset, nodeMap);
   }
 
-  const element = container as HTMLElement;
+  return offset;
+}
 
-  const block = nodeMap.getNodeByElement(element) as Block;
+function runOffset(range: StaticRange) {
+  const start = offsetTools.reduce(
+    getOffset.bind({
+      node: range.startContainer,
+      offset: range.startOffset,
+      source: example,
+    }),
+    -1
+  );
 
-  if (offset === 0) {
-    return block.getContentIndex();
+  const end = offsetTools.reduce(
+    getOffset.bind({
+      node: range.endContainer,
+      offset: range.endOffset,
+      source: example,
+    }),
+    -1
+  );
+
+  return { start: start, end: end };
+}
+
+window.document.addEventListener("selectionchange", () => {
+  const selection = window.document.getSelection();
+
+  if (!selection) {
+    return false;
   }
 
-  const children = block.getChildren();
-  let childMarkdownNode = children[offset];
+  const range = selection.getRangeAt(0);
 
-  const { inputEndIndex } = getSourcePosition(childMarkdownNode!);
+  console.log(range);
 
-  return inputEndIndex;
-}
+  const changeRange = runOffset(range);
+
+  console.log(changeRange);
+
+  console.log(example.charAt(changeRange.start));
+  console.log(example.charAt(changeRange.end));
+});
