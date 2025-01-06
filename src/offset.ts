@@ -1,8 +1,9 @@
-import type { Block } from "../commonmark-java-change/commonmark";
+import type { Block, MarkdownNode } from "../commonmark-java-change/commonmark";
 import type NodeMap from "./nodemap";
 import {
   FencedCodeBlock,
   IndentedCodeBlock,
+  SoftLineBreak,
 } from "../commonmark-java-change/commonmark";
 import { getContentIndex, getSourcePosition } from "./utils/source";
 
@@ -65,7 +66,7 @@ function getCodeBlockOffset(
 
   let literal = codeBolckNode.getLiteral();
 
-  const { inputIndex, inputEndIndex } = getSourcePosition(codeBolckNode);
+  let { inputIndex, inputEndIndex } = getSourcePosition(codeBolckNode);
 
   if (literal === void 0) {
     return inputEndIndex;
@@ -75,9 +76,15 @@ function getCodeBlockOffset(
     literal = literal.slice(0, literal.length - 1);
   }
 
-  const codeBlockSource = this.source.slice(inputIndex, inputEndIndex);
+  if (codeBolckNode instanceof FencedCodeBlock) {
+    inputIndex +=
+      (codeBolckNode.getOpeningFenceLength() || 0) +
+      (codeBolckNode.getFenceIndent() || 0);
+  }
 
-  const textStart = codeBlockSource.indexOf(literal);
+  const textStart = this.source
+    .slice(inputIndex, inputEndIndex)
+    .indexOf(literal);
 
   if (textStart === -1) {
     return -1;
@@ -115,10 +122,29 @@ function getDefaultOffset(
   }
 
   const children = block.getChildren();
-  let childMarkdownNode = children[offset - 1];
+  let childMarkdownNode: MarkdownNode | null = children[offset - 1];
+  let isSoftLineBreak = false;
+
+  if (childMarkdownNode instanceof SoftLineBreak) {
+    childMarkdownNode = childMarkdownNode.getPrevious();
+
+    isSoftLineBreak = true;
+  }
 
   if (!childMarkdownNode) {
     return -1;
+  }
+
+  if (isSoftLineBreak) {
+    const softLineBreakPos = getSourcePosition(childMarkdownNode).inputEndIndex;
+
+    const continuousLine = childMarkdownNode.getNext()!.getNext();
+
+    if (!continuousLine) {
+      return softLineBreakPos + 1;
+    }
+
+    return getSourcePosition(continuousLine).inputIndex;
   }
 
   const { inputEndIndex } = getSourcePosition(childMarkdownNode);
