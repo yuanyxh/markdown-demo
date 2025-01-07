@@ -1,5 +1,4 @@
 import type { Block, MarkdownNode } from "../commonmark-java-change/commonmark";
-import type NodeMap from "./nodemap";
 import {
   FencedCodeBlock,
   IndentedCodeBlock,
@@ -7,12 +6,7 @@ import {
 } from "../commonmark-java-change/commonmark";
 import { getContentIndex, getSourcePosition } from "./utils/source";
 
-function getHrOffset(
-  this: INodeRange,
-  node: Node,
-  offset: number,
-  nodeMap: NodeMap
-) {
+function getHrOffset(this: INodeRange, node: Node, offset: number) {
   if (!(node instanceof HTMLElement)) {
     return -1;
   }
@@ -27,7 +21,7 @@ function getHrOffset(
     return -1;
   }
 
-  const hrNode = nodeMap.getNodeByElement(el);
+  const hrNode = this.nodeMap.getNodeByElement(el);
 
   if (!hrNode) {
     return -1;
@@ -36,12 +30,7 @@ function getHrOffset(
   return getSourcePosition(hrNode).inputIndex;
 }
 
-function getCodeBlockOffset(
-  this: INodeRange,
-  node: Node,
-  offset: number,
-  nodeMap: NodeMap
-) {
+function getCodeBlockOffset(this: INodeRange, node: Node, offset: number) {
   if (
     !(
       node instanceof Text &&
@@ -52,7 +41,7 @@ function getCodeBlockOffset(
     return -1;
   }
 
-  const codeBolckNode = nodeMap.getNodeByElement(node.parentElement);
+  const codeBolckNode = this.nodeMap.getNodeByElement(node.parentElement);
 
   if (
     !(
@@ -93,16 +82,11 @@ function getCodeBlockOffset(
   return inputIndex + textStart + offset;
 }
 
-function getDefaultOffset(
-  this: INodeRange,
-  node: Node,
-  offset: number,
-  nodeMap: NodeMap
-) {
+function getDefaultOffset(this: INodeRange, node: Node, offset: number) {
   if (node instanceof Text && node.parentElement) {
     const el = node.parentElement;
 
-    const textNode = nodeMap.getNodeByElement(el);
+    const textNode = this.nodeMap.getNodeByElement(el);
 
     if (!textNode) {
       return -1;
@@ -115,7 +99,7 @@ function getDefaultOffset(
 
   const element = node as HTMLElement;
 
-  const block = nodeMap.getNodeByElement(element) as Block;
+  const block = this.nodeMap.getNodeByElement(element) as Block;
 
   if (offset === 0) {
     return getContentIndex(block);
@@ -152,4 +136,41 @@ function getDefaultOffset(
   return inputEndIndex;
 }
 
-export default [getHrOffset, getCodeBlockOffset, getDefaultOffset];
+const offsetTools = [getHrOffset, getCodeBlockOffset, getDefaultOffset];
+
+export function getOffset(
+  this: INodeRange,
+  offset: number,
+  get: (typeof offsetTools)[number]
+) {
+  if (offset === -1) {
+    return get.call(this, this.node, this.offset);
+  }
+
+  return offset;
+}
+
+export function runOffset(
+  this: Pick<INodeRange, "nodeMap" | "source">,
+  range: StaticRange
+) {
+  const start = offsetTools.reduce(
+    getOffset.bind({
+      node: range.startContainer,
+      offset: range.startOffset,
+      ...this,
+    }),
+    -1
+  );
+
+  const end = offsetTools.reduce(
+    getOffset.bind({
+      node: range.endContainer,
+      offset: range.endOffset,
+      ...this,
+    }),
+    -1
+  );
+
+  return { start: start, end: end };
+}

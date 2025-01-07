@@ -11,11 +11,10 @@ import {
   IncludeSourceSpans,
 } from "../commonmark-java-change/commonmark";
 
-import example from "./example.md?raw";
+import source from "./example.md?raw";
 
 import NodeMap from "./nodemap";
-
-import offsetTools from "./offset";
+import { runOffset } from "./offset";
 
 const nodeMap = new NodeMap();
 
@@ -31,41 +30,7 @@ const htmlRenderer = HtmlRenderer.builder()
   .setSoftbreak("<br />")
   .build();
 
-editor.innerHTML = htmlRenderer.render(markdownParser.parse(example));
-
-function getOffset(
-  this: INodeRange,
-  offset: number,
-  get: (typeof offsetTools)[number]
-) {
-  if (offset === -1) {
-    return get.call(this, this.node, this.offset, nodeMap);
-  }
-
-  return offset;
-}
-
-function runOffset(range: StaticRange) {
-  const start = offsetTools.reduce(
-    getOffset.bind({
-      node: range.startContainer,
-      offset: range.startOffset,
-      source: example,
-    }),
-    -1
-  );
-
-  const end = offsetTools.reduce(
-    getOffset.bind({
-      node: range.endContainer,
-      offset: range.endOffset,
-      source: example,
-    }),
-    -1
-  );
-
-  return { start: start, end: end };
-}
+editor.innerHTML = htmlRenderer.render(markdownParser.parse(source));
 
 window.document.addEventListener("selectionchange", () => {
   const selection = window.document.getSelection();
@@ -78,10 +43,9 @@ window.document.addEventListener("selectionchange", () => {
 
   console.log(range);
 
-  const changeRange = runOffset(range);
+  const changeRange = runOffset.call({ source: source, nodeMap }, range);
 
   console.log(changeRange);
-
-  console.log(example.charAt(changeRange.start));
-  console.log(example.charAt(changeRange.end));
+  console.log(source.charAt(changeRange.start));
+  console.log(source.charAt(changeRange.end));
 });

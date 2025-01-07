@@ -1,4 +1,5 @@
 import type { Block, MarkdownNode } from "../commonmark-java-change/commonmark";
+import type NodeMap from "./nodemap";
 
 declare global {
   interface IEditorOptions {
@@ -46,6 +47,7 @@ declare global {
     node: Node;
     offset: number;
     source: string;
+    nodeMap: NodeMap;
   }
 
   type TCursorDir = "forward" | "backword";
