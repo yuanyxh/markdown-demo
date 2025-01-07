@@ -8,7 +8,7 @@
     "useDefineForClassFields": true,
     "declaration": true,
     "declarationDir": "types",
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "baseUrl": "./",
     "allowJs": true,
     "esModuleInterop": true,

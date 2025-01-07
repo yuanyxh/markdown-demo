@@ -45,7 +45,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       ],
     },
     build: {
-      outDir: "build",
+      outDir: "lib",
       lib: {
         name: "commonmark-java-js",
         formats: ["es"],
@@ -59,11 +59,11 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       dts({
         root: __dirname,
         tsconfigPath: "./tsconfig.json",
+        insertTypesEntry: true,
         rollupTypes: true,
         pathsToAliases: true,
-        entryRoot: "./types",
-        // declarationOnly: true,
-        outDir: "build",
+        declarationOnly: false,
+        outDir: "lib",
       }),
     ],
   });
