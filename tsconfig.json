@@ -11,11 +11,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src/**/*",
-    "./commonmark-js/**/*",
-    "./commonmark-java/**/*",
-    "./commonmark-js-change/**/*",
-    "./commonmark-java-change/**/*"
-  ]
+  "include": ["src/**/*", "./commonmark-java/**/*"]
 }

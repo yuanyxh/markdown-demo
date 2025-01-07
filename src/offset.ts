@@ -1,9 +1,9 @@
-import type { Block, MarkdownNode } from "../commonmark-java-change/commonmark";
+import type { Block, MarkdownNode } from "../commonmark-java/commonmark";
 import {
   FencedCodeBlock,
   IndentedCodeBlock,
   SoftLineBreak,
-} from "../commonmark-java-change/commonmark";
+} from "../commonmark-java/commonmark";
 import { getContentIndex, getSourcePosition } from "./utils/source";
 
 function getHrOffset(this: INodeRange, node: Node, offset: number) {
