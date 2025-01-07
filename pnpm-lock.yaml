@@ -12,8 +12,8 @@ importers:
         specifier: ^5.21.5
         version: 5.21.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       commonmark-java-js:
-        specifier: link:commonmark-java
-        version: link:commonmark-java
+        specifier: link:commonmark-java-js
+        version: link:commonmark-java-js
       normalize.css:
         specifier: ^8.0.1
         version: 8.0.1

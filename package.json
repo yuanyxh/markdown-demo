@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "antd": "^5.21.5",
-    "commonmark-java-js": "link:commonmark-java",
+    "commonmark-java-js": "link:commonmark-java-js",
     "normalize.css": "^8.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

@@ -25,7 +25,7 @@ class HtmlRendererExtension implements Extension {
 }
 
 class HtmlRendererBuilder {
-  public softbreak = '\n';
+  public softbreak = '<br />';
   public escapeHtml = false;
   public sanitizeUrls = false;
   public urlSanitizer: UrlSanitizer = new DefaultUrlSanitizer();
@@ -39,22 +39,6 @@ class HtmlRendererBuilder {
    */
   public build(): HtmlRenderer {
     return new HtmlRenderer(this);
-  }
-
-  /**
-   * The HTML to use for rendering a softbreak, defaults to {@code "\n"} (meaning the rendered result doesn't have
-   * a line break).
-   * <p>
-   * Set it to {@code "<br>"} (or {@code "<br />"} to make them hard breaks.
-   * <p>
-   * Set it to {@code " "} to ignore line wrapping in the source.
-   *
-   * @param softbreak HTML for softbreak
-   * @return {@code this}
-   */
-  public setSoftbreak(softbreak: string): HtmlRendererBuilder {
-    this.softbreak = softbreak;
-    return this;
   }
 
   /**

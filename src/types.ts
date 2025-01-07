@@ -1,5 +1,4 @@
-import type { Block, MarkdownNode } from "commonmark-java-js";
-import type NodeMap from "./nodemap";
+import type { Block, MarkdownNode } from 'commonmark-java-js';
 
 declare global {
   interface IEditorOptions {
@@ -33,7 +32,7 @@ declare global {
   }
 
   interface INodeHolder {
-    type: "insertFirstChild" | "insertAfter" | "remove" | "replace";
+    type: 'insertFirstChild' | 'insertAfter' | 'remove' | 'replace';
     target: HTMLElement | null;
     node: MarkdownNode | null;
   }
@@ -47,8 +46,11 @@ declare global {
     node: Node;
     offset: number;
     source: string;
-    nodeMap: NodeMap;
   }
 
-  type TCursorDir = "forward" | "backword";
+  interface Node {
+    $virtNode: MarkdownNode;
+  }
+
+  type TCursorDir = 'forward' | 'backword';
 }

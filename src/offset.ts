@@ -1,21 +1,19 @@
-import type { Block, MarkdownNode } from "commonmark-java-js";
+import type { MarkdownNode } from 'commonmark-java-js';
 
-import {
-  FencedCodeBlock,
-  IndentedCodeBlock,
-  SoftLineBreak,
-} from "commonmark-java-js";
+import { Code, FencedCodeBlock, IndentedCodeBlock, SoftLineBreak } from 'commonmark-java-js';
 
-import { getContentIndex, getSourcePosition } from "./utils/source";
+import { getContentIndex, getSourcePosition } from './utils/source';
 
-function getHrOffset(this: INodeRange, node: Node, offset: number) {
+type TGetOffset = (this: INodeRange, node: Node, offset: number) => number;
+
+const getHrOffset: TGetOffset = function getHrOffset(node, offset) {
   if (!(node instanceof HTMLElement)) {
     return -1;
   }
 
   let el: Node | null = node.childNodes[offset - 1];
 
-  if (el instanceof Text && el.nodeValue === "\n") {
+  if (el instanceof Text && el.nodeValue === '\n') {
     el = el.nextSibling;
   }
 
@@ -23,41 +21,42 @@ function getHrOffset(this: INodeRange, node: Node, offset: number) {
     return -1;
   }
 
-  const hrNode = this.nodeMap.getNodeByElement(el);
+  const hrNode = el.$virtNode;
 
   if (!hrNode) {
     return -1;
   }
 
   return getSourcePosition(hrNode).inputIndex;
-}
+};
 
-function getCodeBlockOffset(this: INodeRange, node: Node, offset: number) {
+const getCodeOffset: TGetOffset = function getCodeOffset(node, offset) {
   if (
     !(
       node instanceof Text &&
       node.parentElement &&
-      node.parentElement.tagName.toLocaleLowerCase() === "code"
+      node.parentElement.tagName.toLocaleLowerCase() === 'code'
     )
   ) {
     return -1;
   }
 
-  const codeBolckNode = this.nodeMap.getNodeByElement(node.parentElement);
+  const mNode = node.parentElement.$virtNode;
 
   if (
     !(
-      codeBolckNode &&
-      (codeBolckNode instanceof FencedCodeBlock ||
-        codeBolckNode instanceof IndentedCodeBlock)
+      mNode &&
+      (mNode instanceof FencedCodeBlock ||
+        mNode instanceof IndentedCodeBlock ||
+        mNode instanceof Code)
     )
   ) {
     return -1;
   }
 
-  let literal = codeBolckNode.getLiteral();
+  let literal = mNode.getLiteral();
 
-  let { inputIndex, inputEndIndex } = getSourcePosition(codeBolckNode);
+  let { inputIndex, inputEndIndex } = getSourcePosition(mNode);
 
   if (literal === void 0) {
     return inputEndIndex;
@@ -67,28 +66,24 @@ function getCodeBlockOffset(this: INodeRange, node: Node, offset: number) {
     literal = literal.slice(0, literal.length - 1);
   }
 
-  if (codeBolckNode instanceof FencedCodeBlock) {
-    inputIndex +=
-      (codeBolckNode.getOpeningFenceLength() || 0) +
-      (codeBolckNode.getFenceIndent() || 0);
+  if (mNode instanceof FencedCodeBlock) {
+    inputIndex += (mNode.getOpeningFenceLength() || 0) + (mNode.getFenceIndent() || 0);
   }
 
-  const textStart = this.source
-    .slice(inputIndex, inputEndIndex)
-    .indexOf(literal);
+  const textStart = this.source.slice(inputIndex, inputEndIndex).indexOf(literal);
 
   if (textStart === -1) {
     return -1;
   }
 
   return inputIndex + textStart + offset;
-}
+};
 
-function getDefaultOffset(this: INodeRange, node: Node, offset: number) {
+const fallbackGetOffset: TGetOffset = function fallbackGetOffset(node, offset) {
   if (node instanceof Text && node.parentElement) {
     const el = node.parentElement;
 
-    const textNode = this.nodeMap.getNodeByElement(el);
+    const textNode = el.$virtNode;
 
     if (!textNode) {
       return -1;
@@ -101,7 +96,7 @@ function getDefaultOffset(this: INodeRange, node: Node, offset: number) {
 
   const element = node as HTMLElement;
 
-  const block = this.nodeMap.getNodeByElement(element) as Block;
+  const block = element.$virtNode;
 
   if (offset === 0) {
     return getContentIndex(block);
@@ -136,15 +131,11 @@ function getDefaultOffset(this: INodeRange, node: Node, offset: number) {
   const { inputEndIndex } = getSourcePosition(childMarkdownNode);
 
   return inputEndIndex;
-}
+};
 
-const offsetTools = [getHrOffset, getCodeBlockOffset, getDefaultOffset];
+const offsetHandlers: TGetOffset[] = [getHrOffset, getCodeOffset, fallbackGetOffset];
 
-export function getOffset(
-  this: INodeRange,
-  offset: number,
-  get: (typeof offsetTools)[number]
-) {
+export function getOffset(this: INodeRange, offset: number, get: TGetOffset) {
   if (offset === -1) {
     return get.call(this, this.node, this.offset);
   }
@@ -152,24 +143,21 @@ export function getOffset(
   return offset;
 }
 
-export function runOffset(
-  this: Pick<INodeRange, "nodeMap" | "source">,
-  range: StaticRange
-) {
-  const start = offsetTools.reduce(
+export function runOffset(this: Pick<INodeRange, 'source'>, range: StaticRange) {
+  const start = offsetHandlers.reduce(
     getOffset.bind({
       node: range.startContainer,
       offset: range.startOffset,
-      ...this,
+      ...this
     }),
     -1
   );
 
-  const end = offsetTools.reduce(
+  const end = offsetHandlers.reduce(
     getOffset.bind({
       node: range.endContainer,
       offset: range.endOffset,
-      ...this,
+      ...this
     }),
     -1
   );

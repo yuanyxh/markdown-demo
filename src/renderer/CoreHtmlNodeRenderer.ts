@@ -133,28 +133,8 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       }
 
       case node instanceof Paragraph: {
-        // const paragraph = node;
-
-        // const omitP: boolean =
-        //   this.isInTightList(paragraph) || //
-        //   (this.context.shouldOmitSingleParagraphP() &&
-        //     paragraph.getParent() instanceof Document && //
-        //     paragraph.getPrevious() === null &&
-        //     paragraph.getNext() === null);
-
-        // if (!omitP) {
-        //   this.html.line();
-        //   this.html.tag("p", this.getAttrs(paragraph, "p"));
-        // }
-
-        // this.visitChildren(paragraph);
-
-        // if (!omitP) {
-        //   this.html.tag("/p");
-        //   this.html.line();
-        // }
-
         const paragraph = node;
+
         this.html.line();
         this.html.tag('p', this.getAttrs(paragraph, 'p'));
         this.visitChildren(paragraph);
@@ -220,7 +200,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
           this.html.text(htmlBlock.getLiteral());
           this.html.tag('/p');
         } else {
+          this.html.tag('div', this.getAttrs(htmlBlock, 'div'));
           this.html.raw(htmlBlock.getLiteral());
+          this.html.tag('/div');
         }
 
         this.html.line();
@@ -430,19 +412,6 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.html.line();
     this.html.tag('/' + tagName);
     this.html.line();
-  }
-
-  private isInTightList(paragraph: Paragraph): boolean {
-    let parent = paragraph.getParent();
-
-    if (parent !== null) {
-      let gramps = parent.getParent();
-      if (gramps instanceof ListBlock) {
-        return gramps.isTight();
-      }
-    }
-
-    return false;
   }
 
   private getAttrs(

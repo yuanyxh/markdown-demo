@@ -1,5 +1,7 @@
 # Crash Course Computer Science
 
+```何以笙箫默，不如泪两行```
+
 ## 计算机早期历史
 
 ```
