@@ -1,5 +1,6 @@
-import type { HtmlNodeRendererContext } from "./HtmlNodeRendererContext";
-import type { NodeRenderer } from "../../interfaces/NodeRenderer";
+import type { NodeRenderer } from 'commonmark-java-js';
+
+import type { HtmlNodeRendererContext } from './HtmlNodeRendererContext';
 
 /**
  * Factory for instantiating new node renderers when rendering is done.

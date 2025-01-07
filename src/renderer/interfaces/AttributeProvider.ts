@@ -1,4 +1,4 @@
-import type { MarkdownNode } from "@/node";
+import type { MarkdownNode } from 'commonmark-java-js';
 
 /**
  * Extension point for adding/changing attributes on HTML tags for a node.
@@ -19,9 +19,5 @@ export interface AttributeProvider {
    * @param tagName the HTML tag name that these attributes are for (e.g. {@code h1}, {@code pre}, {@code code}).
    * @param attributes the attributes, with any default attributes already set in the map
    */
-  setAttributes(
-    node: MarkdownNode,
-    tagName: string,
-    attributes: Map<string, string>
-  ): void;
+  setAttributes(node: MarkdownNode, tagName: string, attributes: Map<string, string>): void;
 }

@@ -384,6 +384,27 @@ export declare class Emphasis extends MarkdownNode implements Delimited {
   getClosingDelimiter(): string | undefined;
 }
 
+export declare class Escaping {
+  static readonly ESCAPABLE: string;
+  static readonly ENTITY: string;
+  private static readonly BACKSLASH_OR_AMP;
+  private static readonly ENTITY_OR_ESCAPED_CHAR;
+  private static readonly ESCAPE_IN_URI;
+  private static readonly HEX_DIGITS;
+  private static readonly WHITESPACE;
+  private static readonly UNESCAPE_REPLACER;
+  private static readonly URI_REPLACER;
+  static getBytes(input: string): number[];
+  static escapeHtml(input: string): string;
+  /**
+   * Replace entities and backslash escapes with literal characters.
+   */
+  static unescapeString(s: string): string;
+  static percentEncodeUrl(s: string): string;
+  static normalizeLabelContent(input: string): string;
+  private static replaceAll;
+}
+
 /**
  * Base interface for a parser/renderer extension.
  * <p>
@@ -391,7 +412,7 @@ export declare class Emphasis extends MarkdownNode implements Delimited {
  * configure parser/renderer. This base interface is for convenience, so that a list of extensions can be built and then
  * used for configuring both the parser and renderer in the same way.
  */
-declare interface Extension {}
+export declare interface Extension {}
 
 export declare class FencedCodeBlock extends Block {
   private fenceCharacter;
@@ -1413,6 +1434,15 @@ export declare interface NodeRenderer {
    * @param rootNode the root (top-level) node
    */
   afterRoot(rootNode: MarkdownNode): void;
+}
+
+export declare class NodeRendererMap {
+  private readonly nodeRenderers;
+  private readonly renderers;
+  add(nodeRenderer: NodeRenderer): void;
+  render(node: MarkdownNode): void;
+  beforeRoot(node: MarkdownNode): void;
+  afterRoot(node: MarkdownNode): void;
 }
 
 /**

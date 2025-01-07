@@ -1,11 +1,6 @@
-export {
-  Appendable,
-  BitSet,
-  Character,
-  isNotUnDef,
-  isUnDef,
-  fromCodePoint,
-} from "@helpers/index";
+export { Appendable, BitSet, Character, isNotUnDef, isUnDef, fromCodePoint } from '@helpers/index';
+
+export type { Extension } from './Extension';
 
 export type {
   Renderer,
@@ -16,13 +11,9 @@ export type {
   UrlSanitizer,
   MarkdownNodeRendererFactory,
   AttributeProviderContext,
-  TextContentNodeRendererFactory,
-} from "@/renderer";
-export {
-  HtmlRenderer,
-  MarkdownRenderer,
-  TextContentRenderer,
-} from "@/renderer";
+  TextContentNodeRendererFactory
+} from '@/renderer';
+export { HtmlRenderer, MarkdownRenderer, TextContentRenderer } from '@/renderer';
 
 export type {
   BlockParserFactory,
@@ -31,9 +22,9 @@ export type {
   LinkProcessor,
   PostProcessor,
   LinkInfo,
-  InlineParserContext,
-} from "@/parser";
-export { Parser, IncludeSourceSpans, Scanner, LinkResult } from "@/parser";
+  InlineParserContext
+} from '@/parser';
+export { Parser, IncludeSourceSpans, Scanner, LinkResult } from '@/parser';
 
 export {
   MarkdownNode,
@@ -64,5 +55,7 @@ export {
   StrongEmphasis,
   Text,
   ThematicBreak,
-  SourceSpan,
-} from "@/node";
+  SourceSpan
+} from '@/node';
+
+export { NodeRendererMap, Escaping } from '@/internal';
