@@ -1,8 +1,9 @@
-import type { Block, DefinitionMap, SourceSpan } from "../../node";
+import type { Block, DefinitionMap, SourceSpan } from "@/node";
+import type { BlockContinue } from "@/parser";
+
 import type { InlineParser } from "./InlineParser";
-import type SourceLine from "../parser_utils/SourceLine";
 import type { ParserState } from "./ParserState";
-import type { BlockContinue } from "../../parser";
+import type SourceLine from "../parser_utils/SourceLine";
 
 /**
  * Parser for a specific block node.

@@ -1,6 +1,6 @@
-import type { BlockParser } from "../parser";
+import type { BlockParser } from "@/parser";
 
-import { BlockStart } from "../parser";
+import { BlockStart } from "@/parser";
 
 class BlockStartImpl extends BlockStart {
   private readonly blockParsers: BlockParser[];

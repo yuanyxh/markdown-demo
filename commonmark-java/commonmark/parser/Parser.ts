@@ -1,5 +1,6 @@
-import type { Block, MarkdownNode } from "../node";
-import type { Extension } from "../Extension";
+import type { Block, MarkdownNode } from "@/node";
+import type { Extension } from "@/Extension";
+
 import type { InlineContentParserFactory } from "./interfaces/InlineContentParserFactory";
 import type { LinkProcessor } from "./interfaces/LinkProcessor";
 import type { BlockParserFactory } from "./interfaces/BlockParserFactory";
@@ -7,13 +8,14 @@ import type { DelimiterProcessor } from "./interfaces/DelimiterProcessor";
 import type { InlineParserFactory } from "./interfaces/InlineParserFactory";
 import type { PostProcessor } from "./interfaces/PostProcessor";
 
-import IncludeSourceSpans from "./enums/IncludeSourceSpans";
 import {
   Definitions,
   DocumentParser,
   InlineParserContextImpl,
   InlineParserImpl,
-} from "../internal";
+} from "@/internal";
+
+import IncludeSourceSpans from "./enums/IncludeSourceSpans";
 
 /**
  * Extension for {@link Parser}.

@@ -1,8 +1,8 @@
-import type { SourceLine, ParserState } from "../../parser";
-import type { Block } from "../../node";
+import type { SourceLine, ParserState } from "@/parser";
+import type { Block } from "@/node";
 
-import { Document } from "../../node";
-import { AbstractBlockParser, BlockContinue } from "../../parser";
+import { Document } from "@/node";
+import { AbstractBlockParser, BlockContinue } from "@/parser";
 
 class DocumentBlockParser extends AbstractBlockParser {
   private readonly document = new Document();

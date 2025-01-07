@@ -1,4 +1,4 @@
-import { Escaping } from "../../internal";
+import { Escaping } from "@/internal";
 
 /**
  * A map that can be used to store and look up reference definitions by a label. The labels are case-insensitive and

@@ -1,15 +1,15 @@
-import type { Block, ListBlock } from "../../node";
+import type { Block, ListBlock } from "@/node";
 import type {
   BlockParserFactory,
   MatchedBlockParser,
   ParserState,
-} from "../../parser";
+} from "@/parser";
+
+import { BulletList, ListItem, OrderedList } from "@/node";
+import { AbstractBlockParser, BlockStart, BlockContinue } from "@/parser";
 
 import ListItemParser from "./ListItemParser";
 import Parsing from "../internal_util/Parsing";
-import { isNotUnDef } from "../../../helpers";
-import { BulletList, ListItem, OrderedList } from "../../node";
-import { AbstractBlockParser, BlockStart, BlockContinue } from "../../parser";
 
 class Factory implements BlockParserFactory {
   public tryStart(

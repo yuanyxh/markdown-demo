@@ -1,5 +1,6 @@
-import { BlockStartImpl } from "../../internal";
 import type { BlockParser } from "../interfaces/BlockParser";
+
+import { BlockStartImpl } from "@/internal";
 
 /**
  * Result object for starting parsing of a block, see static methods for constructors.

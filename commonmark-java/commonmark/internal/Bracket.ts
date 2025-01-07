@@ -1,6 +1,6 @@
 import type Delimiter from "./Delimiter";
-import type { Text } from "../node";
-import type { Position } from "../parser";
+import type { Text } from "@/node";
+import type { Position } from "@/parser";
 
 /**
  * Opening bracket for links ({@code [}), images ({@code ![}), or links with other markers.

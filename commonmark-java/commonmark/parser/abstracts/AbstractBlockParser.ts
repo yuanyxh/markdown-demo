@@ -1,8 +1,9 @@
+import type { Block, DefinitionMap, SourceSpan } from "@/node";
+import type { BlockContinue } from "@/parser";
+
 import type SourceLine from "../parser_utils/SourceLine";
 import type { BlockParser } from "../interfaces/BlockParser";
-import type { Block, DefinitionMap, SourceSpan } from "../../node";
 import type { InlineParser } from "../interfaces/InlineParser";
-import type { BlockContinue } from "../../parser";
 import type { ParserState } from "../interfaces/ParserState";
 
 abstract class AbstractBlockParser implements BlockParser {

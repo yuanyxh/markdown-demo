@@ -1,9 +1,9 @@
-import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { HtmlNodeRendererContext } from "./interfaces/HtmlNodeRendererContext";
-import type { MarkdownNode } from "../../node";
+import type { MarkdownNode } from "@/node";
 
-import HtmlWriter from "./HtmlWriter";
-import { Appendable, isNotUnDef } from "../../../helpers";
+import type { HtmlNodeRendererContext } from "./interfaces/HtmlNodeRendererContext";
+import type { NodeRenderer } from "../interfaces/NodeRenderer";
+
+import { Appendable, isNotUnDef } from "@/helpers/index";
 import {
   ListBlock,
   Document,
@@ -27,7 +27,9 @@ import {
   SoftLineBreak,
   HardLineBreak,
   AbstractVisitor,
-} from "../../node";
+} from "@/node";
+
+import HtmlWriter from "./HtmlWriter";
 
 class AltTextVisitor extends AbstractVisitor {
   private readonly sb: Appendable = new Appendable();

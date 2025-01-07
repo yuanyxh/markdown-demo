@@ -1,10 +1,11 @@
-import type { SourceSpan } from "../../node";
-import type { CharMatcher } from "../../text";
+import type { SourceSpan } from "@/node";
+import type { CharMatcher } from "@/text";
+
+import { Character, fromCodePoint } from "@/helpers/index";
 
 import SourceLine from "./SourceLine";
 import SourceLines from "./SourceLines";
 import Position from "./Position";
-import { Character, fromCodePoint } from "../../../helpers";
 
 class Scanner {
   /**

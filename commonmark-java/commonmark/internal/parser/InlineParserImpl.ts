@@ -10,20 +10,19 @@ import type {
   LinkProcessor,
   Position,
   SourceLines,
-} from "../../parser";
+} from "@/parser";
 
-import { Appendable, BitSet } from "../../../helpers";
-import { Scanner } from "../../parser";
+import { Appendable, BitSet } from "@/helpers/index";
+import { Scanner } from "@/parser";
 import {
   HardLineBreak,
   MarkdownNode,
   SoftLineBreak,
   SourceSpans,
   Text,
-} from "../../node";
-import { Characters } from "../../text";
-import Bracket from "../Bracket";
-import Delimiter from "../Delimiter";
+} from "@/node";
+import { Characters } from "@/text";
+
 import AsteriskDelimiterProcessor from "../inline/AsteriskDelimiterProcessor";
 import AutolinkInlineParser from "../inline/AutolinkInlineParser";
 import BackslashInlineParser from "../inline/BackslashInlineParser";
@@ -34,9 +33,11 @@ import HtmlInlineParser from "../inline/HtmlInlineParser";
 import LinkResultImpl from "../inline/LinkResultImpl";
 import ParsedInlineImpl from "../inline/ParsedInlineImpl";
 import UnderscoreDelimiterProcessor from "../inline/UnderscoreDelimiterProcessor";
-import StaggeredDelimiterProcessor from "../StaggeredDelimiterProcessor";
 import Escaping from "../internal_util/Escaping";
 import LinkScanner from "../internal_util/LinkScanner";
+import Bracket from "../Bracket";
+import Delimiter from "../Delimiter";
+import StaggeredDelimiterProcessor from "../StaggeredDelimiterProcessor";
 
 class DelimiterData {
   public readonly characters: Text[];

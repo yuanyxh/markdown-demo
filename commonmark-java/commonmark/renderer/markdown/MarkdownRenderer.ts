@@ -1,14 +1,17 @@
-import type { Extension } from "../../Extension";
+import type { Extension } from "@/Extension";
+
+import type { MarkdownNode } from "@/node";
+
 import type { MarkdownNodeRendererContext } from "./interfaces/MarkdownNodeRendererContext";
-import type { Renderer } from "../interfaces/Renderer";
 import type { MarkdownNodeRendererFactory } from "./interfaces/MarkdownNodeRendererFactory";
+import type { Renderer } from "../interfaces/Renderer";
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import { Appendable } from "../../../helpers";
-import type { MarkdownNode } from "../../node";
+
+import { Appendable } from "@/helpers/index";
+import { NodeRendererMap } from "@/internal";
 
 import CoreMarkdownNodeRenderer from "./CoreMarkdownNodeRenderer";
 import MarkdownWriter from "./MarkdownWriter";
-import { NodeRendererMap } from "../../internal";
 
 class MarkdownRendererExtension implements Extension {
   /**

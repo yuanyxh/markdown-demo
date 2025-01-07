@@ -1,12 +1,12 @@
-import type { Block } from "../../node";
+import type { Block } from "@/node";
 import type {
   BlockParserFactory,
   MatchedBlockParser,
   ParserState,
-} from "../../parser";
+} from "@/parser";
 
-import { ThematicBreak } from "../../node";
-import { AbstractBlockParser, BlockStart, BlockContinue } from "../../parser";
+import { ThematicBreak } from "@/node";
+import { AbstractBlockParser, BlockStart, BlockContinue } from "@/parser";
 
 class Factory implements BlockParserFactory {
   public tryStart(

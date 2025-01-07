@@ -1,7 +1,7 @@
-import type { MarkdownNode } from "../../node";
-import type { Position } from "../../parser";
+import type { MarkdownNode } from "@/node";
+import type { Position } from "@/parser";
 
-import { ParsedInline } from "../../parser";
+import { ParsedInline } from "@/parser";
 
 class ParsedInlineImpl implements ParsedInline {
   private readonly node: MarkdownNode;

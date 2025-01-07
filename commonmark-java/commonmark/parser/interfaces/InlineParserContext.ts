@@ -1,7 +1,8 @@
+import type { LinkReferenceDefinition } from "@/node";
+
 import type { DelimiterProcessor } from "./DelimiterProcessor";
 import type { InlineContentParserFactory } from "./InlineContentParserFactory";
 import type { LinkProcessor } from "./LinkProcessor";
-import type { LinkReferenceDefinition } from "../../node";
 
 /**
  * Context for inline parsing.

@@ -1,5 +1,6 @@
+import type { MarkdownNode } from "@/node";
+
 import type MarkdownWriter from "../MarkdownWriter";
-import type { MarkdownNode } from "../../../node";
 
 /**
  * Context that is passed to custom node renderers, see {@link MarkdownNodeRendererFactory#create}.

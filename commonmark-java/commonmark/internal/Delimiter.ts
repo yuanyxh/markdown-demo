@@ -1,5 +1,5 @@
-import type { Text } from "../node";
-import type { DelimiterRun } from "../parser";
+import type { Text } from "@/node";
+import type { DelimiterRun } from "@/parser";
 
 /**
  * Delimiter (emphasis, strong emphasis or custom emphasis).

@@ -3,15 +3,16 @@ import type {
   MatchedBlockParser,
   ParserState,
   SourceLine,
-} from "../../parser";
-import type { Block } from "../../node";
+} from "@/parser";
+import type { Block } from "@/node";
+
+import { Appendable } from "@/helpers/index";
+import { FencedCodeBlock } from "@/node";
+import { AbstractBlockParser, BlockStart, BlockContinue } from "@/parser";
+import { Characters } from "@/text";
 
 import Escaping from "../internal_util/Escaping";
 import Parsing from "../internal_util/Parsing";
-import { Appendable } from "../../../helpers";
-import { FencedCodeBlock } from "../../node";
-import { AbstractBlockParser, BlockStart, BlockContinue } from "../../parser";
-import { Characters } from "../../text";
 
 class Factory implements BlockParserFactory {
   public tryStart(

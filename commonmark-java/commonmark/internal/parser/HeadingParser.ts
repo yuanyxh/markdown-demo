@@ -1,22 +1,23 @@
-import type { Block } from "../../node";
+import type { Block } from "@/node";
 import type {
   BlockParserFactory,
   InlineParser,
   MatchedBlockParser,
   ParserState,
   SourceLine,
-} from "../../parser";
+} from "@/parser";
 
-import Parsing from "../internal_util/Parsing";
-import { Heading } from "../../node";
+import { Heading } from "@/node";
 import {
   AbstractBlockParser,
   BlockStart,
   Scanner,
   SourceLines,
   BlockContinue,
-} from "../../parser";
-import { Characters } from "../../text";
+} from "@/parser";
+import { Characters } from "@/text";
+
+import Parsing from "../internal_util/Parsing";
 
 class Factory implements BlockParserFactory {
   public tryStart(

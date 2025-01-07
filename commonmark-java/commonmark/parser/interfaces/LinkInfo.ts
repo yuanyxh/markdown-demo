@@ -1,5 +1,6 @@
+import type { Text } from "@/node";
+
 import type Position from "../parser_utils/Position";
-import type { Text } from "../../node";
 
 /**
  * A parsed link/image. There are different types of links.

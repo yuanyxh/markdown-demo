@@ -1,6 +1,6 @@
-import type BlockStart from "../abstracts/BlockStart";
 import type { MatchedBlockParser } from "./MatchedBlockParser";
 import type { ParserState } from "./ParserState";
+import type BlockStart from "../abstracts/BlockStart";
 
 /**
  * Parser factory for a block node for determining when a block starts.

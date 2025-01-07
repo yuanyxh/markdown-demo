@@ -1,4 +1,4 @@
-import type { DefinitionMap } from "../node";
+import type { DefinitionMap } from "@/node";
 
 class Definitions {
   private readonly definitionsByType = new Map<any, DefinitionMap<any>>();

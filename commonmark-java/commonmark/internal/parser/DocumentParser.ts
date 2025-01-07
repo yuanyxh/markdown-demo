@@ -1,4 +1,4 @@
-import type { Block, Document } from "../../node";
+import type { Block, Document } from "@/node";
 import type {
   BlockParser,
   BlockParserFactory,
@@ -8,7 +8,22 @@ import type {
   LinkProcessor,
   MatchedBlockParser,
   ParserState,
-} from "../../parser";
+} from "@/parser";
+
+import { Appendable } from "@/helpers/index";
+import {
+  BlockQuote,
+  FencedCodeBlock,
+  Heading,
+  HtmlBlock,
+  IndentedCodeBlock,
+  ListBlock,
+  Paragraph,
+  SourceSpan,
+  ThematicBreak,
+} from "@/node";
+import { IncludeSourceSpans, SourceLine, SourceLines } from "@/parser";
+import { Characters } from "@/text";
 
 import BlockContinueImpl from "../BlockContinueImpl";
 import BlockQuoteParser from "./BlockQuoteParser";
@@ -24,20 +39,6 @@ import ListBlockParser from "./ListBlockParser";
 import ParagraphParser from "./ParagraphParser";
 import ThematicBreakParser from "./ThematicBreakParser";
 import Parsing from "../internal_util/Parsing";
-import { Appendable } from "../../../helpers";
-import {
-  BlockQuote,
-  FencedCodeBlock,
-  Heading,
-  HtmlBlock,
-  IndentedCodeBlock,
-  ListBlock,
-  Paragraph,
-  SourceSpan,
-  ThematicBreak,
-} from "../../node";
-import { IncludeSourceSpans, SourceLine, SourceLines } from "../../parser";
-import { Characters } from "../../text";
 
 class MatchedBlockParserImpl implements MatchedBlockParser {
   private readonly matchedBlockParser: BlockParser;

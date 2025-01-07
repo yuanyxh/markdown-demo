@@ -1,8 +1,8 @@
-import type { Block } from "../../node";
-import type { ParserState } from "../../parser";
+import type { Block } from "@/node";
+import type { ParserState } from "@/parser";
 
-import { ListBlock, ListItem, Paragraph } from "../../node";
-import { AbstractBlockParser, BlockContinue } from "../../parser";
+import { ListBlock, ListItem, Paragraph } from "@/node";
+import { AbstractBlockParser, BlockContinue } from "@/parser";
 
 class ListItemParser extends AbstractBlockParser {
   private readonly block = new ListItem();

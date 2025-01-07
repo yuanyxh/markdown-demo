@@ -1,7 +1,8 @@
-import type Position from "../parser_utils/Position";
-import type { MarkdownNode } from "../../node";
+import type { MarkdownNode } from "@/node";
 
-import { LinkResultImpl } from "../../internal";
+import type Position from "../parser_utils/Position";
+
+import { LinkResultImpl } from "@/internal";
 
 /**
  * What to do with a link/image processed by {@link LinkProcessor}.

@@ -1,6 +1,6 @@
 {
   "name": "commonmark",
-  "description": "a strongly specified, highly compatible variant of Markdown",
+  "description": "A strongly specified, highly compatible variant of Markdown",
   "version": "0.31.2",
   "type": "module",
   "scripts": {
@@ -12,13 +12,11 @@
   },
   "dependencies": {
     "antd": "^5.21.5",
-    "entities": "^5.0.0",
     "normalize.css": "^8.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/mdurl": "^2.0.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",

@@ -1,7 +1,7 @@
-import type LinkResult from "../abstracts/LinkResult";
-import type Scanner from "../parser_utils/Scanner";
 import type { InlineParserContext } from "./InlineParserContext";
 import type { LinkInfo } from "./LinkInfo";
+import type LinkResult from "../abstracts/LinkResult";
+import type Scanner from "../parser_utils/Scanner";
 
 /**
  * An interface to decide how links/images are handled.

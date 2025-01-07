@@ -1,4 +1,4 @@
-import { SourceSpan } from "../../node";
+import { SourceSpan } from "@/node";
 
 /**
  * A line or part of a line from the input source.

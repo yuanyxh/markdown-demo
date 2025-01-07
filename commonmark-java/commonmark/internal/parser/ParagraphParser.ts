@@ -1,14 +1,15 @@
-import type { Block, SourceSpan } from "../../node";
+import type { Block, SourceSpan } from "@/node";
 import type {
   InlineParser,
   ParserState,
   SourceLine,
   SourceLines,
-} from "../../parser";
+} from "@/parser";
+
+import { DefinitionMap, LinkReferenceDefinition, Paragraph } from "@/node";
+import { AbstractBlockParser, BlockContinue } from "@/parser";
 
 import LinkReferenceDefinitionParser from "./LinkReferenceDefinitionParser";
-import { DefinitionMap, LinkReferenceDefinition, Paragraph } from "../../node";
-import { AbstractBlockParser, BlockContinue } from "../../parser";
 
 class ParagraphParser extends AbstractBlockParser {
   private readonly block = new Paragraph();

@@ -1,4 +1,4 @@
-import type { MarkdownNode } from "../../../node";
+import type { MarkdownNode } from "@/node";
 
 /**
  * Extension point for adding/changing attributes on HTML tags for a node.

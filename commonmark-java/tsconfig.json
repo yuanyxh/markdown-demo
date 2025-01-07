@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+    "baseUrl": "./",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["commonmark/*"],
+      "@/internal/*": ["commonmark/internal/*"],
+      "@/node/*": ["commonmark/node/*"],
+      "@/parser/*": ["commonmark/parser/*"],
+      "@/renderer/*": ["commonmark/renderer/*"],
+      "@/text/*": ["commonmark/text/*"],
+      "@/helpers/*": ["helpers/*"]
+    }
+  },
+  "include": ["commonmark/**/*", "helpers/**/*"]
+}

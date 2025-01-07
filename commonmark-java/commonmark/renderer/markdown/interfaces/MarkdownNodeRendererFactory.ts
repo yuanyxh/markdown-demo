@@ -1,5 +1,5 @@
-import type { NodeRenderer } from "../../interfaces/NodeRenderer";
 import type { MarkdownNodeRendererContext } from "./MarkdownNodeRendererContext";
+import type { NodeRenderer } from "../../interfaces/NodeRenderer";
 
 /**
  * Factory for instantiating new node renderers for rendering custom nodes.

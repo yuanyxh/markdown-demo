@@ -1,5 +1,5 @@
-import type SourceLines from "../parser_utils/SourceLines";
 import type { BlockParser } from "./BlockParser";
+import type SourceLines from "../parser_utils/SourceLines";
 
 /**
  * Open block parser that was last matched during the continue phase. This is different from the currently active

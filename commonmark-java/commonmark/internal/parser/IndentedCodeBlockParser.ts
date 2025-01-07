@@ -1,16 +1,17 @@
-import type { Block } from "../../node";
-import type { BlockParserFactory, ParserState, SourceLine } from "../../parser";
+import type { Block } from "@/node";
+import type { BlockParserFactory, ParserState, SourceLine } from "@/parser";
 
-import Parsing from "../internal_util/Parsing";
-import { Appendable } from "../../../helpers";
-import { IndentedCodeBlock, Paragraph } from "../../node";
+import { Appendable } from "@/helpers/index";
+import { IndentedCodeBlock, Paragraph } from "@/node";
 import {
   AbstractBlockParser,
   BlockStart,
   MatchedBlockParser,
   BlockContinue,
-} from "../../parser";
-import { Characters } from "../../text";
+} from "@/parser";
+import { Characters } from "@/text";
+
+import Parsing from "../internal_util/Parsing";
 
 class Factory implements BlockParserFactory {
   public tryStart(

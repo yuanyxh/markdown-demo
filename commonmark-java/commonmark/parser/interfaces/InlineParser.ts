@@ -1,6 +1,7 @@
-import type SourceLines from "../parser_utils/SourceLines";
-import type { MarkdownNode } from "../../node";
+import type { MarkdownNode } from "@/node";
+
 import type { InlineParserFactory } from "./InlineParserFactory";
+import type SourceLines from "../parser_utils/SourceLines";
 
 /**
  * Parser for inline content (text, links, emphasized text, etc).

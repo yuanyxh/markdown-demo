@@ -3,10 +3,10 @@ import type {
   InlineParserContext,
   LinkProcessor,
   Scanner,
-} from "../../parser";
+} from "@/parser";
 
-import LinkResult from "../../parser/abstracts/LinkResult";
-import { Image, Link, LinkReferenceDefinition } from "../../node";
+import { LinkResult } from "@/parser";
+import { Image, Link, LinkReferenceDefinition } from "@/node";
 
 class CoreLinkProcessor implements LinkProcessor {
   public process(

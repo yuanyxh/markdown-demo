@@ -1,5 +1,5 @@
-import type { Appendable } from "../../../helpers";
-import type { MarkdownNode } from "../../node";
+import type { Appendable } from "@/helpers/index";
+import type { MarkdownNode } from "@/node";
 
 export interface Renderer {
   /**

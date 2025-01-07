@@ -1,6 +1,7 @@
-import type { Appendable } from "../../../helpers";
+import type { Appendable } from "@/helpers/index";
 
-import { fromCodePoint, isNotUnDef } from "../../../helpers";
+import { fromCodePoint, isNotUnDef } from "@/helpers/index";
+
 import LineBreakRendering from "./enums/LineBreakRendering";
 
 class TextContentWriter {

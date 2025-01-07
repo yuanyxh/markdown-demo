@@ -1,7 +1,8 @@
-import type Position from "../parser_utils/Position";
-import type { MarkdownNode } from "../../node";
+import type { MarkdownNode } from "@/node";
 
-import { ParsedInlineImpl } from "../../internal";
+import type Position from "../parser_utils/Position";
+
+import { ParsedInlineImpl } from "@/internal";
 
 /**
  * The result of a single inline parser. Use the static methods to create instances.

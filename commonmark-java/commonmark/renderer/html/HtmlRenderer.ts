@@ -1,19 +1,21 @@
-import type { Extension } from "../../Extension";
+import type { Extension } from "@/Extension";
+import type { MarkdownNode } from "@/node";
+
 import type { HtmlNodeRendererContext } from "./interfaces/HtmlNodeRendererContext";
 import type { AttributeProviderFactory } from "./interfaces/AttributeProviderFactory";
-import type { Renderer } from "../interfaces/Renderer";
+import type { AttributeProvider } from "./interfaces/AttributeProvider";
+import type { AttributeProviderContext } from "./interfaces/AttributeProviderContext";
 import type { UrlSanitizer } from "./interfaces/UrlSanitizer";
 import type { HtmlNodeRendererFactory } from "./interfaces/HtmlNodeRendererFactory";
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { MarkdownNode } from "../../node";
-import type { AttributeProvider } from "./interfaces/AttributeProvider";
-import type { AttributeProviderContext } from "./interfaces/AttributeProviderContext";
+import type { Renderer } from "../interfaces/Renderer";
+
+import { Appendable } from "@/helpers/index";
+import { NodeRendererMap, Escaping } from "@/internal";
 
 import CoreHtmlNodeRenderer from "./CoreHtmlNodeRenderer";
 import DefaultUrlSanitizer from "./html_utils/DefaultUrlSanitizer";
 import HtmlWriter from "./HtmlWriter";
-import { Appendable } from "../../../helpers";
-import { NodeRendererMap, Escaping } from "../../internal";
 
 /**
  * Extension for {@link HtmlRenderer}.

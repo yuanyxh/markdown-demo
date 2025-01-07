@@ -1,4 +1,4 @@
-import type { MarkdownNode } from "../../node";
+import type { MarkdownNode } from "@/node";
 
 export interface PostProcessor {
   /**

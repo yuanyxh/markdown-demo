@@ -8,12 +8,12 @@ export type {
   MarkdownNodeRendererFactory,
   AttributeProviderContext,
   TextContentNodeRendererFactory,
-} from "./renderer";
+} from "@/renderer";
 export {
   HtmlRenderer,
   MarkdownRenderer,
   TextContentRenderer,
-} from "./renderer";
+} from "@/renderer";
 
 export type {
   BlockParserFactory,
@@ -23,8 +23,8 @@ export type {
   PostProcessor,
   LinkInfo,
   InlineParserContext,
-} from "./parser";
-export { Parser, IncludeSourceSpans, Scanner, LinkResult } from "./parser";
+} from "@/parser";
+export { Parser, IncludeSourceSpans, Scanner, LinkResult } from "@/parser";
 
 export {
   MarkdownNode,
@@ -56,6 +56,4 @@ export {
   Text,
   ThematicBreak,
   SourceSpan,
-} from "./node";
-
-export * from "./internal";
+} from "@/node";

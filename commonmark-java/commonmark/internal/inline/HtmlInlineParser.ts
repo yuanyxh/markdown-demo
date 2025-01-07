@@ -4,11 +4,11 @@ import type {
   InlineContentParser,
   Position,
   Scanner,
-} from "../../parser";
+} from "@/parser";
 
-import { HtmlInline } from "../../node";
-import { ParsedInline } from "../../parser";
-import { AsciiMatcher } from "../../text";
+import { HtmlInline } from "@/node";
+import { ParsedInline } from "@/parser";
+import { AsciiMatcher } from "@/text";
 
 class Factory implements InlineContentParserFactory {
   public getTriggerCharacters(): Set<string> {

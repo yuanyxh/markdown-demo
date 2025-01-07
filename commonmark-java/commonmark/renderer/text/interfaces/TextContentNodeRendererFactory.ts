@@ -1,5 +1,5 @@
-import type { NodeRenderer } from "../../interfaces/NodeRenderer";
 import type { TextContentNodeRendererContext } from "./TextContentNodeRendererContext";
+import type { NodeRenderer } from "../../interfaces/NodeRenderer";
 
 /**
  * Factory for instantiating new node renderers when rendering is done.

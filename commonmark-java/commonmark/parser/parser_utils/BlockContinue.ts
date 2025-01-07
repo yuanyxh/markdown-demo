@@ -1,4 +1,4 @@
-import { BlockContinueImpl } from "../../internal";
+import { BlockContinueImpl } from "@/internal";
 
 /**
  * Result object for continuing parsing of a block, see static methods for constructors.

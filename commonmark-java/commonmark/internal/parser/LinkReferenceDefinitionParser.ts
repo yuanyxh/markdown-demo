@@ -1,9 +1,10 @@
-import type { SourceSpan } from "../../node";
-import type { SourceLine } from "../../parser";
+import type { SourceSpan } from "@/node";
+import type { SourceLine } from "@/parser";
 
-import { Appendable } from "../../../helpers";
-import { LinkReferenceDefinition } from "../../node";
-import { Scanner, SourceLines } from "../../parser";
+import { Appendable } from "@/helpers/index";
+import { LinkReferenceDefinition } from "@/node";
+import { Scanner, SourceLines } from "@/parser";
+
 import Escaping from "../internal_util/Escaping";
 import LinkScanner from "../internal_util/LinkScanner";
 

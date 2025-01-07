@@ -1,4 +1,4 @@
-import type { Text } from "../../node";
+import type { Text } from "@/node";
 
 /**
  * A delimiter run is one or more of the same delimiter character, e.g. {@code ***}.

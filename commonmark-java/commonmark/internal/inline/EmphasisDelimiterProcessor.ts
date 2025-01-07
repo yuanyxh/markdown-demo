@@ -1,7 +1,7 @@
-import type { MarkdownNode } from "../../node";
-import type { DelimiterProcessor, DelimiterRun } from "../../parser";
+import type { MarkdownNode } from "@/node";
+import type { DelimiterProcessor, DelimiterRun } from "@/parser";
 
-import { Emphasis, Nodes, SourceSpans, StrongEmphasis } from "../../node";
+import { Emphasis, Nodes, SourceSpans, StrongEmphasis } from "@/node";
 
 abstract class EmphasisDelimiterProcessor implements DelimiterProcessor {
   private readonly delimiterChar: string;

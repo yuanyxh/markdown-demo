@@ -1,6 +1,7 @@
+import type { MarkdownNode } from "@/node";
+
 import type LineBreakRendering from "../enums/LineBreakRendering";
 import type TextContentWriter from "../TextContentWriter";
-import type { MarkdownNode } from "../../../node";
 
 export interface TextContentNodeRendererContext {
   /**

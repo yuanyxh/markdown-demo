@@ -1,4 +1,4 @@
-import type { BulletList } from "../../../node";
+import type { BulletList } from "@/node";
 
 import ListHolder from "./ListHolder";
 

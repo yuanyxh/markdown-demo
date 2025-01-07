@@ -1,5 +1,5 @@
-import type { MarkdownNode } from "../../node";
-import type { NodeRenderer } from "./../../renderer";
+import type { MarkdownNode } from "@/node";
+import type { NodeRenderer } from "@/renderer";
 
 class NodeRendererMap {
   private readonly nodeRenderers: NodeRenderer[] = [];

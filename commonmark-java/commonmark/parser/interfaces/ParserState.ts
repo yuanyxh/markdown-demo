@@ -1,5 +1,5 @@
-import type SourceLine from "../parser_utils/SourceLine";
 import type { BlockParser } from "./BlockParser";
+import type SourceLine from "../parser_utils/SourceLine";
 
 /**
  * State of the parser that is used in block parsers.

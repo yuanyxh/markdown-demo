@@ -4,9 +4,9 @@ import type {
   InlineParserContext,
   LinkProcessor,
   DelimiterProcessor,
-} from "../../parser";
+} from "@/parser";
 
-import { LinkReferenceDefinition } from "../../node";
+import { LinkReferenceDefinition } from "@/node";
 
 class InlineParserContextImpl implements InlineParserContext {
   private readonly inlineContentParserFactories: InlineContentParserFactory[];

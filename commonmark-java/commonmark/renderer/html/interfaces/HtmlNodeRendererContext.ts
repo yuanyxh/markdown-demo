@@ -1,6 +1,7 @@
-import type HtmlWriter from "../HtmlWriter";
-import type { MarkdownNode } from "../../../node";
+import type { MarkdownNode } from "@/node";
+
 import type { UrlSanitizer } from "./UrlSanitizer";
+import type HtmlWriter from "../HtmlWriter";
 
 export interface HtmlNodeRendererContext {
   /**

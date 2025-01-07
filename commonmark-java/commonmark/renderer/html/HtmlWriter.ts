@@ -1,7 +1,7 @@
-import type { Appendable } from "../../../helpers";
+import type { Appendable } from "@/helpers/index";
 
-import { fromCodePoint } from "../../../helpers";
-import { Escaping } from "../../internal";
+import { fromCodePoint } from "@/helpers/index";
+import { Escaping } from "@/internal";
 
 class HtmlWriter {
   private static readonly NO_ATTRIBUTES = new Map<string, string>();

@@ -1,4 +1,4 @@
-import type { Block, MarkdownNode } from "../commonmark-java/commonmark";
+import type { Block, MarkdownNode } from "commonmark-java/commonmark";
 import type NodeMap from "./nodemap";
 
 declare global {

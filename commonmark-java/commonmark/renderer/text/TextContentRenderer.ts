@@ -1,14 +1,16 @@
-import type { Extension } from "../../Extension";
+import type { Extension } from "@/Extension";
+import type { MarkdownNode } from "@/node";
+import type { Appendable } from "@/helpers/index";
+
 import type { TextContentNodeRendererFactory } from "./interfaces/TextContentNodeRendererFactory";
-import type { MarkdownNode } from "../../node";
 import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";
 import type { Renderer } from "../interfaces/Renderer";
-import type { Appendable } from "../../../helpers";
+
+import { NodeRendererMap } from "@/internal";
 
 import LineBreakRendering from "./enums/LineBreakRendering";
 import CoreTextContentNodeRenderer from "./CoreTextContentNodeRenderer";
 import TextContentWriter from "./TextContentWriter";
-import { NodeRendererMap } from "../../internal";
 
 /**
  * Extension for {@link TextContentRenderer}.

@@ -1,11 +1,11 @@
-import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";
-import type TextContentWriter from "./TextContentWriter";
-import type { ListHolder } from "../../internal";
-import type { MarkdownNode } from "../../node";
+import type { ListHolder } from "@/internal";
+import type { MarkdownNode } from "@/node";
 
-import LineBreakRendering from "./enums/LineBreakRendering";
-import { OrderedListHolder, BulletListHolder } from "../../internal";
+import type TextContentWriter from "./TextContentWriter";
+import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";
+import type { NodeRenderer } from "../interfaces/NodeRenderer";
+
+import { OrderedListHolder, BulletListHolder } from "@/internal";
 import {
   Document,
   Heading,
@@ -28,7 +28,9 @@ import {
   SoftLineBreak,
   HardLineBreak,
   AbstractVisitor,
-} from "../../node";
+} from "@/node";
+
+import LineBreakRendering from "./enums/LineBreakRendering";
 
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).

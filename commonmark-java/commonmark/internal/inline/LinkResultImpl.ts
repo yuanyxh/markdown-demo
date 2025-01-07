@@ -1,5 +1,5 @@
-import type { MarkdownNode } from "../../node";
-import type { LinkResult, Position } from "../../parser";
+import type { MarkdownNode } from "@/node";
+import type { LinkResult, Position } from "@/parser";
 
 enum Type {
   WRAP = "WRAP",

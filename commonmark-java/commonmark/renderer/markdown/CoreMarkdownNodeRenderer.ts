@@ -1,9 +1,10 @@
+import type { MarkdownNode } from "@/node";
+
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
 import type { MarkdownNodeRendererContext } from "./interfaces/MarkdownNodeRendererContext";
-import type { MarkdownNode } from "../../node";
 
-import MarkdownWriter from "./MarkdownWriter";
-import { AsciiMatcher, Characters, CharMatcher } from "../../text";
+import { AsciiMatcher, Characters, CharMatcher } from "@/text";
+import { isNotUnDef, isUnDef } from "@/helpers/index";
 import {
   Document,
   Heading,
@@ -26,8 +27,9 @@ import {
   SoftLineBreak,
   HardLineBreak,
   AbstractVisitor,
-} from "../../node";
-import { isNotUnDef, isUnDef } from "../../../helpers";
+} from "@/node";
+
+import MarkdownWriter from "./MarkdownWriter";
 
 class ListHolder {
   public readonly parent: ListHolder;

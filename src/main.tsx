@@ -9,7 +9,7 @@ import {
   Parser,
   HtmlRenderer,
   IncludeSourceSpans,
-} from "../commonmark-java/commonmark";
+} from "commonmark-java/commonmark";
 
 import source from "./example.md?raw";
 

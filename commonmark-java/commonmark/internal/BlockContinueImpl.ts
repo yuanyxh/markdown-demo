@@ -1,4 +1,4 @@
-import { BlockContinue } from "../parser";
+import { BlockContinue } from "@/parser";
 
 class BlockContinueImpl extends BlockContinue {
   private readonly newIndex: number;

@@ -2,11 +2,11 @@ import type {
   InlineContentParser,
   InlineContentParserFactory,
   InlineParserState,
-} from "../../parser";
+} from "@/parser";
 
-import ParsedInline from "../../parser/abstracts/ParsedInline";
-import { Characters } from "../../text";
-import { Code, Text } from "../../node";
+import { ParsedInline } from "@/parser";
+import { Characters } from "@/text";
+import { Code, Text } from "@/node";
 
 class Factory implements InlineContentParserFactory {
   public getTriggerCharacters(): Set<string> {

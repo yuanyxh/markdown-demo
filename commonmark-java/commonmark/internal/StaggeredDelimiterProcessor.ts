@@ -1,4 +1,4 @@
-import type { DelimiterProcessor, DelimiterRun } from "../parser";
+import type { DelimiterProcessor, DelimiterRun } from "@/parser";
 
 /**
  * An implementation of DelimiterProcessor that dispatches all calls to two or more other DelimiterProcessors

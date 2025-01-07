@@ -1,7 +1,8 @@
-import type { OrderedList } from "../../../node";
+import type { OrderedList } from "@/node";
+
+import { isNotUnDef } from "@/helpers/index";
 
 import ListHolder from "./ListHolder";
-import { isNotUnDef } from "../../../../helpers";
 
 class OrderedListHolder extends ListHolder {
   private readonly delimiter: string;

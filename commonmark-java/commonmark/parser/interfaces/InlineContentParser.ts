@@ -1,5 +1,5 @@
-import type ParsedInline from "../abstracts/ParsedInline";
 import type { InlineParserState } from "./InlineParserState";
+import type ParsedInline from "../abstracts/ParsedInline";
 
 /**
  * Parser for a type of inline content. Registered via a {@link InlineContentParserFactory} and created by its

@@ -1,4 +1,4 @@
-import type { MarkdownNode } from "../../node";
+import type { MarkdownNode } from "@/node";
 
 /**
  * A renderer for a set of node types.

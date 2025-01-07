@@ -1,7 +1,7 @@
-import type { Appendable } from "../../../helpers";
-import type { CharMatcher } from "../../text";
+import type { Appendable } from "@/helpers/index";
+import type { CharMatcher } from "@/text";
 
-import { fromCodePoint } from "../../../helpers";
+import { fromCodePoint } from "@/helpers/index";
 
 /**
  * Writer for Markdown (CommonMark) text.

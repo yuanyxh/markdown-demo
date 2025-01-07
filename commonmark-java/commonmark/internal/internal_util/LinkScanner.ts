@@ -1,6 +1,6 @@
-import type { Scanner } from "../../parser";
+import type { Scanner } from "@/parser";
 
-import { Character } from "../../../helpers";
+import { Character } from "@/helpers/index";
 
 class LinkScanner {
   /**

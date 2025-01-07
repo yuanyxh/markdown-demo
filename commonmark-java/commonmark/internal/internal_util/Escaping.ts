@@ -1,4 +1,5 @@
-import { Appendable } from "../../../helpers";
+import { Appendable } from "@/helpers/index";
+
 import Html5Entities from "./Html5Entities";
 
 interface Replacer {

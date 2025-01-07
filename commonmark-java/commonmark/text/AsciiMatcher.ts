@@ -1,4 +1,5 @@
-import { BitSet, fromCodePoint } from "../../helpers";
+import { BitSet, fromCodePoint } from "@/helpers/index";
+
 import { CharMatcher } from "./interfaces/CharMatcher";
 
 class AsciiMatcherBuilder {

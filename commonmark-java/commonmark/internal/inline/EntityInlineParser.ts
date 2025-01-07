@@ -2,13 +2,15 @@ import type {
   InlineContentParser,
   InlineContentParserFactory,
   InlineParserState,
-} from "../../parser";
-import type { Position, Scanner } from "../../parser";
+  Position,
+  Scanner,
+} from "@/parser";
+
+import { ParsedInline } from "@/parser";
+import { Text } from "@/node";
+import { AsciiMatcher } from "@/text";
 
 import Html5Entities from "../internal_util/Html5Entities";
-import { ParsedInline } from "../../parser";
-import { Text } from "../../node";
-import { AsciiMatcher } from "../../text";
 
 class Factory implements InlineContentParserFactory {
   public getTriggerCharacters(): Set<string> {
