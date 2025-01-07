@@ -1,10 +1,33 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import { Code, FencedCodeBlock, IndentedCodeBlock, SoftLineBreak } from 'commonmark-java-js';
+import {
+  Code,
+  FencedCodeBlock,
+  HtmlBlock,
+  HtmlInline,
+  IndentedCodeBlock,
+  SoftLineBreak
+} from 'commonmark-java-js';
 
 import { getContentIndex, getSourcePosition } from './utils/source';
 
 type TGetOffset = (this: INodeRange, node: Node, offset: number) => number;
+
+const getHtmlOffset: TGetOffset = function getHtmlOffset(node, offset) {
+  let curr: Node | null = node;
+
+  while (curr) {
+    if (curr.$virtNode) {
+      if (!(curr.$virtNode instanceof HtmlBlock || curr.$virtNode instanceof HtmlInline)) {
+        return -1;
+      }
+    } else {
+      curr = node.parentNode;
+    }
+  }
+
+  return -1;
+};
 
 const getHrOffset: TGetOffset = function getHrOffset(node, offset) {
   if (!(node instanceof HTMLElement)) {
@@ -133,7 +156,7 @@ const fallbackGetOffset: TGetOffset = function fallbackGetOffset(node, offset) {
   return inputEndIndex;
 };
 
-const offsetHandlers: TGetOffset[] = [getHrOffset, getCodeOffset, fallbackGetOffset];
+const offsetHandlers: TGetOffset[] = [getHtmlOffset, getHrOffset, getCodeOffset, fallbackGetOffset];
 
 export function getOffset(this: INodeRange, offset: number, get: TGetOffset) {
   if (offset === -1) {

@@ -285,10 +285,8 @@ class HtmlRenderer implements Renderer {
     return new HtmlRendererBuilder();
   }
 
-  public render(node: MarkdownNode, output?: Appendable) {
-    if (!output) {
-      output = new Appendable();
-    }
+  public render(node: MarkdownNode) {
+    const output = new Appendable();
 
     const context = new RendererContext(this, new HtmlWriter(output));
 

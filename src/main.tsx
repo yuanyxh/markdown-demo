@@ -9,10 +9,10 @@ import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
 
 import source from './example.md?raw';
 
-import AttributesProvider from './attributes';
-import HtmlRenderer from './renderer/HtmlRenderer';
 import { runOffset } from './offset';
 import { sync } from './sync';
+import AttributesProvider from './attributes';
+import HtmlRenderer from './renderer/HtmlRenderer';
 
 const attributesProvider = new AttributesProvider();
 
