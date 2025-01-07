@@ -1,4 +1,4 @@
-import type { MarkdownNode, Block } from "commonmark-java/commonmark";
+import type { MarkdownNode, Block } from "commonmark-java";
 
 export function getSourcePosition(node: MarkdownNode) {
   const spans = node.getSourceSpans();

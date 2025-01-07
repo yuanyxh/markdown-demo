@@ -54,6 +54,12 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
         input: "./commonmark/index.ts",
       },
     },
-    plugins: [dts({ rollupTypes: true, pathsToAliases: true })],
+    plugins: [
+      dts({
+        tsconfigPath: "./tsconfig.json",
+        rollupTypes: true,
+        pathsToAliases: true,
+      }),
+    ],
   });
 };

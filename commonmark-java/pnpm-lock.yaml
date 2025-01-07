@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  vite-plugin-dts:
+    hash: boml77ttnaxyr2r4pnlq6gehmq
+    path: patches/vite-plugin-dts.patch
+
 importers:
 
   .:
@@ -25,7 +30,7 @@ importers:
         version: 6.0.7(@types/node@22.10.5)
       vite-plugin-dts:
         specifier: ^4.4.0
-        version: 4.4.0(@types/node@22.10.5)(rollup@4.30.0)(typescript@5.7.2)(vite@6.0.7(@types/node@22.10.5))
+        version: 4.4.0(patch_hash=boml77ttnaxyr2r4pnlq6gehmq)(@types/node@22.10.5)(rollup@4.30.0)(typescript@5.7.2)(vite@6.0.7(@types/node@22.10.5))
 
 packages:
 
@@ -1241,7 +1246,7 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  vite-plugin-dts@4.4.0(@types/node@22.10.5)(rollup@4.30.0)(typescript@5.7.2)(vite@6.0.7(@types/node@22.10.5)):
+  vite-plugin-dts@4.4.0(patch_hash=boml77ttnaxyr2r4pnlq6gehmq)(@types/node@22.10.5)(rollup@4.30.0)(typescript@5.7.2)(vite@6.0.7(@types/node@22.10.5)):
     dependencies:
       '@microsoft/api-extractor': 7.48.1(@types/node@22.10.5)
       '@rollup/pluginutils': 5.1.4(rollup@4.30.0)

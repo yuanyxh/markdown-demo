@@ -7,7 +7,6 @@
     "isolatedModules": true,
     "useDefineForClassFields": true,
     "declaration": true,
-    "declarationDir": "types",
     "emitDeclarationOnly": true,
     "baseUrl": "./",
     "allowJs": true,

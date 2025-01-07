@@ -2,9 +2,9 @@ import {
   AttributeProvider,
   AttributeProviderContext,
   AttributeProviderFactory,
-} from "commonmark-java/commonmark";
+} from "commonmark-java";
 
-import type { MarkdownNode } from "commonmark-java/commonmark";
+import type { MarkdownNode } from "commonmark-java";
 
 let nodeId = 1;
 

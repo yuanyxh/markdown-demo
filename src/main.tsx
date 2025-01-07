@@ -5,11 +5,7 @@ import "./styles/editor-init.less";
 
 import { createEditorElement } from "./utils";
 
-import {
-  Parser,
-  HtmlRenderer,
-  IncludeSourceSpans,
-} from "commonmark-java/commonmark";
+import { Parser, HtmlRenderer, IncludeSourceSpans } from "commonmark-java";
 
 import source from "./example.md?raw";
 

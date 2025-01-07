@@ -1,0 +1,47 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 3822cbc3bf4c271c6a82fe2729d8c5e15b657b0f..bb116bc652109384b34008becc597d11e778e4f8 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -107,24 +107,28 @@ function queryPublicPath(paths) {
+   return publicPath.slice(0, -1);
+ }
+ function removeDirIfEmpty(dir) {
+-  if (!existsSync(dir)) {
+-    return;
+-  }
+-  let onlyHasDir = true;
+-  for (const file of readdirSync(dir)) {
+-    const abs = resolve(dir, file);
+-    if (lstatSync(abs).isDirectory()) {
+-      if (!removeDirIfEmpty(abs)) {
++  try {
++    if (!existsSync(dir)) {
++      return;
++    }
++    let onlyHasDir = true;
++    for (const file of readdirSync(dir)) {
++      const abs = resolve(dir, file);
++      if (lstatSync(abs).isDirectory()) {
++        if (!removeDirIfEmpty(abs)) {
++          onlyHasDir = false;
++        }
++      } else {
+         onlyHasDir = false;
+       }
+-    } else {
+-      onlyHasDir = false;
+     }
++    if (onlyHasDir) {
++      rmdirSync(dir);
++    }
++    return onlyHasDir;
++  } catch(err) {
++    
+   }
+-  if (onlyHasDir) {
+-    rmdirSync(dir);
+-  }
+-  return onlyHasDir;
+ }
+ function getTsConfig(tsConfigPath, readFileSync) {
+   const baseConfig = ts.readConfigFile(tsConfigPath, readFileSync).config ?? {};
