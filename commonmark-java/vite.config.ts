@@ -57,6 +57,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
     },
     plugins: [
       dts({
+        root: __dirname,
         tsconfigPath: "./tsconfig.json",
         rollupTypes: true,
         pathsToAliases: true,
