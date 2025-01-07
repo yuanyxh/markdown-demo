@@ -9,7 +9,7 @@ export declare abstract class AbstractVisitor implements Visitor {
   protected visitChildren(parent: MarkdownNode): void;
 }
 
-declare class Appendable {
+export declare class Appendable {
   private data;
   constructor(initStr?: string);
   append(str: string, start?: number, end?: number): void;
@@ -36,11 +36,7 @@ export declare interface AttributeProvider {
    * @param tagName the HTML tag name that these attributes are for (e.g. {@code h1}, {@code pre}, {@code code}).
    * @param attributes the attributes, with any default attributes already set in the map
    */
-  setAttributes(
-    node: MarkdownNode,
-    tagName: string,
-    attributes: Map<string, string>
-  ): void;
+  setAttributes(node: MarkdownNode, tagName: string, attributes: Map<string, string>): void;
 }
 
 /**
@@ -61,6 +57,14 @@ export declare interface AttributeProviderFactory {
    * @return an AttributeProvider
    */
   create(context: AttributeProviderContext): AttributeProvider;
+}
+
+export declare class BitSet {
+  private readonly values;
+  constructor(values?: boolean[]);
+  set(index: number): void;
+  get(index: number): boolean;
+  clone(): BitSet;
 }
 
 /**
@@ -132,10 +136,7 @@ declare interface BlockParser {
  * Implementations should subclass {@link AbstractBlockParserFactory} instead of implementing this directly.
  */
 export declare interface BlockParserFactory {
-  tryStart(
-    state: ParserState,
-    matchedBlockParser: MatchedBlockParser
-  ): BlockStart | null;
+  tryStart(state: ParserState, matchedBlockParser: MatchedBlockParser): BlockStart | null;
 }
 
 export declare class BlockQuote extends Block {
@@ -166,6 +167,51 @@ export declare class BulletList extends ListBlock {
    * @param marker
    */
   setMarker(marker: string | undefined): void;
+}
+
+export declare class Character {
+  private static map;
+  static isUnicodeCharOfCategory(type: UnicodeCategoryTypes, char: string): boolean;
+  static isISOControl(c: string): boolean;
+  static isLetter(char: string): boolean;
+  static isHighSurrogate(codePoint: number): boolean;
+  static isLowSurrogate(codePoint: number): boolean;
+  static toCodePoint(char1: number, char2: number): number;
+  static readonly UnicodeCategory: {
+    readonly Ll: 'Ll';
+    readonly Lu: 'Lu';
+    readonly Lt: 'Lt';
+    readonly Lm: 'Lm';
+    readonly Lo: 'Lo';
+    readonly Mn: 'Mn';
+    readonly Mc: 'Mc';
+    readonly Me: 'Me';
+    readonly Nd: 'Nd';
+    readonly Nl: 'Nl';
+    readonly No: 'No';
+    readonly Pd: 'Pd';
+    readonly Ps: 'Ps';
+    readonly Pe: 'Pe';
+    readonly Pi: 'Pi';
+    readonly Pf: 'Pf';
+    readonly Pc: 'Pc';
+    readonly Po: 'Po';
+    readonly Sm: 'Sm';
+    readonly Sc: 'Sc';
+    readonly Sk: 'Sk';
+    readonly So: 'So';
+    readonly Zs: 'Zs';
+    readonly Zl: 'Zl';
+    readonly Zp: 'Zp';
+    readonly Cc: 'Cc';
+    readonly Cf: 'Cf';
+    readonly Co: 'Co';
+    readonly Cs: 'Cs';
+    readonly Cn: 'Cn';
+    readonly L: 'L';
+    readonly P: 'P';
+    readonly S: 'S';
+  };
 }
 
 /**
@@ -391,6 +437,8 @@ export declare class FencedCodeBlock extends Block {
   private static checkFenceLengths;
 }
 
+export declare function fromCodePoint(...codes: number[]): string;
+
 export declare class HardLineBreak extends MarkdownNode {
   constructor();
   accept(visitor: Visitor): void;
@@ -609,9 +657,7 @@ declare class HtmlRendererBuilder {
    * @param attributeProviderFactory the attribute provider factory to add
    * @return {@code this}
    */
-  attributeProviderFactory(
-    attributeProviderFactory: AttributeProviderFactory
-  ): HtmlRendererBuilder;
+  attributeProviderFactory(attributeProviderFactory: AttributeProviderFactory): HtmlRendererBuilder;
   /**
    * Add a factory for instantiating a node renderer (done when rendering). This allows to override the rendering
    * of node types or define rendering for custom node types.
@@ -622,9 +668,7 @@ declare class HtmlRendererBuilder {
    * @param nodeRendererFactory the factory for creating a node renderer
    * @return {@code this}
    */
-  nodeRendererFactory(
-    nodeRendererFactory: HtmlNodeRendererFactory
-  ): HtmlRendererBuilder;
+  nodeRendererFactory(nodeRendererFactory: HtmlNodeRendererFactory): HtmlRendererBuilder;
   /**
    * @param extensions extensions to use on this HTML renderer
    * @return {@code this}
@@ -668,15 +712,15 @@ export declare enum IncludeSourceSpans {
   /**
    * Do not include source spans.
    */
-  NONE = "NONE",
+  NONE = 'NONE',
   /**
    * Include source spans on {@link Block} nodes.
    */
-  BLOCKS = "BLOCKS",
+  BLOCKS = 'BLOCKS',
   /**
    * Include source spans on block nodes and inline nodes.
    */
-  BLOCKS_AND_INLINES = "BLOCKS_AND_INLINES",
+  BLOCKS_AND_INLINES = 'BLOCKS_AND_INLINES'
 }
 
 export declare class IndentedCodeBlock extends Block {
@@ -802,19 +846,23 @@ declare interface InlineParserState {
   getScanner(): Scanner;
 }
 
+export declare function isNotUnDef<T>(data: T | undefined): data is T;
+
+export declare function isUnDef(data: any): data is undefined;
+
 declare enum LineBreakRendering {
   /**
    * Strip all line breaks within blocks and between blocks, resulting in all the text in a single line.
    */
-  STRIP = "STRIP",
+  STRIP = 'STRIP',
   /**
    * Use single line breaks between blocks, not a blank line (also render all lists as tight).
    */
-  COMPACT = "COMPACT",
+  COMPACT = 'COMPACT',
   /**
    * Separate blocks by a blank line (and respect tight vs loose lists).
    */
-  SEPARATE_BLOCKS = "SEPARATE_BLOCKS",
+  SEPARATE_BLOCKS = 'SEPARATE_BLOCKS'
 }
 
 /**
@@ -941,11 +989,7 @@ export declare interface LinkProcessor {
    * @return what to do with the link/image, e.g. do nothing (try the next processor), wrap the text in a node, or
    * replace the link/image with a node
    */
-  process(
-    linkInfo: LinkInfo,
-    scanner: Scanner,
-    context: InlineParserContext
-  ): LinkResult | null;
+  process(linkInfo: LinkInfo, scanner: Scanner, context: InlineParserContext): LinkResult | null;
 }
 
 /**
@@ -1549,9 +1593,7 @@ declare class ParserBuilder {
    * @param blockParserFactory a block parser factory implementation
    * @return {@code this}
    */
-  customBlockParserFactory(
-    blockParserFactory: BlockParserFactory
-  ): ParserBuilder;
+  customBlockParserFactory(blockParserFactory: BlockParserFactory): ParserBuilder;
   /**
    * Add a factory for a custom inline content parser, for extending inline parsing or overriding built-in parsing.
    * <p>
@@ -1576,9 +1618,7 @@ declare class ParserBuilder {
    * @param delimiterProcessor a delimiter processor implementation
    * @return {@code this}
    */
-  customDelimiterProcessor(
-    delimiterProcessor: DelimiterProcessor
-  ): ParserBuilder;
+  customDelimiterProcessor(delimiterProcessor: DelimiterProcessor): ParserBuilder;
   /**
    * Add a custom link/image processor for inline parsing.
    * <p>
@@ -1620,9 +1660,7 @@ declare class ParserBuilder {
    * @param inlineParserFactory an inline parser factory implementation
    * @return {@code this}
    */
-  setInlineParserFactory(
-    inlineParserFactory: InlineParserFactory | null
-  ): ParserBuilder;
+  setInlineParserFactory(inlineParserFactory: InlineParserFactory | null): ParserBuilder;
   getInlineParserFactory(): InlineParserFactory;
 }
 
@@ -1825,12 +1863,7 @@ export declare class SourceSpan {
    * Use {{@link #of(int, int, int, int)}} instead to also specify input index. Using the deprecated one
    * will set {@link #inputIndex} to 0.
    */
-  static of(
-    line: number,
-    col: number,
-    input: number | undefined,
-    length: number
-  ): SourceSpan;
+  static of(line: number, col: number, input: number | undefined, length: number): SourceSpan;
 }
 
 export declare class StrongEmphasis extends MarkdownNode implements Delimited {
@@ -1924,9 +1957,7 @@ declare class TextContentRendererBuilder {
    * @param lineBreakRendering the mode to use
    * @return {@code this}
    */
-  setLineBreakRendering(
-    lineBreakRendering: LineBreakRendering
-  ): TextContentRendererBuilder;
+  setLineBreakRendering(lineBreakRendering: LineBreakRendering): TextContentRendererBuilder;
   /**
    * Add a factory for instantiating a node renderer (done when rendering). This allows to override the rendering
    * of node types or define rendering for custom node types.
@@ -1999,6 +2030,8 @@ export declare class ThematicBreak extends Block {
   getLiteral(): string | undefined;
   setLiteral(literal: string): void;
 }
+
+declare type UnicodeCategoryTypes = keyof typeof Character.UnicodeCategory;
 
 /**
  * Sanitizes urls for img and a elements by whitelisting protocols.

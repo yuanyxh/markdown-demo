@@ -1,3 +1,12 @@
+export {
+  Appendable,
+  BitSet,
+  Character,
+  isNotUnDef,
+  isUnDef,
+  fromCodePoint,
+} from "@helpers/index";
+
 export type {
   Renderer,
   NodeRenderer,

@@ -7821,9 +7821,12 @@ class it {
 i(it, "Builder", Lt), i(it, "HtmlRendererExtension", Mt);
 export {
   Ne as AbstractVisitor,
+  I as Appendable,
+  Ge as BitSet,
   N as Block,
   Q as BlockQuote,
   Y as BulletList,
+  P as Character,
   ue as Code,
   mr as CustomBlock,
   wr as CustomNode,
@@ -7855,5 +7858,8 @@ export {
   be as StrongEmphasis,
   A as Text,
   et as TextContentRenderer,
-  te as ThematicBreak
+  te as ThematicBreak,
+  ae as fromCodePoint,
+  C as isNotUnDef,
+  ct as isUnDef
 };
