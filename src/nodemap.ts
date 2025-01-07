@@ -1,10 +1,10 @@
+import type { MarkdownNode } from "commonmark-java-js";
+
 import {
   AttributeProvider,
   AttributeProviderContext,
   AttributeProviderFactory,
-} from "commonmark-java";
-
-import type { MarkdownNode } from "commonmark-java";
+} from "commonmark-java-js";
 
 let nodeId = 1;
 

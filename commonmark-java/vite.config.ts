@@ -45,6 +45,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       ],
     },
     build: {
+      outDir: "build",
       lib: {
         name: "commonmark-java-js",
         formats: ["es"],
@@ -59,6 +60,9 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
         tsconfigPath: "./tsconfig.json",
         rollupTypes: true,
         pathsToAliases: true,
+        entryRoot: "./types",
+        // declarationOnly: true,
+        outDir: "build",
       }),
     ],
   });

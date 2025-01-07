@@ -4,7 +4,7 @@
   "description": "This is a JavaScript library that has been translated from commonmark-java. It offers powerful functionality for parsing markdown text. It allows for customization in terms of nodes, rendering, and parsing",
   "main": "./commonmark/index.ts",
   "type": "module",
-  "types": "./commonmark/index.d.ts",
+  "types": "./types/commonmark/index.d.ts",
   "scripts": {
     "build": "tsc && pnpm vite build"
   },
@@ -18,7 +18,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "i": "^0.3.7",
     "pnpm": "^9.15.3",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
