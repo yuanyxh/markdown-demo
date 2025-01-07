@@ -7,7 +7,7 @@ import type { MarkdownNodeRendererFactory } from "./interfaces/MarkdownNodeRende
 import type { Renderer } from "../interfaces/Renderer";
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
 
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 import { NodeRendererMap } from "@/internal";
 
 import CoreMarkdownNodeRenderer from "./CoreMarkdownNodeRenderer";

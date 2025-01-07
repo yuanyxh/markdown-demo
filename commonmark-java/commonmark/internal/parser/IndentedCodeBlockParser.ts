@@ -1,7 +1,7 @@
 import type { Block } from "@/node";
 import type { BlockParserFactory, ParserState, SourceLine } from "@/parser";
 
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 import { IndentedCodeBlock, Paragraph } from "@/node";
 import {
   AbstractBlockParser,

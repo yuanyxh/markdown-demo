@@ -4,7 +4,7 @@ import type { NodeRenderer } from "../interfaces/NodeRenderer";
 import type { MarkdownNodeRendererContext } from "./interfaces/MarkdownNodeRendererContext";
 
 import { AsciiMatcher, Characters, CharMatcher } from "@/text";
-import { isNotUnDef, isUnDef } from "@/helpers/index";
+import { isNotUnDef, isUnDef } from "@helpers/index";
 import {
   Document,
   Heading,
@@ -62,6 +62,36 @@ class OrderedListHolder extends ListHolder {
 
     this.delimiter = isNotUnDef(markerDelimiter) ? markerDelimiter : ".";
     this.number = markerStartNumber ? markerStartNumber : 1;
+  }
+}
+
+class LineBreakVisitor extends AbstractVisitor {
+  private lineBreak: boolean = false;
+
+  public hasLineBreak(): boolean {
+    return this.lineBreak;
+  }
+
+  public visit(lineBreak: SoftLineBreak | HardLineBreak) {
+    switch (true) {
+      case lineBreak instanceof SoftLineBreak: {
+        const softLineBreak = lineBreak;
+
+        super.visit(softLineBreak);
+        this.lineBreak = true;
+
+        break;
+      }
+
+      case lineBreak instanceof HardLineBreak: {
+        const hardLineBreak = lineBreak;
+
+        super.visit(hardLineBreak);
+        this.lineBreak = true;
+
+        break;
+      }
+    }
   }
 }
 
@@ -748,35 +778,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
   /**
    * Visits nodes to check if there are any soft or hard line breaks.
    */
-  public static LineBreakVisitor = class LineBreakVisitor extends AbstractVisitor {
-    private lineBreak: boolean = false;
-
-    public hasLineBreak(): boolean {
-      return this.lineBreak;
-    }
-
-    public visit(lineBreak: SoftLineBreak | HardLineBreak) {
-      switch (true) {
-        case lineBreak instanceof SoftLineBreak: {
-          const softLineBreak = lineBreak;
-
-          super.visit(softLineBreak);
-          this.lineBreak = true;
-
-          break;
-        }
-
-        case lineBreak instanceof HardLineBreak: {
-          const hardLineBreak = lineBreak;
-
-          super.visit(hardLineBreak);
-          this.lineBreak = true;
-
-          break;
-        }
-      }
-    }
-  };
+  public static LineBreakVisitor = LineBreakVisitor;
 }
 
 export default CoreMarkdownNodeRenderer;

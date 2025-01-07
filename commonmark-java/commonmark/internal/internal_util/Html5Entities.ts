@@ -1,4 +1,4 @@
-import { fromCodePoint } from "@/helpers/index";
+import { fromCodePoint } from "@helpers/index";
 
 import { EntitiesMap } from "./Entities";
 

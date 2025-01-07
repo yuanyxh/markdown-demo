@@ -6,6 +6,9 @@
     "moduleResolution": "Bundler",
     "isolatedModules": true,
     "useDefineForClassFields": true,
+    "declaration": true,
+    "declarationDir": "types",
+    "emitDeclarationOnly": true,
     "baseUrl": "./",
     "allowJs": true,
     "esModuleInterop": true,
@@ -19,7 +22,7 @@
       "@/parser/*": ["commonmark/parser/*"],
       "@/renderer/*": ["commonmark/renderer/*"],
       "@/text/*": ["commonmark/text/*"],
-      "@/helpers/*": ["helpers/*"]
+      "@helpers/*": ["helpers/*"]
     }
   },
   "include": ["commonmark/**/*", "helpers/**/*"]

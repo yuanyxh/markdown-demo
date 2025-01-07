@@ -1,6 +1,9 @@
-import path from "node:path";
-import { defineConfig } from "vite";
 import type { ConfigEnv, UserConfig } from "vite";
+
+import path from "node:path";
+
+import { defineConfig } from "vite";
+import dts from "vite-plugin-dts";
 
 const currFileDir = __dirname;
 const resolve = (...paths: string[]) => path.resolve(currFileDir, ...paths);
@@ -36,18 +39,21 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
           replacement: `${resolve("commonmark/text")}/`,
         },
         {
-          find: /@\\helpers\//,
+          find: /@helpers\//,
           replacement: `${resolve("helpers")}/`,
         },
       ],
     },
     build: {
       lib: {
+        name: "commonmark-java-js",
+        formats: ["es"],
         entry: "./commonmark/index.ts",
       },
       rollupOptions: {
         input: "./commonmark/index.ts",
       },
     },
+    plugins: [dts({ rollupTypes: true, pathsToAliases: true })],
   });
 };

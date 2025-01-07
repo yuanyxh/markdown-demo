@@ -12,7 +12,7 @@ import type {
   SourceLines,
 } from "@/parser";
 
-import { Appendable, BitSet } from "@/helpers/index";
+import { Appendable, BitSet } from "@helpers/index";
 import { Scanner } from "@/parser";
 import {
   HardLineBreak,

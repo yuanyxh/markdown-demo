@@ -1,6 +1,6 @@
-import type { Appendable } from "@/helpers/index";
+import type { Appendable } from "@helpers/index";
 
-import { fromCodePoint, isNotUnDef } from "@/helpers/index";
+import { fromCodePoint, isNotUnDef } from "@helpers/index";
 
 import LineBreakRendering from "./enums/LineBreakRendering";
 

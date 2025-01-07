@@ -6,7 +6,7 @@ import type {
 } from "@/parser";
 import type { Block } from "@/node";
 
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 import { FencedCodeBlock } from "@/node";
 import { AbstractBlockParser, BlockStart, BlockContinue } from "@/parser";
 import { Characters } from "@/text";

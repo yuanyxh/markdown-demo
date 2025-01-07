@@ -1,4 +1,4 @@
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 
 import Html5Entities from "./Html5Entities";
 

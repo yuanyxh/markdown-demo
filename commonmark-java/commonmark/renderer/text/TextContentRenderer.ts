@@ -1,6 +1,6 @@
 import type { Extension } from "@/Extension";
 import type { MarkdownNode } from "@/node";
-import type { Appendable } from "@/helpers/index";
+import type { Appendable } from "@helpers/index";
 
 import type { TextContentNodeRendererFactory } from "./interfaces/TextContentNodeRendererFactory";
 import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";

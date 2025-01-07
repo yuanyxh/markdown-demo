@@ -1,7 +1,7 @@
 import type { SourceSpan } from "@/node";
 import type { SourceLine } from "@/parser";
 
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 import { LinkReferenceDefinition } from "@/node";
 import { Scanner, SourceLines } from "@/parser";
 

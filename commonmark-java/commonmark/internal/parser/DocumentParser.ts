@@ -10,7 +10,7 @@ import type {
   ParserState,
 } from "@/parser";
 
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 import {
   BlockQuote,
   FencedCodeBlock,

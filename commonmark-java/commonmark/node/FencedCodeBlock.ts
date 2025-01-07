@@ -1,6 +1,6 @@
 import type { Visitor } from "./interfaces/Visitor";
 
-import { isNotUnDef } from "@/helpers/index";
+import { isNotUnDef } from "@helpers/index";
 
 import Block from "./abstracts/Block";
 

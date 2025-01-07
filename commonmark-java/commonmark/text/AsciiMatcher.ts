@@ -1,4 +1,4 @@
-import { BitSet, fromCodePoint } from "@/helpers/index";
+import { BitSet, fromCodePoint } from "@helpers/index";
 
 import { CharMatcher } from "./interfaces/CharMatcher";
 

@@ -1,7 +1,7 @@
 import type { SourceSpan } from "@/node";
 import type { CharMatcher } from "@/text";
 
-import { Character, fromCodePoint } from "@/helpers/index";
+import { Character, fromCodePoint } from "@helpers/index";
 
 import SourceLine from "./SourceLine";
 import SourceLines from "./SourceLines";

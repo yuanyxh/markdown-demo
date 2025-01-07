@@ -10,7 +10,7 @@ import type { HtmlNodeRendererFactory } from "./interfaces/HtmlNodeRendererFacto
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
 import type { Renderer } from "../interfaces/Renderer";
 
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 import { NodeRendererMap, Escaping } from "@/internal";
 
 import CoreHtmlNodeRenderer from "./CoreHtmlNodeRenderer";

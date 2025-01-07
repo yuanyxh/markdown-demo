@@ -43,7 +43,7 @@ window.document.addEventListener("selectionchange", () => {
 
   console.log(range);
 
-  const changeRange = runOffset.call({ source: source, nodeMap }, range);
+  const changeRange = runOffset.call({ source, nodeMap }, range);
 
   console.log(changeRange);
   console.log(source.charAt(changeRange.start));

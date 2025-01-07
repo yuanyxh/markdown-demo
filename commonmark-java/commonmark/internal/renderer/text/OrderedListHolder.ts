@@ -1,6 +1,6 @@
 import type { OrderedList } from "@/node";
 
-import { isNotUnDef } from "@/helpers/index";
+import { isNotUnDef } from "@helpers/index";
 
 import ListHolder from "./ListHolder";
 

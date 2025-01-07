@@ -2,7 +2,7 @@ import type { SourceSpan } from "@/node";
 
 import type SourceLine from "./SourceLine";
 
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 
 /**
  * A set of lines ({@link SourceLine}) from the input source.

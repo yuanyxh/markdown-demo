@@ -3,7 +3,7 @@ import type { MarkdownNode } from "@/node";
 import type { HtmlNodeRendererContext } from "./interfaces/HtmlNodeRendererContext";
 import type { NodeRenderer } from "../interfaces/NodeRenderer";
 
-import { Appendable, isNotUnDef } from "@/helpers/index";
+import { Appendable, isNotUnDef } from "@helpers/index";
 import {
   ListBlock,
   Document,

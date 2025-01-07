@@ -1,4 +1,4 @@
-import { fromCodePoint, Character } from "@/helpers/index";
+import { fromCodePoint, Character } from "@helpers/index";
 
 /**
  * Class for finding characters in strings or checking characters.

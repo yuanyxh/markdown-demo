@@ -1,6 +1,6 @@
-import type { Appendable } from "@/helpers/index";
+import type { Appendable } from "@helpers/index";
 
-import { fromCodePoint } from "@/helpers/index";
+import { fromCodePoint } from "@helpers/index";
 import { Escaping } from "@/internal";
 
 class HtmlWriter {

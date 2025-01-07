@@ -1,4 +1,4 @@
-import { Appendable } from "@/helpers/index";
+import { Appendable } from "@helpers/index";
 
 class BlockContent {
   private readonly sb: Appendable;
