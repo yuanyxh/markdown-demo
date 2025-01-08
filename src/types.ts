@@ -1,4 +1,5 @@
 import type { Block, MarkdownNode } from 'commonmark-java-js';
+import type HtmlRenderer from './renderer/HtmlRenderer';
 
 declare global {
   interface IEditorOptions {
@@ -6,9 +7,9 @@ declare global {
   }
 
   /** 变更范围 */
-  interface IChangeRange {
-    start: number;
-    end: number;
+  interface IChanged {
+    from: number;
+    to: number;
   }
 
   /** 公共祖先 */
@@ -17,35 +18,17 @@ declare global {
     blockAncestor: Block;
   }
 
-  /** 新块的信息 */
-  interface INewBlockInfo {
-    /** 缩进 */
-    indent: number;
-    /** 是否是列表 */
-    isList: boolean;
-    /** 是否紧凑 */
-    isTight?: boolean;
-    /** 列表标记 */
-    marker?: string;
-    /** 有序列表的序号 */
-    startNumber?: number;
-  }
-
   interface INodeHolder {
     type: 'insertFirstChild' | 'insertAfter' | 'remove' | 'replace';
     target: HTMLElement | null;
     node: MarkdownNode | null;
   }
 
-  interface IScope {
-    start: MarkdownNode;
-    end: MarkdownNode;
-  }
-
-  interface INodeRange {
+  interface IEditorContext {
     node: Node;
     offset: number;
     source: string;
+    renderer: HtmlRenderer;
   }
 
   interface Node {
@@ -53,4 +36,10 @@ declare global {
   }
 
   type TCursorDir = 'forward' | 'backword';
+
+  type TUpdateFn = (doc: string) => string;
+
+  type TUpdateDoc = (update: TUpdateFn | string) => boolean;
+
+  type TInputHandlerFn = (e: InputEvent, changed: IChanged, updateDoc: TUpdateDoc) => boolean;
 }

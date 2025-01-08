@@ -1,9 +1,13 @@
-import MarkdownNode from "./MarkdownNode";
+import MarkdownNode from './MarkdownNode';
 
 /**
  * Block nodes such as paragraphs, list blocks, code blocks etc.
  */
 abstract class Block extends MarkdownNode {
+  public override isBlock(): boolean {
+    return true;
+  }
+
   public override getParent(): Block | null {
     const parent = super.getParent();
 
@@ -11,9 +15,7 @@ abstract class Block extends MarkdownNode {
       if (parent instanceof Block) {
         return parent;
       } else {
-        throw new Error(
-          "Warning: The parent node is not a block. This is an error."
-        );
+        throw new Error('Warning: The parent node is not a block. This is an error.');
       }
     }
 
@@ -22,7 +24,7 @@ abstract class Block extends MarkdownNode {
 
   public override setParent(parent: MarkdownNode): void {
     if (!(parent instanceof Block)) {
-      throw Error("Parent of block must also be block (can not be inline)");
+      throw Error('Parent of block must also be block (can not be inline)');
     }
 
     super.setParent(parent);

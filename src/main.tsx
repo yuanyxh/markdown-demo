@@ -5,7 +5,7 @@ import './styles/editor-init.less';
 
 import { createEditorElement } from './utils';
 
-import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
+import { Parser, IncludeSourceSpans, MarkdownNode } from 'commonmark-java-js';
 
 import source from './example.md?raw';
 
@@ -13,60 +13,61 @@ import { runOffset } from './offset';
 import { sync } from './sync';
 import AttributesProvider from './attributes';
 import HtmlRenderer from './renderer/HtmlRenderer';
-import { getPlainData } from './data';
+import inputHandlers from './input';
 
 const attributesProvider = new AttributesProvider();
-
-const editor = createEditorElement();
-window.document.getElementById('root')!.appendChild(editor);
 
 const markdownParser = Parser.builder()
   .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
   .build();
-
 const htmlRenderer = HtmlRenderer.builder().attributeProviderFactory(attributesProvider).build();
 
-function render(source: string) {
-  const root = markdownParser.parse(source);
-  const html = htmlRenderer.render(root);
-  editor.innerHTML = html;
-  sync(editor, root);
-}
+function init() {
+  const editor = createEditorElement();
+  window.document.getElementById('root')!.appendChild(editor);
 
-render(source);
+  let doc = '';
+  let initial = false;
 
-// window.document.addEventListener('selectionchange', () => {
-//   const selection = window.document.getSelection();
+  function render(newSource: string) {
+    const newRoot = markdownParser.parse(newSource);
 
-//   if (!selection) {
-//     return false;
-//   }
+    if (!initial) {
+      const html = htmlRenderer.render(newRoot);
+      editor.innerHTML = html;
 
-//   const range = selection.getRangeAt(0);
+      initial = true;
+    } else {
+    }
 
-//   console.log(range);
+    sync(newRoot, editor);
+  }
 
-//   const changeRange = runOffset.call({ source }, range);
+  function updateDoc(update: TUpdateFn | string) {
+    const newDoc = typeof update === 'function' ? update(doc) : update;
 
-//   console.log(changeRange);
-//   console.log(source.charAt(changeRange.start));
-//   console.log(source.charAt(changeRange.end));
-// });
+    if (newDoc !== doc) {
+      doc = newDoc;
 
-editor.addEventListener('beforeinput', (e) => {
-  e.preventDefault();
+      render(newDoc);
 
-  const data = getPlainData(e);
+      return true;
+    }
 
-  const selection = window.document.getSelection();
-
-  if (!selection) {
     return false;
   }
 
-  const range = selection.getRangeAt(0);
+  const onBeforeInput = (e: InputEvent) => {
+    const changed = runOffset.call({ source }, e.getTargetRanges()[0]);
 
-  const changeRange = runOffset.call({ source }, range);
+    if (inputHandlers[e.inputType]) {
+      inputHandlers[e.inputType](e, changed, updateDoc);
+    }
+  };
 
-  render(source.slice(0, changeRange.start) + data + source.slice(changeRange.end));
-});
+  editor.addEventListener('beforeinput', onBeforeInput);
+
+  updateDoc(source);
+}
+
+init();

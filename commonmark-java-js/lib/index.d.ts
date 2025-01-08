@@ -71,6 +71,7 @@ export declare class BitSet {
  * Block nodes such as paragraphs, list blocks, code blocks etc.
  */
 export declare abstract class Block extends MarkdownNode {
+  isBlock(): boolean;
   getParent(): Block | null;
   setParent(parent: MarkdownNode): void;
 }
@@ -1137,6 +1138,7 @@ export declare abstract class MarkdownNode {
   private next;
   private sourceSpans;
   constructor(type: string);
+  isBlock(): boolean;
   get type(): string;
   abstract accept(visitor: Visitor): void;
   getNext(): MarkdownNode | null;

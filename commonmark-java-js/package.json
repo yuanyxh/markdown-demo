@@ -5,6 +5,19 @@
   "main": "./lib/commonmark-java-js.js",
   "type": "module",
   "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "default": "./lib/index.d.ts"
+      },
+      "browser": {
+        "default": "./lib/commonmark-java-js.js"
+      },
+      "default": {
+        "default": "./lib/commonmark-java-js.js"
+      }
+    }
+  },
   "scripts": {
     "build": "tsc && pnpm vite build"
   },

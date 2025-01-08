@@ -1,16 +1,9 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import { FencedCodeBlock, Image, IndentedCodeBlock } from 'commonmark-java-js';
+import { filterBreakNode } from './utils/filter';
 
-function filterBreakNode(node: Node) {
-  if (node instanceof Text && node.nodeValue === '\n') {
-    return false;
-  }
-
-  return true;
-}
-
-export function sync(el: Node, node: MarkdownNode) {
+export function sync(node: MarkdownNode, el: Node) {
   el.$virtNode = node;
 
   if (node instanceof Image) {
@@ -21,7 +14,7 @@ export function sync(el: Node, node: MarkdownNode) {
   const elChildren = Array.from(el.childNodes).filter(filterBreakNode);
 
   for (let i = 0; i < children.length; i++) {
-    sync(elChildren[i], children[i]);
+    sync(children[i], elChildren[i]);
   }
 
   if (node instanceof FencedCodeBlock || node instanceof IndentedCodeBlock) {

@@ -11,7 +11,7 @@ import {
 
 import { findHtmlSelectionPoint, getContentIndex, getSourcePosition } from './utils/source';
 
-type TGetOffset = (this: INodeRange, node: Node, offset: number) => number;
+type TGetOffset = (this: Omit<IEditorContext, 'renderer'>, node: Node, offset: number) => number;
 
 const getHtmlBlockOffset: TGetOffset = function getHtmlBlockOffset(node, offset) {
   let curr: Node | null = node;
@@ -23,12 +23,7 @@ const getHtmlBlockOffset: TGetOffset = function getHtmlBlockOffset(node, offset)
       continue;
     }
 
-    if (
-      !(
-        curr instanceof HTMLElement &&
-        (curr.$virtNode instanceof HtmlBlock || curr.$virtNode instanceof HtmlInline)
-      )
-    ) {
+    if (!(curr instanceof HTMLElement && curr.$virtNode instanceof HtmlBlock)) {
       return -1;
     }
 
@@ -177,7 +172,7 @@ const offsetHandlers: TGetOffset[] = [
   fallbackGetOffset
 ];
 
-export function getOffset(this: INodeRange, offset: number, get: TGetOffset) {
+export function getOffset(this: Omit<IEditorContext, 'renderer'>, offset: number, get: TGetOffset) {
   if (offset === -1) {
     return get.call(this, this.node, this.offset);
   }
@@ -185,8 +180,8 @@ export function getOffset(this: INodeRange, offset: number, get: TGetOffset) {
   return offset;
 }
 
-export function runOffset(this: Pick<INodeRange, 'source'>, range: StaticRange) {
-  const start = offsetHandlers.reduce(
+export function runOffset(this: Pick<IEditorContext, 'source'>, range: StaticRange) {
+  const from = offsetHandlers.reduce(
     getOffset.bind({
       node: range.startContainer,
       offset: range.startOffset,
@@ -195,7 +190,7 @@ export function runOffset(this: Pick<INodeRange, 'source'>, range: StaticRange) 
     -1
   );
 
-  const end = offsetHandlers.reduce(
+  const to = offsetHandlers.reduce(
     getOffset.bind({
       node: range.endContainer,
       offset: range.endOffset,
@@ -204,5 +199,5 @@ export function runOffset(this: Pick<INodeRange, 'source'>, range: StaticRange) 
     -1
   );
 
-  return { start: start, end: end };
+  return { from, to };
 }

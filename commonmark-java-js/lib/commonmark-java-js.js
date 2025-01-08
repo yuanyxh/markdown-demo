@@ -445,6 +445,9 @@ class U {
     i(this, "sourceSpans", null);
     this.innerType = e;
   }
+  isBlock() {
+    return !1;
+  }
   get type() {
     return this.innerType;
   }
@@ -535,14 +538,15 @@ class Ne {
   }
 }
 class N extends U {
+  isBlock() {
+    return !0;
+  }
   getParent() {
     const e = super.getParent();
     if (e) {
       if (e instanceof N)
         return e;
-      throw new Error(
-        "Warning: The parent node is not a block. This is an error."
-      );
+      throw new Error("Warning: The parent node is not a block. This is an error.");
     }
     return null;
   }

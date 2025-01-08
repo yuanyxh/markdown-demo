@@ -1,10 +1,14 @@
-type TInputHandlerFn = (e: InputEvent) => boolean;
+import { getPlainData } from './data';
 
 interface IInputHandler {
   [key: string]: TInputHandlerFn;
 }
 
-const insertPlainText: TInputHandlerFn = function insertPlainText() {
+const insertPlainText: TInputHandlerFn = function insertPlainText(e, changed, updateDoc) {
+  const text = getPlainData(e);
+
+  updateDoc((doc) => doc.slice(0, changed.from) + text + doc.slice(changed.to));
+
   return false;
 };
 

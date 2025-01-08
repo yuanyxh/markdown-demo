@@ -1,5 +1,5 @@
-import type SourceSpan from "../node_utils/SourceSpan";
-import type { Visitor } from "../interfaces/Visitor";
+import type SourceSpan from '../node_utils/SourceSpan';
+import type { Visitor } from '../interfaces/Visitor';
 
 /**
  * The base class of all CommonMark AST nodes ({@link Block} and inlines).
@@ -18,6 +18,10 @@ abstract class MarkdownNode {
 
   public constructor(type: string) {
     this.innerType = type;
+  }
+
+  public isBlock() {
+    return false;
   }
 
   public get type() {
