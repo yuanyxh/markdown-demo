@@ -1,4 +1,4 @@
-import type { MarkdownNode, Block } from "commonmark-java-js";
+import type { MarkdownNode, Block } from 'commonmark-java-js';
 
 export function getSourcePosition(node: MarkdownNode) {
   const spans = node.getSourceSpans();
@@ -34,4 +34,39 @@ export function getContentIndex(block: Block) {
   }
 
   return -1;
+}
+
+export function findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: number) {
+  let element: HTMLElement | null = null;
+  let position = 0;
+
+  if (node instanceof HTMLElement) {
+    element = node;
+  } else {
+    element = node.parentElement;
+  }
+
+  while (element && element !== parent) {
+    const elementParent = element.parentElement;
+
+    if (!elementParent || elementParent === parent) {
+      break;
+    }
+
+    position += elementParent.outerHTML.indexOf(element.outerHTML);
+
+    element = elementParent;
+  }
+
+  if (node instanceof HTMLElement && offset !== 0) {
+    position += node.outerHTML.length;
+  } else if (node instanceof Text) {
+    if (node.parentElement && node.nodeValue) {
+      position += node.parentElement.outerHTML.indexOf(node.nodeValue);
+    }
+
+    position += offset;
+  }
+
+  return getSourcePosition(parent.$virtNode).inputIndex + position;
 }

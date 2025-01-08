@@ -13,6 +13,7 @@ import { runOffset } from './offset';
 import { sync } from './sync';
 import AttributesProvider from './attributes';
 import HtmlRenderer from './renderer/HtmlRenderer';
+import { getPlainData } from './data';
 
 const attributesProvider = new AttributesProvider();
 
@@ -25,11 +26,38 @@ const markdownParser = Parser.builder()
 
 const htmlRenderer = HtmlRenderer.builder().attributeProviderFactory(attributesProvider).build();
 
-const root = markdownParser.parse(source);
-editor.innerHTML = htmlRenderer.render(root);
-sync(editor, root);
+function render(source: string) {
+  const root = markdownParser.parse(source);
+  const html = htmlRenderer.render(root);
+  editor.innerHTML = html;
+  sync(editor, root);
+}
 
-window.document.addEventListener('selectionchange', () => {
+render(source);
+
+// window.document.addEventListener('selectionchange', () => {
+//   const selection = window.document.getSelection();
+
+//   if (!selection) {
+//     return false;
+//   }
+
+//   const range = selection.getRangeAt(0);
+
+//   console.log(range);
+
+//   const changeRange = runOffset.call({ source }, range);
+
+//   console.log(changeRange);
+//   console.log(source.charAt(changeRange.start));
+//   console.log(source.charAt(changeRange.end));
+// });
+
+editor.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+
+  const data = getPlainData(e);
+
   const selection = window.document.getSelection();
 
   if (!selection) {
@@ -38,11 +66,7 @@ window.document.addEventListener('selectionchange', () => {
 
   const range = selection.getRangeAt(0);
 
-  console.log(range);
-
   const changeRange = runOffset.call({ source }, range);
 
-  console.log(changeRange);
-  console.log(source.charAt(changeRange.start));
-  console.log(source.charAt(changeRange.end));
+  render(source.slice(0, changeRange.start) + data + source.slice(changeRange.end));
 });

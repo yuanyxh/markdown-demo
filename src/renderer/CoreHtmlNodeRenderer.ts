@@ -195,6 +195,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const htmlBlock = node;
 
         this.html.line();
+
         if (this.context.shouldEscapeHtml()) {
           this.html.tag('p', this.getAttrs(htmlBlock, 'p'));
           this.html.text(htmlBlock.getLiteral());

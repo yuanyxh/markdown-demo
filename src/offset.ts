@@ -9,21 +9,36 @@ import {
   SoftLineBreak
 } from 'commonmark-java-js';
 
-import { getContentIndex, getSourcePosition } from './utils/source';
+import { findHtmlSelectionPoint, getContentIndex, getSourcePosition } from './utils/source';
 
 type TGetOffset = (this: INodeRange, node: Node, offset: number) => number;
 
-const getHtmlOffset: TGetOffset = function getHtmlOffset(node, offset) {
+const getHtmlBlockOffset: TGetOffset = function getHtmlBlockOffset(node, offset) {
   let curr: Node | null = node;
 
   while (curr) {
-    if (curr.$virtNode) {
-      if (!(curr.$virtNode instanceof HtmlBlock || curr.$virtNode instanceof HtmlInline)) {
-        return -1;
-      }
-    } else {
-      curr = node.parentNode;
+    if (!curr.$virtNode) {
+      curr = curr.parentNode;
+
+      continue;
     }
+
+    if (
+      !(
+        curr instanceof HTMLElement &&
+        (curr.$virtNode instanceof HtmlBlock || curr.$virtNode instanceof HtmlInline)
+      )
+    ) {
+      return -1;
+    }
+
+    if (curr === node) {
+      return offset === 0
+        ? getSourcePosition(curr.$virtNode).inputIndex
+        : getSourcePosition(curr.$virtNode).inputEndIndex;
+    }
+
+    return findHtmlSelectionPoint(node, curr, offset);
   }
 
   return -1;
@@ -125,9 +140,8 @@ const fallbackGetOffset: TGetOffset = function fallbackGetOffset(node, offset) {
     return getContentIndex(block);
   }
 
-  const children = block.getChildren();
-  let childMarkdownNode: MarkdownNode | null = children[offset - 1];
   let isSoftLineBreak = false;
+  let childMarkdownNode: MarkdownNode | null = block.getChildren()[offset - 1];
 
   if (childMarkdownNode instanceof SoftLineBreak) {
     childMarkdownNode = childMarkdownNode.getPrevious();
@@ -156,7 +170,12 @@ const fallbackGetOffset: TGetOffset = function fallbackGetOffset(node, offset) {
   return inputEndIndex;
 };
 
-const offsetHandlers: TGetOffset[] = [getHtmlOffset, getHrOffset, getCodeOffset, fallbackGetOffset];
+const offsetHandlers: TGetOffset[] = [
+  getHtmlBlockOffset,
+  getHrOffset,
+  getCodeOffset,
+  fallbackGetOffset
+];
 
 export function getOffset(this: INodeRange, offset: number, get: TGetOffset) {
   if (offset === -1) {
