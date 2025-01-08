@@ -1,8 +1,13 @@
-import { MarkdownNode } from 'commonmark-java-js';
+import type { MarkdownNode } from 'commonmark-java-js';
+
 import { filterBreakNode } from './utils/filter';
 
 export function diff(this: Pick<IEditorContext, 'renderer'>, node: MarkdownNode, el?: Node) {
   if (!el) {
+    if (node.isBlock()) {
+      patch();
+    }
+
     return true;
   }
 
