@@ -1,19 +1,17 @@
 import type { MarkdownNode } from 'commonmark-java-js';
+import type { Editor } from './main';
 
 import {
   Code,
   FencedCodeBlock,
   HtmlBlock,
-  HtmlInline,
   IndentedCodeBlock,
   SoftLineBreak
 } from 'commonmark-java-js';
 
 import { findHtmlSelectionPoint, getContentIndex, getSourcePosition } from './utils/source';
 
-type TGetOffset = (this: Omit<IEditorContext, 'renderer'>, node: Node, offset: number) => number;
-
-const getHtmlBlockOffset: TGetOffset = function getHtmlBlockOffset(node, offset) {
+const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
   let curr: Node | null = node;
 
   while (curr) {
@@ -39,7 +37,7 @@ const getHtmlBlockOffset: TGetOffset = function getHtmlBlockOffset(node, offset)
   return -1;
 };
 
-const getHrOffset: TGetOffset = function getHrOffset(node, offset) {
+const locateHr: LocateHandler = function locateHr(node, offset) {
   if (!(node instanceof HTMLElement)) {
     return -1;
   }
@@ -63,7 +61,7 @@ const getHrOffset: TGetOffset = function getHrOffset(node, offset) {
   return getSourcePosition(hrNode).inputIndex;
 };
 
-const getCodeOffset: TGetOffset = function getCodeOffset(node, offset) {
+const locateCode: LocateHandler = function locateCode(node, offset) {
   if (
     !(
       node instanceof Text &&
@@ -103,7 +101,7 @@ const getCodeOffset: TGetOffset = function getCodeOffset(node, offset) {
     inputIndex += (mNode.getOpeningFenceLength() || 0) + (mNode.getFenceIndent() || 0);
   }
 
-  const textStart = this.source.slice(inputIndex, inputEndIndex).indexOf(literal);
+  const textStart = this.document.slice(inputIndex, inputEndIndex).indexOf(literal);
 
   if (textStart === -1) {
     return -1;
@@ -112,7 +110,7 @@ const getCodeOffset: TGetOffset = function getCodeOffset(node, offset) {
   return inputIndex + textStart + offset;
 };
 
-const fallbackGetOffset: TGetOffset = function fallbackGetOffset(node, offset) {
+const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
   if (node instanceof Text && node.parentElement) {
     const el = node.parentElement;
 
@@ -165,39 +163,41 @@ const fallbackGetOffset: TGetOffset = function fallbackGetOffset(node, offset) {
   return inputEndIndex;
 };
 
-const offsetHandlers: TGetOffset[] = [
-  getHtmlBlockOffset,
-  getHrOffset,
-  getCodeOffset,
-  fallbackGetOffset
-];
+interface LocateHandler {
+  (this: Editor, node: Node, offset: number): number;
+}
 
-export function getOffset(this: Omit<IEditorContext, 'renderer'>, offset: number, get: TGetOffset) {
-  if (offset === -1) {
-    return get.call(this, this.node, this.offset);
+interface SourceMapConfig {
+  context: Editor;
+  locateHandlers?: LocateHandler[];
+}
+
+class SourceMap {
+  private context: Editor;
+
+  private locateHandlers = [locateHtmlBlock, locateHr, locateCode, fallbackLocate];
+
+  public constructor(config: SourceMapConfig) {
+    this.context = config.context;
+
+    this.locateHandlers = [...(config.locateHandlers || []), ...this.locateHandlers];
   }
 
-  return offset;
+  public locate(range: StaticRange) {
+    const from = this.locateHandlers.reduce(
+      (prev, locate) =>
+        prev === -1 ? locate.call(this.context, range.startContainer, range.startOffset) : prev,
+      -1
+    );
+
+    const to = this.locateHandlers.reduce(
+      (prev, locate) =>
+        prev === -1 ? locate.call(this.context, range.endContainer, range.endOffset) : prev,
+      -1
+    );
+
+    return { from, to };
+  }
 }
 
-export function runOffset(this: Pick<IEditorContext, 'source'>, range: StaticRange) {
-  const from = offsetHandlers.reduce(
-    getOffset.bind({
-      node: range.startContainer,
-      offset: range.startOffset,
-      ...this
-    }),
-    -1
-  );
-
-  const to = offsetHandlers.reduce(
-    getOffset.bind({
-      node: range.endContainer,
-      offset: range.endOffset,
-      ...this
-    }),
-    -1
-  );
-
-  return { from, to };
-}
+export default SourceMap;

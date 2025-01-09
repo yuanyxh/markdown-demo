@@ -1,73 +1,138 @@
+import type { MarkdownNode, AttributeProviderFactory } from 'commonmark-java-js';
+
+import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
+
 import 'normalize.css';
 import './styles/global.less';
-
 import './styles/editor-init.less';
 
-import { createEditorElement } from './utils';
-
-import { Parser, IncludeSourceSpans, MarkdownNode } from 'commonmark-java-js';
+import { createEditorElement, setHtml } from './utils';
+import HtmlRenderer from './renderer/HtmlRenderer';
 
 import source from './example.md?raw';
+import EditorInput from './editorInput';
+import SourceMap from './sourcemap';
+import SyncDoc from './syncDoc';
 
-import { runOffset } from './offset';
-import { sync } from './sync';
-import AttributesProvider from './attributes';
-import HtmlRenderer from './renderer/HtmlRenderer';
-import inputHandlers from './input';
-
-const attributesProvider = new AttributesProvider();
-
-const markdownParser = Parser.builder()
-  .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
-  .build();
-const htmlRenderer = HtmlRenderer.builder().attributeProviderFactory(attributesProvider).build();
-
-function init() {
-  const editor = createEditorElement();
-  window.document.getElementById('root')!.appendChild(editor);
-
-  let doc = '';
-  let initial = false;
-
-  function render(newSource: string) {
-    const newRoot = markdownParser.parse(newSource);
-
-    if (!initial) {
-      const html = htmlRenderer.render(newRoot);
-      editor.innerHTML = html;
-
-      initial = true;
-    } else {
-    }
-
-    sync(newRoot, editor);
-  }
-
-  function updateDoc(update: TUpdateFn | string) {
-    const newDoc = typeof update === 'function' ? update(doc) : update;
-
-    if (newDoc !== doc) {
-      doc = newDoc;
-
-      render(newDoc);
-
-      return true;
-    }
-
-    return false;
-  }
-
-  const onBeforeInput = (e: InputEvent) => {
-    const changed = runOffset.call({ source }, e.getTargetRanges()[0]);
-
-    if (inputHandlers[e.inputType]) {
-      inputHandlers[e.inputType](e, changed, updateDoc);
-    }
-  };
-
-  editor.addEventListener('beforeinput', onBeforeInput);
-
-  updateDoc(source);
+interface RendererConfig {
+  attributeProvider: AttributeProviderFactory;
 }
 
-init();
+interface EditorOptions {
+  parent: HTMLElement;
+  root?: Document;
+  doc?: string;
+  renderer?: RendererConfig;
+}
+
+type InputType = 'insert' | 'delete' | 'replace' | 'selection';
+
+interface InputAction {
+  type: InputType;
+  from: number;
+  to?: number;
+  text?: string;
+  range?: [MarkdownNode, MarkdownNode];
+}
+
+type Update = Pick<InputAction, 'from' | 'to' | 'text'>;
+
+export class Editor {
+  private editorDOM = createEditorElement();
+
+  public renderer: HtmlRenderer;
+  public parser: Parser;
+  public souremap: SourceMap;
+
+  private syncDoc: SyncDoc;
+  private editorInput: EditorInput;
+
+  private doc: MarkdownNode;
+  private oldDoc: MarkdownNode;
+
+  private source = '';
+
+  public constructor(options: EditorOptions) {
+    const { renderer, doc = '' } = options;
+
+    this.parser = Parser.builder()
+      .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
+      .build();
+
+    const rendererBuilder = HtmlRenderer.builder();
+    if (renderer?.attributeProvider) {
+      this.renderer = rendererBuilder.attributeProviderFactory(renderer.attributeProvider).build();
+    } else {
+      this.renderer = rendererBuilder.build();
+    }
+
+    this.source = doc;
+    this.doc = this.oldDoc = this.parser.parse(this.source);
+
+    this.souremap = new SourceMap({ context: this });
+    this.syncDoc = new SyncDoc({ context: this });
+
+    setHtml(this.editorDOM, this.renderer.render(this.doc));
+
+    options.parent.appendChild(this.editorDOM);
+    this.editorInput = EditorInput.create({ context: this });
+    this.editorInput.on(this.editorDOM);
+
+    this.attachNode();
+  }
+
+  public get document() {
+    return this.source;
+  }
+
+  public dispatch(action: InputAction) {
+    if (typeof action.to === 'undefined') {
+      action.to = this.source.length;
+    }
+
+    if (!this.update(action)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private update(update: Update): boolean {
+    update.text ??= '';
+
+    const oldSource = this.source;
+
+    this.source = this.source.slice(0, update.from) + update.text + this.source.slice(update.to);
+
+    if (this.source === oldSource) {
+      return false;
+    }
+
+    this.oldDoc = this.doc;
+    this.doc = this.parser.parse(this.source);
+
+    const result = this.syncDoc.sync(this.doc, this.oldDoc);
+    this.attachNode();
+
+    return result;
+  }
+
+  private attachNode() {
+    this.syncDoc.attach(this.doc, this.editorDOM);
+  }
+
+  public destroy() {
+    this.editorDOM.blur();
+    this.editorInput.off(this.editorDOM);
+    this.editorDOM.remove();
+  }
+
+  public static create(options: EditorOptions) {
+    return new Editor(options);
+  }
+}
+
+Editor.create({
+  parent: window.document.getElementById('root')!,
+  doc: source
+});

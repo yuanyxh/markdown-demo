@@ -437,6 +437,7 @@ class q {
 class U {
   constructor(e) {
     i(this, "innerType");
+    i(this, "innerMeta", {});
     i(this, "parent", null);
     i(this, "firstChild", null);
     i(this, "lastChild", null);
@@ -445,11 +446,17 @@ class U {
     i(this, "sourceSpans", null);
     this.innerType = e;
   }
-  isBlock() {
-    return !1;
+  get meta() {
+    return this.innerMeta;
+  }
+  set meta(e) {
+    this.innerMeta = e;
   }
   get type() {
     return this.innerType;
+  }
+  isBlock() {
+    return !1;
   }
   getNext() {
     return this.next;

@@ -349,7 +349,10 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Code: {
         const code = node;
 
-        this.html.tag('code', this.getAttrs(code, 'code'));
+        this.html.tag(
+          'code',
+          this.getAttrs(code, 'code', new Map<string, string>([['inline', 'true']]))
+        );
         this.html.text(code.getLiteral());
         this.html.tag('/code');
 
@@ -362,7 +365,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         if (this.context.shouldEscapeHtml()) {
           this.html.text(htmlInline.getLiteral());
         } else {
+          this.html.tag('span', this.getAttrs(htmlInline, 'div'));
           this.html.raw(htmlInline.getLiteral());
+          this.html.tag('/span');
         }
 
         break;

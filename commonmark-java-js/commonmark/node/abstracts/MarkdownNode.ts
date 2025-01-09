@@ -8,6 +8,7 @@ import type { Visitor } from '../interfaces/Visitor';
  */
 abstract class MarkdownNode {
   private innerType: string;
+  private innerMeta: Record<string, any> = {};
 
   private parent: MarkdownNode | null = null;
   private firstChild: MarkdownNode | null = null;
@@ -20,8 +21,12 @@ abstract class MarkdownNode {
     this.innerType = type;
   }
 
-  public isBlock() {
-    return false;
+  public get meta() {
+    return this.innerMeta;
+  }
+
+  public set meta(meta: Record<string, any>) {
+    this.innerMeta = meta;
   }
 
   public get type() {
@@ -29,6 +34,10 @@ abstract class MarkdownNode {
   }
 
   public abstract accept(visitor: Visitor): void;
+
+  public isBlock() {
+    return false;
+  }
 
   public getNext(): MarkdownNode | null {
     return this.next;
