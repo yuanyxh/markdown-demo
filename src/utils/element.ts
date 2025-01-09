@@ -1,5 +1,3 @@
-import { filterBreakNode } from './filter';
-
 export function createEditorElement() {
   const editorElement = window.document.createElement('div');
 
@@ -13,10 +11,6 @@ export function createEditorElement() {
   editorElement.ariaMultiLine = 'true';
 
   return editorElement;
-}
-
-export function getElChildren(el: Node) {
-  return Array.from(el.childNodes).filter(filterBreakNode);
 }
 
 export function setHtml(el: HTMLElement, html: string) {

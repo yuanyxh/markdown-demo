@@ -49,6 +49,8 @@ class EditorInput {
     this.context = config.context;
 
     setHandlers(this.handlers);
+
+    this.listenForSelectionChange();
   }
 
   public on(el: HTMLElement) {
@@ -57,11 +59,32 @@ class EditorInput {
 
   public off(el: HTMLElement) {
     el.removeEventListener('beforeinput', this.onBeforeInput.bind(this));
+
+    this.context.root.removeEventListener('selectionchange', this.onSelectionChange.bind(this));
+  }
+
+  private listenForSelectionChange() {
+    this.context.root.addEventListener('selectionchange', this.onSelectionChange.bind(this));
   }
 
   private onBeforeInput(e: InputEvent) {
     if (this.handlers[e.inputType]) {
       this.handlers[e.inputType].call(this.context, e);
+    }
+  }
+
+  private onSelectionChange() {
+    if (!this.context.hasFocus()) {
+      return false;
+    }
+
+    const selection = this.context.root.getSelection();
+
+    if (selection) {
+      const range = selection.getRangeAt(0);
+      const { from, to } = this.context.souremap.locate(range);
+
+      console.log(this.context.document.charAt(from));
     }
   }
 

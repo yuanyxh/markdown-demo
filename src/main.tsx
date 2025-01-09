@@ -50,6 +50,7 @@ export class Editor {
   private doc: MarkdownNode;
   private oldDoc: MarkdownNode;
 
+  private innerRoot: Document;
   private source = '';
 
   public constructor(options: EditorOptions) {
@@ -69,15 +70,21 @@ export class Editor {
     this.source = doc;
     this.doc = this.oldDoc = this.parser.parse(this.source);
 
-    this.souremap = new SourceMap({ context: this });
-    this.syncDoc = new SyncDoc({ context: this });
-
     options.parent.appendChild(this.editorDOM);
+    this.innerRoot = options.root ?? this.editorDOM.ownerDocument;
+
     this.editorInput = EditorInput.create({ context: this });
     this.editorInput.on(this.editorDOM);
 
+    this.souremap = new SourceMap({ context: this });
+    this.syncDoc = new SyncDoc({ context: this });
+
     setHtml(this.editorDOM, this.renderer.render(this.doc));
     this.attachNode();
+  }
+
+  public get root() {
+    return this.innerRoot;
   }
 
   public get document() {
@@ -116,14 +123,18 @@ export class Editor {
     return result;
   }
 
-  private attachNode() {
-    this.syncDoc.attach(this.doc, this.editorDOM);
-  }
-
   public destroy() {
     this.editorDOM.blur();
     this.editorInput.off(this.editorDOM);
     this.editorDOM.remove();
+  }
+
+  public hasFocus() {
+    return this.innerRoot.activeElement === this.editorDOM;
+  }
+
+  private attachNode() {
+    this.syncDoc.attach(this.doc, this.editorDOM);
   }
 
   public static create(options: EditorOptions) {

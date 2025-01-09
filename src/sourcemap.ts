@@ -6,7 +6,8 @@ import {
   FencedCodeBlock,
   HtmlBlock,
   IndentedCodeBlock,
-  SoftLineBreak
+  SoftLineBreak,
+  ThematicBreak
 } from 'commonmark-java-js';
 
 import { findHtmlSelectionPoint, getContentIndex, getSourcePosition } from './utils/source';
@@ -44,11 +45,15 @@ const locateHr: LocateHandler = function locateHr(node, offset) {
 
   let el: Node | null = node.childNodes[offset - 1];
 
-  if (el instanceof Text && el.nodeValue === '\n') {
+  if (!el) {
+    return -1;
+  }
+
+  if (el.$virtNode.isBlock() && el.nextSibling) {
     el = el.nextSibling;
   }
 
-  if (!(el instanceof HTMLHRElement)) {
+  if (!(el.$virtNode instanceof ThematicBreak)) {
     return -1;
   }
 
@@ -62,13 +67,7 @@ const locateHr: LocateHandler = function locateHr(node, offset) {
 };
 
 const locateCode: LocateHandler = function locateCode(node, offset) {
-  if (
-    !(
-      node instanceof Text &&
-      node.parentElement &&
-      node.parentElement.tagName.toLocaleLowerCase() === 'code'
-    )
-  ) {
+  if (!(node instanceof Text && node.parentElement)) {
     return -1;
   }
 
@@ -135,6 +134,10 @@ const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
 
   let isSoftLineBreak = false;
   let childMarkdownNode: MarkdownNode | null = block.getChildren()[offset - 1];
+
+  if (childMarkdownNode.isBlock() && childMarkdownNode.getNext()) {
+    childMarkdownNode = childMarkdownNode.getNext();
+  }
 
   if (childMarkdownNode instanceof SoftLineBreak) {
     childMarkdownNode = childMarkdownNode.getPrevious();

@@ -43,12 +43,6 @@ class HtmlWriter {
     this.append('>');
   }
 
-  public line() {
-    if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== '\n') {
-      this.append('\n');
-    }
-  }
-
   protected append(s: string) {
     this.buffer.append(s);
 

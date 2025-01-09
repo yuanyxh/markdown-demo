@@ -123,11 +123,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const heading = node;
 
         const htag = 'h' + heading.getLevel();
-        this.html.line();
         this.html.tag(htag, this.getAttrs(heading, htag));
         this.visitChildren(heading);
         this.html.tag('/' + htag);
-        this.html.line();
 
         break;
       }
@@ -135,11 +133,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Paragraph: {
         const paragraph = node;
 
-        this.html.line();
         this.html.tag('p', this.getAttrs(paragraph, 'p'));
         this.visitChildren(paragraph);
         this.html.tag('/p');
-        this.html.line();
 
         break;
       }
@@ -147,13 +143,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof BlockQuote: {
         const blockQuote = node;
 
-        this.html.line();
         this.html.tag('blockquote', this.getAttrs(blockQuote, 'blockquote'));
-        this.html.line();
         this.visitChildren(blockQuote);
-        this.html.line();
         this.html.tag('/blockquote');
-        this.html.line();
 
         break;
       }
@@ -194,8 +186,6 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof HtmlBlock: {
         const htmlBlock = node;
 
-        this.html.line();
-
         if (this.context.shouldEscapeHtml()) {
           this.html.tag('p', this.getAttrs(htmlBlock, 'p'));
           this.html.text(htmlBlock.getLiteral());
@@ -206,17 +196,13 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
           this.html.tag('/div');
         }
 
-        this.html.line();
-
         break;
       }
 
       case node instanceof ThematicBreak: {
         const thematicBreak = node;
 
-        this.html.line();
         this.html.tag('hr', this.getAttrs(thematicBreak, 'hr'), true);
-        this.html.line();
 
         break;
       }
@@ -265,7 +251,6 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         this.html.tag('li', this.getAttrs(listItem, 'li'));
         this.visitChildren(listItem);
         this.html.tag('/li');
-        this.html.line();
 
         break;
       }
@@ -383,7 +368,6 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const hardLineBreak = node;
 
         this.html.tag('br', this.getAttrs(hardLineBreak, 'br'), true);
-        this.html.line();
 
         break;
       }
@@ -401,23 +385,17 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   }
 
   private renderCodeBlock(literal: string, node: MarkdownNode, attributes: Map<string, string>) {
-    this.html.line();
     this.html.tag('pre', this.getAttrs(node, 'pre'));
     this.html.tag('code', this.getAttrs(node, 'code', attributes));
     this.html.text(literal);
     this.html.tag('/code');
     this.html.tag('/pre');
-    this.html.line();
   }
 
   private renderListBlock(listBlock: ListBlock, tagName: string, attributes: Map<string, string>) {
-    this.html.line();
     this.html.tag(tagName, attributes);
-    this.html.line();
     this.visitChildren(listBlock);
-    this.html.line();
     this.html.tag('/' + tagName);
-    this.html.line();
   }
 
   private getAttrs(

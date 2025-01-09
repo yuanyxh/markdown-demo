@@ -3,7 +3,6 @@ import type { MarkdownNode } from 'commonmark-java-js';
 import type HtmlRenderer from './renderer/HtmlRenderer';
 
 import { FencedCodeBlock, Image, IndentedCodeBlock } from 'commonmark-java-js';
-import { getElChildren } from './utils';
 
 interface SyncDocConfig {
   context: Editor;
@@ -145,7 +144,7 @@ class SyncDoc {
     }
 
     const children = node.getChildren();
-    const elChildren = getElChildren(el);
+    const elChildren = el.childNodes;
 
     for (let i = 0; i < children.length; i++) {
       this.attach(children[i], elChildren[i]);
