@@ -14,7 +14,7 @@ declare global {
 
   interface IPatchNode {
     type: TNodeChangeType;
-    node: MarkdownNode;
+    update: (cb: (dom: HTMLElement) => void) => void;
     updateNode?: MarkdownNode;
   }
 

@@ -12,7 +12,7 @@ import HtmlRenderer from './renderer/HtmlRenderer';
 import source from './example.md?raw';
 import EditorInput from './editorInput';
 import SourceMap from './sourcemap';
-import SyncDoc from './syncDoc';
+import SyncDoc from './syncdoc';
 
 interface RendererConfig {
   attributeProvider: AttributeProviderFactory;

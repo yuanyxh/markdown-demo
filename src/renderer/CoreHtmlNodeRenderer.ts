@@ -336,7 +336,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         this.html.tag(
           'code',
-          this.getAttrs(code, 'code', new Map<string, string>([['inline', 'true']]))
+          this.getAttrs(code, 'code', new Map<string, string>([['data-inline', 'true']]))
         );
         this.html.text(code.getLiteral());
         this.html.tag('/code');
