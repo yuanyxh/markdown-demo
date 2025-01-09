@@ -72,12 +72,11 @@ export class Editor {
     this.souremap = new SourceMap({ context: this });
     this.syncDoc = new SyncDoc({ context: this });
 
-    setHtml(this.editorDOM, this.renderer.render(this.doc));
-
     options.parent.appendChild(this.editorDOM);
     this.editorInput = EditorInput.create({ context: this });
     this.editorInput.on(this.editorDOM);
 
+    setHtml(this.editorDOM, this.renderer.render(this.doc));
     this.attachNode();
   }
 
