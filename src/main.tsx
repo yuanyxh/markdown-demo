@@ -47,7 +47,7 @@ export class Editor {
   private syncDoc: SyncDoc;
   private editorInput: EditorInput;
 
-  private doc: MarkdownNode;
+  private innerDoc: MarkdownNode;
   private oldDoc: MarkdownNode;
 
   private innerRoot: Document;
@@ -68,7 +68,7 @@ export class Editor {
     }
 
     this.source = doc;
-    this.doc = this.oldDoc = this.parser.parse(this.source);
+    this.innerDoc = this.oldDoc = this.parser.parse(this.source);
 
     options.parent.appendChild(this.editorDOM);
     this.innerRoot = options.root ?? this.editorDOM.ownerDocument;
@@ -79,7 +79,7 @@ export class Editor {
     this.souremap = new SourceMap({ context: this });
     this.syncDoc = new SyncDoc({ context: this });
 
-    setHtml(this.editorDOM, this.renderer.render(this.doc));
+    setHtml(this.editorDOM, this.renderer.render(this.innerDoc));
     this.attachNode();
   }
 
@@ -89,6 +89,10 @@ export class Editor {
 
   public get document() {
     return this.source;
+  }
+
+  public get doc() {
+    return this.innerDoc;
   }
 
   public dispatch(action: InputAction) {
@@ -114,10 +118,12 @@ export class Editor {
       return false;
     }
 
-    this.oldDoc = this.doc;
-    this.doc = this.parser.parse(this.source);
+    this.oldDoc = this.innerDoc;
+    this.innerDoc = this.parser.parse(this.source);
 
-    const result = this.syncDoc.sync(this.doc, this.oldDoc);
+    console.log(this.innerDoc);
+
+    const result = this.syncDoc.sync(this.innerDoc, this.oldDoc);
     this.attachNode();
 
     return result;
@@ -134,7 +140,7 @@ export class Editor {
   }
 
   private attachNode() {
-    this.syncDoc.attach(this.doc, this.editorDOM);
+    this.syncDoc.attach(this.innerDoc, this.editorDOM);
   }
 
   public static create(options: EditorOptions) {
