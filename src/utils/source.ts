@@ -3,6 +3,10 @@ import type { MarkdownNode, Block } from 'commonmark-java-js';
 export function getSourcePosition(node: MarkdownNode) {
   const spans = node.getSourceSpans();
 
+  if (!spans.length) {
+    return { inputIndex: 0, inputLength: 0, inputEndIndex: 0 };
+  }
+
   const inputIndex = spans[0].getInputIndex();
 
   const lastSpan = spans[spans.length - 1];

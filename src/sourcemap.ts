@@ -100,7 +100,7 @@ const locateCode: LocateHandler = function locateCode(node, offset) {
     inputIndex += (mNode.getOpeningFenceLength() || 0) + (mNode.getFenceIndent() || 0);
   }
 
-  const textStart = this.document.slice(inputIndex, inputEndIndex).indexOf(literal);
+  const textStart = this.source.slice(inputIndex, inputEndIndex).indexOf(literal);
 
   if (textStart === -1) {
     return -1;
@@ -133,7 +133,7 @@ const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
   }
 
   let isSoftLineBreak = false;
-  let childMarkdownNode: MarkdownNode | null = block.getChildren()[offset - 1];
+  let childMarkdownNode: MarkdownNode | null = block.children[offset - 1];
 
   if (childMarkdownNode.isBlock() && childMarkdownNode.getNext()) {
     childMarkdownNode = childMarkdownNode.getNext();

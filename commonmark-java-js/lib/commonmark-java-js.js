@@ -438,6 +438,7 @@ class U {
   constructor(e) {
     i(this, "innerType");
     i(this, "innerMeta", {});
+    i(this, "innerChildren", []);
     i(this, "parent", null);
     i(this, "firstChild", null);
     i(this, "lastChild", null);
@@ -454,6 +455,17 @@ class U {
   }
   get type() {
     return this.innerType;
+  }
+  get children() {
+    if (this.innerChildren.length)
+      return this.innerChildren;
+    let e = this.getFirstChild();
+    const t = [];
+    if (!e)
+      return t;
+    for (t.push(e); e = e.getNext(); )
+      t.push(e);
+    return t;
   }
   isBlock() {
     return !1;
@@ -472,15 +484,6 @@ class U {
   }
   getParent() {
     return this.parent;
-  }
-  getChildren() {
-    let e = this.getFirstChild();
-    const t = [];
-    if (!e)
-      return t;
-    for (t.push(e); e = e.getNext(); )
-      t.push(e);
-    return t;
   }
   setParent(e) {
     this.parent = e;

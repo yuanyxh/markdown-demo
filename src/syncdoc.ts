@@ -1,146 +1,11 @@
 import type { Editor } from './main';
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import { FencedCodeBlock, Image, IndentedCodeBlock } from 'commonmark-java-js';
+import { FencedCodeBlock, Image, IndentedCodeBlock, Text } from 'commonmark-java-js';
+import { getSourcePosition } from './utils/source';
 
 interface SyncDocConfig {
   context: Editor;
-}
-
-function isBlock(node: MarkdownNode) {
-  return node.isBlock() && node.type !== 'document';
-}
-
-function create(
-  type: TNodeChangeType,
-  node: MarkdownNode,
-  offset?: number,
-  updateNode?: MarkdownNode
-): IPatchNode {
-  return {
-    type,
-    updateNode,
-    update: (cb) => {
-      if (typeof offset === 'number') {
-        cb(node.meta.$dom.childNodes[offset]);
-      } else {
-        cb(node.meta.$dom);
-      }
-    }
-  };
-}
-
-/**
- * 按元素类型进行对比，同时将变更的内联节点冒泡提升为块节点的变更
- */
-function diff(node: MarkdownNode, oldNode: MarkdownNode): IPatchNode[] | boolean {
-  const childNodes = node.getChildren();
-  const oldChildNodes = oldNode.getChildren();
-
-  const patchList: IPatchNode[] = [];
-
-  let curr: MarkdownNode;
-  let oldCurr: MarkdownNode;
-
-  for (let i = 0; i < childNodes.length; i++) {
-    curr = childNodes[i];
-    oldCurr = oldChildNodes[i];
-
-    if (!oldCurr) {
-      if (oldChildNodes[i - 1]) {
-        if (isBlock(oldChildNodes[i - 1])) {
-          patchList.push(create('insertAfter', oldNode, i - 1, curr));
-        } else {
-          return true;
-        }
-      } else {
-        if (isBlock(oldNode)) {
-          patchList.push(create('append', oldNode, 0, curr));
-        } else {
-          return true;
-        }
-      }
-
-      continue;
-    }
-
-    if (curr.type !== oldCurr.type) {
-      if (isBlock(oldCurr)) {
-        patchList.push(create('replace', oldNode, i, node));
-      } else {
-        return true;
-      }
-    }
-
-    const result = diff(curr, oldCurr);
-
-    if (typeof result === 'boolean') {
-      if (result) {
-        if (isBlock(oldCurr)) {
-          patchList.push(create('replace', oldNode, i, curr));
-        } else {
-          return true;
-        }
-      }
-    } else {
-      patchList.push(...result);
-    }
-  }
-
-  for (let i = childNodes.length; i < oldChildNodes.length; i++) {
-    patchList.push(create('remove', oldChildNodes[i]));
-  }
-
-  if (!patchList.length) {
-    return false;
-  }
-
-  return patchList;
-}
-
-function patch(context: Editor, patchList: IPatchNode[]) {
-  let curr: IPatchNode;
-
-  for (let i = 0; i < patchList.length; i++) {
-    curr = patchList[i];
-
-    switch (curr.type) {
-      case 'remove':
-        curr.update((dom) => dom.remove());
-
-        break;
-
-      case 'insertAfter':
-        curr.update((dom) => {
-          dom.insertAdjacentHTML(
-            'afterend',
-            context.renderer.render(curr.updateNode as MarkdownNode)
-          );
-        });
-
-        break;
-
-      case 'append':
-        curr.update((dom) => {
-          dom.insertAdjacentHTML(
-            'afterbegin',
-            context.renderer.render(curr.updateNode as MarkdownNode)
-          );
-        });
-
-        break;
-
-      case 'replace':
-        curr.update((dom) => {
-          dom.outerHTML = context.renderer.render(curr.updateNode as MarkdownNode);
-        });
-
-        break;
-
-      default:
-        break;
-    }
-  }
 }
 
 class SyncDoc {
@@ -153,6 +18,8 @@ class SyncDoc {
   public attach(node: MarkdownNode, el: Node) {
     el.$virtNode = node;
     node.meta.$dom = el;
+
+    this.getKey(node);
 
     if (node instanceof Image) {
       return false;
@@ -167,7 +34,7 @@ class SyncDoc {
       }
     }
 
-    const children = node.getChildren();
+    const children = node.children;
     const elChildren = el.childNodes;
 
     for (let i = 0; i < children.length; i++) {
@@ -176,15 +43,128 @@ class SyncDoc {
   }
 
   public sync(node: MarkdownNode, oldNode: MarkdownNode) {
-    const patchList = diff(node, oldNode);
+    return this.diff(node, oldNode);
+  }
 
-    if (typeof patchList !== 'boolean') {
-      patch(this.context, patchList);
+  private diff(newNode: MarkdownNode, oldNode: MarkdownNode): boolean {
+    const newChildren = newNode.children;
+    const oldChildren = oldNode.children;
 
-      return true;
+    let nextIndex = 0;
+    let lastIndex = 0;
+
+    let changed = false;
+
+    for (; nextIndex < newChildren.length; nextIndex++) {
+      const oldIndex = oldChildren.findIndex((old) => this.isSomeNode(newChildren[nextIndex], old));
+
+      if (oldIndex !== -1) {
+        if (oldIndex < lastIndex) {
+          this.moveTo(oldChildren[oldIndex], nextIndex, oldNode);
+
+          changed = true;
+        } else {
+          lastIndex = oldIndex;
+        }
+
+        oldChildren[oldIndex].meta.synced = true;
+      } else {
+        lastIndex = Math.max(nextIndex, lastIndex);
+
+        if (!oldChildren[nextIndex]) {
+          this.insert(newChildren[nextIndex], nextIndex, oldNode);
+
+          changed = true;
+
+          continue;
+        } else if (this.isSomeNodeType(newChildren[nextIndex], oldChildren[nextIndex])) {
+          if (this.isTextChanged(newChildren[nextIndex], oldChildren[nextIndex])) {
+            this.insert(newChildren[nextIndex], nextIndex, oldNode);
+
+            changed = true;
+          } else {
+            const childChanged = this.diff(newChildren[nextIndex], oldChildren[nextIndex]);
+
+            if (!changed) {
+              changed = childChanged;
+            }
+
+            oldChildren[nextIndex].meta.synced = true;
+          }
+        } else {
+          this.insert(newChildren[nextIndex], nextIndex, oldNode);
+
+          changed = true;
+        }
+      }
     }
 
-    return false;
+    for (let i = 0; i < oldChildren.length; i++) {
+      if (!oldChildren[i].meta.synced) {
+        this.remove(oldNode, oldChildren[i]);
+
+        changed = true;
+      }
+    }
+
+    return changed;
+  }
+
+  private getKey(node: MarkdownNode) {
+    if (node.meta.key) {
+      return node.meta.key;
+    }
+
+    const { inputIndex, inputEndIndex } = getSourcePosition(node);
+
+    return (node.meta.key = this.context.source.slice(inputIndex, inputEndIndex));
+  }
+
+  private isTextChanged(newNode: MarkdownNode, oldNode: MarkdownNode) {
+    return (
+      newNode instanceof Text &&
+      oldNode instanceof Text &&
+      newNode.getLiteral() !== oldNode.getLiteral()
+    );
+  }
+
+  private isSomeNode(newNode: MarkdownNode, oldNode: MarkdownNode) {
+    return (
+      this.isSomeNodeType(newNode, oldNode) &&
+      !oldNode.meta.synced &&
+      this.getKey(newNode) === this.getKey(oldNode)
+    );
+  }
+
+  private isSomeNodeType(newNode: MarkdownNode, oldNode: MarkdownNode) {
+    return newNode.type === oldNode.type;
+  }
+
+  private moveTo(oldNode: MarkdownNode, newIndex: number, parent: MarkdownNode) {
+    const next = (parent.meta.$dom as HTMLElement).childNodes[newIndex + 1];
+
+    if (next) {
+      (parent.meta.$dom as HTMLElement).insertBefore(oldNode.meta.$dom, next);
+    } else {
+      (parent.meta.$dom as HTMLElement).appendChild(oldNode.meta.$dom);
+    }
+  }
+
+  private insert(newNode: MarkdownNode, index: number, parent: MarkdownNode) {
+    const prev = (parent.meta.$dom as HTMLElement).childNodes[index - 1];
+
+    if (prev && prev instanceof HTMLElement) {
+      prev.insertAdjacentHTML('afterend', this.context.renderer.render(newNode));
+    } else {
+      (parent.meta.$dom as HTMLElement).insertAdjacentHTML(
+        'afterbegin',
+        this.context.renderer.render(newNode)
+      );
+    }
+  }
+
+  private remove(parent: MarkdownNode, oldNode: MarkdownNode) {
+    parent.meta.$dom.removeChild(oldNode.meta.$dom);
   }
 }
 

@@ -51,7 +51,7 @@ export class Editor {
   private oldDoc: MarkdownNode;
 
   private innerRoot: Document;
-  private source = '';
+  private innerSource = '';
 
   public constructor(options: EditorOptions) {
     const { renderer, doc = '' } = options;
@@ -62,13 +62,13 @@ export class Editor {
 
     const rendererBuilder = HtmlRenderer.builder();
     if (renderer?.attributeProvider) {
-      this.renderer = rendererBuilder.attributeProviderFactory(renderer.attributeProvider).build();
-    } else {
-      this.renderer = rendererBuilder.build();
+      rendererBuilder.attributeProviderFactory(renderer.attributeProvider);
     }
 
-    this.source = doc;
-    this.innerDoc = this.oldDoc = this.parser.parse(this.source);
+    this.renderer = rendererBuilder.build();
+
+    this.innerSource = doc;
+    this.innerDoc = this.oldDoc = this.parser.parse(this.innerSource);
 
     options.parent.appendChild(this.editorDOM);
     this.innerRoot = options.root ?? this.editorDOM.ownerDocument;
@@ -87,8 +87,8 @@ export class Editor {
     return this.innerRoot;
   }
 
-  public get document() {
-    return this.source;
+  public get source() {
+    return this.innerSource;
   }
 
   public get doc() {
@@ -97,7 +97,7 @@ export class Editor {
 
   public dispatch(action: InputAction) {
     if (typeof action.to === 'undefined') {
-      action.to = this.source.length;
+      action.to = this.innerSource.length;
     }
 
     if (!this.update(action)) {
@@ -110,20 +110,20 @@ export class Editor {
   private update(update: Update): boolean {
     update.text ??= '';
 
-    const oldSource = this.source;
+    const oldSource = this.innerSource;
 
-    this.source = this.source.slice(0, update.from) + update.text + this.source.slice(update.to);
+    this.innerSource =
+      this.innerSource.slice(0, update.from) + update.text + this.innerSource.slice(update.to);
 
-    if (this.source === oldSource) {
+    if (this.innerSource === oldSource) {
       return false;
     }
 
     this.oldDoc = this.innerDoc;
-    this.innerDoc = this.parser.parse(this.source);
-
-    console.log(this.innerDoc);
+    this.innerDoc = this.parser.parse(this.innerSource);
 
     const result = this.syncDoc.sync(this.innerDoc, this.oldDoc);
+
     this.attachNode();
 
     return result;

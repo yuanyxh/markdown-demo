@@ -1132,6 +1132,7 @@ export declare class ListItem extends Block {
 export declare abstract class MarkdownNode {
   private innerType;
   private innerMeta;
+  private innerChildren;
   private parent;
   private firstChild;
   private lastChild;
@@ -1142,6 +1143,7 @@ export declare abstract class MarkdownNode {
   get meta(): Record<string, any>;
   set meta(meta: Record<string, any>);
   get type(): string;
+  get children(): MarkdownNode[];
   abstract accept(visitor: Visitor): void;
   isBlock(): boolean;
   getNext(): MarkdownNode | null;
@@ -1149,7 +1151,6 @@ export declare abstract class MarkdownNode {
   getFirstChild(): MarkdownNode | null;
   getLastChild(): MarkdownNode | null;
   getParent(): MarkdownNode | null;
-  getChildren(): MarkdownNode[];
   setParent(parent: MarkdownNode): void;
   appendChild(child: MarkdownNode): void;
   prependChild(child: MarkdownNode): void;

@@ -9,6 +9,7 @@ import type { Visitor } from '../interfaces/Visitor';
 abstract class MarkdownNode {
   private innerType: string;
   private innerMeta: Record<string, any> = {};
+  private innerChildren: MarkdownNode[] = [];
 
   private parent: MarkdownNode | null = null;
   private firstChild: MarkdownNode | null = null;
@@ -31,6 +32,28 @@ abstract class MarkdownNode {
 
   public get type() {
     return this.innerType;
+  }
+
+  public get children() {
+    if (this.innerChildren.length) {
+      return this.innerChildren;
+    }
+
+    let curr = this.getFirstChild();
+
+    const children: MarkdownNode[] = [];
+
+    if (!curr) {
+      return children;
+    }
+
+    children.push(curr);
+
+    while ((curr = curr.getNext())) {
+      children.push(curr);
+    }
+
+    return children;
   }
 
   public abstract accept(visitor: Visitor): void;
@@ -58,25 +81,6 @@ abstract class MarkdownNode {
   public getParent(): MarkdownNode | null {
     return this.parent;
   }
-
-  public getChildren(): MarkdownNode[] {
-    let curr = this.getFirstChild();
-
-    const children: MarkdownNode[] = [];
-
-    if (!curr) {
-      return children;
-    }
-
-    children.push(curr);
-
-    while ((curr = curr.getNext())) {
-      children.push(curr);
-    }
-
-    return children;
-  }
-
   public setParent(parent: MarkdownNode) {
     this.parent = parent;
   }
