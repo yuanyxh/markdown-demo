@@ -80,6 +80,7 @@ class SyncDoc {
         } else if (this.isSomeNodeType(newChildren[nextIndex], oldChildren[nextIndex])) {
           if (this.isTextChanged(newChildren[nextIndex], oldChildren[nextIndex])) {
             this.insert(newChildren[nextIndex], nextIndex, oldNode);
+            // this.replaceText(newChildren[nextIndex] as Text, oldChildren[nextIndex] as Text);
 
             changed = true;
           } else {
@@ -138,6 +139,10 @@ class SyncDoc {
 
   private isSomeNodeType(newNode: MarkdownNode, oldNode: MarkdownNode) {
     return newNode.type === oldNode.type;
+  }
+
+  private replaceText(newNode: Text, oldNode: Text) {
+    (oldNode.meta.$dom as HTMLElement).textContent = newNode.getLiteral();
   }
 
   private moveTo(oldNode: MarkdownNode, newIndex: number, parent: MarkdownNode) {
