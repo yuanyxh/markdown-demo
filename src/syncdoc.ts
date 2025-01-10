@@ -1,8 +1,11 @@
-import type { Editor } from './main';
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import { FencedCodeBlock, Image, IndentedCodeBlock, Text } from 'commonmark-java-js';
+import type Editor from './editor';
+
+import type { Text as MarkdownText } from 'commonmark-java-js';
+
 import { getSourcePosition } from './utils/source';
+import TypeTools from './utils/typetools';
 
 interface SyncDocConfig {
   context: Editor;
@@ -21,11 +24,11 @@ class SyncDoc {
 
     this.getKey(node);
 
-    if (node instanceof Image) {
+    if (TypeTools.isImage(node)) {
       return false;
     }
 
-    if (node instanceof FencedCodeBlock || node instanceof IndentedCodeBlock) {
+    if (TypeTools.isCodeBlock(node)) {
       if (
         el.firstChild instanceof HTMLElement &&
         el.firstChild.tagName.toLocaleLowerCase() === 'code'
@@ -52,15 +55,20 @@ class SyncDoc {
 
     let nextIndex = 0;
     let lastIndex = 0;
+    let newChild: MarkdownNode;
+    let oldChild: MarkdownNode;
 
     let changed = false;
 
     for (; nextIndex < newChildren.length; nextIndex++) {
-      const oldIndex = oldChildren.findIndex((old) => this.isSomeNode(newChildren[nextIndex], old));
+      newChild = newChildren[nextIndex];
+      oldChild = oldChildren[nextIndex];
+
+      const oldIndex = oldChildren.findIndex((old) => this.isSomeNode(newChild, old));
 
       if (oldIndex !== -1) {
         if (oldIndex < lastIndex) {
-          this.moveTo(oldChildren[oldIndex], nextIndex, oldNode);
+          this.moveTo(oldChild, nextIndex, oldNode);
 
           changed = true;
         } else {
@@ -71,29 +79,32 @@ class SyncDoc {
       } else {
         lastIndex = Math.max(nextIndex, lastIndex);
 
-        if (!oldChildren[nextIndex]) {
-          this.insert(newChildren[nextIndex], nextIndex, oldNode);
+        if (!oldChild) {
+          this.insert(newChild, nextIndex, oldNode);
 
           changed = true;
 
           continue;
-        } else if (this.isSomeNodeType(newChildren[nextIndex], oldChildren[nextIndex])) {
-          if (this.isTextChanged(newChildren[nextIndex], oldChildren[nextIndex])) {
-            this.insert(newChildren[nextIndex], nextIndex, oldNode);
-            // this.replaceText(newChildren[nextIndex] as Text, oldChildren[nextIndex] as Text);
+        } else if (this.isSomeNodeType(newChild, oldChild)) {
+          if (
+            TypeTools.isMarkdownText(newChild) &&
+            TypeTools.isMarkdownText(oldChild) &&
+            this.isTextChanged(newChild, oldChild)
+          ) {
+            this.replaceText(newChild, oldChild);
 
             changed = true;
           } else {
-            const childChanged = this.diff(newChildren[nextIndex], oldChildren[nextIndex]);
+            const childChanged = this.diff(newChild, oldChild);
 
             if (!changed) {
               changed = childChanged;
             }
-
-            oldChildren[nextIndex].meta.synced = true;
           }
+
+          oldChild.meta.synced = true;
         } else {
-          this.insert(newChildren[nextIndex], nextIndex, oldNode);
+          this.insert(newChild, nextIndex, oldNode);
 
           changed = true;
         }
@@ -121,18 +132,14 @@ class SyncDoc {
     return (node.meta.key = this.context.source.slice(inputIndex, inputEndIndex));
   }
 
-  private isTextChanged(newNode: MarkdownNode, oldNode: MarkdownNode) {
-    return (
-      newNode instanceof Text &&
-      oldNode instanceof Text &&
-      newNode.getLiteral() !== oldNode.getLiteral()
-    );
+  private isTextChanged(newNode: MarkdownText, oldNode: MarkdownText) {
+    return newNode.getLiteral() !== oldNode.getLiteral();
   }
 
   private isSomeNode(newNode: MarkdownNode, oldNode: MarkdownNode) {
     return (
-      this.isSomeNodeType(newNode, oldNode) &&
       !oldNode.meta.synced &&
+      this.isSomeNodeType(newNode, oldNode) &&
       this.getKey(newNode) === this.getKey(oldNode)
     );
   }
@@ -141,30 +148,27 @@ class SyncDoc {
     return newNode.type === oldNode.type;
   }
 
-  private replaceText(newNode: Text, oldNode: Text) {
-    (oldNode.meta.$dom as HTMLElement).textContent = newNode.getLiteral();
+  private replaceText(newNode: MarkdownText, oldNode: MarkdownText) {
+    oldNode.meta.$dom.textContent = newNode.getLiteral();
   }
 
   private moveTo(oldNode: MarkdownNode, newIndex: number, parent: MarkdownNode) {
-    const next = (parent.meta.$dom as HTMLElement).childNodes[newIndex + 1];
+    const next = parent.meta.$dom.childNodes[newIndex + 1];
 
     if (next) {
-      (parent.meta.$dom as HTMLElement).insertBefore(oldNode.meta.$dom, next);
+      parent.meta.$dom.insertBefore(oldNode.meta.$dom, next);
     } else {
-      (parent.meta.$dom as HTMLElement).appendChild(oldNode.meta.$dom);
+      parent.meta.$dom.appendChild(oldNode.meta.$dom);
     }
   }
 
   private insert(newNode: MarkdownNode, index: number, parent: MarkdownNode) {
-    const prev = (parent.meta.$dom as HTMLElement).childNodes[index - 1];
+    const prev = parent.meta.$dom.childNodes[index - 1];
 
-    if (prev && prev instanceof HTMLElement) {
+    if (prev && TypeTools.isElement(prev)) {
       prev.insertAdjacentHTML('afterend', this.context.renderer.render(newNode));
     } else {
-      (parent.meta.$dom as HTMLElement).insertAdjacentHTML(
-        'afterbegin',
-        this.context.renderer.render(newNode)
-      );
+      parent.meta.$dom.insertAdjacentHTML('afterbegin', this.context.renderer.render(newNode));
     }
   }
 

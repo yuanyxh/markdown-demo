@@ -1,4 +1,4 @@
-import type { Editor } from './main';
+import type Editor from './editor';
 
 import { getPlainData } from './data';
 
@@ -69,9 +69,7 @@ class EditorInput {
 
   private onBeforeInput(e: InputEvent) {
     if (this.handlers[e.inputType]) {
-      console.time('one');
       this.handlers[e.inputType].call(this.context, e);
-      console.timeEnd('one');
     }
   }
 
@@ -86,7 +84,7 @@ class EditorInput {
       const range = selection.getRangeAt(0);
       const { from, to } = this.context.souremap.locate(range);
 
-      console.log(this.context.source.charAt(from));
+      console.log(from, to, this.context.source.charAt(from));
     }
   }
 

@@ -1,5 +1,7 @@
 import type { MarkdownNode, Block } from 'commonmark-java-js';
 
+import TypeTools from './typetools';
+
 export function getSourcePosition(node: MarkdownNode) {
   const spans = node.getSourceSpans();
 
@@ -44,7 +46,7 @@ export function findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: 
   let element: HTMLElement | null = null;
   let position = 0;
 
-  if (node instanceof HTMLElement) {
+  if (TypeTools.isElement(node)) {
     element = node;
   } else {
     element = node.parentElement;
@@ -62,9 +64,9 @@ export function findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: 
     element = elementParent;
   }
 
-  if (node instanceof HTMLElement && offset !== 0) {
+  if (TypeTools.isElement(node) && offset !== 0) {
     position += node.outerHTML.length;
-  } else if (node instanceof Text) {
+  } else if (TypeTools.isText(node)) {
     if (node.parentElement && node.nodeValue) {
       position += node.parentElement.outerHTML.indexOf(node.nodeValue);
     }

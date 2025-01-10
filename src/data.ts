@@ -1,6 +1,4 @@
-function filterImageFile(file: File) {
-  return file.type.startsWith('image/');
-}
+import TypeTools from './utils/typetools';
 
 function toImageSource(images: File[]) {
   return images
@@ -24,7 +22,7 @@ export function getPlainData(e: InputEvent) {
   const files = e.dataTransfer.files;
 
   if (files && files.length) {
-    const images = Array.from(files).filter(filterImageFile);
+    const images = Array.from(files).filter(TypeTools.isImageFile);
 
     return toImageSource(images);
   } else {

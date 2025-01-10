@@ -1,16 +1,9 @@
 import type { MarkdownNode } from 'commonmark-java-js';
-import type { Editor } from './main';
 
-import {
-  Code,
-  FencedCodeBlock,
-  HtmlBlock,
-  IndentedCodeBlock,
-  SoftLineBreak,
-  ThematicBreak
-} from 'commonmark-java-js';
+import type Editor from './editor';
 
 import { findHtmlSelectionPoint, getContentIndex, getSourcePosition } from './utils/source';
+import TypeTools from './utils/typetools';
 
 const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
   let curr: Node | null = node;
@@ -22,7 +15,7 @@ const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
       continue;
     }
 
-    if (!(curr instanceof HTMLElement && curr.$virtNode instanceof HtmlBlock)) {
+    if (!(TypeTools.isElement(curr) && TypeTools.isHtmlBlock(curr.$virtNode))) {
       return -1;
     }
 
@@ -39,7 +32,7 @@ const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
 };
 
 const locateHr: LocateHandler = function locateHr(node, offset) {
-  if (!(node instanceof HTMLElement)) {
+  if (!TypeTools.isElement(node)) {
     return -1;
   }
 
@@ -49,11 +42,11 @@ const locateHr: LocateHandler = function locateHr(node, offset) {
     return -1;
   }
 
-  if (el.$virtNode.isBlock() && el.nextSibling) {
+  if (TypeTools.isBlockNode(el.$virtNode) && el.nextSibling) {
     el = el.nextSibling;
   }
 
-  if (!(el.$virtNode instanceof ThematicBreak)) {
+  if (!TypeTools.isThematicBreak(el.$virtNode)) {
     return -1;
   }
 
@@ -67,20 +60,13 @@ const locateHr: LocateHandler = function locateHr(node, offset) {
 };
 
 const locateCode: LocateHandler = function locateCode(node, offset) {
-  if (!(node instanceof Text && node.parentElement)) {
+  if (!(TypeTools.isText(node) && node.parentElement)) {
     return -1;
   }
 
   const mNode = node.parentElement.$virtNode;
 
-  if (
-    !(
-      mNode &&
-      (mNode instanceof FencedCodeBlock ||
-        mNode instanceof IndentedCodeBlock ||
-        mNode instanceof Code)
-    )
-  ) {
+  if (!(mNode && TypeTools.isCode(mNode))) {
     return -1;
   }
 
@@ -96,7 +82,7 @@ const locateCode: LocateHandler = function locateCode(node, offset) {
     literal = literal.slice(0, literal.length - 1);
   }
 
-  if (mNode instanceof FencedCodeBlock) {
+  if (TypeTools.isFencedCodeBlock(mNode)) {
     inputIndex += (mNode.getOpeningFenceLength() || 0) + (mNode.getFenceIndent() || 0);
   }
 
@@ -110,7 +96,7 @@ const locateCode: LocateHandler = function locateCode(node, offset) {
 };
 
 const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
-  if (node instanceof Text && node.parentElement) {
+  if (TypeTools.isText(node) && node.parentElement) {
     const el = node.parentElement;
 
     const textNode = el.$virtNode;
@@ -139,7 +125,7 @@ const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
     childMarkdownNode = childMarkdownNode.getNext();
   }
 
-  if (childMarkdownNode instanceof SoftLineBreak) {
+  if (childMarkdownNode && TypeTools.isSoftLineBreak(childMarkdownNode)) {
     childMarkdownNode = childMarkdownNode.getPrevious();
 
     isSoftLineBreak = true;
