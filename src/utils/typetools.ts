@@ -59,6 +59,18 @@ class TypeTools {
     return data.type === 'softline-break';
   }
 
+  public static isTransformNode(data: MarkdownNode): boolean {
+    return [
+      'image',
+      'link',
+      'html-block',
+      'html-inline',
+      'emphasis',
+      'strong-emphasis',
+      'text'
+    ].includes(data.type);
+  }
+
   public static isImageFile(file: File): file is File {
     return file.type.startsWith('image/');
   }

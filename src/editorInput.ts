@@ -24,7 +24,7 @@ const insertPlainText: TInputHandlerFn = function insertPlainText(this: Editor, 
       range.from = range.to = range.from + text.length;
     }
 
-    this.updateSelection({ from: range.from, to: range.to });
+    this.dispatch({ type: 'selection', from: range.from, to: range.to });
 
     return true;
   }
@@ -100,16 +100,7 @@ class EditorInput {
       return false;
     }
 
-    const selection = this.context.root.getSelection();
-
-    if (selection) {
-      const range = selection.getRangeAt(0);
-      const { from, to } = this.context.locate(range);
-
-      console.log(range);
-      console.log(from, to, this.context.source.charAt(from), this.context.source.charAt(to));
-      console.log(this.context.source.lineAt(from), this.context.source.lineAt(to));
-    }
+    this.context.checkSelection();
   }
 
   public static create(config: EditorInputConfig) {

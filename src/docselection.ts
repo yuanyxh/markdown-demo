@@ -50,8 +50,10 @@ class DocSelection {
     const selectionRange = this.locateRange(updateSelection.from, updateSelection.to);
 
     if (selectionRange) {
-      this.setRange(selectionRange);
+      return this.setRange(selectionRange);
     }
+
+    return false;
   }
 
   public locateRange(from: number, to: number): SelectionRange | false {
@@ -96,52 +98,50 @@ class DocSelection {
       curr = children[i];
       next = children[i + 1];
 
+      if (next && position > curr.inputEndIndex && position < next.inputIndex) {
+        return { node: getDomOfType(node), offset: i + 1 };
+      }
+
       if (position >= curr.inputIndex && position <= curr.inputEndIndex) {
-        if ((nodePoint = this.findNodePoint(curr, position))) {
+        nodePoint = this.findNodePoint(curr, position);
+
+        if (nodePoint) {
           return nodePoint;
-        } else {
-          if (TypeTools.isMarkdownText(curr)) {
-            nodePoint = { node: getDomOfType(curr), offset: position - curr.inputIndex };
+        }
 
-            break;
-          }
+        if (TypeTools.isMarkdownText(curr)) {
+          return { node: getDomOfType(curr), offset: position - curr.inputIndex };
+        }
 
-          if (TypeTools.isCode(curr)) {
-            const textRange = NodeTools.codePoint(this.context.source, curr);
+        if (TypeTools.isCode(curr)) {
+          const textRange = NodeTools.codePoint(this.context.source, curr);
 
-            if (textRange !== false) {
-              let inputIndex = curr.inputIndex;
+          if (textRange !== false) {
+            let inputIndex = curr.inputIndex;
 
-              if (TypeTools.isFencedCodeBlock(curr)) {
-                inputIndex += (curr.getOpeningFenceLength() || 0) + (curr.getFenceIndent() || 0);
-              }
+            if (TypeTools.isFencedCodeBlock(curr)) {
+              inputIndex += (curr.getOpeningFenceLength() || 0) + (curr.getFenceIndent() || 0);
+            }
 
-              if (
-                position >= inputIndex + textRange.textStart &&
-                position <= inputIndex + textRange.textStart + textRange.textEnd
-              ) {
-                nodePoint = {
-                  node: getDomOfType(curr),
-                  offset: position - inputIndex - textRange.textStart
-                };
-
-                break;
-              }
+            if (
+              position >= inputIndex + textRange.textStart &&
+              position <= inputIndex + textRange.textStart + textRange.textEnd
+            ) {
+              return {
+                node: getDomOfType(curr),
+                offset: position - inputIndex - textRange.textStart
+              };
             }
           }
-
-          if (position === curr.inputIndex) {
-            nodePoint = { node: getDomOfType(node), offset: i };
-          } else if (position === curr.inputEndIndex) {
-            nodePoint = { node: getDomOfType(node), offset: i + 1 };
-          } else {
-            nodePoint = { node: getDomOfType(node), offset: i === 0 ? 0 : i + 1 };
-          }
-
-          break;
         }
-      } else if (next && position > curr.inputEndIndex && position < next.inputIndex) {
-        nodePoint = { node: getDomOfType(node), offset: i + 1 };
+
+        if (position === curr.inputIndex) {
+          nodePoint = { node: getDomOfType(node), offset: i };
+        } else if (position === curr.inputEndIndex) {
+          nodePoint = { node: getDomOfType(node), offset: i + 1 };
+        } else {
+          nodePoint = { node: getDomOfType(node), offset: i === 0 ? 0 : i + 1 };
+        }
 
         break;
       }

@@ -9,6 +9,7 @@ import SyncDoc from './syncdoc';
 import DocSelection from './docselection';
 import Source from './source';
 import HtmlRenderer from './renderer/HtmlRenderer';
+import Scope from './scope';
 
 interface RendererConfig {
   attributeProvider: AttributeProviderFactory;
@@ -21,8 +22,6 @@ interface EditorOptions {
   renderer?: RendererConfig;
 }
 
-type InputType = 'insert' | 'delete' | 'replace' | 'selection';
-
 interface InputAction {
   type: InputType;
   from: number;
@@ -33,6 +32,8 @@ interface InputAction {
 
 type Update = Pick<InputAction, 'from' | 'to' | 'text'>;
 
+type InputType = 'insert' | 'delete' | 'replace' | 'selection';
+
 class Editor {
   private editorDOM = createEditorElement();
 
@@ -42,6 +43,7 @@ class Editor {
   private docSelection: DocSelection;
   private syncDoc: SyncDoc;
   private editorInput: EditorInput;
+  private scope: Scope;
 
   private innerDoc: MarkdownNode;
   private oldDoc: MarkdownNode;
@@ -76,6 +78,7 @@ class Editor {
       this.souremap = new SourceMap({ context: this });
       this.syncDoc = new SyncDoc({ context: this });
       this.docSelection = new DocSelection({ context: this });
+      this.scope = new Scope({ context: this });
     }
 
     {
@@ -108,20 +111,37 @@ class Editor {
       action.to = this.innerSource.length;
     }
 
-    if (!this.update(action)) {
-      return false;
+    let result = false;
+
+    switch (action.type) {
+      case 'insert':
+        result = this.update(action);
+
+        break;
+
+      case 'delete':
+        break;
+
+      case 'replace':
+        break;
+
+      case 'selection':
+        result = this.docSelection.updateSelection(action);
+
+        break;
+
+      default:
+        break;
     }
 
-    return true;
+    return result;
   }
 
   public locate(range: StaticRange) {
     return this.souremap.locate(range);
   }
 
-  public updateSelection(selection: UpdateSelection) {
-    return this.docSelection.updateSelection(selection);
-  }
+  public checkSelection() {}
 
   public render(node: MarkdownNode) {
     return this.renderer.render(node);
@@ -153,12 +173,12 @@ class Editor {
     this.editorDOM.remove();
   }
 
-  public hasFocus() {
-    return this.innerRoot.activeElement === this.editorDOM;
-  }
-
   private attachNode() {
     this.syncDoc.attach(this.innerDoc, this.editorDOM);
+  }
+
+  public hasFocus() {
+    return this.innerRoot.activeElement === this.editorDOM;
   }
 
   public static create(options: EditorOptions) {
