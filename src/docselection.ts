@@ -23,6 +23,20 @@ interface SelectionRange {
   endOffset: number;
 }
 
+function findNodePoint(node: MarkdownNode, position: number): NodePoint | false {
+  // image | code | html | gap
+  const children = node.children;
+
+  let curr: MarkdownNode;
+  let nodePoint: NodePoint | false = false;
+
+  for (let i = 0; i < children.length; i++) {
+    curr = children[i];
+  }
+
+  return nodePoint;
+}
+
 class DocSelection {
   private context: Editor;
 
@@ -49,17 +63,21 @@ class DocSelection {
       [updateSelection.from, updateSelection.to] = [updateSelection.to, updateSelection.from];
     }
 
-    this.setRange(this.locateRange(updateSelection.from, updateSelection.to));
+    const selectionRange = this.locateRange(updateSelection.from, updateSelection.to);
+
+    if (selectionRange) {
+      this.setRange(selectionRange);
+    }
   }
 
-  public locateRange(from: number, to: number): SelectionRange {
-    let start: NodePoint;
-    let end: NodePoint;
+  public locateRange(from: number, to: number): SelectionRange | false {
+    let start: NodePoint | false;
+    let end: NodePoint | false;
 
     if (from === 0) {
       start = { node: this.context.doc, offset: 0 };
     } else {
-      start = this.findPoint(this.context.doc, from);
+      start = this.findNodePoint(this.context.doc, from);
     }
 
     if (to === from) {
@@ -67,7 +85,11 @@ class DocSelection {
     } else if (to === this.context.length) {
       end = { node: this.context.doc, offset: this.context.doc.children.length };
     } else {
-      end = this.findPoint(this.context.doc, to);
+      end = this.findNodePoint(this.context.doc, to);
+    }
+
+    if (!(start && end)) {
+      return false;
     }
 
     return {
@@ -78,8 +100,8 @@ class DocSelection {
     };
   }
 
-  private findPoint(node: MarkdownNode, position: number): NodePoint {
-    // image | code | html | gap
+  private findNodePoint(node: MarkdownNode, position: number): NodePoint | false {
+    return findNodePoint(node, position);
   }
 
   private setRange({ startNode, startOffset, endNode, endOffset }: SelectionRange) {

@@ -18,7 +18,7 @@ class Ge {
     return new Ge(this.values.slice(0));
   }
 }
-class I {
+class y {
   constructor(e) {
     i(this, "data", "");
     e !== void 0 && (this.data += e);
@@ -109,7 +109,7 @@ class zt {
   constructor(e = "") {
     i(this, "sb");
     i(this, "lineCount", 0);
-    this.sb = new I(e);
+    this.sb = new y(e);
   }
   add(e) {
     this.lineCount !== 0 && this.sb.append(`
@@ -389,13 +389,13 @@ class w {
     return null;
   }
   static atIndex(e) {
-    return new ve(e, -1, !1);
+    return new Be(e, -1, !1);
   }
   static atColumn(e) {
-    return new ve(-1, e, !1);
+    return new Be(-1, e, !1);
   }
   static finished() {
-    return new ve(-1, -1, !0);
+    return new Be(-1, -1, !0);
   }
 }
 class q {
@@ -419,7 +419,7 @@ class q {
     return this.lines.length === 0;
   }
   getContent() {
-    const e = new I();
+    const e = new y();
     for (let t = 0; t < this.lines.length; t++)
       t !== 0 && e.append(`
 `), e.append(this.lines[t].getContent());
@@ -439,6 +439,8 @@ class U {
     i(this, "innerType");
     i(this, "innerMeta", {});
     i(this, "innerChildren", []);
+    i(this, "innerInputIndex", -1);
+    i(this, "innerInputEndInput", -1);
     i(this, "parent", null);
     i(this, "firstChild", null);
     i(this, "lastChild", null);
@@ -455,6 +457,17 @@ class U {
   }
   get type() {
     return this.innerType;
+  }
+  get inputIndex() {
+    var e;
+    return this.innerInputIndex === -1 && (this.innerInputIndex = ((e = this.getSourceSpans()[0]) == null ? void 0 : e.getInputIndex()) || 0), this.innerInputIndex;
+  }
+  get inputEndIndex() {
+    if (this.innerInputEndInput === -1) {
+      const e = this.getSourceSpans(), t = e[e.length - 1];
+      t ? this.innerInputEndInput = t.getInputIndex() + t.getLength() : this.innerInputEndInput = 0;
+    }
+    return this.innerInputEndInput;
   }
   get children() {
     if (this.innerChildren.length)
@@ -1527,7 +1540,7 @@ const Z = class Z {
  */
 i(Z, "END", ae(0));
 let se = Z;
-class ve extends w {
+class Be extends w {
   constructor(t, r, s) {
     super();
     i(this, "newIndex");
@@ -1666,7 +1679,7 @@ class m {
     return r - 1;
   }
 }
-class Be {
+class Ie {
   constructor(e) {
     i(this, "set");
     this.set = e;
@@ -1703,13 +1716,13 @@ class R {
     return this.set.get(e.charCodeAt(0));
   }
   newBuilder() {
-    return new Be(this.set.clone());
+    return new Ie(this.set.clone());
   }
   static builder(e) {
-    return e ? new Be(e.set.clone()) : new Be(new Ge());
+    return e ? new Ie(e.set.clone()) : new Ie(new Ge());
   }
 }
-i(R, "Builder", Be);
+i(R, "Builder", Ie);
 let Wt = class {
   tryStart(e, t) {
     const r = e.getNextNonSpaceIndex();
@@ -4074,7 +4087,7 @@ const $t = /* @__PURE__ */ new Map([
   }
 };
 i(ze, "NAMED_CHARACTER_REFERENCES", $t);
-let ye = ze;
+let ve = ze;
 const k = class k {
   static getBytes(e) {
     if (window.TextEncoder) {
@@ -4113,7 +4126,7 @@ const k = class k {
           t !== null && t.append(s);
           continue e;
       }
-      t === null && (t = new I(), t.append(e, 0, r)), t.append(n);
+      t === null && (t = new y(), t.append(e, 0, r)), t.append(n);
     }
     return t !== null ? t.toString() : e;
   }
@@ -4141,7 +4154,7 @@ const k = class k {
     let s = e.exec(t);
     if (s === null)
       return t;
-    const n = new I();
+    const n = new y();
     let a = 0;
     do
       n.append(t, a, s.index), r.replace(s[0], n), a = s.index + s[0].length;
@@ -4172,7 +4185,7 @@ i(k, "ESCAPE_IN_URI", /(%[a-fA-F0-9]{0,2}|[^:/?#@!$&'()*+,;=a-zA-Z0-9\-._~])/), 
   "F"
 ]), i(k, "WHITESPACE", /[ \t\r\n]+/), i(k, "UNESCAPE_REPLACER", {
   replace(e, t) {
-    e.charAt(0) === "\\" ? t.append(e, 1, e.length) : t.append(ye.entityToString(e));
+    e.charAt(0) === "\\" ? t.append(e, 1, e.length) : t.append(ve.entityToString(e));
   }
 }), i(k, "URI_REPLACER", {
   replace(e, t) {
@@ -4191,7 +4204,7 @@ let E = k, Yt = class {
     if (r >= T.CODE_BLOCK_INDENT)
       return b.none();
     let s = e.getNextNonSpaceIndex();
-    const n = Ie.checkOpener(
+    const n = ye.checkOpener(
       e.getLine().getContent(),
       s,
       r
@@ -4208,7 +4221,7 @@ const Pe = class Pe extends K {
     i(this, "fenceChar");
     i(this, "openingFenceLength");
     i(this, "firstLine", null);
-    i(this, "otherLines", new I());
+    i(this, "otherLines", new y());
     this.fenceChar = t, this.openingFenceLength = r, this.block.setFenceCharacter(t), this.block.setOpeningFenceLength(r), this.block.setFenceIndent(s);
   }
   getBlock() {
@@ -4263,7 +4276,7 @@ const Pe = class Pe extends K {
   }
 };
 i(Pe, "Factory", Yt);
-let Ie = Pe, jt = class {
+let ye = Pe, jt = class {
   tryStart(e, t) {
     if (e.getIndent() >= T.CODE_BLOCK_INDENT)
       return b.none();
@@ -4457,7 +4470,7 @@ class nt extends K {
     let t = this.lines.length - 1;
     for (; t >= 0 && m.isBlank(this.lines[t]); )
       t--;
-    const r = new I();
+    const r = new y();
     for (let s = 0; s < t + 1; s++)
       r.append(this.lines[s]), r.append(`
 `);
@@ -4605,10 +4618,10 @@ const z = class z extends K {
     let p = u, f = !1;
     const S = t.length;
     for (let H = c; H < S; H++) {
-      const v = t.charAt(H);
-      if (v === "	")
+      const B = t.charAt(H);
+      if (B === "	")
         p += T.columnsToNextTabStop(p);
-      else if (v === " ")
+      else if (B === " ")
         p++;
       else {
         f = !0;
@@ -4689,7 +4702,7 @@ const z = class z extends K {
 };
 i(z, "Factory", _t), i(z, "ListData", pt), i(z, "ListMarkerData", dt);
 let le = z;
-class y {
+class v {
   /**
    * Attempt to scan the contents of a link label (inside the brackets), stopping after the content or returning false.
    * The stopped position can bei either the closing {@code ]}, or the end of the line if the label continues on
@@ -4699,7 +4712,7 @@ class y {
     for (; e.hasNext(); )
       switch (e.peek()) {
         case "\\":
-          e.next(), y.isEscapable(e.peek()) && e.next();
+          e.next(), v.isEscapable(e.peek()) && e.next();
           break;
         case "]":
           return !0;
@@ -4720,7 +4733,7 @@ class y {
       for (; e.hasNext(); )
         switch (e.peek()) {
           case "\\":
-            e.next(), y.isEscapable(e.peek()) && e.next();
+            e.next(), v.isEscapable(e.peek()) && e.next();
             break;
           case `
 `:
@@ -4733,7 +4746,7 @@ class y {
         }
       return !1;
     } else
-      return y.scanLinkDestinationWithBalancedParens(e);
+      return v.scanLinkDestinationWithBalancedParens(e);
   }
   static scanLinkTitle(e) {
     if (!e.hasNext())
@@ -4752,13 +4765,13 @@ class y {
       default:
         return !1;
     }
-    return e.next(), !y.scanLinkTitleContent(e, t) || !e.hasNext() ? !1 : (e.next(), !0);
+    return e.next(), !v.scanLinkTitleContent(e, t) || !e.hasNext() ? !1 : (e.next(), !0);
   }
   static scanLinkTitleContent(e, t) {
     for (; e.hasNext(); ) {
       let r = e.peek();
       if (r === "\\")
-        e.next(), y.isEscapable(e.peek()) && e.next();
+        e.next(), v.isEscapable(e.peek()) && e.next();
       else {
         if (r === t)
           return !0;
@@ -4780,7 +4793,7 @@ class y {
         case " ":
           return !r;
         case "\\":
-          e.next(), y.isEscapable(e.peek()) && e.next();
+          e.next(), v.isEscapable(e.peek()) && e.next();
           break;
         case "(":
           if (t++, t > 32)
@@ -4841,8 +4854,8 @@ class y {
     return !1;
   }
 }
-var Bt = /* @__PURE__ */ ((o) => (o.START_DEFINITION = "START_DEFINITION", o.LABEL = "LABEL", o.DESTINATION = "DESTINATION", o.START_TITLE = "START_TITLE", o.TITLE = "TITLE", o.PARAGRAPH = "PARAGRAPH", o))(Bt || {});
-class vt {
+var It = /* @__PURE__ */ ((o) => (o.START_DEFINITION = "START_DEFINITION", o.LABEL = "LABEL", o.DESTINATION = "DESTINATION", o.START_TITLE = "START_TITLE", o.TITLE = "TITLE", o.PARAGRAPH = "PARAGRAPH", o))(It || {});
+class Bt {
   constructor() {
     i(this, "state", "START_DEFINITION");
     i(this, "paragraphLines", []);
@@ -4909,13 +4922,13 @@ class vt {
     return this.state;
   }
   startDefinition(e) {
-    return this.finishReference(), e.whitespace(), e.next("[") ? (this.state = "LABEL", this.label = new I(), e.hasNext() || this.label.append(`
+    return this.finishReference(), e.whitespace(), e.next("[") ? (this.state = "LABEL", this.label = new y(), e.hasNext() || this.label.append(`
 `), !0) : !1;
   }
   setLabel(e) {
     var r, s;
     const t = e.position();
-    return y.scanLinkLabelContent(e) ? ((r = this.label) == null || r.append(
+    return v.scanLinkLabelContent(e) ? ((r = this.label) == null || r.append(
       e.getSource(t, e.position()).getContent()
     ), e.hasNext() ? e.next("]") ? !e.next(":") || this.label && this.label.length() > 999 || E.normalizeLabelContent(
       this.label.toString()
@@ -4925,7 +4938,7 @@ class vt {
   setDestination(e) {
     e.whitespace();
     const t = e.position();
-    if (!y.scanLinkDestination(e))
+    if (!v.scanLinkDestination(e))
       return !1;
     const r = e.getSource(t, e.position()).getContent();
     this.destination = r.startsWith("<") ? r.substring(1, r.length - 1) : r;
@@ -4950,13 +4963,13 @@ class vt {
         this.titleDelimiter = ")";
         break;
     }
-    return this.titleDelimiter !== "\0" ? (this.state = "TITLE", this.title = new I(), e.next(), e.hasNext() || this.title.append(`
+    return this.titleDelimiter !== "\0" ? (this.state = "TITLE", this.title = new y(), e.next(), e.hasNext() || this.title.append(`
 `)) : this.state = "START_DEFINITION", !0;
   }
   setTitle(e) {
     var r, s;
     const t = e.position();
-    return y.scanLinkTitleContent(e, this.titleDelimiter || "") ? ((r = this.title) == null || r.append(
+    return v.scanLinkTitleContent(e, this.titleDelimiter || "") ? ((r = this.title) == null || r.append(
       e.getSource(t, e.position()).getContent()
     ), e.hasNext() ? (e.next(), e.whitespace(), e.hasNext() ? (this.title = null, !1) : (this.referenceValid = !0, this.paragraphLines.length = 0, this.state = "START_DEFINITION", !0)) : ((s = this.title) == null || s.append(`
 `), !0)) : (this.title = null, !1);
@@ -4973,12 +4986,12 @@ class vt {
     r.setSourceSpans(this.sourceSpans), this.sourceSpans.length = 0, this.definitions.push(r), this.label = null, this.referenceValid = !1, this.destination = null, this.title = null;
   }
 }
-i(vt, "State", Bt);
+i(Bt, "State", It);
 class Xe extends K {
   constructor() {
     super(...arguments);
     i(this, "block", new M());
-    i(this, "linkReferenceDefinitionParser", new vt());
+    i(this, "linkReferenceDefinitionParser", new Bt());
   }
   canHaveLazyContinuationLines() {
     return !0;
@@ -5087,7 +5100,7 @@ class gt {
     this.blockParser = e, this.sourceIndex = t;
   }
 }
-const B = class B {
+const I = class I {
   constructor(e, t, r, s, n, a, l) {
     i(this, "line");
     /**
@@ -5124,20 +5137,20 @@ const B = class B {
     this.blockParserFactories = e, this.inlineParserFactory = t, this.inlineContentParserFactories = r, this.delimiterProcessors = s, this.linkProcessors = n, this.linkMarkers = a, this.includeSourceSpans = l, this.documentBlockParser = new Zt(), this.activateBlockParser(new gt(this.documentBlockParser, 0));
   }
   static getDefaultBlockParserTypes() {
-    return B.CORE_FACTORY_TYPES;
+    return I.CORE_FACTORY_TYPES;
   }
   static calculateBlockParserFactories(e, t) {
     const r = [];
     r.push(...e);
     for (const s of t)
-      r.push(B.NODES_TO_CORE_FACTORIES.get(s));
+      r.push(I.NODES_TO_CORE_FACTORIES.get(s));
     return r;
   }
   static checkEnabledBlockTypes(e) {
     for (const t of e)
-      if (!B.NODES_TO_CORE_FACTORIES.has(t))
+      if (!I.NODES_TO_CORE_FACTORIES.has(t))
         throw new Error(
-          "Can't enable block type " + t + ", possible options are: " + B.NODES_TO_CORE_FACTORIES.keys()
+          "Can't enable block type " + t + ", possible options are: " + I.NODES_TO_CORE_FACTORIES.keys()
         );
   }
   /**
@@ -5188,7 +5201,7 @@ const B = class B {
       const u = this.openBlockParsers[h], p = u.blockParser;
       this.findNextNonSpace();
       const f = p.tryContinue(this);
-      if (f instanceof ve) {
+      if (f instanceof Be) {
         const S = f;
         if (u.sourceIndex = this.getIndex(), S.isFinalize()) {
           this.addSourceSpans(), this.closeBlockParsers(this.openBlockParsers.length - h);
@@ -5216,7 +5229,7 @@ const B = class B {
       h.isReplaceActiveBlockParser() && (p = this.prepareActiveBlockParserForReplacement().getSourceSpans());
       for (let f of h.getBlockParsers())
         this.addChild(
-          new B.OpenBlockParser(f, u)
+          new I.OpenBlockParser(f, u)
         ), p !== null && f.getBlock().setSourceSpans(p), n = f, c = f.isContainer();
     }
     if (!a && !this.isBlank() && this.getActiveBlockParser().canHaveLazyContinuationLines())
@@ -5228,13 +5241,13 @@ const B = class B {
     else {
       let h = new Xe();
       this.addChild(
-        new B.OpenBlockParser(h, l)
+        new I.OpenBlockParser(h, l)
       ), this.addLine();
     }
   }
   setLine(e, t) {
     this.lineIndex++, this.index = 0, this.column = 0, this.columnIsInTab = !1;
-    let r = B.prepareLine(e), s = null;
+    let r = I.prepareLine(e), s = null;
     this.includeSourceSpans !== Se.NONE && (s = ce.of(
       this.lineIndex,
       0,
@@ -5286,7 +5299,7 @@ const B = class B {
   addLine() {
     let e;
     if (this.columnIsInTab) {
-      const r = this.index + 1, s = this.line.getContent().substring(r, this.line.getContent().length), n = T.columnsToNextTabStop(this.column), a = new I();
+      const r = this.index + 1, s = this.line.getContent().substring(r, this.line.getContent().length), n = T.columnsToNextTabStop(this.column), a = new y();
       for (let l = 0; l < n; l++)
         a.append(" ");
       a.append(s), e = a.toString();
@@ -5304,7 +5317,7 @@ const B = class B {
       }
   }
   findBlockStart(e) {
-    const t = new B.MatchedBlockParserImpl(e);
+    const t = new I.MatchedBlockParserImpl(e);
     for (const r of this.blockParserFactories) {
       const s = r.tryStart(this, t);
       if (s instanceof Tt)
@@ -5378,7 +5391,7 @@ const B = class B {
     return e.indexOf("\0") === -1 ? e : e.replace(/\0/g, "�");
   }
 };
-i(B, "CORE_FACTORY_TYPES", /* @__PURE__ */ new Set([
+i(I, "CORE_FACTORY_TYPES", /* @__PURE__ */ new Set([
   Q,
   G,
   F,
@@ -5386,17 +5399,17 @@ i(B, "CORE_FACTORY_TYPES", /* @__PURE__ */ new Set([
   te,
   me,
   X
-])), i(B, "NODES_TO_CORE_FACTORIES", /* @__PURE__ */ new Map([
+])), i(I, "NODES_TO_CORE_FACTORIES", /* @__PURE__ */ new Map([
   [Q, new Te.Factory()],
   [G, new fe.Factory()],
-  [F, new Ie.Factory()],
+  [F, new ye.Factory()],
   [J, new ke.Factory()],
   [te, new De.Factory()],
   [me, new le.Factory()],
   [X, new nt.Factory()]
-])), i(B, "MatchedBlockParserImpl", tr), i(B, "OpenBlockParser", gt);
-let xe = B;
-class yt {
+])), i(I, "MatchedBlockParserImpl", tr), i(I, "OpenBlockParser", gt);
+let xe = I;
+class vt {
   constructor(e) {
     i(this, "delimiterChar");
     this.delimiterChar = e;
@@ -5423,7 +5436,7 @@ class yt {
     return n.addAllFrom(t.getClosers(r)), s.setSourceSpans(n.getSourceSpans()), a.insertAfter(s), r;
   }
 }
-class rr extends yt {
+class rr extends vt {
   constructor() {
     super("*");
   }
@@ -5555,7 +5568,7 @@ const D = class D {
   entity(e, t) {
     const r = e.getSource(t, e.position()).getContent();
     return O.of(
-      new A(ye.entityToString(r)),
+      new A(ve.entityToString(r)),
       e.position()
     );
   }
@@ -5662,7 +5675,7 @@ i(d, "attributeStart", d.asciiLetter.newBuilder().c("_").c(":").build()), i(d, "
 i(d, "attributeValueEnd", R.builder().c(" ").c("	").c(`
 `).c("\v").c("\f").c("\r").c('"').c("'").c("=").c("<").c(">").c("`").build()), i(d, "Factory", or);
 let Me = d;
-var It = /* @__PURE__ */ ((o) => (o.WRAP = "WRAP", o.REPLACE = "REPLACE", o))(It || {});
+var yt = /* @__PURE__ */ ((o) => (o.WRAP = "WRAP", o.REPLACE = "REPLACE", o))(yt || {});
 class ie {
   constructor(e, t, r) {
     i(this, "type");
@@ -5687,7 +5700,7 @@ class ie {
     return this.includeMarker;
   }
 }
-i(ie, "Type", It);
+i(ie, "Type", yt);
 class Dt {
   constructor(e, t) {
     i(this, "node");
@@ -5701,7 +5714,7 @@ class Dt {
     return this.position;
   }
 }
-class lr extends yt {
+class lr extends vt {
   constructor() {
     super("_");
   }
@@ -6171,7 +6184,7 @@ const L = class L {
    */
   static parseLinkDestination(e) {
     const t = e.peek(), r = e.position();
-    if (!y.scanLinkDestination(e))
+    if (!v.scanLinkDestination(e))
       return null;
     let s;
     if (t === "<") {
@@ -6186,7 +6199,7 @@ const L = class L {
    */
   static parseLinkTitle(e) {
     const t = e.position();
-    if (!y.scanLinkTitle(e))
+    if (!v.scanLinkTitle(e))
       return null;
     const r = e.getSource(t, e.position()).getContent(), s = r.substring(1, r.length - 1);
     return E.unescapeString(s);
@@ -6198,7 +6211,7 @@ const L = class L {
     if (!e.next("["))
       return null;
     const t = e.position();
-    if (!y.scanLinkLabelContent(e))
+    if (!v.scanLinkLabelContent(e))
       return null;
     const r = e.position();
     if (!e.next("]"))
@@ -6251,8 +6264,8 @@ const L = class L {
         )
       ), l = this.scanner.position();
     const c = this.scanner.peekCodePoint(), h = r === 0 || m.isPunctuationCodePoint(r), u = r === 0 || m.isWhitespaceCodePoint(r), p = c === 0 || m.isPunctuationCodePoint(c), f = c === 0 || m.isWhitespaceCodePoint(c), S = !f && (!p || u || h), H = !u && (!h || f || p);
-    let v, Ce;
-    return t === "_" ? (v = S && (!H || h), Ce = H && (!S || p)) : (v = S && t === e.getOpeningCharacter(), Ce = H && t === e.getClosingCharacter()), new kt(a, v, Ce);
+    let B, Ce;
+    return t === "_" ? (B = S && (!H || h), Ce = H && (!S || p)) : (B = S && t === e.getOpeningCharacter(), Ce = H && t === e.getClosingCharacter()), new kt(a, B, Ce);
   }
   processDelimiters(e) {
     let t = /* @__PURE__ */ new Map(), r = this.lastDelimiter;
@@ -6335,7 +6348,7 @@ const L = class L {
   }
   mergeIfNeeded(e, t, r) {
     if (e !== null && t !== null && e !== t) {
-      const s = new I();
+      const s = new y();
       s.append(e.getLiteral());
       let n = null;
       this.includeSourceSpans && (n = new We(), n.addAll(e.getSourceSpans()));
@@ -6864,11 +6877,11 @@ const x = class x extends Ne {
         if (C(c))
           l = c;
         else {
-          const v = x.findMaxRunLength(
+          const B = x.findMaxRunLength(
             a,
             s || ""
           );
-          l = Math.max(v + 1, 3);
+          l = Math.max(B + 1, 3);
         }
         const h = r.getClosingFenceLength(), u = C(h) ? h : l, p = x.repeat(
           a,
@@ -6878,14 +6891,14 @@ const x = class x extends Ne {
           u
         ), S = r.getFenceIndent() || 0;
         if (S > 0) {
-          const v = x.repeat(" ", S);
-          this.writer.writePrefix(v), this.writer.pushPrefix(v);
+          const B = x.repeat(" ", S);
+          this.writer.writePrefix(B), this.writer.pushPrefix(B);
         }
         this.writer.raw(p);
         const H = r.getInfo();
         if (C(H) && this.writer.raw(H), this.writer.line(), C(s)) {
-          const v = x.getLines(s);
-          for (const Ce of v)
+          const B = x.getLines(s);
+          for (const Ce of B)
             this.writer.raw(Ce), this.writer.line();
         }
         this.writer.raw(f), S > 0 && this.writer.popPrefix(), this.writer.block();
@@ -7318,7 +7331,7 @@ class rt {
     return new Ct();
   }
   render(e, t) {
-    return t = t || new I(), new dr(this, new pr(t)).render(e), t.toString();
+    return t = t || new y(), new dr(this, new pr(t)).render(e), t.toString();
   }
 }
 /**
@@ -7328,7 +7341,7 @@ i(rt, "Builder", Ct), i(rt, "MarkdownRendererExtension", qt);
 class St extends Ne {
   constructor() {
     super(...arguments);
-    i(this, "sb", new I());
+    i(this, "sb", new y());
   }
   getAltText() {
     return this.sb.toString();
@@ -7824,7 +7837,7 @@ class it {
     return new Lt();
   }
   render(e, t) {
-    t || (t = new I());
+    t || (t = new y());
     const r = new fr(this, new st(t));
     return r.beforeRoot(e), r.render(e), r.afterRoot(e), t.toString();
   }
@@ -7835,7 +7848,7 @@ class it {
 i(it, "Builder", Lt), i(it, "HtmlRendererExtension", Mt);
 export {
   Ne as AbstractVisitor,
-  I as Appendable,
+  y as Appendable,
   Ge as BitSet,
   N as Block,
   Q as BlockQuote,

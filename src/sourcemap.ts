@@ -2,7 +2,7 @@ import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
 
-import { findHtmlSelectionPoint, getContentIndex, getSourcePosition } from './utils/source';
+import { findHtmlSelectionPoint, getContentIndex } from './utils/source';
 import TypeTools from './utils/typetools';
 
 const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
@@ -20,9 +20,7 @@ const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
     }
 
     if (curr === node) {
-      return offset === 0
-        ? getSourcePosition(curr.$virtNode).inputIndex
-        : getSourcePosition(curr.$virtNode).inputEndIndex;
+      return offset === 0 ? curr.$virtNode.inputIndex : curr.$virtNode.inputEndIndex;
     }
 
     return findHtmlSelectionPoint(node, curr, offset);
@@ -56,7 +54,7 @@ const locateHr: LocateHandler = function locateHr(node, offset) {
     return -1;
   }
 
-  return getSourcePosition(hrNode).inputIndex;
+  return hrNode.inputIndex;
 };
 
 const locateCode: LocateHandler = function locateCode(node, offset) {
@@ -72,7 +70,7 @@ const locateCode: LocateHandler = function locateCode(node, offset) {
 
   let literal = mNode.getLiteral();
 
-  let { inputIndex, inputEndIndex } = getSourcePosition(mNode);
+  let { inputIndex, inputEndIndex } = mNode;
 
   if (literal === void 0) {
     return inputEndIndex;
@@ -105,9 +103,7 @@ const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
       return -1;
     }
 
-    const { inputIndex } = getSourcePosition(textNode);
-
-    return inputIndex + offset;
+    return textNode.inputIndex + offset;
   }
 
   const element = node as HTMLElement;
@@ -136,20 +132,16 @@ const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
   }
 
   if (isSoftLineBreak) {
-    const softLineBreakPos = getSourcePosition(childMarkdownNode).inputEndIndex;
-
     const continuousLine = childMarkdownNode.getNext()!.getNext();
 
     if (!continuousLine) {
-      return softLineBreakPos + 1;
+      return childMarkdownNode.inputEndIndex + 1;
     }
 
-    return getSourcePosition(continuousLine).inputIndex;
+    return continuousLine.inputIndex;
   }
 
-  const { inputEndIndex } = getSourcePosition(childMarkdownNode);
-
-  return inputEndIndex;
+  return childMarkdownNode.inputEndIndex;
 };
 
 interface LocateHandler {

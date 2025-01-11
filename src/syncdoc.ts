@@ -4,7 +4,6 @@ import type Editor from './editor';
 
 import type { Text as MarkdownText } from 'commonmark-java-js';
 
-import { getSourcePosition } from './utils/source';
 import TypeTools from './utils/typetools';
 
 interface SyncDocConfig {
@@ -127,9 +126,7 @@ class SyncDoc {
       return node.meta.key;
     }
 
-    const { inputIndex, inputEndIndex } = getSourcePosition(node);
-
-    return (node.meta.key = this.context.source.slice(inputIndex, inputEndIndex));
+    return (node.meta.key = this.context.source.slice(node.inputIndex, node.inputEndIndex));
   }
 
   private isTextChanged(newNode: MarkdownText, oldNode: MarkdownText) {

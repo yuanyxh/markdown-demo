@@ -1,6 +1,5 @@
 import type Editor from './editor';
 import type { Code, FencedCodeBlock, IndentedCodeBlock, MarkdownNode } from 'commonmark-java-js';
-import type HtmlRenderer from './renderer/HtmlRenderer';
 
 declare global {
   interface Node {

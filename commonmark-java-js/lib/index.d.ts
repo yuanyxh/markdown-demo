@@ -1133,6 +1133,8 @@ export declare abstract class MarkdownNode {
   private innerType;
   private innerMeta;
   private innerChildren;
+  private innerInputIndex;
+  private innerInputEndInput;
   private parent;
   private firstChild;
   private lastChild;
@@ -1143,6 +1145,8 @@ export declare abstract class MarkdownNode {
   get meta(): Record<string, any>;
   set meta(meta: Record<string, any>);
   get type(): string;
+  get inputIndex(): number;
+  get inputEndIndex(): number;
   get children(): MarkdownNode[];
   abstract accept(visitor: Visitor): void;
   isBlock(): boolean;

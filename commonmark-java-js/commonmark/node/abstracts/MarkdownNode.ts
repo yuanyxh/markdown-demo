@@ -10,6 +10,8 @@ abstract class MarkdownNode {
   private innerType: string;
   private innerMeta: Record<string, any> = {};
   private innerChildren: MarkdownNode[] = [];
+  private innerInputIndex: number = -1;
+  private innerInputEndInput: number = -1;
 
   private parent: MarkdownNode | null = null;
   private firstChild: MarkdownNode | null = null;
@@ -32,6 +34,29 @@ abstract class MarkdownNode {
 
   public get type() {
     return this.innerType;
+  }
+
+  public get inputIndex() {
+    if (this.innerInputIndex === -1) {
+      this.innerInputIndex = this.getSourceSpans()[0]?.getInputIndex() || 0;
+    }
+
+    return this.innerInputIndex;
+  }
+
+  public get inputEndIndex() {
+    if (this.innerInputEndInput === -1) {
+      const spans = this.getSourceSpans();
+      const lastSpan = spans[spans.length - 1];
+
+      if (!lastSpan) {
+        this.innerInputEndInput = 0;
+      } else {
+        this.innerInputEndInput = lastSpan.getInputIndex() + lastSpan.getLength();
+      }
+    }
+
+    return this.innerInputEndInput;
   }
 
   public get children() {
