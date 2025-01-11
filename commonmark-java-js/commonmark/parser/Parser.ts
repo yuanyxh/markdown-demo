@@ -1,21 +1,16 @@
-import type { Block, MarkdownNode } from "@/node";
-import type { Extension } from "@/Extension";
+import type { Block, MarkdownNode } from '@/node';
+import type { Extension } from '@/Extension';
 
-import type { InlineContentParserFactory } from "./interfaces/InlineContentParserFactory";
-import type { LinkProcessor } from "./interfaces/LinkProcessor";
-import type { BlockParserFactory } from "./interfaces/BlockParserFactory";
-import type { DelimiterProcessor } from "./interfaces/DelimiterProcessor";
-import type { InlineParserFactory } from "./interfaces/InlineParserFactory";
-import type { PostProcessor } from "./interfaces/PostProcessor";
+import type { InlineContentParserFactory } from './interfaces/InlineContentParserFactory';
+import type { LinkProcessor } from './interfaces/LinkProcessor';
+import type { BlockParserFactory } from './interfaces/BlockParserFactory';
+import type { DelimiterProcessor } from './interfaces/DelimiterProcessor';
+import type { InlineParserFactory } from './interfaces/InlineParserFactory';
+import type { PostProcessor } from './interfaces/PostProcessor';
 
-import {
-  Definitions,
-  DocumentParser,
-  InlineParserContextImpl,
-  InlineParserImpl,
-} from "@/internal";
+import { Definitions, DocumentParser, InlineParserContextImpl, InlineParserImpl } from '@/internal';
 
-import IncludeSourceSpans from "./enums/IncludeSourceSpans";
+import IncludeSourceSpans from './enums/IncludeSourceSpans';
 
 /**
  * Extension for {@link Parser}.
@@ -26,14 +21,12 @@ class ParserExtension implements Extension {
 
 class ParserBuilder {
   public readonly blockParserFactories: BlockParserFactory[] = [];
-  public readonly inlineContentParserFactories: InlineContentParserFactory[] =
-    [];
+  public readonly inlineContentParserFactories: InlineContentParserFactory[] = [];
   public readonly delimiterProcessors: DelimiterProcessor[] = [];
   public readonly linkProcessors: LinkProcessor[] = [];
   public readonly postProcessors: PostProcessor[] = [];
   public readonly linkMarkers: Set<string> = new Set();
-  public enabledBlockTypes: Set<typeof Block> =
-    DocumentParser.getDefaultBlockParserTypes();
+  public enabledBlockTypes: Set<typeof Block> = DocumentParser.getDefaultBlockParserTypes();
   private inlineParserFactory: InlineParserFactory | null = null;
   public includeSourceSpans = IncludeSourceSpans.NONE;
 
@@ -84,9 +77,7 @@ class ParserBuilder {
    *                          If this list is empty, the parser will not recognize any CommonMark core features.
    * @return {@code this}
    */
-  public setEnabledBlockTypes(
-    enabledBlockTypes: Set<typeof Block>
-  ): ParserBuilder {
+  public setEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>): ParserBuilder {
     DocumentParser.checkEnabledBlockTypes(enabledBlockTypes);
 
     this.enabledBlockTypes = enabledBlockTypes;
@@ -102,9 +93,7 @@ class ParserBuilder {
    * @return {@code this}
    * @since 0.16.0
    */
-  public setIncludeSourceSpans(
-    includeSourceSpans: IncludeSourceSpans
-  ): ParserBuilder {
+  public setIncludeSourceSpans(includeSourceSpans: IncludeSourceSpans): ParserBuilder {
     this.includeSourceSpans = includeSourceSpans;
     return this;
   }
@@ -119,9 +108,7 @@ class ParserBuilder {
    * @param blockParserFactory a block parser factory implementation
    * @return {@code this}
    */
-  public customBlockParserFactory(
-    blockParserFactory: BlockParserFactory
-  ): ParserBuilder {
+  public customBlockParserFactory(blockParserFactory: BlockParserFactory): ParserBuilder {
     this.blockParserFactories.push(blockParserFactory);
     return this;
   }
@@ -154,9 +141,7 @@ class ParserBuilder {
    * @param delimiterProcessor a delimiter processor implementation
    * @return {@code this}
    */
-  public customDelimiterProcessor(
-    delimiterProcessor: DelimiterProcessor
-  ): ParserBuilder {
+  public customDelimiterProcessor(delimiterProcessor: DelimiterProcessor): ParserBuilder {
     this.delimiterProcessors.push(delimiterProcessor);
     return this;
   }
@@ -214,9 +199,7 @@ class ParserBuilder {
    * @param inlineParserFactory an inline parser factory implementation
    * @return {@code this}
    */
-  public setInlineParserFactory(
-    inlineParserFactory: InlineParserFactory | null
-  ): ParserBuilder {
+  public setInlineParserFactory(inlineParserFactory: InlineParserFactory | null): ParserBuilder {
     this.inlineParserFactory = inlineParserFactory;
     return this;
   }
@@ -229,7 +212,7 @@ class ParserBuilder {
     return {
       create(inlineParserContext): InlineParserImpl {
         return new InlineParserImpl(inlineParserContext);
-      },
+      }
     };
   }
 }
@@ -297,9 +280,9 @@ export class Parser {
    * @param input the text to parse - must not be null
    * @return the root node
    */
-  public parse(input: string): MarkdownNode {
+  public parse(input: string | String): MarkdownNode {
     const documentParser = this.createDocumentParser();
-    const document = documentParser.parse(input);
+    const document = documentParser.parse(input.toString());
 
     return this.postProcess(document);
   }

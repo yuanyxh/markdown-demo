@@ -1537,7 +1537,7 @@ export declare class Parser {
    * @param input the text to parse - must not be null
    * @return the root node
    */
-  parse(input: string): MarkdownNode;
+  parse(input: string | String): MarkdownNode;
   /**
    * Parse the specified reader into a tree of nodes. The caller is responsible for closing the reader.
    * <pre><code>

@@ -6,8 +6,9 @@ import { createEditorElement, setHtml } from './utils/element';
 import EditorInput from './editorInput';
 import SourceMap from './sourcemap';
 import SyncDoc from './syncdoc';
-import HtmlRenderer from './renderer/HtmlRenderer';
 import DocSelection from './docselection';
+import Source from './source';
+import HtmlRenderer from './renderer/HtmlRenderer';
 
 interface RendererConfig {
   attributeProvider: AttributeProviderFactory;
@@ -47,37 +48,44 @@ class Editor {
   private oldDoc: MarkdownNode;
 
   private innerRoot: Document;
-  private innerSource = '';
+  private innerSource: Source;
 
   public constructor(options: EditorOptions) {
     const { renderer, doc = '' } = options;
 
-    this.parser = Parser.builder()
-      .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
-      .build();
+    {
+      this.parser = Parser.builder()
+        .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
+        .build();
 
-    const rendererBuilder = HtmlRenderer.builder();
-    if (renderer?.attributeProvider) {
-      rendererBuilder.attributeProviderFactory(renderer.attributeProvider);
+      const rendererBuilder = HtmlRenderer.builder();
+      if (renderer?.attributeProvider) {
+        rendererBuilder.attributeProviderFactory(renderer.attributeProvider);
+      }
+      this.renderer = rendererBuilder.build();
     }
 
-    this.renderer = rendererBuilder.build();
+    {
+      options.parent.appendChild(this.editorDOM);
+      this.innerRoot = options.root ?? this.editorDOM.ownerDocument;
+    }
 
-    this.innerSource = doc;
-    this.innerDoc = this.oldDoc = this.parser.parse(this.innerSource);
+    {
+      this.editorInput = EditorInput.create({ context: this });
+      this.editorInput.on(this.editorDOM);
 
-    options.parent.appendChild(this.editorDOM);
-    this.innerRoot = options.root ?? this.editorDOM.ownerDocument;
+      this.souremap = new SourceMap({ context: this });
+      this.syncDoc = new SyncDoc({ context: this });
+      this.docSelection = new DocSelection({ context: this });
+    }
 
-    this.editorInput = EditorInput.create({ context: this });
-    this.editorInput.on(this.editorDOM);
+    {
+      this.innerSource = new Source();
+      this.innerDoc = this.oldDoc = this.parser.parse(this.innerSource);
+      this.attachNode();
+    }
 
-    this.souremap = new SourceMap({ context: this });
-    this.syncDoc = new SyncDoc({ context: this });
-    this.docSelection = new DocSelection({ context: this });
-
-    setHtml(this.editorDOM, this.renderer.render(this.innerDoc));
-    this.attachNode();
+    this.update({ from: 0, text: doc });
   }
 
   public get root() {
@@ -111,12 +119,10 @@ class Editor {
   private update(update: Update): boolean {
     update.text ??= '';
 
-    const oldSource = this.innerSource;
+    const oldSource = this.innerSource.toString();
+    this.innerSource.update(update.from, update.to, update.text);
 
-    this.innerSource =
-      this.innerSource.slice(0, update.from) + update.text + this.innerSource.slice(update.to);
-
-    if (this.innerSource === oldSource) {
+    if (this.innerSource.compare(oldSource)) {
       return false;
     }
 

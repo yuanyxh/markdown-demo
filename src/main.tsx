@@ -2,7 +2,7 @@ import 'normalize.css';
 import './styles/global.less';
 import './styles/editor-init.less';
 
-import source from './example.md?raw';
+import source from './examples/example.md?raw';
 
 import Editor from './editor';
 

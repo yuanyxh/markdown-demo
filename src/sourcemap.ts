@@ -2,7 +2,7 @@ import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
 
-import { findHtmlSelectionPoint, getContentIndex } from './utils/source';
+import NodeTools from './utils/nodetools';
 import TypeTools from './utils/typetools';
 
 const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
@@ -23,7 +23,7 @@ const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
       return offset === 0 ? curr.$virtNode.inputIndex : curr.$virtNode.inputEndIndex;
     }
 
-    return findHtmlSelectionPoint(node, curr, offset);
+    return NodeTools.findHtmlSelectionPoint(node, curr, offset);
   }
 
   return -1;
@@ -111,7 +111,7 @@ const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {
   const block = element.$virtNode;
 
   if (offset === 0) {
-    return getContentIndex(block);
+    return NodeTools.getContentIndex(block);
   }
 
   let isSoftLineBreak = false;

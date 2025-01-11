@@ -333,7 +333,7 @@ class Qe {
    * @return the root node
    */
   parse(e) {
-    const r = this.createDocumentParser().parse(e);
+    const r = this.createDocumentParser().parse(e.toString());
     return this.postProcess(r);
   }
   /**
