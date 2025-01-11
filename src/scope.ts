@@ -31,7 +31,15 @@ class Scope {
       this.findScopeByPoint(this.context.doc, to);
     }
 
+    console.log(this.innerScopes);
+
     return this.innerScopes.length !== 0;
+  }
+
+  private push(node: MarkdownNode) {
+    if (!this.innerScopes.includes(node)) {
+      this.innerScopes.push(node);
+    }
   }
 
   private findScopeByPoint(node: MarkdownNode, position: number): boolean {
@@ -45,13 +53,21 @@ class Scope {
       curr = children[i];
       next = children[i + 1];
 
+      if (next && position > curr.inputEndIndex && position < next.inputIndex) {
+        this.push(curr);
+
+        return true;
+      }
+
       if (position >= curr.inputIndex && position <= curr.inputEndIndex) {
         const findedInChildren = this.findScopeByPoint(curr, position);
 
         if (!findedInChildren) {
-          this.innerScopes.push(curr);
-        } else if (TypeTools.isTransformNode(curr)) {
-          this.innerScopes.push(curr);
+          this.push(curr);
+
+          finded = true;
+        } else {
+          this.push(curr);
 
           finded = true;
         }

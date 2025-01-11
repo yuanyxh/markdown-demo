@@ -87,7 +87,6 @@ class DocSelection {
   }
 
   private findNodePoint(node: MarkdownNode, position: number): NodePoint | false {
-    // image | code | html | gap
     const children = node.children;
 
     let curr: MarkdownNode;

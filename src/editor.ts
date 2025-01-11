@@ -141,7 +141,29 @@ class Editor {
     return this.souremap.locate(range);
   }
 
-  public checkSelection() {}
+  public getRange(): StaticRange | null {
+    if (!this.hasFocus()) {
+      return null;
+    }
+
+    const selection = this.root.getSelection();
+
+    if (!selection || selection.rangeCount === 0) {
+      return null;
+    }
+
+    return selection.getRangeAt(0);
+  }
+
+  public checkSelection() {
+    const range = this.getRange();
+
+    if (range) {
+      return this.scope.updateScopes(range);
+    }
+
+    return false;
+  }
 
   public render(node: MarkdownNode) {
     return this.renderer.render(node);
