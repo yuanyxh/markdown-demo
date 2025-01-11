@@ -2,7 +2,7 @@ import type { MarkdownNode, AttributeProviderFactory } from 'commonmark-java-js'
 
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
 
-import { createEditorElement, setHtml } from './utils/element';
+import { createEditorElement } from './utils/element';
 import EditorInput from './editorInput';
 import SourceMap from './sourcemap';
 import SyncDoc from './syncdoc';

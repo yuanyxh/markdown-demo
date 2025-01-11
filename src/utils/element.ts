@@ -12,7 +12,3 @@ export function createEditorElement() {
 
   return editorElement;
 }
-
-export function setHtml(el: HTMLElement, html: string) {
-  el.innerHTML = html;
-}
