@@ -2,8 +2,6 @@ import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
 
-import { isUnDef } from 'commonmark-java-js';
-
 import NodeTools from './utils/nodetools';
 import TypeTools from './utils/typetools';
 

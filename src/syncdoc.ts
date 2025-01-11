@@ -163,9 +163,9 @@ class SyncDoc {
     const prev = parent.meta.$dom.childNodes[index - 1];
 
     if (prev && TypeTools.isElement(prev)) {
-      prev.insertAdjacentHTML('afterend', this.context.renderer.render(newNode));
+      prev.insertAdjacentHTML('afterend', this.context.render(newNode));
     } else {
-      parent.meta.$dom.insertAdjacentHTML('afterbegin', this.context.renderer.render(newNode));
+      parent.meta.$dom.insertAdjacentHTML('afterbegin', this.context.render(newNode));
     }
   }
 

@@ -11,7 +11,7 @@ interface IInputHandler {
 }
 
 const insertPlainText: TInputHandlerFn = function insertPlainText(this: Editor, e) {
-  const range = this.souremap.locate(e.getTargetRanges()[0]);
+  const range = this.locate(e.getTargetRanges()[0]);
 
   const text = getPlainData(e);
 
@@ -24,7 +24,7 @@ const insertPlainText: TInputHandlerFn = function insertPlainText(this: Editor, 
       range.from = range.to = range.from + text.length;
     }
 
-    this.docSelection.updateSelection({ from: range.from, to: range.to });
+    this.updateSelection({ from: range.from, to: range.to });
 
     return true;
   }
@@ -114,13 +114,13 @@ class EditorInput {
 
     if (selection) {
       const range = selection.getRangeAt(0);
-      const { from, to } = this.context.souremap.locate(range);
+      const { from, to } = this.context.locate(range);
 
       console.log(range);
       console.log(from, to, this.context.source.charAt(from), this.context.source.charAt(to));
       console.log(this.context.source.lineAt(from), this.context.source.lineAt(to));
 
-      this.exec(() => this.context.docSelection.updateSelection({ from, to }));
+      this.exec(() => this.context.updateSelection({ from, to }));
     }
   }
 

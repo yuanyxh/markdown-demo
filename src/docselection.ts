@@ -9,11 +9,6 @@ interface DocSelectionConfig {
   context: Editor;
 }
 
-interface UpdateSelection {
-  from: number;
-  to?: number;
-}
-
 interface NodePoint {
   node: Node;
   offset: number;

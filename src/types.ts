@@ -6,6 +6,11 @@ declare global {
     $virtNode: MarkdownNode;
   }
 
+  interface UpdateSelection {
+    from: number;
+    to?: number;
+  }
+
   type TInputHandlerFn = (this: Editor, e: InputEvent) => boolean;
 
   type CodeBlock = FencedCodeBlock | IndentedCodeBlock;

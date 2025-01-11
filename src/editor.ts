@@ -36,11 +36,10 @@ type Update = Pick<InputAction, 'from' | 'to' | 'text'>;
 class Editor {
   private editorDOM = createEditorElement();
 
-  public renderer: HtmlRenderer;
-  public parser: Parser;
-  public souremap: SourceMap;
-  public docSelection: DocSelection;
-
+  private renderer: HtmlRenderer;
+  private parser: Parser;
+  private souremap: SourceMap;
+  private docSelection: DocSelection;
   private syncDoc: SyncDoc;
   private editorInput: EditorInput;
 
@@ -114,6 +113,18 @@ class Editor {
     }
 
     return true;
+  }
+
+  public locate(range: StaticRange) {
+    return this.souremap.locate(range);
+  }
+
+  public updateSelection(selection: UpdateSelection) {
+    return this.docSelection.updateSelection(selection);
+  }
+
+  public render(node: MarkdownNode) {
+    return this.renderer.render(node);
   }
 
   private update(update: Update): boolean {
