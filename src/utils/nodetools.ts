@@ -5,6 +5,11 @@ import { isUnDef } from 'commonmark-java-js';
 import TypeTools from './typetools';
 import HtmlTools from './htmltools';
 
+interface TextRange {
+  textStart: number;
+  textEnd: number;
+}
+
 class NodeTools {
   public static getContentIndex(block: Block) {
     const child = block.getFirstChild();
@@ -47,16 +52,16 @@ class NodeTools {
       inputIndex += (node.getOpeningFenceLength() || 0) + (node.getFenceIndent() || 0);
     }
 
-    const textStart = this.codePoint(source, node);
+    const textRange = this.codePoint(source, node);
 
-    if (typeof textStart === 'boolean') {
+    if (typeof textRange === 'boolean') {
       return -1;
     }
 
-    return inputIndex + textStart + offset;
+    return inputIndex + textRange.textStart + offset;
   }
 
-  public static codePoint(source: string | String, node: MarkdownCode): number | false {
+  public static codePoint(source: string | String, node: MarkdownCode): TextRange | false {
     let literal = node.getLiteral();
 
     if (isUnDef(literal)) {
@@ -74,12 +79,13 @@ class NodeTools {
     }
 
     const textStart = source.slice(inputIndex, inputEndIndex).indexOf(literal);
+    const textEnd = literal.length;
 
     if (textStart === -1) {
       return false;
     }
 
-    return textStart;
+    return { textStart, textEnd };
   }
 
   public static findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: number) {

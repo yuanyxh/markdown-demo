@@ -3,6 +3,7 @@ import type { MarkdownNode } from 'commonmark-java-js';
 import type Editor from './editor';
 import TypeTools from './utils/typetools';
 import NodeTools from './utils/nodetools';
+import { getDom, getDomOfType } from './utils/element';
 
 interface DocSelectionConfig {
   context: Editor;
@@ -14,14 +15,14 @@ interface UpdateSelection {
 }
 
 interface NodePoint {
-  node: MarkdownNode;
+  node: Node;
   offset: number;
 }
 
 interface SelectionRange {
-  startNode: MarkdownNode;
+  startNode: Node;
   startOffset: number;
-  endNode: MarkdownNode;
+  endNode: Node;
   endOffset: number;
 }
 
@@ -38,9 +39,9 @@ class DocSelection {
       (updateSelection.from === 0 && updateSelection.to === this.context.length)
     ) {
       return this.setRange({
-        startNode: this.context.doc,
+        startNode: getDom(this.context.doc),
         startOffset: 0,
-        endNode: this.context.doc,
+        endNode: getDom(this.context.doc),
         endOffset: this.context.doc.children.length
       });
     }
@@ -63,7 +64,7 @@ class DocSelection {
     let end: NodePoint | false;
 
     if (from === 0) {
-      start = { node: this.context.doc, offset: 0 };
+      start = { node: getDom(this.context.doc), offset: 0 };
     } else {
       start = this.findNodePoint(this.context.doc, from);
     }
@@ -71,7 +72,7 @@ class DocSelection {
     if (to === from) {
       end = start;
     } else if (to === this.context.length) {
-      end = { node: this.context.doc, offset: this.context.doc.children.length };
+      end = { node: getDom(this.context.doc), offset: this.context.doc.children.length };
     } else {
       end = this.findNodePoint(this.context.doc, to);
     }
@@ -105,23 +106,29 @@ class DocSelection {
           return nodePoint;
         } else {
           if (TypeTools.isMarkdownText(curr)) {
-            nodePoint = { node: curr, offset: position - curr.inputIndex };
+            nodePoint = { node: getDomOfType(curr), offset: position - curr.inputIndex };
 
             break;
           }
 
           if (TypeTools.isCode(curr)) {
-            const textStart = NodeTools.codePoint(this.context.source, curr);
+            const textRange = NodeTools.codePoint(this.context.source, curr);
 
-            if (typeof textStart === 'number') {
+            if (textRange !== false) {
               let inputIndex = curr.inputIndex;
 
               if (TypeTools.isFencedCodeBlock(curr)) {
                 inputIndex += (curr.getOpeningFenceLength() || 0) + (curr.getFenceIndent() || 0);
               }
 
-              if (position >= inputIndex + textStart) {
-                nodePoint = { node: curr, offset: position - inputIndex - textStart };
+              if (
+                position >= inputIndex + textRange.textStart &&
+                position <= inputIndex + textRange.textStart + textRange.textEnd
+              ) {
+                nodePoint = {
+                  node: getDomOfType(curr),
+                  offset: position - inputIndex - textRange.textStart
+                };
 
                 break;
               }
@@ -129,17 +136,17 @@ class DocSelection {
           }
 
           if (position === curr.inputIndex) {
-            nodePoint = { node: node, offset: i };
+            nodePoint = { node: getDomOfType(node), offset: i };
           } else if (position === curr.inputEndIndex) {
-            nodePoint = { node: node, offset: i + 1 };
+            nodePoint = { node: getDomOfType(node), offset: i + 1 };
           } else {
-            nodePoint = { node: node, offset: i === 0 ? 0 : i + 1 };
+            nodePoint = { node: getDomOfType(node), offset: i === 0 ? 0 : i + 1 };
           }
 
           break;
         }
       } else if (next && position > curr.inputEndIndex && position < next.inputIndex) {
-        nodePoint = { node: node, offset: i + 1 };
+        nodePoint = { node: getDomOfType(node), offset: i + 1 };
 
         break;
       }
@@ -164,22 +171,10 @@ class DocSelection {
     }
 
     try {
-      if (TypeTools.isMarkdownText(startNode) || TypeTools.isInlineCode(endNode)) {
-        range.setStart(startNode.meta.$dom.childNodes[0], startOffset);
-      } else if (TypeTools.isCodeBlock(startNode)) {
-        range.setStart(startNode.meta.$dom.childNodes[0].childNodes[0], startOffset);
-      } else {
-        range.setStart(startNode.meta.$dom, startOffset);
-      }
+      range.setStart(startNode, startOffset);
 
       if (startNode !== endNode || startOffset !== endOffset) {
-        if (TypeTools.isMarkdownText(endNode) || TypeTools.isInlineCode(endNode)) {
-          range.setEnd(endNode.meta.$dom.childNodes[0], endOffset);
-        } else if (TypeTools.isCodeBlock(endNode)) {
-          range.setEnd(endNode.meta.$dom.childNodes[0].childNodes[0], endOffset);
-        } else {
-          range.setEnd(endNode.meta.$dom, endOffset);
-        }
+        range.setEnd(endNode, endOffset);
       } else {
         range.collapse(true);
       }
