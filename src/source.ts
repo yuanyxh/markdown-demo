@@ -41,6 +41,8 @@ class Source extends String {
       if (position >= lineStart && position <= lineEnd) {
         return lineSource;
       }
+
+      lineStart = lineEnd;
     }
 
     return '';

@@ -1,6 +1,8 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
+import TypeTools from './utils/typetools';
+import NodeTools from './utils/nodetools';
 
 interface DocSelectionConfig {
   context: Editor;
@@ -21,20 +23,6 @@ interface SelectionRange {
   startOffset: number;
   endNode: MarkdownNode;
   endOffset: number;
-}
-
-function findNodePoint(node: MarkdownNode, position: number): NodePoint | false {
-  // image | code | html | gap
-  const children = node.children;
-
-  let curr: MarkdownNode;
-  let nodePoint: NodePoint | false = false;
-
-  for (let i = 0; i < children.length; i++) {
-    curr = children[i];
-  }
-
-  return nodePoint;
 }
 
 class DocSelection {
@@ -101,7 +89,63 @@ class DocSelection {
   }
 
   private findNodePoint(node: MarkdownNode, position: number): NodePoint | false {
-    return findNodePoint(node, position);
+    // image | code | html | gap
+    const children = node.children;
+
+    let curr: MarkdownNode;
+    let next: MarkdownNode;
+    let nodePoint: NodePoint | false = false;
+
+    for (let i = 0; i < children.length; i++) {
+      curr = children[i];
+      next = children[i + 1];
+
+      if (position >= curr.inputIndex && position <= curr.inputEndIndex) {
+        if ((nodePoint = this.findNodePoint(curr, position))) {
+          return nodePoint;
+        } else {
+          if (TypeTools.isMarkdownText(curr)) {
+            nodePoint = { node: curr, offset: position - curr.inputIndex };
+
+            break;
+          }
+
+          if (TypeTools.isCode(curr)) {
+            const textStart = NodeTools.codePoint(this.context.source, curr);
+
+            if (typeof textStart === 'number') {
+              let inputIndex = curr.inputIndex;
+
+              if (TypeTools.isFencedCodeBlock(curr)) {
+                inputIndex += (curr.getOpeningFenceLength() || 0) + (curr.getFenceIndent() || 0);
+              }
+
+              if (position >= inputIndex + textStart) {
+                nodePoint = { node: curr, offset: position - inputIndex - textStart };
+
+                break;
+              }
+            }
+          }
+
+          if (position === curr.inputIndex) {
+            nodePoint = { node: node, offset: i };
+          } else if (position === curr.inputEndIndex) {
+            nodePoint = { node: node, offset: i + 1 };
+          } else {
+            nodePoint = { node: node, offset: i === 0 ? 0 : i + 1 };
+          }
+
+          break;
+        }
+      } else if (next && position > curr.inputEndIndex && position < next.inputIndex) {
+        nodePoint = { node: node, offset: i + 1 };
+
+        break;
+      }
+    }
+
+    return nodePoint;
   }
 
   private setRange({ startNode, startOffset, endNode, endOffset }: SelectionRange) {
@@ -119,18 +163,34 @@ class DocSelection {
       range = new Range();
     }
 
-    range.setStart(startNode.meta.$dom, startOffset);
+    try {
+      if (TypeTools.isMarkdownText(startNode) || TypeTools.isInlineCode(endNode)) {
+        range.setStart(startNode.meta.$dom.childNodes[0], startOffset);
+      } else if (TypeTools.isCodeBlock(startNode)) {
+        range.setStart(startNode.meta.$dom.childNodes[0].childNodes[0], startOffset);
+      } else {
+        range.setStart(startNode.meta.$dom, startOffset);
+      }
 
-    if (startNode !== endNode || startOffset !== endOffset) {
-      range.setEnd(endNode.meta.$dom, endOffset);
+      if (startNode !== endNode || startOffset !== endOffset) {
+        if (TypeTools.isMarkdownText(endNode) || TypeTools.isInlineCode(endNode)) {
+          range.setEnd(endNode.meta.$dom.childNodes[0], endOffset);
+        } else if (TypeTools.isCodeBlock(endNode)) {
+          range.setEnd(endNode.meta.$dom.childNodes[0].childNodes[0], endOffset);
+        } else {
+          range.setEnd(endNode.meta.$dom, endOffset);
+        }
+      } else {
+        range.collapse(true);
+      }
 
-      return true;
-    } else {
-      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } catch (error) {
+      console.error(error);
+
+      return false;
     }
-
-    selection.removeAllRanges();
-    selection.addRange(range);
 
     return true;
   }

@@ -2,6 +2,8 @@ import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
 
+import { isUnDef } from 'commonmark-java-js';
+
 import NodeTools from './utils/nodetools';
 import TypeTools from './utils/typetools';
 
@@ -40,21 +42,19 @@ const locateHr: LocateHandler = function locateHr(node, offset) {
     return -1;
   }
 
-  if (TypeTools.isBlockNode(el.$virtNode) && el.nextSibling) {
-    el = el.nextSibling;
-  }
-
   if (!TypeTools.isThematicBreak(el.$virtNode)) {
+    if (
+      TypeTools.isBlockNode(el.$virtNode) &&
+      el.nextSibling &&
+      TypeTools.isThematicBreak(el.nextSibling.$virtNode)
+    ) {
+      return el.nextSibling.$virtNode.inputIndex;
+    }
+
     return -1;
   }
 
-  const hrNode = el.$virtNode;
-
-  if (!hrNode) {
-    return -1;
-  }
-
-  return hrNode.inputIndex;
+  return el.$virtNode.inputEndIndex;
 };
 
 const locateCode: LocateHandler = function locateCode(node, offset) {
@@ -68,29 +68,7 @@ const locateCode: LocateHandler = function locateCode(node, offset) {
     return -1;
   }
 
-  let literal = mNode.getLiteral();
-
-  let { inputIndex, inputEndIndex } = mNode;
-
-  if (literal === void 0) {
-    return inputEndIndex;
-  }
-
-  if (literal.charCodeAt(literal.length - 1) === 10) {
-    literal = literal.slice(0, literal.length - 1);
-  }
-
-  if (TypeTools.isFencedCodeBlock(mNode)) {
-    inputIndex += (mNode.getOpeningFenceLength() || 0) + (mNode.getFenceIndent() || 0);
-  }
-
-  const textStart = this.source.slice(inputIndex, inputEndIndex).indexOf(literal);
-
-  if (textStart === -1) {
-    return -1;
-  }
-
-  return inputIndex + textStart + offset;
+  return NodeTools.codeIndexOf(this.source, mNode, offset);
 };
 
 const fallbackLocate: LocateHandler = function fallbackLocate(node, offset) {

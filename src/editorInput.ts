@@ -20,6 +20,12 @@ const insertPlainText: TInputHandlerFn = function insertPlainText(this: Editor, 
   if (changed) {
     e.preventDefault();
 
+    if (range.from === range.to) {
+      range.from = range.to = range.from + text.length;
+    }
+
+    this.docSelection.updateSelection({ from: range.from, to: range.to });
+
     return true;
   }
 
@@ -45,12 +51,19 @@ class EditorInput {
 
   private handlers: IInputHandler = {};
 
+  private innerInputing = false;
+  private timerId: number | null = null;
+
   public constructor(config: EditorInputConfig) {
     this.context = config.context;
 
     setHandlers(this.handlers);
 
     this.listenForSelectionChange();
+  }
+
+  public get isInputting() {
+    return this.innerInputing;
   }
 
   public on(el: HTMLElement) {
@@ -67,14 +80,33 @@ class EditorInput {
     this.context.root.addEventListener('selectionchange', this.onSelectionChange.bind(this));
   }
 
+  private exec(cb: () => void) {
+    if (this.timerId) {
+      window.clearTimeout(this.timerId);
+    }
+
+    try {
+      this.innerInputing = true;
+
+      cb();
+    } catch (error) {
+      console.error(error);
+    }
+
+    this.timerId = window.setTimeout(() => {
+      this.timerId = null;
+      this.innerInputing = false;
+    }, 0);
+  }
+
   private onBeforeInput(e: InputEvent) {
     if (this.handlers[e.inputType]) {
-      this.handlers[e.inputType].call(this.context, e);
+      this.exec(() => this.handlers[e.inputType].call(this.context, e));
     }
   }
 
   private onSelectionChange() {
-    if (!this.context.hasFocus()) {
+    if (this.innerInputing || !this.context.hasFocus()) {
       return false;
     }
 
@@ -84,7 +116,11 @@ class EditorInput {
       const range = selection.getRangeAt(0);
       const { from, to } = this.context.souremap.locate(range);
 
-      console.log(from, to, this.context.source.charAt(from));
+      console.log(range);
+      console.log(from, to, this.context.source.charAt(from), this.context.source.charAt(to));
+      console.log(this.context.source.lineAt(from), this.context.source.lineAt(to));
+
+      this.exec(() => this.context.docSelection.updateSelection({ from, to }));
     }
   }
 

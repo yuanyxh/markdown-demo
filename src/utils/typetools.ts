@@ -6,7 +6,8 @@ import type {
   ThematicBreak,
   SoftLineBreak,
   Image,
-  Text as MarkdownText
+  Text as MarkdownText,
+  Code
 } from 'commonmark-java-js';
 
 class TypeTools {
@@ -28,6 +29,10 @@ class TypeTools {
 
   public static isThematicBreak(data: MarkdownNode): data is ThematicBreak {
     return data.type === 'thematic-break';
+  }
+
+  public static isInlineCode(data: MarkdownNode): data is Code {
+    return data.type === 'code';
   }
 
   public static isCode(data: MarkdownNode): data is MarkdownCode {

@@ -1,5 +1,7 @@
 import type { Block } from 'commonmark-java-js';
 
+import { isUnDef } from 'commonmark-java-js';
+
 import TypeTools from './typetools';
 import HtmlTools from './htmltools';
 
@@ -26,6 +28,58 @@ class NodeTools {
     }
 
     return -1;
+  }
+
+  public static codeIndexOf(source: string | String, node: MarkdownCode, offset: number): number {
+    let literal = node.getLiteral();
+
+    let { inputIndex, inputEndIndex } = node;
+
+    if (isUnDef(literal)) {
+      return inputEndIndex;
+    }
+
+    if (literal.charCodeAt(literal.length - 1) === 10) {
+      literal = literal.slice(0, literal.length - 1);
+    }
+
+    if (TypeTools.isFencedCodeBlock(node)) {
+      inputIndex += (node.getOpeningFenceLength() || 0) + (node.getFenceIndent() || 0);
+    }
+
+    const textStart = this.codePoint(source, node);
+
+    if (typeof textStart === 'boolean') {
+      return -1;
+    }
+
+    return inputIndex + textStart + offset;
+  }
+
+  public static codePoint(source: string | String, node: MarkdownCode): number | false {
+    let literal = node.getLiteral();
+
+    if (isUnDef(literal)) {
+      return false;
+    }
+
+    let { inputIndex, inputEndIndex } = node;
+
+    if (literal.charCodeAt(literal.length - 1) === 10) {
+      literal = literal.slice(0, literal.length - 1);
+    }
+
+    if (TypeTools.isFencedCodeBlock(node)) {
+      inputIndex += (node.getOpeningFenceLength() || 0) + (node.getFenceIndent() || 0);
+    }
+
+    const textStart = source.slice(inputIndex, inputEndIndex).indexOf(literal);
+
+    if (textStart === -1) {
+      return false;
+    }
+
+    return textStart;
   }
 
   public static findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: number) {
