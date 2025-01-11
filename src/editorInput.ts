@@ -52,7 +52,6 @@ class EditorInput {
   private handlers: IInputHandler = {};
 
   private innerInputing = false;
-  private timerId: number | null = null;
 
   public constructor(config: EditorInputConfig) {
     this.context = config.context;
@@ -81,10 +80,6 @@ class EditorInput {
   }
 
   private exec(cb: () => void) {
-    if (this.timerId) {
-      window.clearTimeout(this.timerId);
-    }
-
     try {
       this.innerInputing = true;
 
@@ -92,11 +87,6 @@ class EditorInput {
     } catch (error) {
       console.error(error);
     }
-
-    this.timerId = window.setTimeout(() => {
-      this.timerId = null;
-      this.innerInputing = false;
-    }, 0);
   }
 
   private onBeforeInput(e: InputEvent) {
@@ -119,8 +109,6 @@ class EditorInput {
       console.log(range);
       console.log(from, to, this.context.source.charAt(from), this.context.source.charAt(to));
       console.log(this.context.source.lineAt(from), this.context.source.lineAt(to));
-
-      this.exec(() => this.context.updateSelection({ from, to }));
     }
   }
 

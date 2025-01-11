@@ -1,13 +1,11 @@
 import type { Appendable } from 'commonmark-java-js';
 
-import { fromCodePoint } from 'commonmark-java-js';
 import { Escaping } from 'commonmark-java-js';
 
 class HtmlWriter {
   private static readonly NO_ATTRIBUTES = new Map<string, string>();
 
   private readonly buffer: Appendable;
-  private lastChar = fromCodePoint(0);
 
   public constructor(out: Appendable) {
     this.buffer = out;
@@ -45,11 +43,6 @@ class HtmlWriter {
 
   protected append(s: string) {
     this.buffer.append(s);
-
-    const length = s.length;
-    if (length !== 0) {
-      this.lastChar = s.charAt(length - 1);
-    }
   }
 }
 

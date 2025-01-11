@@ -7,14 +7,12 @@ import type { HtmlNodeRendererContext } from './interfaces/HtmlNodeRendererConte
 import type { AttributeProviderFactory } from './interfaces/AttributeProviderFactory';
 import type { AttributeProvider } from './interfaces/AttributeProvider';
 import type { AttributeProviderContext } from './interfaces/AttributeProviderContext';
-import type { UrlSanitizer } from './interfaces/UrlSanitizer';
 import type { HtmlNodeRendererFactory } from './interfaces/HtmlNodeRendererFactory';
 
 import { Appendable } from 'commonmark-java-js';
-import { NodeRendererMap, Escaping } from 'commonmark-java-js';
+import { NodeRendererMap } from 'commonmark-java-js';
 
 import CoreHtmlNodeRenderer from './CoreHtmlNodeRenderer';
-import DefaultUrlSanitizer from './html_utils/DefaultUrlSanitizer';
 import HtmlWriter from './HtmlWriter';
 
 /**
@@ -26,11 +24,6 @@ class HtmlRendererExtension implements Extension {
 
 class HtmlRendererBuilder {
   public softbreak = '<br />';
-  public escapeHtml = false;
-  public sanitizeUrls = false;
-  public urlSanitizer: UrlSanitizer = new DefaultUrlSanitizer();
-  public percentEncodeUrls = false;
-  public omitSingleParagraphP = false;
   public attributeProviderFactories: AttributeProviderFactory[] = [];
   public nodeRendererFactories: HtmlNodeRendererFactory[] = [];
 
@@ -39,74 +32,6 @@ class HtmlRendererBuilder {
    */
   public build(): HtmlRenderer {
     return new HtmlRenderer(this);
-  }
-
-  /**
-   * Whether {@link HtmlInline} and {@link HtmlBlock} should be escaped, defaults to {@code false}.
-   * <p>
-   * Note that {@link HtmlInline} is only a tag itself, not the text between an opening tag and a closing tag. So
-   * markup in the text will be parsed as normal and is not affected by this option.
-   *
-   * @param escapeHtml true for escaping, false for preserving raw HTML
-   * @return {@code this}
-   */
-  public setEscapeHtml(escapeHtml: boolean): HtmlRendererBuilder {
-    this.escapeHtml = escapeHtml;
-    return this;
-  }
-
-  /**
-   * Whether {@link Image} src and {@link Link} href should be sanitized, defaults to {@code false}.
-   *
-   * @param sanitizeUrls true for sanitization, false for preserving raw attribute
-   * @return {@code this}
-   * @since 0.14.0
-   */
-  public setSanitizeUrls(sanitizeUrls: boolean): HtmlRendererBuilder {
-    this.sanitizeUrls = sanitizeUrls;
-    return this;
-  }
-
-  /**
-   * {@link UrlSanitizer} used to filter URL's if {@link #sanitizeUrls} is true.
-   *
-   * @param urlSanitizer Filterer used to filter {@link Image} src and {@link Link}.
-   * @return {@code this}
-   * @since 0.14.0
-   */
-  public setUrlSanitizer(urlSanitizer: UrlSanitizer): HtmlRendererBuilder {
-    this.urlSanitizer = urlSanitizer;
-    return this;
-  }
-
-  /**
-   * Whether URLs of link or images should be percent-encoded, defaults to {@code false}.
-   * <p>
-   * If enabled, the following is done:
-   * <ul>
-   * <li>Existing percent-encoded parts are preserved (e.g. "%20" is kept as "%20")</li>
-   * <li>Reserved characters such as "/" are preserved, except for "[" and "]" (see encodeURI in JS)</li>
-   * <li>Unreserved characters such as "a" are preserved</li>
-   * <li>Other characters such umlauts are percent-encoded</li>
-   * </ul>
-   *
-   * @param percentEncodeUrls true to percent-encode, false for leaving as-is
-   * @return {@code this}
-   */
-  public setPercentEncodeUrls(percentEncodeUrls: boolean): HtmlRendererBuilder {
-    this.percentEncodeUrls = percentEncodeUrls;
-    return this;
-  }
-
-  /**
-   * Whether documents that only contain a single paragraph should be rendered without the {@code <p>} tag. Set to
-   * {@code true} to render without the tag; the default of {@code false} always renders the tag.
-   *
-   * @return {@code this}
-   */
-  public setOmitSingleParagraphP(omitSingleParagraphP: boolean): HtmlRendererBuilder {
-    this.omitSingleParagraphP = omitSingleParagraphP;
-    return this;
   }
 
   /**
@@ -175,30 +100,6 @@ class RendererContext implements HtmlNodeRendererContext, AttributeProviderConte
     }
   }
 
-  public shouldEscapeHtml(): boolean {
-    return this.context.escapeHtml;
-  }
-
-  public shouldOmitSingleParagraphP(): boolean {
-    return this.context.omitSingleParagraphP;
-  }
-
-  public shouldSanitizeUrls(): boolean {
-    return this.context.sanitizeUrls;
-  }
-
-  public urlSanitizer(): UrlSanitizer {
-    return this.context.urlSanitizer;
-  }
-
-  public encodeUrl(url: string): string {
-    if (this.context.percentEncodeUrls) {
-      return Escaping.percentEncodeUrl(url);
-    } else {
-      return url;
-    }
-  }
-
   public extendAttributes(
     node: MarkdownNode,
     tagName: string,
@@ -248,23 +149,12 @@ class RendererContext implements HtmlNodeRendererContext, AttributeProviderConte
  */
 class HtmlRenderer implements Renderer {
   public readonly softbreak: string;
-  public readonly escapeHtml: boolean;
-  public readonly percentEncodeUrls: boolean;
-  public readonly omitSingleParagraphP: boolean;
-  public readonly sanitizeUrls: boolean;
-  public readonly urlSanitizer: UrlSanitizer;
   public readonly attributeProviderFactories: AttributeProviderFactory[];
   public readonly nodeRendererFactories: HtmlNodeRendererFactory[];
 
   public constructor(builder: HtmlRendererBuilder) {
     this.softbreak = builder.softbreak;
-    this.escapeHtml = builder.escapeHtml;
-    this.percentEncodeUrls = builder.percentEncodeUrls;
-    this.omitSingleParagraphP = builder.omitSingleParagraphP;
-    this.sanitizeUrls = builder.sanitizeUrls;
-    this.urlSanitizer = builder.urlSanitizer;
     this.attributeProviderFactories = [...builder.attributeProviderFactories];
-
     this.nodeRendererFactories = [];
     this.nodeRendererFactories.push(...builder.nodeRendererFactories);
 

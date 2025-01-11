@@ -186,15 +186,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof HtmlBlock: {
         const htmlBlock = node;
 
-        if (this.context.shouldEscapeHtml()) {
-          this.html.tag('p', this.getAttrs(htmlBlock, 'p'));
-          this.html.text(htmlBlock.getLiteral());
-          this.html.tag('/p');
-        } else {
-          this.html.tag('div', this.getAttrs(htmlBlock, 'div'));
-          this.html.raw(htmlBlock.getLiteral());
-          this.html.tag('/div');
-        }
+        this.html.tag('div', this.getAttrs(htmlBlock, 'div'));
+        this.html.raw(htmlBlock.getLiteral());
+        this.html.tag('/div');
 
         break;
       }
@@ -225,12 +219,6 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const attrs = new Map<string, string>();
         let url = link.getDestination();
 
-        if (this.context.shouldSanitizeUrls()) {
-          url = this.context.urlSanitizer().sanitizeLinkUrl(url);
-          attrs.set('rel', 'nofollow');
-        }
-
-        url = this.context.encodeUrl(url);
         attrs.set('href', url);
 
         const title = link.getTitle();
@@ -275,7 +263,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Image: {
         const image = node;
 
-        let url = image.getDestination();
+        const url = image.getDestination();
 
         const altTextVisitor = new AltTextVisitor();
         image.accept(altTextVisitor);
@@ -284,11 +272,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         const attrs = new Map<string, string>();
 
-        if (this.context.shouldSanitizeUrls()) {
-          url = this.context.urlSanitizer().sanitizeImageUrl(url);
-        }
-
-        attrs.set('src', this.context.encodeUrl(url));
+        attrs.set('src', url);
         attrs.set('alt', altText);
 
         const title = image.getTitle();
@@ -347,13 +331,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof HtmlInline: {
         const htmlInline = node;
 
-        if (this.context.shouldEscapeHtml()) {
-          this.html.text(htmlInline.getLiteral());
-        } else {
-          this.html.tag('span', this.getAttrs(htmlInline, 'div'));
-          this.html.raw(htmlInline.getLiteral());
-          this.html.tag('/span');
-        }
+        this.html.tag('span', this.getAttrs(htmlInline, 'div'));
+        this.html.raw(htmlInline.getLiteral());
+        this.html.tag('/span');
 
         break;
       }
