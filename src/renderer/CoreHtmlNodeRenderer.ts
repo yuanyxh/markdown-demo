@@ -331,9 +331,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof HtmlInline: {
         const htmlInline = node;
 
-        this.html.tag('span', this.getAttrs(htmlInline, 'div'));
         this.html.raw(htmlInline.getLiteral());
-        this.html.tag('/span');
 
         break;
       }

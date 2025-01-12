@@ -182,6 +182,8 @@ class Editor {
     this.oldDoc = this.innerDoc;
     this.innerDoc = this.parser.parse(this.innerSource);
 
+    console.log(this.innerDoc);
+
     const result = this.syncDoc.sync(this.innerDoc, this.oldDoc);
 
     this.attachNode();
