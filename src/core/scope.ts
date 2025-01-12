@@ -22,15 +22,15 @@ class Scope {
   public updateScopes(range: StaticRange): boolean {
     this.innerScopes.length = 0;
 
-    const { from, to } = this.context.locate(range);
+    const { from, to } = this.context.locateSrcPos(range);
+
+    console.log(from, to, this.context.source.charAt(from), this.context.source.charAt(to));
 
     this.findScopeByPoint(this.context.doc, from);
 
     if (to !== from) {
       this.findScopeByPoint(this.context.doc, to);
     }
-
-    console.log(this.innerScopes);
 
     return this.innerScopes.length !== 0;
   }

@@ -1,9 +1,9 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
-import type { EditorRange, NodePoint, Selection } from '@/interfaces';
+import type { EditorRange, Extension, NodePoint, Selection } from '@/interfaces';
 
-import { TypeTools, NodeTools, getDom, getDomOfType } from '@/utils';
+import { getDomOfType } from '@/utils';
 
 interface DocSelectionConfig {
   context: Editor;
@@ -22,9 +22,9 @@ class DocSelection {
       (updateSelection.from === 0 && updateSelection.to === this.context.length)
     ) {
       return this.setRange({
-        startContainer: getDom(this.context.doc),
+        startContainer: getDomOfType(this.context.doc),
         startOffset: 0,
-        endContainer: getDom(this.context.doc),
+        endContainer: getDomOfType(this.context.doc),
         endOffset: this.context.doc.children.length
       });
     }
@@ -44,12 +44,12 @@ class DocSelection {
     return false;
   }
 
-  public locateRange(from: number, to: number): EditorRange | false {
-    let start: NodePoint | false;
-    let end: NodePoint | false;
+  public locateRange(from: number, to: number): EditorRange | null {
+    let start: NodePoint | null;
+    let end: NodePoint | null;
 
     if (from === 0) {
-      start = { node: getDom(this.context.doc), offset: 0 };
+      start = { node: getDomOfType(this.context.doc), offset: 0 };
     } else {
       start = this.findNodePoint(this.context.doc, from);
     }
@@ -57,13 +57,13 @@ class DocSelection {
     if (to === from) {
       end = start;
     } else if (to === this.context.length) {
-      end = { node: getDom(this.context.doc), offset: this.context.doc.children.length };
+      end = { node: getDomOfType(this.context.doc), offset: this.context.doc.children.length };
     } else {
       end = this.findNodePoint(this.context.doc, to);
     }
 
     if (!(start && end)) {
-      return false;
+      return null;
     }
 
     return {
@@ -74,12 +74,12 @@ class DocSelection {
     };
   }
 
-  private findNodePoint(node: MarkdownNode, position: number): NodePoint | false {
+  private findNodePoint(node: MarkdownNode, position: number): NodePoint | null {
     const children = node.children;
 
     let curr: MarkdownNode;
     let next: MarkdownNode;
-    let nodePoint: NodePoint | false = false;
+    let nodePoint: NodePoint | null = null;
 
     for (let i = 0; i < children.length; i++) {
       curr = children[i];
@@ -96,41 +96,21 @@ class DocSelection {
           return nodePoint;
         }
 
-        if (TypeTools.isMarkdownText(curr)) {
-          return { node: getDomOfType(curr), offset: position - curr.inputIndex };
-        }
+        this.context
+          .getPlugins(Object.getPrototypeOf(curr)?.constructor)
+          .find((plugin) => (nodePoint = plugin.locatePointFromSrcPos(curr, position)));
 
-        if (TypeTools.isCode(curr)) {
-          const textRange = NodeTools.codePoint(this.context.source, curr);
-
-          if (textRange !== false) {
-            let inputIndex = curr.inputIndex;
-
-            if (TypeTools.isFencedCodeBlock(curr)) {
-              inputIndex += (curr.getOpeningFenceLength() || 0) + (curr.getFenceIndent() || 0);
-            }
-
-            if (
-              position >= inputIndex + textRange.textStart &&
-              position <= inputIndex + textRange.textStart + textRange.textEnd
-            ) {
-              return {
-                node: getDomOfType(curr),
-                offset: position - inputIndex - textRange.textStart
-              };
-            }
+        if (!nodePoint) {
+          if (position === curr.inputIndex) {
+            nodePoint = { node: getDomOfType(node), offset: i };
+          } else if (position === curr.inputEndIndex) {
+            nodePoint = { node: getDomOfType(node), offset: i + 1 };
+          } else {
+            nodePoint = { node: getDomOfType(node), offset: i === 0 ? 0 : i + 1 };
           }
         }
 
-        if (position === curr.inputIndex) {
-          nodePoint = { node: getDomOfType(node), offset: i };
-        } else if (position === curr.inputEndIndex) {
-          nodePoint = { node: getDomOfType(node), offset: i + 1 };
-        } else {
-          nodePoint = { node: getDomOfType(node), offset: i === 0 ? 0 : i + 1 };
-        }
-
-        break;
+        return nodePoint;
       }
     }
 

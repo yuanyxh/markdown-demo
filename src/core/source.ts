@@ -12,7 +12,7 @@ class Source extends String {
     this.set(source);
   }
 
-  public get length() {
+  public override get length() {
     if (this.innerLength === -1) {
       this.innerLength = this.lines.reduce((total, curr) => total + curr.length + 1, 0);
 
@@ -63,7 +63,7 @@ class Source extends String {
     return this.toString() === text;
   }
 
-  public toString(): string {
+  public override toString(): string {
     if (this.innerSource === null) {
       this.innerSource = this.lines.reduce((source, curr) => source + curr + '\n', '');
 
@@ -75,7 +75,7 @@ class Source extends String {
     return this.innerSource;
   }
 
-  public valueOf(): string {
+  public override valueOf(): string {
     return this.toString();
   }
 }

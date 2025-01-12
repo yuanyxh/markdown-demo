@@ -13,7 +13,7 @@ interface InputHandler {
 }
 
 const insertPlainText: InputHandlerFn = function insertPlainText(this: Editor, e) {
-  const range = this.locate(e.getTargetRanges()[0]);
+  const range = this.locateSrcPos(e.getTargetRanges()[0]);
 
   const text = getPlainData(e);
 
@@ -103,10 +103,6 @@ class EditorInput {
     }
 
     this.context.checkSelection();
-  }
-
-  public static create(config: EditorInputConfig) {
-    return new EditorInput(config);
   }
 }
 
