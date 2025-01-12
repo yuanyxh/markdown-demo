@@ -1,12 +1,8 @@
 import type Editor from './editor';
 
-import type { InputHandlerFn } from '@/interfaces';
+import type { EditorContextConfig, InputHandlerFn } from '@/interfaces';
 
 import { getPlainData } from './data';
-
-interface EditorInputConfig {
-  context: Editor;
-}
 
 interface InputHandler {
   [key: string]: InputHandlerFn;
@@ -55,7 +51,7 @@ class EditorInput {
 
   private innerInputing = false;
 
-  public constructor(config: EditorInputConfig) {
+  public constructor(config: EditorContextConfig) {
     this.context = config.context;
 
     setHandlers(this.handlers);

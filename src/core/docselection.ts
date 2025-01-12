@@ -1,18 +1,14 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
-import type { EditorRange, NodePoint, RangeBounds } from '@/interfaces';
+import type { EditorContextConfig, EditorRange, NodePoint, RangeBounds } from '@/interfaces';
 
 import { ElementTools, NodeTools } from '@/utils';
-
-interface DocSelectionConfig {
-  context: Editor;
-}
 
 class DocSelection {
   private context: Editor;
 
-  public constructor(config: DocSelectionConfig) {
+  public constructor(config: EditorContextConfig) {
     this.context = config.context;
   }
 

@@ -2,16 +2,14 @@ import type { MarkdownNode, Text as MarkdownText } from 'commonmark-java-js';
 
 import type Editor from './editor';
 
-import { TypeTools } from '@/utils';
+import type { EditorContextConfig } from './interfaces';
 
-interface SyncDocConfig {
-  context: Editor;
-}
+import { TypeTools } from '@/utils';
 
 class SyncDoc {
   private context: Editor;
 
-  public constructor(config: SyncDocConfig) {
+  public constructor(config: EditorContextConfig) {
     this.context = config.context;
   }
 

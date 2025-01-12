@@ -6,13 +6,13 @@ import type {
   HtmlRendererExtension,
   ParserExtension,
   NodePoint,
-  EnhanceextensionConfig
+  EditorContextConfig
 } from '@/interfaces';
 
 class EnhanceExtension implements Extension {
   protected context: Editor;
 
-  public constructor(config: EnhanceextensionConfig) {
+  public constructor(config: EditorContextConfig) {
     this.context = config.context;
   }
 
