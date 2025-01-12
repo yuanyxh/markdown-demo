@@ -5,7 +5,7 @@ import type { NodePoint } from '@/interfaces';
 import { Code, FencedCodeBlock, IndentedCodeBlock } from 'commonmark-java-js';
 
 import EnhanceExtension from '@/abstracts/enhanceextension';
-import { getDomOfType, NodeTools, TypeTools } from '@/utils';
+import { ElementTools, NodeTools, TypeTools } from '@/utils';
 
 class CodePlugin extends EnhanceExtension {
   public getTypes(): (typeof MarkdownNode)[] {
@@ -42,7 +42,7 @@ class CodePlugin extends EnhanceExtension {
           pos <= inputIndex + textRange.textStart + textRange.textEnd
         ) {
           return {
-            node: getDomOfType(node),
+            node: ElementTools.getDomFromNode(node),
             offset: pos - inputIndex - textRange.textStart
           };
         }

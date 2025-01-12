@@ -68,42 +68,40 @@ class EditorInput {
   }
 
   public on(el: HTMLElement) {
-    el.addEventListener('beforeinput', this.onBeforeInput.bind(this));
+    el.addEventListener('blur', this.onBlur);
+    el.addEventListener('beforeinput', this.onBeforeInput);
   }
 
   public off(el: HTMLElement) {
-    el.removeEventListener('beforeinput', this.onBeforeInput.bind(this));
+    el.removeEventListener('blur', this.onBlur);
+    el.removeEventListener('beforeinput', this.onBeforeInput);
 
-    this.context.root.removeEventListener('selectionchange', this.onSelectionChange.bind(this));
+    this.context.root.removeEventListener('selectionchange', this.onSelectionChange);
   }
 
   private listenForSelectionChange() {
-    this.context.root.addEventListener('selectionchange', this.onSelectionChange.bind(this));
+    this.context.root.addEventListener('selectionchange', this.onSelectionChange);
   }
 
   private exec(cb: () => void) {
-    try {
-      this.innerInputing = true;
-
-      cb();
-    } catch (error) {
-      console.error(error);
-    }
+    this.innerInputing = true;
+    cb();
+    this.innerInputing = false;
   }
 
-  private onBeforeInput(e: InputEvent) {
+  private onBlur = () => {};
+
+  private onBeforeInput = (e: InputEvent) => {
     if (this.handlers[e.inputType]) {
       this.exec(() => this.handlers[e.inputType].call(this.context, e));
     }
-  }
+  };
 
-  private onSelectionChange() {
-    if (this.innerInputing || !this.context.hasFocus()) {
+  private onSelectionChange = () => {
+    if (this.innerInputing || !this.context.isFocus) {
       return false;
     }
-
-    this.context.checkSelection();
-  }
+  };
 }
 
 export default EditorInput;

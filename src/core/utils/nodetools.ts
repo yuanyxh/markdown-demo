@@ -1,4 +1,4 @@
-import type { Block } from 'commonmark-java-js';
+import type { Block, MarkdownNode } from 'commonmark-java-js';
 
 import type { MarkdownCode } from '@/interfaces';
 
@@ -126,6 +126,10 @@ class NodeTools {
     }
 
     return parent.$virtNode.inputIndex + position;
+  }
+
+  public static getConstructor(node: MarkdownNode): typeof MarkdownNode {
+    return Object.getPrototypeOf(node).constructor;
   }
 }
 

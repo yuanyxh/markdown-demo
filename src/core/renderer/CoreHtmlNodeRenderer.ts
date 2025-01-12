@@ -1,5 +1,4 @@
-import type { MarkdownNode } from 'commonmark-java-js';
-import type { NodeRenderer } from 'commonmark-java-js';
+import type { MarkdownNode, NodeRenderer, Delimited } from 'commonmark-java-js';
 
 import type { HtmlNodeRendererContext } from './interfaces/HtmlNodeRendererContext';
 
@@ -101,7 +100,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       HtmlInline,
       SoftLineBreak,
       HardLineBreak
-    ] as unknown as (typeof MarkdownNode)[]);
+    ] as (typeof MarkdownNode)[]);
   }
 
   public render(node: MarkdownNode) {

@@ -14,13 +14,15 @@ export interface EnhanceextensionConfig {
 export interface Extension {
   getTypes(): (typeof MarkdownNode)[];
 
+  getParserExtension(): ParserExtension | null;
+
+  getHtmlRendererExtension(): HtmlRendererExtension | null;
+
   locateSrcPos(node: Node, offset: number): number;
 
   locatePointFromSrcPos(node: MarkdownNode, pos: number): NodePoint | null;
 
-  render(rendererContext: HtmlNodeRendererContext, node: MarkdownNode): void | null;
+  enter(node: MarkdownNode): void;
 
-  getParserExtension(): ParserExtension | null;
-
-  getHtmlRendererExtension(): HtmlRendererExtension | null;
+  leave(node: MarkdownNode): void;
 }

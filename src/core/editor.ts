@@ -1,18 +1,17 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import type { EditorRange, Extension, Selection } from './interfaces';
+import type { EditorRange, Extension, RangeBounds } from './interfaces';
 import type EnhanceExtension from './abstracts/enhanceextension';
 
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
 
 import { HtmlRenderer } from '@/renderer';
-import { createEditorElement } from '@/utils';
+import { ElementTools } from '@/utils';
 
 import EditorInput from './editorInput';
 import SyncDoc from './syncdoc';
 import DocSelection from './docselection';
 import Source from './source';
-import Scope from './scope';
 import { defaultPlugins } from './plugins';
 
 interface EditorOptions {
@@ -27,23 +26,23 @@ interface InputAction {
   from: number;
   to?: number;
   text?: string;
+  force?: boolean;
 }
 
-type Update = Pick<InputAction, 'from' | 'to' | 'text'>;
 type InputType = 'insert' | 'delete' | 'replace' | 'selection';
 
 class Editor {
-  private editorDOM = createEditorElement();
+  private editorDOM = ElementTools.createEditorElement();
 
   private renderer: HtmlRenderer;
   private parser: Parser;
   private docSelection: DocSelection;
   private syncDoc: SyncDoc;
   private editorInput: EditorInput;
-  private scope: Scope;
 
   private innerDoc: MarkdownNode;
   private oldDoc: MarkdownNode;
+  private innerRangeBounds: Required<RangeBounds> | null = null;
 
   private innerRoot: Document;
   private innerSource: Source;
@@ -79,7 +78,6 @@ class Editor {
 
       this.syncDoc = new SyncDoc({ context: this });
       this.docSelection = new DocSelection({ context: this });
-      this.scope = new Scope({ context: this });
     }
 
     {
@@ -88,7 +86,7 @@ class Editor {
       this.attachNode();
     }
 
-    this.update({ from: 0, text: doc });
+    this.update({ type: 'insert', from: 0, text: doc });
   }
 
   public get root() {
@@ -96,7 +94,15 @@ class Editor {
   }
 
   public get source() {
-    return this.innerSource;
+    return this.innerSource.toString();
+  }
+
+  public get rangeBounds() {
+    if (this.innerRangeBounds) {
+      return { ...this.innerRangeBounds };
+    }
+
+    return null;
   }
 
   public get length() {
@@ -107,10 +113,13 @@ class Editor {
     return this.innerDoc;
   }
 
+  public get isFocus() {
+    return this.innerRoot.activeElement === this.editorDOM;
+  }
+
   public dispatch(action: InputAction) {
-    if (typeof action.to === 'undefined') {
-      action.to = this.innerSource.length;
-    }
+    action.to ??= this.innerSource.length;
+    action.force ??= false;
 
     let result = false;
 
@@ -127,7 +136,12 @@ class Editor {
         break;
 
       case 'selection':
-        result = this.docSelection.updateSelection(action);
+        if (
+          !action.force &&
+          (this.rangeBounds?.from !== action.from || this.rangeBounds?.to !== action.to)
+        ) {
+          result = this.docSelection.updateSelection(action);
+        }
 
         break;
 
@@ -138,7 +152,7 @@ class Editor {
     return result;
   }
 
-  public locateSrcPos(range: EditorRange): Required<Selection> {
+  public locateSrcPos(range: EditorRange): Required<RangeBounds> {
     const from = this.locateFormPoint(range.startContainer, range.startOffset);
 
     if (this.isCollapseRange(range) || from === -1) {
@@ -150,46 +164,63 @@ class Editor {
     return { from, to };
   }
 
-  public getRange(): StaticRange | null {
-    if (!this.hasFocus()) {
-      return null;
-    }
+  public locateRangeFromSrcPos(selection: RangeBounds): EditorRange | null {
+    selection.to ??= this.length;
 
-    const selection = this.root.getSelection();
-
-    if (!selection || selection.rangeCount === 0) {
-      return null;
-    }
-
-    return selection.getRangeAt(0);
+    return this.docSelection.locateRange(selection.from, selection.to);
   }
 
-  public checkSelection() {
-    const range = this.getRange();
+  public getRange(): EditorRange | null {
+    const originSelection = this.root.getSelection();
 
-    if (range) {
-      return this.scope.updateScopes(range);
+    if (!(this.isFocus && originSelection && originSelection.rangeCount !== 0)) {
+      return (this.innerRangeBounds = null);
     }
 
-    return false;
+    return originSelection.getRangeAt(0);
+  }
+
+  public updateRangeBounds() {
+    const range = this.getRange();
+
+    let rangeBounds: Required<RangeBounds>;
+
+    range && console.log(this.locateSrcPos(range));
+
+    if (
+      range &&
+      (rangeBounds = this.locateSrcPos(range)) &&
+      rangeBounds.from !== -1 &&
+      rangeBounds.to !== -1
+    ) {
+      if (
+        this.innerRangeBounds &&
+        rangeBounds.from === this.innerRangeBounds.from &&
+        rangeBounds.to === this.innerRangeBounds.to
+      ) {
+        return false;
+      }
+
+      this.innerRangeBounds = rangeBounds;
+
+      return;
+    }
+
+    this.innerRangeBounds = null;
   }
 
   public render(node: MarkdownNode) {
     return this.renderer.render(node);
   }
 
+  public getPlugins(type: typeof MarkdownNode) {
+    return this.innerPlugins.filter((plugin) => plugin.getTypes().includes(type));
+  }
+
   public destroy() {
     this.editorDOM.blur();
     this.editorInput.off(this.editorDOM);
     this.editorDOM.remove();
-  }
-
-  public hasFocus() {
-    return this.innerRoot.activeElement === this.editorDOM;
-  }
-
-  public getPlugins(type: typeof MarkdownNode) {
-    return this.innerPlugins.filter((plugin) => plugin.getTypes().includes(type));
   }
 
   private getParserExtensions(pluginInstances: Extension[]) {
@@ -220,13 +251,13 @@ class Editor {
     return result;
   }
 
-  private update(update: Update): boolean {
-    update.text ??= '';
+  private update(action: InputAction): boolean {
+    action.text ??= '';
 
     const oldSource = this.innerSource.toString();
-    this.innerSource.update(update.from, update.to, update.text);
+    this.innerSource.update(action.from, action.to, action.text);
 
-    if (this.innerSource.compare(oldSource)) {
+    if (!action.force && this.innerSource.compare(oldSource)) {
       return false;
     }
 

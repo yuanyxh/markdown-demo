@@ -274,7 +274,7 @@ declare class DefinitionMap<D extends abstract new (...args: any) => any> {
 /**
  * A node that uses delimiters in the source form (e.g. <code>*bold*</code>).
  */
-declare interface Delimited {
+export declare interface Delimited {
   /**
    * @return the opening (beginning) delimiter, e.g. <code>*</code>
    */

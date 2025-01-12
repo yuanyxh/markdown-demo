@@ -1,9 +1,9 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
-import type { EditorRange, Extension, NodePoint, Selection } from '@/interfaces';
+import type { EditorRange, NodePoint, RangeBounds } from '@/interfaces';
 
-import { getDomOfType } from '@/utils';
+import { ElementTools, NodeTools } from '@/utils';
 
 interface DocSelectionConfig {
   context: Editor;
@@ -16,26 +16,23 @@ class DocSelection {
     this.context = config.context;
   }
 
-  public updateSelection(updateSelection?: Selection) {
-    if (
-      !updateSelection ||
-      (updateSelection.from === 0 && updateSelection.to === this.context.length)
-    ) {
+  public updateSelection(rangeBounds?: RangeBounds) {
+    if (!rangeBounds || (rangeBounds.from === 0 && rangeBounds.to === this.context.length)) {
       return this.setRange({
-        startContainer: getDomOfType(this.context.doc),
+        startContainer: ElementTools.getDomFromNode(this.context.doc),
         startOffset: 0,
-        endContainer: getDomOfType(this.context.doc),
+        endContainer: ElementTools.getDomFromNode(this.context.doc),
         endOffset: this.context.doc.children.length
       });
     }
 
-    updateSelection.to ??= this.context.length;
+    rangeBounds.to ??= this.context.length;
 
-    if (updateSelection.from > updateSelection.to) {
-      [updateSelection.from, updateSelection.to] = [updateSelection.to, updateSelection.from];
+    if (rangeBounds.from > rangeBounds.to) {
+      [rangeBounds.from, rangeBounds.to] = [rangeBounds.to, rangeBounds.from];
     }
 
-    const selectionRange = this.locateRange(updateSelection.from, updateSelection.to);
+    const selectionRange = this.locateRange(rangeBounds.from, rangeBounds.to);
 
     if (selectionRange) {
       return this.setRange(selectionRange);
@@ -49,7 +46,7 @@ class DocSelection {
     let end: NodePoint | null;
 
     if (from === 0) {
-      start = { node: getDomOfType(this.context.doc), offset: 0 };
+      start = { node: ElementTools.getDomFromNode(this.context.doc), offset: 0 };
     } else {
       start = this.findNodePoint(this.context.doc, from);
     }
@@ -57,7 +54,10 @@ class DocSelection {
     if (to === from) {
       end = start;
     } else if (to === this.context.length) {
-      end = { node: getDomOfType(this.context.doc), offset: this.context.doc.children.length };
+      end = {
+        node: ElementTools.getDomFromNode(this.context.doc),
+        offset: this.context.doc.children.length
+      };
     } else {
       end = this.findNodePoint(this.context.doc, to);
     }
@@ -86,7 +86,7 @@ class DocSelection {
       next = children[i + 1];
 
       if (next && position > curr.inputEndIndex && position < next.inputIndex) {
-        return { node: getDomOfType(node), offset: i + 1 };
+        return { node: ElementTools.getDomFromNode(node), offset: i + 1 };
       }
 
       if (position >= curr.inputIndex && position <= curr.inputEndIndex) {
@@ -97,16 +97,16 @@ class DocSelection {
         }
 
         this.context
-          .getPlugins(Object.getPrototypeOf(curr)?.constructor)
+          .getPlugins(NodeTools.getConstructor(curr))
           .find((plugin) => (nodePoint = plugin.locatePointFromSrcPos(curr, position)));
 
         if (!nodePoint) {
           if (position === curr.inputIndex) {
-            nodePoint = { node: getDomOfType(node), offset: i };
+            nodePoint = { node: ElementTools.getDomFromNode(node), offset: i };
           } else if (position === curr.inputEndIndex) {
-            nodePoint = { node: getDomOfType(node), offset: i + 1 };
+            nodePoint = { node: ElementTools.getDomFromNode(node), offset: i + 1 };
           } else {
-            nodePoint = { node: getDomOfType(node), offset: i === 0 ? 0 : i + 1 };
+            nodePoint = { node: ElementTools.getDomFromNode(node), offset: i === 0 ? 0 : i + 1 };
           }
         }
 

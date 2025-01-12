@@ -2,7 +2,7 @@ import type { Code, FencedCodeBlock, IndentedCodeBlock } from 'commonmark-java-j
 
 import type Editor from '@/editor';
 
-export interface Selection {
+export interface RangeBounds {
   from: number;
   to?: number;
 }

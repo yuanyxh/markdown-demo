@@ -1,7 +1,6 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from '@/editor';
-import type { HtmlNodeRendererContext } from '@/renderer';
 import type {
   Extension,
   HtmlRendererExtension,
@@ -21,6 +20,14 @@ class EnhanceExtension implements Extension {
     return [];
   }
 
+  public getParserExtension(): ParserExtension | null {
+    return null;
+  }
+
+  public getHtmlRendererExtension(): HtmlRendererExtension | null {
+    return null;
+  }
+
   public locateSrcPos(node: Node, offset: number): number {
     return -1;
   }
@@ -29,17 +36,9 @@ class EnhanceExtension implements Extension {
     return null;
   }
 
-  public render(rendererContext: HtmlNodeRendererContext, node: MarkdownNode): void | null {
-    return null;
-  }
+  public enter(node: MarkdownNode): void {}
 
-  public getParserExtension(): ParserExtension | null {
-    return null;
-  }
-
-  public getHtmlRendererExtension(): HtmlRendererExtension | null {
-    return null;
-  }
+  public leave(node: MarkdownNode): void {}
 }
 
 export default EnhanceExtension;
