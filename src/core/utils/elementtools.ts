@@ -2,7 +2,13 @@ import type { MarkdownNode } from 'commonmark-java-js';
 
 import TypeTools from './typetools';
 
+/** Auxiliary tool class for elements. */
 class ElementTools {
+  /**
+   * Create elements for the editor.
+   *
+   * @returns {HTMLElement} the editor element
+   */
   public static createEditorElement(): HTMLElement {
     const editorElement = window.document.createElement('div');
 
@@ -18,7 +24,13 @@ class ElementTools {
     return editorElement;
   }
 
-  public static getDomFromNode(node: MarkdownNode): Node {
+  /**
+   * Obtain the corresponding DOM node of a specific type from the Markdown node.
+   *
+   * @param node
+   * @returns {Node} DOM Node
+   */
+  public static getDomByNodeType(node: MarkdownNode): Node {
     if (TypeTools.isMarkdownText(node) || TypeTools.isInlineCode(node)) {
       return node.meta.$dom.childNodes[0];
     } else if (TypeTools.isCodeBlock(node)) {
@@ -28,6 +40,12 @@ class ElementTools {
     }
   }
 
+  /**
+   * Obtain the corresponding DOM node from the Markdown node.
+   *
+   * @param node
+   * @returns {Node} DOM Node
+   */
   public static getDom(node: MarkdownNode): Node {
     return node.meta.$dom;
   }

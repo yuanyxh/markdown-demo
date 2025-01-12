@@ -11,6 +11,7 @@ import type {
 } from 'commonmark-java-js';
 import type { CodeBlock, MarkdownCode } from '@/interfaces';
 
+/** Auxiliary tool class for validating types. */
 class TypeTools {
   public static isElement(data: Node): data is HTMLElement {
     return data instanceof HTMLElement;

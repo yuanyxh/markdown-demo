@@ -12,12 +12,18 @@ class DocSelection {
     this.context = config.context;
   }
 
+  /**
+   * Update the selection range in the editor.
+   *
+   * @param rangeBounds Define boundaries in the source code.
+   * @returns {boolean} Whether the selection area is changed. true - yes | false - no.
+   */
   public updateSelection(rangeBounds?: RangeBounds): boolean {
     if (!rangeBounds || (rangeBounds.from === 0 && rangeBounds.to === this.context.length)) {
       return this.setRange({
-        startContainer: ElementTools.getDomFromNode(this.context.doc),
+        startContainer: ElementTools.getDomByNodeType(this.context.doc),
         startOffset: 0,
-        endContainer: ElementTools.getDomFromNode(this.context.doc),
+        endContainer: ElementTools.getDomByNodeType(this.context.doc),
         endOffset: this.context.doc.children.length
       });
     }
@@ -37,12 +43,19 @@ class DocSelection {
     return false;
   }
 
+  /**
+   * Locate the dom range according to the defined boundaries in the source code.
+   *
+   * @param from Start offset in the source code.
+   * @param to End offset in the source code.
+   * @returns {EditorRange | null} Editor range.
+   */
   public locateRange(from: number, to: number): EditorRange | null {
     let start: NodePoint | null;
     let end: NodePoint | null;
 
     if (from === 0) {
-      start = { node: ElementTools.getDomFromNode(this.context.doc), offset: 0 };
+      start = { node: ElementTools.getDomByNodeType(this.context.doc), offset: 0 };
     } else {
       start = this.findNodePoint(this.context.doc, from);
     }
@@ -51,7 +64,7 @@ class DocSelection {
       end = start;
     } else if (to === this.context.length) {
       end = {
-        node: ElementTools.getDomFromNode(this.context.doc),
+        node: ElementTools.getDomByNodeType(this.context.doc),
         offset: this.context.doc.children.length
       };
     } else {
@@ -70,6 +83,13 @@ class DocSelection {
     };
   }
 
+  /**
+   * Find the DOM node point according to the position in the source code.
+   *
+   * @param node Markdown node.
+   * @param position Position in the source code.
+   * @returns
+   */
   private findNodePoint(node: MarkdownNode, position: number): NodePoint | null {
     const children = node.children;
 
@@ -82,7 +102,7 @@ class DocSelection {
       next = children[i + 1];
 
       if (next && position > curr.inputEndIndex && position < next.inputIndex) {
-        return { node: ElementTools.getDomFromNode(node), offset: i + 1 };
+        return { node: ElementTools.getDomByNodeType(node), offset: i + 1 };
       }
 
       if (position >= curr.inputIndex && position <= curr.inputEndIndex) {
@@ -98,11 +118,11 @@ class DocSelection {
 
         if (!nodePoint) {
           if (position === curr.inputIndex) {
-            nodePoint = { node: ElementTools.getDomFromNode(node), offset: i };
+            nodePoint = { node: ElementTools.getDomByNodeType(node), offset: i };
           } else if (position === curr.inputEndIndex) {
-            nodePoint = { node: ElementTools.getDomFromNode(node), offset: i + 1 };
+            nodePoint = { node: ElementTools.getDomByNodeType(node), offset: i + 1 };
           } else {
-            nodePoint = { node: ElementTools.getDomFromNode(node), offset: i === 0 ? 0 : i + 1 };
+            nodePoint = { node: ElementTools.getDomByNodeType(node), offset: i === 0 ? 0 : i + 1 };
           }
         }
 
@@ -113,6 +133,12 @@ class DocSelection {
     return nodePoint;
   }
 
+  /**
+   * Set dom range on the editor.
+   *
+   * @param param0
+   * @returns {boolean} Selection area setting result. True means yes. False means no.
+   */
   private setRange({ startContainer, startOffset, endContainer, endOffset }: EditorRange): boolean {
     const selection = this.context.root.getSelection();
 

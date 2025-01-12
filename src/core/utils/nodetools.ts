@@ -11,7 +11,14 @@ interface TextRange {
   textEnd: number;
 }
 
+/** Auxiliary tool class for Markdown node. */
 class NodeTools {
+  /**
+   * Obtain the correct source code position of the Markdown block node.
+   *
+   * @param block Markdown block nodes
+   * @returns {number} Position at the source code
+   */
   public static getContentIndex(block: Block): number {
     const child = block.getFirstChild();
 
@@ -36,7 +43,15 @@ class NodeTools {
     return -1;
   }
 
-  public static codeIndexOf(source: string | String, node: MarkdownCode, offset: number): number {
+  /**
+   * Obtain the correct source code position of Markdown code nodes or code block nodes.
+   *
+   * @param source The source code of the current editor’s document.
+   * @param node Markdown node
+   * @param offset Code offset
+   * @returns {number} Position at the source code
+   */
+  public static codeIndexOf(source: string, node: MarkdownCode, offset: number): number {
     let literal = node.getLiteral();
 
     let { inputIndex, inputEndIndex } = node;
@@ -62,7 +77,14 @@ class NodeTools {
     return inputIndex + textRange.textStart + offset;
   }
 
-  public static codePoint(source: string | String, node: MarkdownCode): TextRange | false {
+  /**
+   * Obtain the position of the code content in a code node or code block node.
+   *
+   * @param source The source code of the current editor’s document.
+   * @param node Code or CodeBlock
+   * @returns {TextRange | false} code content index in the {@link MarkdownCode}
+   */
+  public static codePoint(source: string, node: MarkdownCode): TextRange | false {
     let literal = node.getLiteral();
 
     if (isUnDef(literal)) {
@@ -89,7 +111,15 @@ class NodeTools {
     return { textStart, textEnd };
   }
 
-  public static findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: number): number {
+  /**
+   * Find the code position of an HTML block node.
+   *
+   * @param node DOM Node
+   * @param parent Parent element of the node
+   * @param offset Node offset
+   * @returns {number} Position in the source code.
+   */
+  public static findHtmlBlockSrcPos(node: Node, parent: HTMLElement, offset: number): number {
     let element: HTMLElement | null = null;
     let position = 0;
 
@@ -128,6 +158,12 @@ class NodeTools {
     return parent.$virtNode.inputIndex + position;
   }
 
+  /**
+   * Obtain the constructor class of a node instance.
+   *
+   * @param node Markdown node
+   * @returns {typeof MarkdownNode} constructor class of a node instance
+   */
   public static getConstructor(node: MarkdownNode): typeof MarkdownNode {
     return Object.getPrototypeOf(node).constructor;
   }

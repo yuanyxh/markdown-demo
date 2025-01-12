@@ -42,7 +42,7 @@ class CodePlugin extends EnhanceExtension {
           pos <= inputIndex + textRange.textStart + textRange.textEnd
         ) {
           return {
-            node: ElementTools.getDomFromNode(node),
+            node: ElementTools.getDomByNodeType(node),
             offset: pos - inputIndex - textRange.textStart
           };
         }

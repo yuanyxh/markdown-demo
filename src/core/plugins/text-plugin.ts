@@ -13,7 +13,7 @@ class TextPlugin extends EnhanceExtension {
   }
 
   public override locatePointFromSrcPos(node: MarkdownNode, pos: number): NodePoint | null {
-    return { node: ElementTools.getDomFromNode(node), offset: pos - node.inputIndex };
+    return { node: ElementTools.getDomByNodeType(node), offset: pos - node.inputIndex };
   }
 }
 

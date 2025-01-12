@@ -21,7 +21,14 @@ const escapeChar: Record<string, string> = {};
 const UNESCAPE_CHAR_REGEXP = new RegExp(Object.keys(unescapeChar).join('|'), 'gi');
 const ESCAPE_CHAR_REGEXP = new RegExp(Object.values(unescapeChar).join('|'), 'gi');
 
+/** Auxiliary tool class for HTML. */
 class HtmlTools {
+  /**
+   * Decode the escaped character sequence.
+   *
+   * @param plain plain text
+   * @returns {string} decoded text
+   */
   public static unescape(plain: string): string {
     UNESCAPE_CHAR_REGEXP.lastIndex = 0;
 
@@ -30,6 +37,12 @@ class HtmlTools {
     });
   }
 
+  /**
+   * Escape character sequence for replacing unsafe text.
+   *
+   * @param html html text
+   * @returns {string} encoded text
+   */
   public static escape(html: string): string {
     ESCAPE_CHAR_REGEXP.lastIndex = 0;
 
@@ -44,6 +57,13 @@ class HtmlTools {
     });
   }
 
+  /**
+   * Obtain the position of the content in HTML in the correct format.
+   *
+   * @param html html text
+   * @param content content text
+   * @returns {number} Content offset in the html
+   */
   public static indexOf(html: string, content: string): number {
     return this.unescape(html).indexOf(this.unescape(content));
   }

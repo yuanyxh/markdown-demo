@@ -20,7 +20,7 @@ class HtmlBlockPlugin extends EnhanceExtension {
         return offset === 0 ? curr.$virtNode.inputIndex : curr.$virtNode.inputEndIndex;
       }
 
-      return NodeTools.findHtmlSelectionPoint(node, curr, offset);
+      return NodeTools.findHtmlBlockSrcPos(node, curr, offset);
     }
 
     return -1;
