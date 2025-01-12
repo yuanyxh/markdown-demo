@@ -2,8 +2,7 @@ import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
 
-import NodeTools from './utils/nodetools';
-import TypeTools from './utils/typetools';
+import { NodeTools, TypeTools } from '@/utils';
 
 const locateHtmlBlock: LocateHandler = function locateHtmlBlock(node, offset) {
   let curr: Node | null = node;

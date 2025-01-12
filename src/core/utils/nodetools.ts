@@ -1,7 +1,8 @@
 import type { Block } from 'commonmark-java-js';
 
-import { isUnDef } from 'commonmark-java-js';
+import type { MarkdownCode } from '@/interfaces';
 
+import { isUnDef } from 'commonmark-java-js';
 import TypeTools from './typetools';
 import HtmlTools from './htmltools';
 

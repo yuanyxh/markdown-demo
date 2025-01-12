@@ -1,24 +1,12 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
-import TypeTools from './utils/typetools';
-import NodeTools from './utils/nodetools';
-import { getDom, getDomOfType } from './utils/element';
+import type { EditorRange, NodePoint, Selection } from '@/interfaces';
+
+import { TypeTools, NodeTools, getDom, getDomOfType } from '@/utils';
 
 interface DocSelectionConfig {
   context: Editor;
-}
-
-interface NodePoint {
-  node: Node;
-  offset: number;
-}
-
-interface SelectionRange {
-  startNode: Node;
-  startOffset: number;
-  endNode: Node;
-  endOffset: number;
 }
 
 class DocSelection {
@@ -28,15 +16,15 @@ class DocSelection {
     this.context = config.context;
   }
 
-  public updateSelection(updateSelection?: UpdateSelection) {
+  public updateSelection(updateSelection?: Selection) {
     if (
       !updateSelection ||
       (updateSelection.from === 0 && updateSelection.to === this.context.length)
     ) {
       return this.setRange({
-        startNode: getDom(this.context.doc),
+        startContainer: getDom(this.context.doc),
         startOffset: 0,
-        endNode: getDom(this.context.doc),
+        endContainer: getDom(this.context.doc),
         endOffset: this.context.doc.children.length
       });
     }
@@ -56,7 +44,7 @@ class DocSelection {
     return false;
   }
 
-  public locateRange(from: number, to: number): SelectionRange | false {
+  public locateRange(from: number, to: number): EditorRange | false {
     let start: NodePoint | false;
     let end: NodePoint | false;
 
@@ -79,9 +67,9 @@ class DocSelection {
     }
 
     return {
-      startNode: start.node,
+      startContainer: start.node,
       startOffset: start.offset,
-      endNode: end.node,
+      endContainer: end.node,
       endOffset: end.offset
     };
   }
@@ -149,7 +137,7 @@ class DocSelection {
     return nodePoint;
   }
 
-  private setRange({ startNode, startOffset, endNode, endOffset }: SelectionRange) {
+  private setRange({ startContainer, startOffset, endContainer, endOffset }: EditorRange) {
     const selection = this.context.root.getSelection();
 
     if (!selection) {
@@ -165,10 +153,10 @@ class DocSelection {
     }
 
     try {
-      range.setStart(startNode, startOffset);
+      range.setStart(startContainer, startOffset);
 
-      if (startNode !== endNode || startOffset !== endOffset) {
-        range.setEnd(endNode, endOffset);
+      if (startContainer !== endContainer || startOffset !== endOffset) {
+        range.setEnd(endContainer, endOffset);
       } else {
         range.collapse(true);
       }

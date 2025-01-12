@@ -9,6 +9,7 @@ import type {
   Text as MarkdownText,
   Code
 } from 'commonmark-java-js';
+import type { CodeBlock, MarkdownCode } from '@/interfaces';
 
 class TypeTools {
   public static isElement(data: Node): data is HTMLElement {

@@ -1,4 +1,4 @@
-import TypeTools from './utils/typetools';
+import { TypeTools } from '@/utils';
 
 function toImageSource(images: File[]) {
   return images

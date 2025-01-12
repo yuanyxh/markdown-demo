@@ -1,7 +1,6 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
 import type Editor from './editor';
-import TypeTools from './utils/typetools';
 
 interface ScopeConfig {
   context: Editor;

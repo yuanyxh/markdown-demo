@@ -2,13 +2,14 @@ import type { MarkdownNode, AttributeProviderFactory } from 'commonmark-java-js'
 
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
 
-import { createEditorElement } from './utils/element';
+import { HtmlRenderer } from '@/renderer';
+import { createEditorElement } from '@/utils';
+
 import EditorInput from './editorInput';
 import SourceMap from './sourcemap';
 import SyncDoc from './syncdoc';
 import DocSelection from './docselection';
 import Source from './source';
-import HtmlRenderer from './renderer/HtmlRenderer';
 import Scope from './scope';
 
 interface RendererConfig {
@@ -31,7 +32,6 @@ interface InputAction {
 }
 
 type Update = Pick<InputAction, 'from' | 'to' | 'text'>;
-
 type InputType = 'insert' | 'delete' | 'replace' | 'selection';
 
 class Editor {
@@ -181,8 +181,6 @@ class Editor {
 
     this.oldDoc = this.innerDoc;
     this.innerDoc = this.parser.parse(this.innerSource);
-
-    console.log(this.innerDoc);
 
     const result = this.syncDoc.sync(this.innerDoc, this.oldDoc);
 

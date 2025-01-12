@@ -1,16 +1,18 @@
 import type Editor from './editor';
 
+import type { InputHandlerFn } from '@/interfaces';
+
 import { getPlainData } from './data';
 
 interface EditorInputConfig {
   context: Editor;
 }
 
-interface IInputHandler {
-  [key: string]: TInputHandlerFn;
+interface InputHandler {
+  [key: string]: InputHandlerFn;
 }
 
-const insertPlainText: TInputHandlerFn = function insertPlainText(this: Editor, e) {
+const insertPlainText: InputHandlerFn = function insertPlainText(this: Editor, e) {
   const range = this.locate(e.getTargetRanges()[0]);
 
   const text = getPlainData(e);
@@ -32,7 +34,7 @@ const insertPlainText: TInputHandlerFn = function insertPlainText(this: Editor, 
   return false;
 };
 
-function setHandlers(handlers: IInputHandler) {
+function setHandlers(handlers: InputHandler) {
   [
     'insertText',
     'insertReplacementText',
@@ -49,7 +51,7 @@ function setHandlers(handlers: IInputHandler) {
 class EditorInput {
   private context: Editor;
 
-  private handlers: IInputHandler = {};
+  private handlers: InputHandler = {};
 
   private innerInputing = false;
 

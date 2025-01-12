@@ -1,10 +1,8 @@
-import type { MarkdownNode } from 'commonmark-java-js';
+import type { MarkdownNode, Text as MarkdownText } from 'commonmark-java-js';
 
 import type Editor from './editor';
 
-import type { Text as MarkdownText } from 'commonmark-java-js';
-
-import TypeTools from './utils/typetools';
+import { TypeTools } from '@/utils';
 
 interface SyncDocConfig {
   context: Editor;

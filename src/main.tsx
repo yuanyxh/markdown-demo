@@ -4,7 +4,7 @@ import './styles/editor-init.less';
 
 import source from './examples/example.md?raw';
 
-import Editor from './editor';
+import Editor from './core/editor';
 
 Editor.create({
   parent: window.document.getElementById('root')!,

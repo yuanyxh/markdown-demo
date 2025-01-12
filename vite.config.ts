@@ -1,15 +1,35 @@
-import { defineConfig } from "vite";
-import type { ConfigEnv, UserConfig } from "vite";
+import path from 'node:path';
+import type { ConfigEnv, UserConfig } from 'vite';
 
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+const currFileDir = __dirname;
+const resolve = (...paths: string[]) => path.resolve(currFileDir, ...paths);
 
 export default ({ command, mode }: ConfigEnv): UserConfig => {
   return defineConfig({
-    root: ".",
-    base: "./",
+    root: '.',
+    base: './',
     plugins: [react()],
-    server: {
-      port: 9089,
+    resolve: {
+      alias: [
+        {
+          find: /@\//,
+          replacement: `${resolve('src/core')}/`
+        },
+        {
+          find: /@\/abstracts\//,
+          replacement: `${resolve('src/core/abstracts')}/`
+        },
+        {
+          find: /@\/interfaces\//,
+          replacement: `${resolve('src/core/interfaces')}/`
+        }
+      ]
     },
+    server: {
+      port: 9089
+    }
   });
 };
