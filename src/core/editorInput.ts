@@ -34,7 +34,7 @@ const insertPlainText: InputHandlerFn = function insertPlainText(this: Editor, e
   return false;
 };
 
-function setHandlers(handlers: InputHandler) {
+function setHandlers(handlers: InputHandler): void {
   [
     'insertText',
     'insertReplacementText',
@@ -67,40 +67,44 @@ class EditorInput {
     return this.innerInputing;
   }
 
-  public on(el: HTMLElement) {
+  public on(el: HTMLElement): void {
     el.addEventListener('blur', this.onBlur);
     el.addEventListener('beforeinput', this.onBeforeInput);
   }
 
-  public off(el: HTMLElement) {
+  public off(el: HTMLElement): void {
     el.removeEventListener('blur', this.onBlur);
     el.removeEventListener('beforeinput', this.onBeforeInput);
 
     this.context.root.removeEventListener('selectionchange', this.onSelectionChange);
   }
 
-  private listenForSelectionChange() {
+  private listenForSelectionChange(): void {
     this.context.root.addEventListener('selectionchange', this.onSelectionChange);
   }
 
-  private exec(cb: () => void) {
+  private exec(cb: () => void): void {
     this.innerInputing = true;
     cb();
     this.innerInputing = false;
   }
 
-  private onBlur = () => {};
+  private onBlur = (): void => {
+    this.context.updateRangeBounds();
+  };
 
-  private onBeforeInput = (e: InputEvent) => {
+  private onBeforeInput = (e: InputEvent): void => {
     if (this.handlers[e.inputType]) {
       this.exec(() => this.handlers[e.inputType].call(this.context, e));
     }
   };
 
-  private onSelectionChange = () => {
+  private onSelectionChange = (): void => {
     if (this.innerInputing || !this.context.isFocus) {
-      return false;
+      return;
     }
+
+    this.context.updateRangeBounds();
   };
 }
 

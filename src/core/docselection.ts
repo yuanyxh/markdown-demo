@@ -16,7 +16,7 @@ class DocSelection {
     this.context = config.context;
   }
 
-  public updateSelection(rangeBounds?: RangeBounds) {
+  public updateSelection(rangeBounds?: RangeBounds): boolean {
     if (!rangeBounds || (rangeBounds.from === 0 && rangeBounds.to === this.context.length)) {
       return this.setRange({
         startContainer: ElementTools.getDomFromNode(this.context.doc),
@@ -117,7 +117,7 @@ class DocSelection {
     return nodePoint;
   }
 
-  private setRange({ startContainer, startOffset, endContainer, endOffset }: EditorRange) {
+  private setRange({ startContainer, startOffset, endContainer, endOffset }: EditorRange): boolean {
     const selection = this.context.root.getSelection();
 
     if (!selection) {

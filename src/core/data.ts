@@ -1,6 +1,6 @@
 import { TypeTools } from '@/utils';
 
-function toImageSource(images: File[]) {
+function toImageSource(images: File[]): string {
   return images
     .map((image) => {
       const url = URL.createObjectURL(image);
@@ -10,7 +10,7 @@ function toImageSource(images: File[]) {
     .join(' ');
 }
 
-export function getPlainData(e: InputEvent) {
+export function getPlainData(e: InputEvent): string {
   if (e.data) {
     return e.data;
   }

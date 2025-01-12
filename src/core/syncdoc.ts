@@ -15,14 +15,14 @@ class SyncDoc {
     this.context = config.context;
   }
 
-  public attach(node: MarkdownNode, el: Node) {
+  public attach(node: MarkdownNode, el: Node): void {
     el.$virtNode = node;
     node.meta.$dom = el;
 
     this.getKey(node);
 
     if (TypeTools.isImage(node)) {
-      return false;
+      return;
     }
 
     if (TypeTools.isCodeBlock(node)) {
@@ -42,7 +42,7 @@ class SyncDoc {
     }
   }
 
-  public sync(node: MarkdownNode, oldNode: MarkdownNode) {
+  public sync(node: MarkdownNode, oldNode: MarkdownNode): boolean {
     return this.diff(node, oldNode);
   }
 
@@ -119,7 +119,7 @@ class SyncDoc {
     return changed;
   }
 
-  private getKey(node: MarkdownNode) {
+  private getKey(node: MarkdownNode): string {
     if (node.meta.key) {
       return node.meta.key;
     }
@@ -127,11 +127,11 @@ class SyncDoc {
     return (node.meta.key = this.context.source.slice(node.inputIndex, node.inputEndIndex));
   }
 
-  private isTextChanged(newNode: MarkdownText, oldNode: MarkdownText) {
+  private isTextChanged(newNode: MarkdownText, oldNode: MarkdownText): boolean {
     return newNode.getLiteral() !== oldNode.getLiteral();
   }
 
-  private isSomeNode(newNode: MarkdownNode, oldNode: MarkdownNode) {
+  private isSomeNode(newNode: MarkdownNode, oldNode: MarkdownNode): boolean {
     return (
       !oldNode.meta.synced &&
       this.isSomeNodeType(newNode, oldNode) &&
@@ -139,15 +139,15 @@ class SyncDoc {
     );
   }
 
-  private isSomeNodeType(newNode: MarkdownNode, oldNode: MarkdownNode) {
+  private isSomeNodeType(newNode: MarkdownNode, oldNode: MarkdownNode): boolean {
     return newNode.type === oldNode.type;
   }
 
-  private replaceText(newNode: MarkdownText, oldNode: MarkdownText) {
+  private replaceText(newNode: MarkdownText, oldNode: MarkdownText): void {
     oldNode.meta.$dom.textContent = newNode.getLiteral();
   }
 
-  private moveTo(oldNode: MarkdownNode, newIndex: number, parent: MarkdownNode) {
+  private moveTo(oldNode: MarkdownNode, newIndex: number, parent: MarkdownNode): void {
     const next = parent.meta.$dom.childNodes[newIndex + 1];
 
     if (next) {
@@ -157,7 +157,7 @@ class SyncDoc {
     }
   }
 
-  private insert(newNode: MarkdownNode, index: number, parent: MarkdownNode) {
+  private insert(newNode: MarkdownNode, index: number, parent: MarkdownNode): void {
     const prev = parent.meta.$dom.childNodes[index - 1];
 
     if (prev && TypeTools.isElement(prev)) {

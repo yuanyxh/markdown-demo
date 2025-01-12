@@ -1,6 +1,12 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import type { EditorRange, Extension, RangeBounds } from './interfaces';
+import type {
+  EditorRange,
+  Extension,
+  HtmlRendererExtension,
+  ParserExtension,
+  RangeBounds
+} from './interfaces';
 import type EnhanceExtension from './abstracts/enhanceextension';
 
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
@@ -89,15 +95,15 @@ class Editor {
     this.update({ type: 'insert', from: 0, text: doc });
   }
 
-  public get root() {
+  public get root(): Document {
     return this.innerRoot;
   }
 
-  public get source() {
+  public get source(): string {
     return this.innerSource.toString();
   }
 
-  public get rangeBounds() {
+  public get rangeBounds(): Required<RangeBounds> | null {
     if (this.innerRangeBounds) {
       return { ...this.innerRangeBounds };
     }
@@ -105,19 +111,19 @@ class Editor {
     return null;
   }
 
-  public get length() {
+  public get length(): number {
     return this.innerSource.length;
   }
 
-  public get doc() {
+  public get doc(): MarkdownNode {
     return this.innerDoc;
   }
 
-  public get isFocus() {
+  public get isFocus(): boolean {
     return this.innerRoot.activeElement === this.editorDOM;
   }
 
-  public dispatch(action: InputAction) {
+  public dispatch(action: InputAction): boolean {
     action.to ??= this.innerSource.length;
     action.force ??= false;
 
@@ -180,12 +186,10 @@ class Editor {
     return originSelection.getRangeAt(0);
   }
 
-  public updateRangeBounds() {
+  public updateRangeBounds(): boolean {
     const range = this.getRange();
 
     let rangeBounds: Required<RangeBounds>;
-
-    range && console.log(this.locateSrcPos(range));
 
     if (
       range &&
@@ -203,43 +207,45 @@ class Editor {
 
       this.innerRangeBounds = rangeBounds;
 
-      return;
+      return true;
     }
 
     this.innerRangeBounds = null;
+
+    return false;
   }
 
-  public render(node: MarkdownNode) {
+  public render(node: MarkdownNode): string {
     return this.renderer.render(node);
   }
 
-  public getPlugins(type: typeof MarkdownNode) {
+  public getPlugins(type: typeof MarkdownNode): Extension[] {
     return this.innerPlugins.filter((plugin) => plugin.getTypes().includes(type));
   }
 
-  public destroy() {
+  public destroy(): void {
     this.editorDOM.blur();
     this.editorInput.off(this.editorDOM);
     this.editorDOM.remove();
   }
 
-  private getParserExtensions(pluginInstances: Extension[]) {
+  private getParserExtensions(pluginInstances: Extension[]): ParserExtension[] {
     return pluginInstances
       .map((plugin) => plugin.getParserExtension())
       .filter((plugin) => plugin !== null);
   }
 
-  private getHtmlRendererExtensions(pluginInstances: Extension[]) {
+  private getHtmlRendererExtensions(pluginInstances: Extension[]): HtmlRendererExtension[] {
     return pluginInstances
       .map((plugin) => plugin.getHtmlRendererExtension())
       .filter((plugin) => plugin !== null);
   }
 
-  private isCollapseRange(range: EditorRange) {
+  private isCollapseRange(range: EditorRange): boolean {
     return range.startContainer === range.endContainer && range.startOffset === range.endOffset;
   }
 
-  private locateFormPoint(node: Node, offset: number) {
+  private locateFormPoint(node: Node, offset: number): number {
     let result = -1;
 
     this.innerPlugins.some((plugin) => {
@@ -271,11 +277,11 @@ class Editor {
     return result;
   }
 
-  private attachNode() {
+  private attachNode(): void {
     this.syncDoc.attach(this.innerDoc, this.editorDOM);
   }
 
-  public static create(options: EditorOptions) {
+  public static create(options: EditorOptions): Editor {
     return new Editor(options);
   }
 }

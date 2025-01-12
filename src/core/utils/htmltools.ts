@@ -22,7 +22,7 @@ const UNESCAPE_CHAR_REGEXP = new RegExp(Object.keys(unescapeChar).join('|'), 'gi
 const ESCAPE_CHAR_REGEXP = new RegExp(Object.values(unescapeChar).join('|'), 'gi');
 
 class HtmlTools {
-  public static unescape(plain: string) {
+  public static unescape(plain: string): string {
     UNESCAPE_CHAR_REGEXP.lastIndex = 0;
 
     return plain.replace(UNESCAPE_CHAR_REGEXP, function (char: string) {
@@ -30,7 +30,7 @@ class HtmlTools {
     });
   }
 
-  public static escape(html: string) {
+  public static escape(html: string): string {
     ESCAPE_CHAR_REGEXP.lastIndex = 0;
 
     return html.replace(ESCAPE_CHAR_REGEXP, function (char: string) {
@@ -44,7 +44,7 @@ class HtmlTools {
     });
   }
 
-  public static indexOf(html: string, content: string) {
+  public static indexOf(html: string, content: string): number {
     return this.unescape(html).indexOf(this.unescape(content));
   }
 }

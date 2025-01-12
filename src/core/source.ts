@@ -12,7 +12,7 @@ class Source extends String {
     this.set(source);
   }
 
-  public override get length() {
+  public override get length(): number {
     if (this.innerLength === -1) {
       this.innerLength = this.lines.reduce((total, curr) => total + curr.length + 1, 0);
 
@@ -24,7 +24,7 @@ class Source extends String {
     return this.innerLength;
   }
 
-  public lineAt(position: number) {
+  public lineAt(position: number): string {
     let lineSource: string;
     let lineStart: number = 0;
     let lineEnd: number = 0;
@@ -48,18 +48,18 @@ class Source extends String {
     return '';
   }
 
-  public set(source: string) {
+  public set(source: string): void {
     this.lines = source.split(LINE_BREAK_REGEXP);
 
     this.innerLength = -1;
     this.innerSource = null;
   }
 
-  public update(from = 0, to = this.length, text = '') {
+  public update(from = 0, to = this.length, text = ''): void {
     this.set(this.slice(0, from) + text + this.slice(to));
   }
 
-  public compare(text: string) {
+  public compare(text: string): boolean {
     return this.toString() === text;
   }
 

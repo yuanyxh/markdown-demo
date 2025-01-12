@@ -3,7 +3,7 @@ import type { MarkdownNode } from 'commonmark-java-js';
 import TypeTools from './typetools';
 
 class ElementTools {
-  public static createEditorElement() {
+  public static createEditorElement(): HTMLElement {
     const editorElement = window.document.createElement('div');
 
     editorElement.classList.add('editor');
@@ -18,7 +18,7 @@ class ElementTools {
     return editorElement;
   }
 
-  public static getDomFromNode(node: MarkdownNode) {
+  public static getDomFromNode(node: MarkdownNode): Node {
     if (TypeTools.isMarkdownText(node) || TypeTools.isInlineCode(node)) {
       return node.meta.$dom.childNodes[0];
     } else if (TypeTools.isCodeBlock(node)) {

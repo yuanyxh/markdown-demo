@@ -12,7 +12,7 @@ interface TextRange {
 }
 
 class NodeTools {
-  public static getContentIndex(block: Block) {
+  public static getContentIndex(block: Block): number {
     const child = block.getFirstChild();
 
     if (child === null) {
@@ -89,7 +89,7 @@ class NodeTools {
     return { textStart, textEnd };
   }
 
-  public static findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: number) {
+  public static findHtmlSelectionPoint(node: Node, parent: HTMLElement, offset: number): number {
     let element: HTMLElement | null = null;
     let position = 0;
 
