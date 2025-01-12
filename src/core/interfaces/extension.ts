@@ -22,7 +22,5 @@ export interface Extension {
 
   locatePointFromSrcPos(node: MarkdownNode, pos: number): NodePoint | null;
 
-  enter(node: MarkdownNode): void;
-
-  leave(node: MarkdownNode): void;
+  adjustNode(node: MarkdownNode): void;
 }

@@ -36,9 +36,7 @@ class EnhanceExtension implements Extension {
     return null;
   }
 
-  public enter(node: MarkdownNode): void {}
-
-  public leave(node: MarkdownNode): void {}
+  public adjustNode(node: MarkdownNode): void {}
 }
 
 export default EnhanceExtension;
