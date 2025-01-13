@@ -193,6 +193,7 @@ class Editor {
    * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
    */
   public dispatch(action: InputAction): void {
+    // FIXME: bugs for selection
     this.actionProcessor.enqueue(() => this.dispatchInner(action));
   }
 
