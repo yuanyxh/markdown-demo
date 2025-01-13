@@ -5,7 +5,7 @@ class HtmlBlockPlugin extends EnhanceExtension {
   public override locateSrcPos(node: Node, offset: number): number {
     let curr: Node | null = node;
 
-    while (curr) {
+    while (curr && curr !== this.context.dom) {
       if (!curr.$virtNode) {
         curr = curr.parentNode;
 

@@ -13,6 +13,7 @@ class DocSelection {
   private context: Editor;
 
   private innerRangeBounds: Required<RangeBounds> | null = null;
+  private scopes: Node[] = [];
 
   public constructor(config: EditorContextConfig) {
     this.context = config.context;
@@ -37,29 +38,34 @@ class DocSelection {
   public updateRangeBounds(): boolean {
     const range = this.getDOMRange();
 
+    let result = false;
     let rangeBounds: Required<RangeBounds>;
 
-    if (
-      range &&
-      (rangeBounds = this.context.locateSrcPos(range)) &&
-      this.context.checkRangeBounds(rangeBounds)
-    ) {
+    try {
       if (
-        this.innerRangeBounds &&
-        rangeBounds.from === this.innerRangeBounds.from &&
-        rangeBounds.to === this.innerRangeBounds.to
+        range &&
+        (rangeBounds = this.context.locateSrcPos(range)) &&
+        this.context.checkRangeBounds(rangeBounds)
       ) {
-        return false;
+        if (
+          this.innerRangeBounds &&
+          rangeBounds.from === this.innerRangeBounds.from &&
+          rangeBounds.to === this.innerRangeBounds.to
+        ) {
+          return (result = false);
+        }
+
+        this.innerRangeBounds = rangeBounds;
+
+        return (result = true);
       }
 
-      this.innerRangeBounds = rangeBounds;
+      this.innerRangeBounds = null;
+    } finally {
+      this.updateScopes(range);
 
-      return true;
+      return result;
     }
-
-    this.innerRangeBounds = null;
-
-    return false;
   }
 
   /**
@@ -140,6 +146,94 @@ class DocSelection {
     }
 
     return originSelection.getRangeAt(0);
+  }
+
+  /**
+   * Update the nodes within the scope of the selection.
+   *
+   * @param range
+   * @returns {boolean}
+   */
+  private updateScopes(range: EditorRange | null): boolean {
+    if (!range) {
+      if (this.scopes.length) {
+        this.scopes.length = 0;
+
+        return this.forceRerender();
+      }
+
+      return false;
+    }
+
+    const scopes = this.getScopes(range);
+    let result = false;
+
+    if (scopes.length !== this.scopes.length) {
+      result = true;
+    } else {
+      for (let i = 0; i < this.scopes.length; i++) {
+        if (!scopes.includes(this.scopes[i])) {
+          result = true;
+
+          break;
+        }
+      }
+    }
+
+    this.scopes = scopes;
+
+    return result ? this.forceRerender() : false;
+  }
+
+  /**
+   * Obtain the nodes within the scope of the selection.
+   *
+   * @param range
+   * @returns {Node[]}
+   */
+  private getScopes(range: EditorRange): Node[] {
+    const result: Node[] = [];
+
+    let node: Node | null = range.startContainer;
+
+    while (node && node !== this.context.dom) {
+      if (node.$virtNode && this.context.isInRangeScope(node.$virtNode)) {
+        result.push(node);
+      }
+
+      node = node.parentNode;
+    }
+
+    node = range.endContainer;
+    if (node !== range.startContainer) {
+      while (node && node !== this.context.dom) {
+        if (
+          node.$virtNode &&
+          this.context.isInRangeScope(node.$virtNode) &&
+          !result.includes(node)
+        ) {
+          result.push(node);
+        }
+
+        node = node.parentNode;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Forcibly re-execute the check for whether rendering is needed.
+   *
+   * @returns {boolean}
+   */
+  private forceRerender(): boolean {
+    return this.context.dispatch({
+      type: 'insert',
+      force: true,
+      from: 0,
+      text: this.context.source
+    });
   }
 
   /**

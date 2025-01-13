@@ -52,13 +52,18 @@ class SyncDoc {
    *
    * @param node The {@link ExtendsMarkdownNode | Markdown node}.
    * @param oldNode The {@link ExtendsMarkdownNode | Old Markdown node}.
+   * @param [force=false] Enforce deep comparison. - default is false.
    * @returns
    */
-  public sync(node: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
-    return this.diff(node, oldNode);
+  public sync(node: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode, force = false): boolean {
+    return this.diff(node, oldNode, force);
   }
 
-  private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
+  private diff(
+    newNode: ExtendsMarkdownNode,
+    oldNode: ExtendsMarkdownNode,
+    force: boolean
+  ): boolean {
     if (this.context.isInRangeScope(newNode)) {
       // Apply plugins and execute the adjustNode program for pre-transformation.
       newNode = this.context
@@ -82,7 +87,7 @@ class SyncDoc {
 
       const oldIndex = oldChildren.findIndex((old) => this.isSomeNode(newChild, old));
 
-      if (oldIndex !== -1) {
+      if (force === false && oldIndex !== -1) {
         if (oldIndex < lastIndex) {
           this.moveTo(oldChild, nextIndex, oldNode);
 
@@ -111,7 +116,7 @@ class SyncDoc {
 
             changed = true;
           } else {
-            const childChanged = this.diff(newChild, oldChild);
+            const childChanged = this.diff(newChild, oldChild, force);
 
             if (!changed) {
               changed = childChanged;

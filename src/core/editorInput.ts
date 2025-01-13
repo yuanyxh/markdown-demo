@@ -90,7 +90,7 @@ class EditorInput {
   };
 
   private onSelectionChange = (): void => {
-    if (!this.context.isFocus) {
+    if (!this.context.isFocus || this.context.isInputing) {
       return;
     }
 

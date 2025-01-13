@@ -75,6 +75,8 @@ class Editor {
   private innerRoot: Document;
   private innerSource: Source;
 
+  private innerIsInputing = false;
+
   private innerPlugins: Extension[] = [];
 
   public constructor(options: EditorConfig) {
@@ -145,7 +147,7 @@ class Editor {
    * @returns {number} The length of the editor’s document is always the length of the source code.
    */
   public get length(): number {
-    return this.innerSource.length;
+    return this.innerSource.toString().length;
   }
 
   /**
@@ -153,6 +155,20 @@ class Editor {
    */
   public get doc(): ExtendsMarkdownNode {
     return this.innerDoc;
+  }
+
+  /**
+   * @returns {HTMLElement} The editor's dom.
+   */
+  public get dom(): HTMLElement {
+    return this.editorDOM;
+  }
+
+  /**
+   * @returns {boolean} Indicate whether input is in progress, including any behavior that changes the state of the editor.
+   */
+  public get isInputing(): boolean {
+    return this.innerIsInputing;
   }
 
   /**
@@ -172,9 +188,13 @@ class Editor {
    * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
    */
   public dispatch(action: InputAction): boolean {
-    if (!this.checkDispatchAction(action)) {
+    console.time('default');
+
+    if (this.innerIsInputing || !this.checkDispatchAction(action)) {
       return false;
     }
+
+    this.innerIsInputing = true;
 
     let result = false;
 
@@ -195,6 +215,8 @@ class Editor {
         break;
     }
 
+    this.innerIsInputing = false;
+
     return result;
   }
 
@@ -207,13 +229,13 @@ class Editor {
    * editor.locateSrcPos(editor.getRange());
    */
   public locateSrcPos(range: EditorRange): Required<RangeBounds> {
-    const from = this.locateFormPoint(range.startContainer, range.startOffset);
+    const from = this.locateFormDOMPoint(range.startContainer, range.startOffset);
 
     if (this.isCollapseRange(range) || from === -1) {
       return { from, to: from };
     }
 
-    const to = this.locateFormPoint(range.endContainer, range.endOffset);
+    const to = this.locateFormDOMPoint(range.endContainer, range.endOffset);
 
     return { from, to };
   }
@@ -318,7 +340,7 @@ class Editor {
       return false;
     }
 
-    return node.inputIndex >= this.rangeBounds.from && node.inputEndIndex <= this.rangeBounds.to;
+    return this.rangeBounds.from >= node.inputIndex && this.rangeBounds.to <= node.inputEndIndex;
   }
 
   /**
@@ -347,9 +369,10 @@ class Editor {
     return range.startContainer === range.endContainer && range.startOffset === range.endOffset;
   }
 
-  private locateFormPoint(node: Node, offset: number): number {
+  private locateFormDOMPoint(node: Node, offset: number): number {
     let result = -1;
 
+    /** Apply plugins and execute the locateSrcPos program to locate the source code position. */
     this.innerPlugins.some((plugin) => {
       result = plugin.locateSrcPos(node, offset);
 
@@ -378,7 +401,7 @@ class Editor {
     this.oldDoc = this.innerDoc;
     this.innerDoc = this.parser.parse(this.innerSource) as ExtendsMarkdownNode;
 
-    const result = this.syncDoc.sync(this.innerDoc, this.oldDoc);
+    const result = this.syncDoc.sync(this.innerDoc, this.oldDoc, payload.force);
 
     this.attachNode();
 

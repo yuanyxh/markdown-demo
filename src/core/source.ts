@@ -4,7 +4,6 @@ const LINE_BREAK_REGEXP = /\r\n|\n|\r/g;
 class Source extends String {
   private lines: string[] = [];
 
-  private innerLength = -1;
   private innerSource: string | null = null;
 
   public constructor(source: string = '') {
@@ -14,18 +13,10 @@ class Source extends String {
   }
 
   /**
-   * @returns {number} Return the length of the document source code.
+   * TODO: This will never run. It is placed here to emphasize this problem.
    */
-  public override get length(): number {
-    if (this.innerLength === -1) {
-      this.innerLength = this.lines.reduce((total, curr) => total + curr.length + 1, 0);
-
-      if (this.lines[this.lines.length - 1] === '') {
-        this.innerLength -= 1;
-      }
-    }
-
-    return this.innerLength;
+  public get length(): number {
+    return 0;
   }
 
   /**
@@ -68,7 +59,6 @@ class Source extends String {
 
     this.lines = source.split(LINE_BREAK_REGEXP);
 
-    this.innerLength = -1;
     this.innerSource = null;
   }
 
@@ -79,7 +69,7 @@ class Source extends String {
    * @param to Ending offset
    * @param text Plain text
    */
-  public update(from = 0, to = this.length, text = ''): void {
+  public update(from = 0, to = this.toString().length, text = ''): void {
     this.set(this.slice(0, from) + text + this.slice(to));
   }
 
