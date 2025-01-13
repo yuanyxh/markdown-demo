@@ -42,8 +42,7 @@ class DocSelection {
     if (
       range &&
       (rangeBounds = this.context.locateSrcPos(range)) &&
-      rangeBounds.from !== -1 &&
-      rangeBounds.to !== -1
+      this.context.checkRangeBounds(rangeBounds)
     ) {
       if (
         this.innerRangeBounds &&
@@ -69,7 +68,7 @@ class DocSelection {
    * @param rangeBounds Define boundaries in the source code.
    * @returns {boolean} Whether the selection area is changed. true - yes | false - no.
    */
-  public updateSelection(rangeBounds?: RangeBounds): boolean {
+  public updateSelection(rangeBounds?: Required<RangeBounds>): boolean {
     if (!rangeBounds || (rangeBounds.from === 0 && rangeBounds.to === this.context.length)) {
       return this.setRange({
         startContainer: ElementTools.getDomByNodeType(this.context.doc),
@@ -77,12 +76,6 @@ class DocSelection {
         endContainer: ElementTools.getDomByNodeType(this.context.doc),
         endOffset: this.context.doc.children.length
       });
-    }
-
-    rangeBounds.to ??= this.context.length;
-
-    if (rangeBounds.from > rangeBounds.to) {
-      [rangeBounds.from, rangeBounds.to] = [rangeBounds.to, rangeBounds.from];
     }
 
     const selectionRange = this.locateRange(rangeBounds.from, rangeBounds.to);
@@ -178,6 +171,7 @@ class DocSelection {
           return nodePoint;
         }
 
+        // Apply plugins and execute the locatePointFromSrcPos program to help the editor locate.
         this.context
           .getPlugins(NodeTools.getConstructor(curr))
           .find((plugin) => (nodePoint = plugin.locatePointFromSrcPos(curr, position)));

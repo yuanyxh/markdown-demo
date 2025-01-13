@@ -172,30 +172,22 @@ class Editor {
    * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
    */
   public dispatch(action: InputAction): boolean {
-    action.to ??= this.innerSource.length;
-    action.force ??= false;
+    if (!this.checkDispatchAction(action)) {
+      return false;
+    }
 
     let result = false;
 
     switch (action.type) {
       case 'insert':
+      case 'delete':
+      case 'replace':
         result = this.update(action);
 
         break;
 
-      case 'delete':
-        break;
-
-      case 'replace':
-        break;
-
       case 'selection':
-        if (
-          !action.force &&
-          (this.rangeBounds?.from !== action.from || this.rangeBounds?.to !== action.to)
-        ) {
-          result = this.docSelection.updateSelection(action);
-        }
+        result = this.docSelection.updateSelection(action as Required<RangeBounds>);
 
         break;
 
@@ -235,9 +227,11 @@ class Editor {
    * editor.locateRangeFromSrcPos({ from: 42, to: 80 });
    */
   public locateRangeFromSrcPos(rangeBounds: RangeBounds): EditorRange | null {
-    rangeBounds.to ??= this.length;
+    if (this.checkRangeBounds(rangeBounds)) {
+      return this.docSelection.locateRange(rangeBounds.from, rangeBounds.to);
+    }
 
-    return this.docSelection.locateRange(rangeBounds.from, rangeBounds.to);
+    return null;
   }
 
   /**
@@ -250,12 +244,54 @@ class Editor {
   }
 
   /**
+   * Check if the range boundary is valid.
+   *
+   * @param rangeBounds range boundary
+   * @returns {boolean} If the range boundary is valid, return true.
+   */
+  public checkRangeBounds(rangeBounds: RangeBounds): rangeBounds is Required<RangeBounds> {
+    rangeBounds.to ??= this.length;
+
+    const result =
+      rangeBounds.from >= 0 &&
+      rangeBounds.from <= this.length &&
+      rangeBounds.to >= 0 &&
+      rangeBounds.to <= this.length;
+
+    if (result && rangeBounds.from > rangeBounds.to) {
+      [rangeBounds.from, rangeBounds.to] = [rangeBounds.to, rangeBounds.from];
+    }
+
+    return result;
+  }
+
+  /**
+   * Check whether the dispatched action can be executed.
+   *
+   * @param action
+   * @returns {boolean} If can be executed, return true.
+   */
+  public checkDispatchAction(action: InputAction): boolean {
+    if (!this.checkRangeBounds(action)) {
+      return false;
+    }
+
+    action.force ??= false;
+
+    return (
+      action.force ||
+      (action.type === 'selection' &&
+        (this.rangeBounds?.from !== action.from || this.rangeBounds?.to !== action.to))
+    );
+  }
+
+  /**
    * Render the Markdown node using the built-in renderer.
    *
    * @param node
    * @returns {string}
    */
-  public render(node: ExtendsMarkdownNode): string {
+  public render(node: MarkdownNode): string {
     return this.renderer.render(node);
   }
 

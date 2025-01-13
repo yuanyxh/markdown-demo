@@ -60,6 +60,7 @@ class SyncDoc {
 
   private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
     if (this.context.isInRangeScope(newNode)) {
+      // Apply plugins and execute the adjustNode program for pre-transformation.
       newNode = this.context
         .getPlugins(NodeTools.getConstructor(newNode))
         .reduce((n, plugin) => plugin.adjustNode(n), newNode);

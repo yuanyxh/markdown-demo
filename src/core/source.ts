@@ -1,4 +1,4 @@
-const LINE_BREAK_REGEXP = /[\r|\n|\r\n]/g;
+const LINE_BREAK_REGEXP = /\r\n|\n|\r/g;
 
 /** document source code */
 class Source extends String {
@@ -64,6 +64,8 @@ class Source extends String {
    * @param source Source code.
    */
   public set(source: string): void {
+    LINE_BREAK_REGEXP.lastIndex = 0;
+
     this.lines = source.split(LINE_BREAK_REGEXP);
 
     this.innerLength = -1;

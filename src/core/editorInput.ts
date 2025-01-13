@@ -53,8 +53,6 @@ class EditorInput {
     this.context = config.context;
 
     setHandlers(this.handlers);
-
-    this.listenForSelectionChange();
   }
 
   /**
@@ -65,6 +63,8 @@ class EditorInput {
   public on(el: HTMLElement): void {
     el.addEventListener('blur', this.onBlur);
     el.addEventListener('beforeinput', this.onBeforeInput);
+
+    this.context.root.addEventListener('selectionchange', this.onSelectionChange);
   }
 
   /**
@@ -77,10 +77,6 @@ class EditorInput {
     el.removeEventListener('beforeinput', this.onBeforeInput);
 
     this.context.root.removeEventListener('selectionchange', this.onSelectionChange);
-  }
-
-  private listenForSelectionChange(): void {
-    this.context.root.addEventListener('selectionchange', this.onSelectionChange);
   }
 
   private onBlur = (): void => {
