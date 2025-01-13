@@ -139,6 +139,8 @@ abstract class MarkdownNode {
   }
 
   public unlink() {
+    this.innerChildren.length = 0;
+
     if (this.prev !== null) {
       this.prev.next = this.next;
     } else if (this.parent !== null) {

@@ -508,7 +508,7 @@ class U {
     e.unlink(), e.setParent(this), this.firstChild !== null ? (this.firstChild.prev = e, e.next = this.firstChild, this.firstChild = e) : (this.firstChild = e, this.lastChild = e);
   }
   unlink() {
-    this.prev !== null ? this.prev.next = this.next : this.parent !== null && (this.parent.firstChild = this.next), this.next !== null ? this.next.prev = this.prev : this.parent !== null && (this.parent.lastChild = this.prev), this.parent = null, this.next = null, this.prev = null;
+    this.innerChildren.length = 0, this.prev !== null ? this.prev.next = this.next : this.parent !== null && (this.parent.firstChild = this.next), this.next !== null ? this.next.prev = this.prev : this.parent !== null && (this.parent.lastChild = this.prev), this.parent = null, this.next = null, this.prev = null;
   }
   /**
    * Inserts the {@code sibling} node after {@code this} node.
