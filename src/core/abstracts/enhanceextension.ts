@@ -6,8 +6,9 @@ import type {
   HtmlRendererExtension,
   ParserExtension,
   NodePoint,
-  EditorContextConfig
-} from '@/interfaces';
+  EditorContextConfig,
+  ExtendsMarkdownNode
+} from '@/types';
 
 class EnhanceExtension implements Extension {
   /** Editor context. Through it, one can access the data of the editor */
@@ -33,11 +34,11 @@ class EnhanceExtension implements Extension {
     return -1;
   }
 
-  public locatePointFromSrcPos(node: MarkdownNode, pos: number): NodePoint | null {
+  public locatePointFromSrcPos(node: ExtendsMarkdownNode, pos: number): NodePoint | null {
     return null;
   }
 
-  public adjustNode(node: MarkdownNode): MarkdownNode {
+  public adjustNode(node: ExtendsMarkdownNode): ExtendsMarkdownNode {
     return node;
   }
 }

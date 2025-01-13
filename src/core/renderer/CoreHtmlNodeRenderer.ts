@@ -1,4 +1,4 @@
-import type { MarkdownNode, NodeRenderer, Delimited } from 'commonmark-java-js';
+import type { MarkdownNode, NodeRenderer } from 'commonmark-java-js';
 
 import type { HtmlNodeRendererContext } from './interfaces/HtmlNodeRendererContext';
 

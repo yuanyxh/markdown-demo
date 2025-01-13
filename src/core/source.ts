@@ -1,5 +1,6 @@
 const LINE_BREAK_REGEXP = /[\r|\n|\r\n]/g;
 
+/** document source code */
 class Source extends String {
   private lines: string[] = [];
 
@@ -12,6 +13,9 @@ class Source extends String {
     this.set(source);
   }
 
+  /**
+   * @returns {number} Return the length of the document source code.
+   */
   public override get length(): number {
     if (this.innerLength === -1) {
       this.innerLength = this.lines.reduce((total, curr) => total + curr.length + 1, 0);
@@ -24,6 +28,12 @@ class Source extends String {
     return this.innerLength;
   }
 
+  /**
+   * Obtain the line where the offset is located.
+   *
+   * @param position Offset in the source code.
+   * @returns {string} source line
+   */
   public lineAt(position: number): string {
     let lineSource: string;
     let lineStart: number = 0;
@@ -48,6 +58,11 @@ class Source extends String {
     return '';
   }
 
+  /**
+   * Set the document source code.
+   *
+   * @param source Source code.
+   */
   public set(source: string): void {
     this.lines = source.split(LINE_BREAK_REGEXP);
 
@@ -55,10 +70,23 @@ class Source extends String {
     this.innerSource = null;
   }
 
+  /**
+   * Update the document source code.
+   *
+   * @param from Starting offset
+   * @param to Ending offset
+   * @param text Plain text
+   */
   public update(from = 0, to = this.length, text = ''): void {
     this.set(this.slice(0, from) + text + this.slice(to));
   }
 
+  /**
+   * Compare whether the documents are equal.
+   *
+   * @param text
+   * @returns {boolean} If they are different, return false.
+   */
   public compare(text: string): boolean {
     return this.toString() === text;
   }

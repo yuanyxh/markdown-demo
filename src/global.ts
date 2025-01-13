@@ -1,7 +1,7 @@
-import type { MarkdownNode } from 'commonmark-java-js';
+import { ExtendsMarkdownNode } from '@/types';
 
 declare global {
   interface Node {
-    $virtNode: MarkdownNode;
+    $virtNode: ExtendsMarkdownNode;
   }
 }

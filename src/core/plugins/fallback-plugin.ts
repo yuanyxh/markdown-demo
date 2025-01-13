@@ -1,4 +1,4 @@
-import type { MarkdownNode } from 'commonmark-java-js';
+import type { ExtendsMarkdownNode } from '@/types';
 
 import EnhanceExtension from '@/abstracts/enhanceextension';
 import { NodeTools, TypeTools } from '@/utils';
@@ -26,7 +26,7 @@ class FallbackPlugin extends EnhanceExtension {
     }
 
     let isSoftLineBreak = false;
-    let childMarkdownNode: MarkdownNode | null = block.children[offset - 1];
+    let childMarkdownNode: ExtendsMarkdownNode | null = block.children[offset - 1];
 
     if (childMarkdownNode.isBlock() && childMarkdownNode.getNext()) {
       childMarkdownNode = childMarkdownNode.getNext();

@@ -2,6 +2,7 @@ import type { MarkdownNode, Parser } from 'commonmark-java-js';
 
 import type { HtmlRenderer } from '@/renderer';
 import type { NodePoint } from './types';
+import { ExtendsMarkdownNode } from './extends';
 
 /** Built-in parser extension. Passed to the built-in parser to enhance its functionality. */
 export type ParserExtension = (typeof Parser)['ParserExtension'];
@@ -56,7 +57,7 @@ export interface Extension {
    * @param pos Position in source code
    * @returns {NodePoint | null} anchor or focus. - default at null
    */
-  locatePointFromSrcPos(node: MarkdownNode, pos: number): NodePoint | null;
+  locatePointFromSrcPos(node: ExtendsMarkdownNode, pos: number): NodePoint | null;
 
   /**
    * When the cursor enters a node, adjust the node at the cursor position.
@@ -64,7 +65,7 @@ export interface Extension {
    * This is usually used to display the source code of inline nodes and HTML nodes.
    *
    * @param node The Markdown node corresponding to the DOM node.
-   * @returns {MarkdownNode} Adjusted node.
+   * @returns {ExtendsMarkdownNode} Adjusted node.
    */
-  adjustNode(node: MarkdownNode): MarkdownNode;
+  adjustNode(node: ExtendsMarkdownNode): ExtendsMarkdownNode;
 }

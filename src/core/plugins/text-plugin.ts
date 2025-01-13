@@ -1,6 +1,6 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import type { NodePoint } from '@/interfaces';
+import type { ExtendsMarkdownNode, NodePoint } from '@/types';
 
 import { Text as MarkdownText } from 'commonmark-java-js';
 
@@ -12,7 +12,7 @@ class TextPlugin extends EnhanceExtension {
     return [MarkdownText];
   }
 
-  public override locatePointFromSrcPos(node: MarkdownNode, pos: number): NodePoint | null {
+  public override locatePointFromSrcPos(node: ExtendsMarkdownNode, pos: number): NodePoint | null {
     return { node: ElementTools.getDomByNodeType(node), offset: pos - node.inputIndex };
   }
 }

@@ -1,4 +1,4 @@
-import type { MarkdownNode } from 'commonmark-java-js';
+import type { ExtendsMarkdownNode } from '@/types';
 
 import TypeTools from './typetools';
 
@@ -30,7 +30,7 @@ class ElementTools {
    * @param node
    * @returns {Node} DOM Node
    */
-  public static getDomByNodeType(node: MarkdownNode): Node {
+  public static getDomByNodeType(node: ExtendsMarkdownNode): Node {
     if (TypeTools.isMarkdownText(node) || TypeTools.isInlineCode(node)) {
       return node.meta.$dom.childNodes[0];
     } else if (TypeTools.isCodeBlock(node)) {
@@ -46,7 +46,7 @@ class ElementTools {
    * @param node
    * @returns {Node} DOM Node
    */
-  public static getDom(node: MarkdownNode): Node {
+  public static getDom(node: ExtendsMarkdownNode): Node {
     return node.meta.$dom;
   }
 }

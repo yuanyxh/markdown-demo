@@ -16,7 +16,7 @@
     "paths": {
       "@/*": ["src/core/*"],
       "@/abstracts/*": ["src/core/abstracts/*"],
-      "@/interfaces/*": ["src/core/interfaces/*"]
+      "@/interfaces/*": ["src/core/types/*"]
     }
   },
   "include": ["src/**/*", "vite.config.ts"]

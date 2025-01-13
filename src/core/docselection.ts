@@ -1,7 +1,11 @@
-import type { MarkdownNode } from 'commonmark-java-js';
-
 import type Editor from './editor';
-import type { EditorContextConfig, EditorRange, NodePoint, RangeBounds } from '@/interfaces';
+import type {
+  EditorContextConfig,
+  EditorRange,
+  ExtendsMarkdownNode,
+  NodePoint,
+  RangeBounds
+} from '@/types';
 
 import { ElementTools, NodeTools } from '@/utils';
 
@@ -152,11 +156,11 @@ class DocSelection {
    * @param position Position in the source code.
    * @returns
    */
-  private findNodePoint(node: MarkdownNode, position: number): NodePoint | null {
+  private findNodePoint(node: ExtendsMarkdownNode, position: number): NodePoint | null {
     const children = node.children;
 
-    let curr: MarkdownNode;
-    let next: MarkdownNode;
+    let curr: ExtendsMarkdownNode;
+    let next: ExtendsMarkdownNode;
     let nodePoint: NodePoint | null = null;
 
     for (let i = 0; i < children.length; i++) {

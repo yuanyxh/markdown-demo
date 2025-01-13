@@ -1,6 +1,6 @@
 import type Editor from './editor';
 
-import type { EditorContextConfig, InputHandlerFn } from '@/interfaces';
+import type { EditorContextConfig, InputHandlerFn } from '@/types';
 
 import { getPlainData } from './data';
 

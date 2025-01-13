@@ -1,11 +1,11 @@
-import type { MarkdownNode, Text as MarkdownText } from 'commonmark-java-js';
+import type { Text as MarkdownText } from 'commonmark-java-js';
 
 import type Editor from './editor';
+import type { EditorContextConfig, ExtendsMarkdownNode } from './types';
 
-import type { EditorContextConfig } from './interfaces';
+import { NodeTools, TypeTools } from '@/utils';
 
-import { TypeTools } from '@/utils';
-
+/** Synchronize the document */
 class SyncDoc {
   private context: Editor;
 
@@ -13,7 +13,14 @@ class SyncDoc {
     this.context = config.context;
   }
 
-  public attach(node: MarkdownNode, el: Node): void {
+  /**
+   * Append the Markdown node to the DOM tree.
+   *
+   * @param node The {@link ExtendsMarkdownNode | Markdown node}.
+   * @param el DOM node.
+   * @returns
+   */
+  public attach(node: ExtendsMarkdownNode, el: Node): void {
     el.$virtNode = node;
     node.meta.$dom = el;
 
@@ -40,18 +47,31 @@ class SyncDoc {
     }
   }
 
-  public sync(node: MarkdownNode, oldNode: MarkdownNode): boolean {
+  /**
+   * Synchronize the document to the DOM tree and perform necessary checks.
+   *
+   * @param node The {@link ExtendsMarkdownNode | Markdown node}.
+   * @param oldNode The {@link ExtendsMarkdownNode | Old Markdown node}.
+   * @returns
+   */
+  public sync(node: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
     return this.diff(node, oldNode);
   }
 
-  private diff(newNode: MarkdownNode, oldNode: MarkdownNode): boolean {
+  private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
+    if (this.context.isInRangeScope(newNode)) {
+      newNode = this.context
+        .getPlugins(NodeTools.getConstructor(newNode))
+        .reduce((n, plugin) => plugin.adjustNode(n), newNode);
+    }
+
     const newChildren = newNode.children;
     const oldChildren = oldNode.children;
 
     let nextIndex = 0;
     let lastIndex = 0;
-    let newChild: MarkdownNode;
-    let oldChild: MarkdownNode;
+    let newChild: ExtendsMarkdownNode;
+    let oldChild: ExtendsMarkdownNode;
 
     let changed = false;
 
@@ -117,7 +137,7 @@ class SyncDoc {
     return changed;
   }
 
-  private getKey(node: MarkdownNode): string {
+  private getKey(node: ExtendsMarkdownNode): string {
     if (node.meta.key) {
       return node.meta.key;
     }
@@ -129,7 +149,7 @@ class SyncDoc {
     return newNode.getLiteral() !== oldNode.getLiteral();
   }
 
-  private isSomeNode(newNode: MarkdownNode, oldNode: MarkdownNode): boolean {
+  private isSomeNode(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
     return (
       !oldNode.meta.synced &&
       this.isSomeNodeType(newNode, oldNode) &&
@@ -137,7 +157,7 @@ class SyncDoc {
     );
   }
 
-  private isSomeNodeType(newNode: MarkdownNode, oldNode: MarkdownNode): boolean {
+  private isSomeNodeType(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
     return newNode.type === oldNode.type;
   }
 
@@ -145,7 +165,11 @@ class SyncDoc {
     oldNode.meta.$dom.textContent = newNode.getLiteral();
   }
 
-  private moveTo(oldNode: MarkdownNode, newIndex: number, parent: MarkdownNode): void {
+  private moveTo(
+    oldNode: ExtendsMarkdownNode,
+    newIndex: number,
+    parent: ExtendsMarkdownNode
+  ): void {
     const next = parent.meta.$dom.childNodes[newIndex + 1];
 
     if (next) {
@@ -155,17 +179,17 @@ class SyncDoc {
     }
   }
 
-  private insert(newNode: MarkdownNode, index: number, parent: MarkdownNode): void {
+  private insert(newNode: ExtendsMarkdownNode, index: number, parent: ExtendsMarkdownNode): void {
     const prev = parent.meta.$dom.childNodes[index - 1];
 
     if (prev && TypeTools.isElement(prev)) {
       prev.insertAdjacentHTML('afterend', this.context.render(newNode));
-    } else {
+    } else if (TypeTools.isElement(parent.meta.$dom)) {
       parent.meta.$dom.insertAdjacentHTML('afterbegin', this.context.render(newNode));
     }
   }
 
-  private remove(parent: MarkdownNode, oldNode: MarkdownNode) {
+  private remove(parent: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode) {
     parent.meta.$dom.removeChild(oldNode.meta.$dom);
   }
 }

@@ -1,12 +1,13 @@
-import type { Document as MarkdownDocument, MarkdownNode } from 'commonmark-java-js';
+import type { MarkdownNode } from 'commonmark-java-js';
 
 import type {
   EditorRange,
+  ExtendsMarkdownNode,
   Extension,
   HtmlRendererExtension,
   ParserExtension,
   RangeBounds
-} from './interfaces';
+} from './types';
 import type EnhanceExtension from './abstracts/enhanceextension';
 
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
@@ -68,8 +69,8 @@ class Editor {
   private syncDoc: SyncDoc;
   private editorInput: EditorInput;
 
-  private innerDoc: MarkdownNode;
-  private oldDoc: MarkdownNode;
+  private innerDoc: ExtendsMarkdownNode;
+  private oldDoc: ExtendsMarkdownNode;
 
   private innerRoot: Document;
   private innerSource: Source;
@@ -111,7 +112,7 @@ class Editor {
 
     {
       this.innerSource = new Source();
-      this.innerDoc = this.oldDoc = this.parser.parse(this.innerSource);
+      this.innerDoc = this.oldDoc = this.parser.parse(this.innerSource) as ExtendsMarkdownNode;
       this.attachNode();
     }
 
@@ -148,9 +149,9 @@ class Editor {
   }
 
   /**
-   * @returns {MarkdownDocument} The Markdown document corresponding to the editor’s document.
+   * @returns {ExtendsMarkdownNode} The Markdown document corresponding to the editor’s document.
    */
-  public get doc(): MarkdownDocument {
+  public get doc(): ExtendsMarkdownNode {
     return this.innerDoc;
   }
 
@@ -254,7 +255,7 @@ class Editor {
    * @param node
    * @returns {string}
    */
-  public render(node: MarkdownNode): string {
+  public render(node: ExtendsMarkdownNode): string {
     return this.renderer.render(node);
   }
 
@@ -268,6 +269,20 @@ class Editor {
     return type === void 0
       ? this.innerPlugins.slice(0)
       : this.innerPlugins.filter((plugin) => plugin.getTypes().includes(type));
+  }
+
+  /**
+   * checking the node is within the delineated boundary.
+   *
+   * @param node
+   * @returns {boolean} If the node is within the delineated boundary, return true.
+   */
+  public isInRangeScope(node: ExtendsMarkdownNode): boolean {
+    if (!this.rangeBounds) {
+      return false;
+    }
+
+    return node.inputIndex >= this.rangeBounds.from && node.inputEndIndex <= this.rangeBounds.to;
   }
 
   /**
@@ -325,7 +340,7 @@ class Editor {
     }
 
     this.oldDoc = this.innerDoc;
-    this.innerDoc = this.parser.parse(this.innerSource);
+    this.innerDoc = this.parser.parse(this.innerSource) as ExtendsMarkdownNode;
 
     const result = this.syncDoc.sync(this.innerDoc, this.oldDoc);
 

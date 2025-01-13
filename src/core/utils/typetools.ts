@@ -1,15 +1,16 @@
 import type {
   Block,
   FencedCodeBlock,
-  MarkdownNode,
   HtmlBlock,
   ThematicBreak,
   SoftLineBreak,
   Image,
   Text as MarkdownText,
-  Code
+  Code,
+  MarkdownNode
 } from 'commonmark-java-js';
-import type { CodeBlock, MarkdownCode } from '@/interfaces';
+
+import type { CodeBlock, MarkdownCode } from '@/types';
 
 /** Auxiliary tool class for validating types. */
 class TypeTools {

@@ -1,6 +1,6 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import type { NodePoint } from '@/interfaces';
+import type { ExtendsMarkdownNode, NodePoint } from '@/types';
 
 import { Code, FencedCodeBlock, IndentedCodeBlock } from 'commonmark-java-js';
 
@@ -26,7 +26,7 @@ class CodePlugin extends EnhanceExtension {
     return NodeTools.codeIndexOf(this.context.source, mNode, offset);
   }
 
-  public override locatePointFromSrcPos(node: MarkdownNode, pos: number): NodePoint | null {
+  public override locatePointFromSrcPos(node: ExtendsMarkdownNode, pos: number): NodePoint | null {
     if (TypeTools.isCode(node)) {
       const textRange = NodeTools.codePoint(this.context.source, node);
 
