@@ -1,58 +1,14 @@
 import type Editor from './editor';
 
-import type { EditorContextConfig, InputHandlerFn } from '@/types';
+import type { EditorContextConfig } from '@/types';
 
 import { getPlainData } from './data';
-
-interface InputHandler {
-  [key: string]: InputHandlerFn;
-}
-
-const insertPlainText: InputHandlerFn = function insertPlainText(this: Editor, e) {
-  const range = this.locateSrcPos(e.getTargetRanges()[0]);
-
-  const text = getPlainData(e);
-
-  const changed = this.dispatch({ type: 'insert', from: range.from, to: range.to, text });
-
-  if (changed) {
-    e.preventDefault();
-
-    if (range.from === range.to) {
-      range.from = range.to = range.from + text.length;
-    }
-
-    this.dispatch({ type: 'selection', from: range.from, to: range.to });
-
-    return true;
-  }
-
-  return false;
-};
-
-function setHandlers(handlers: InputHandler): void {
-  [
-    'insertText',
-    'insertReplacementText',
-    'insertFromYank',
-    'insertFromDrop',
-    'insertFromPaste',
-    'insertLink',
-    'insertFromPasteAsQuotation'
-  ].forEach((eventName) => {
-    handlers[eventName] = insertPlainText;
-  });
-}
 
 class EditorInput {
   private context: Editor;
 
-  private handlers: InputHandler = {};
-
   public constructor(config: EditorContextConfig) {
     this.context = config.context;
-
-    setHandlers(this.handlers);
   }
 
   /**
@@ -84,18 +40,38 @@ class EditorInput {
   };
 
   private onBeforeInput = (e: InputEvent): void => {
-    if (this.handlers[e.inputType]) {
-      this.handlers[e.inputType].call(this.context, e);
+    e.preventDefault();
+
+    switch (e.inputType) {
+      case 'insertText':
+      case 'insertReplacementText':
+      case 'insertFromYank':
+      case 'insertFromDrop':
+      case 'insertFromPaste':
+      case 'insertLink':
+      case 'insertFromPasteAsQuotation':
+        this.insertPlainText(e);
+
+        break;
     }
   };
 
   private onSelectionChange = (): void => {
-    if (!this.context.isFocus || this.context.isInputing) {
+    if (!this.context.hasFocus) {
       return;
     }
 
     this.context.updateRangeBounds();
   };
+
+  private insertPlainText(e: InputEvent): void {
+    const range = e.getTargetRanges()[0];
+    const bounds = this.context.locateSrcPos(range);
+
+    const text = getPlainData(e);
+
+    this.context.dispatch({ type: 'insert', from: bounds.from, to: bounds.to, text });
+  }
 }
 
 export default EditorInput;

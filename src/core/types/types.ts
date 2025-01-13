@@ -23,9 +23,6 @@ export interface NodePoint {
 
 export type SourceNode = SourceText | SourceBlock;
 
-/** program for input processing */
-export type InputHandlerFn = (this: Editor, e: InputEvent) => boolean;
-
 /** node for code block */
 export type CodeBlock = FencedCodeBlock | IndentedCodeBlock;
 

@@ -52,18 +52,14 @@ class SyncDoc {
    *
    * @param node The {@link ExtendsMarkdownNode | Markdown node}.
    * @param oldNode The {@link ExtendsMarkdownNode | Old Markdown node}.
-   * @param [force=false] Enforce deep comparison. - default is false.
+   * @param [deep=false] Enforce deep comparison. - default is false.
    * @returns
    */
-  public sync(node: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode, force = false): boolean {
-    return this.diff(node, oldNode, force);
+  public sync(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode, deep = false): boolean {
+    return this.diff(newNode, oldNode, deep);
   }
 
-  private diff(
-    newNode: ExtendsMarkdownNode,
-    oldNode: ExtendsMarkdownNode,
-    force: boolean
-  ): boolean {
+  private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode, deep: boolean): boolean {
     if (this.context.isInRangeScope(newNode)) {
       // Apply plugins and execute the adjustNode program for pre-transformation.
       newNode = this.context
@@ -87,13 +83,17 @@ class SyncDoc {
 
       const oldIndex = oldChildren.findIndex((old) => this.isSomeNode(newChild, old));
 
-      if (force === false && oldIndex !== -1) {
+      if (oldIndex !== -1) {
         if (oldIndex < lastIndex) {
           this.moveTo(oldChild, nextIndex, oldNode);
 
           changed = true;
         } else {
           lastIndex = oldIndex;
+        }
+
+        if (deep && this.diff(newChild, oldChildren[oldIndex], deep)) {
+          changed = true;
         }
 
         oldChildren[oldIndex].meta.synced = true;
@@ -116,7 +116,7 @@ class SyncDoc {
 
             changed = true;
           } else {
-            const childChanged = this.diff(newChild, oldChild, force);
+            const childChanged = this.diff(newChild, oldChild, deep);
 
             if (!changed) {
               changed = childChanged;

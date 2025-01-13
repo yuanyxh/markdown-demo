@@ -13,13 +13,14 @@ import type EnhanceExtension from './abstracts/enhanceextension';
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
 
 import { HtmlRenderer } from '@/renderer';
-import { ElementTools, TypeTools } from '@/utils';
+import { ElementTools } from '@/utils';
 
+import { defaultPlugins } from './plugins';
 import EditorInput from './editorInput';
 import SyncDoc from './syncdoc';
 import DocSelection from './docselection';
 import Source from './source';
-import { defaultPlugins } from './plugins';
+import ActionProcessor from './action-processor';
 
 /** Editor configuration. */
 export interface EditorConfig {
@@ -51,6 +52,8 @@ export interface InputAction {
   text?: string;
   /** Enforce action even if the document is not changed. */
   force?: boolean;
+  /** Perform a deep comparison on the document. When set to true, {@link force} is forcibly set to true. */
+  deep?: boolean;
 }
 
 export type InputType = 'insert' | 'delete' | 'replace' | 'selection';
@@ -68,6 +71,7 @@ class Editor {
   private docSelection: DocSelection;
   private syncDoc: SyncDoc;
   private editorInput: EditorInput;
+  private actionProcessor: ActionProcessor;
 
   private innerDoc: ExtendsMarkdownNode;
   private oldDoc: ExtendsMarkdownNode;
@@ -110,6 +114,7 @@ class Editor {
 
       this.syncDoc = new SyncDoc({ context: this });
       this.docSelection = new DocSelection({ context: this });
+      this.actionProcessor = new ActionProcessor();
     }
 
     {
@@ -174,7 +179,7 @@ class Editor {
   /**
    * @returns {boolean} When the focus is in the editor, return true.
    */
-  public get isFocus(): boolean {
+  public get hasFocus(): boolean {
     return this.innerRoot.activeElement === this.editorDOM;
   }
 
@@ -182,40 +187,13 @@ class Editor {
    * Dispatch an action. This method is usually used to change the document.
    *
    * @param action
-   * @returns {boolean} When the document is successfully changed, return true.
+   * @returns {void}
    * @example
    * const editor = Editor.create({ parent: window.parent });
    * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
    */
-  public dispatch(action: InputAction): boolean {
-    if (this.innerIsInputing || !this.checkDispatchAction(action)) {
-      return false;
-    }
-
-    this.innerIsInputing = true;
-
-    let result = false;
-
-    switch (action.type) {
-      case 'insert':
-      case 'delete':
-      case 'replace':
-        result = this.update(action);
-
-        break;
-
-      case 'selection':
-        result = this.docSelection.updateSelection(action as Required<RangeBounds>);
-
-        break;
-
-      default:
-        break;
-    }
-
-    this.innerIsInputing = false;
-
-    return result;
+  public dispatch(action: InputAction): void {
+    this.actionProcessor.enqueue(() => this.dispatchInner(action));
   }
 
   /**
@@ -260,7 +238,15 @@ class Editor {
    * @returns {boolean} When the update is successful, return true.
    */
   public updateRangeBounds(): boolean {
-    return this.docSelection.updateRangeBounds();
+    const cacheBounds = this.rangeBounds;
+
+    const result = this.docSelection.updateRangeBounds();
+
+    if (this.rangeBounds !== cacheBounds) {
+      this.dispatch({ type: 'insert', deep: true, from: 0, text: this.innerSource.toString() });
+    }
+
+    return result;
   }
 
   /**
@@ -296,13 +282,44 @@ class Editor {
       return false;
     }
 
-    action.force ??= false;
+    action.deep ??= false;
+    action.force = action.deep;
 
     return (
       action.force ||
-      (action.type === 'selection' &&
-        (this.rangeBounds?.from !== action.from || this.rangeBounds?.to !== action.to))
+      action.type !== 'selection' ||
+      this.rangeBounds?.from !== action.from ||
+      this.rangeBounds?.to !== action.to
     );
+  }
+
+  /**
+   * checking the node is within the delineated boundary.
+   *
+   * @param node
+   * @returns {boolean} If the node is within the delineated boundary, return true.
+   */
+  public isInRangeScope(node: MarkdownNode): boolean {
+    if (!this.rangeBounds) {
+      return false;
+    }
+
+    const { from, to } = this.rangeBounds;
+
+    let curr: MarkdownNode | null = node;
+
+    while (curr && curr !== this.innerDoc) {
+      if (
+        (from >= curr.inputIndex && from <= curr.inputEndIndex) ||
+        (to >= curr.inputIndex && to <= curr.inputEndIndex)
+      ) {
+        return true;
+      }
+
+      curr = curr.getParent();
+    }
+
+    return false;
   }
 
   /**
@@ -325,27 +342,6 @@ class Editor {
     return type === void 0
       ? this.innerPlugins.slice(0)
       : this.innerPlugins.filter((plugin) => plugin.getTypes().includes(type));
-  }
-
-  /**
-   * checking the node is within the delineated boundary.
-   *
-   * @param node
-   * @returns {boolean} If the node is within the delineated boundary, return true.
-   */
-  public isInRangeScope(node: MarkdownNode): boolean {
-    if (!this.rangeBounds) {
-      return false;
-    }
-
-    if (TypeTools.isSourceNode(node)) {
-      node = node.getCompanionNode();
-    }
-
-    return (
-      (this.rangeBounds.from >= node.inputIndex && this.rangeBounds.from <= node.inputEndIndex) ||
-      (this.rangeBounds.to >= node.inputIndex && this.rangeBounds.to <= node.inputEndIndex)
-    );
   }
 
   /**
@@ -387,6 +383,32 @@ class Editor {
     return result;
   }
 
+  private dispatchInner(action: InputAction): boolean {
+    if (!this.checkDispatchAction(action)) {
+      return false;
+    }
+
+    let result = false;
+
+    switch (action.type) {
+      case 'insert':
+      case 'delete':
+        result = this.update(action);
+
+        break;
+
+      case 'selection':
+        result = this.docSelection.updateSelection(action as Required<RangeBounds>);
+
+        break;
+
+      default:
+        break;
+    }
+
+    return result;
+  }
+
   /**
    * Update the source code and synchronize it to the DOM.
    *
@@ -406,7 +428,7 @@ class Editor {
     this.oldDoc = this.innerDoc;
     this.innerDoc = this.parser.parse(this.innerSource) as ExtendsMarkdownNode;
 
-    const result = this.syncDoc.sync(this.innerDoc, this.oldDoc, payload.force);
+    const result = this.syncDoc.sync(this.innerDoc, this.oldDoc, payload.deep);
 
     this.attachNode();
 

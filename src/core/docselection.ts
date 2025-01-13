@@ -13,7 +13,6 @@ class DocSelection {
   private context: Editor;
 
   private innerRangeBounds: Required<RangeBounds> | null = null;
-  private scopes: Node[] = [];
 
   public constructor(config: EditorContextConfig) {
     this.context = config.context;
@@ -24,7 +23,7 @@ class DocSelection {
    */
   public get rangeBounds(): Required<RangeBounds> | null {
     if (this.innerRangeBounds) {
-      return { ...this.innerRangeBounds };
+      return this.innerRangeBounds;
     }
 
     return null;
@@ -38,34 +37,29 @@ class DocSelection {
   public updateRangeBounds(): boolean {
     const range = this.getDOMRange();
 
-    let result = false;
     let rangeBounds: Required<RangeBounds>;
 
-    try {
+    if (
+      range &&
+      (rangeBounds = this.context.locateSrcPos(range)) &&
+      this.context.checkRangeBounds(rangeBounds)
+    ) {
       if (
-        range &&
-        (rangeBounds = this.context.locateSrcPos(range)) &&
-        this.context.checkRangeBounds(rangeBounds)
+        this.innerRangeBounds &&
+        rangeBounds.from === this.innerRangeBounds.from &&
+        rangeBounds.to === this.innerRangeBounds.to
       ) {
-        if (
-          this.innerRangeBounds &&
-          rangeBounds.from === this.innerRangeBounds.from &&
-          rangeBounds.to === this.innerRangeBounds.to
-        ) {
-          return (result = false);
-        }
-
-        this.innerRangeBounds = rangeBounds;
-
-        return (result = true);
+        return false;
       }
 
-      this.innerRangeBounds = null;
-    } finally {
-      this.updateScopes(range);
+      this.innerRangeBounds = rangeBounds;
 
-      return result;
+      return true;
     }
+
+    this.innerRangeBounds = null;
+
+    return false;
   }
 
   /**
@@ -141,107 +135,11 @@ class DocSelection {
   public getDOMRange(): EditorRange | null {
     const originSelection = this.context.root.getSelection();
 
-    if (!(this.context.isFocus && originSelection && originSelection.rangeCount !== 0)) {
+    if (!(this.context.hasFocus && originSelection && originSelection.rangeCount !== 0)) {
       return (this.innerRangeBounds = null);
     }
 
     return originSelection.getRangeAt(0);
-  }
-
-  /**
-   * Update the nodes within the scope of the selection.
-   *
-   * @param range
-   * @returns {boolean}
-   */
-  private updateScopes(range: EditorRange | null): boolean {
-    if (!range) {
-      if (this.scopes.length) {
-        this.scopes.length = 0;
-
-        return this.forceRerender();
-      }
-
-      return false;
-    }
-
-    const scopes = this.getScopes(range);
-    let result = this.scopes.length !== scopes.length;
-
-    for (let i = 0; i < this.scopes.length; i++) {
-      if (!scopes.includes(this.scopes[i])) {
-        result = true;
-
-        break;
-      }
-    }
-
-    this.scopes = scopes;
-
-    return result ? this.forceRerender() : false;
-  }
-
-  /**
-   * Obtain the nodes within the scope of the selection.
-   *
-   * @param range
-   * @returns {Node[]}
-   */
-  private getScopes(range: EditorRange): Node[] {
-    const result: Node[] = [];
-
-    let node: Node | null = range.startContainer;
-
-    while (node && node !== this.context.dom) {
-      if (node.$virtNode && this.context.isInRangeScope(node.$virtNode)) {
-        result.push(node);
-      }
-
-      node = node.parentNode;
-    }
-
-    node = range.endContainer;
-    if (node !== range.startContainer) {
-      while (node && node !== this.context.dom) {
-        if (
-          node.$virtNode &&
-          this.context.isInRangeScope(node.$virtNode) &&
-          !result.includes(node)
-        ) {
-          result.push(node);
-        }
-
-        node = node.parentNode;
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Forcibly re-execute the check for whether rendering is needed.
-   *
-   * @returns {boolean}
-   */
-  private forceRerender(): boolean {
-    const cacheRangeBounds = this.context.rangeBounds;
-
-    if (!cacheRangeBounds) {
-      return false;
-    }
-
-    const result = this.context.dispatch({
-      type: 'insert',
-      force: true,
-      from: 0,
-      text: this.context.source
-    });
-
-    if (result) {
-      return this.updateSelection(cacheRangeBounds);
-    }
-
-    return false;
   }
 
   /**

@@ -12,16 +12,16 @@ class EmphasisPlugin extends EnhanceExtension {
 
   public override adjustNode(node: MarkdownNode): MarkdownNode {
     if (node instanceof Emphasis || node instanceof StrongEmphasis) {
-      const openingDelimiter = node.getOpeningDelimiter() || '';
-      const closingDelimiter = node.getClosingDelimiter() || '';
-
-      const first = new SourceText(openingDelimiter, node);
-      const last = new SourceText(closingDelimiter, node);
-
       const spans = node.getSourceSpans();
 
       if (spans.length) {
-        first.addSourceSpan(
+        const openingDelimiter = node.getOpeningDelimiter() || '';
+        const closingDelimiter = node.getClosingDelimiter() || '';
+
+        const before = new SourceText(openingDelimiter, node);
+        const after = new SourceText(closingDelimiter, node);
+
+        before.addSourceSpan(
           SourceSpan.of(
             spans[0].getLineIndex(),
             spans[0].getColumnIndex(),
@@ -29,7 +29,8 @@ class EmphasisPlugin extends EnhanceExtension {
             openingDelimiter.length
           )
         );
-        last.addSourceSpan(
+
+        after.addSourceSpan(
           SourceSpan.of(
             spans[spans.length - 1].getLineIndex(),
             spans[spans.length - 1].getColumnIndex(),
@@ -38,8 +39,8 @@ class EmphasisPlugin extends EnhanceExtension {
           )
         );
 
-        node.prependChild(first);
-        node.appendChild(last);
+        node.prependChild(before);
+        node.appendChild(after);
       }
     }
 
