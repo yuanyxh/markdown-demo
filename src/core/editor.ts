@@ -1,4 +1,4 @@
-import type { MarkdownNode } from 'commonmark-java-js';
+import type { Document as MarkdownDocument, MarkdownNode } from 'commonmark-java-js';
 
 import type {
   EditorRange,
@@ -20,23 +20,45 @@ import DocSelection from './docselection';
 import Source from './source';
 import { defaultPlugins } from './plugins';
 
-interface EditorOptions {
+/** Editor configuration. */
+export interface EditorConfig {
+  /** Mounting point for editor elements. By default, editor elements are appended using the appendChild method. */
   parent: HTMLElement;
+  /** Any document instance that implements the Document interface. By default, it is {@link window.document}. */
   root?: Document;
+  /** Initial document, provided in string form. */
   doc?: string;
+  /**
+   * Any extension class that inherits the {@link EnhanceExtension} class.
+   *
+   * It is used to help the editor locate and can also enhance the built-in parser and renderer.
+   */
   plugins: (typeof EnhanceExtension)[];
 }
 
-interface InputAction {
+/** Input action. */
+export interface InputAction {
+  /**
+   * {@link InputType | Input type.}
+   */
   type: InputType;
+  /** Starting point. */
   from: number;
+  /** Ending point. */
   to?: number;
+  /** Text data attached to this action. */
   text?: string;
+  /** Enforce action even if the document is not changed. */
   force?: boolean;
 }
 
-type InputType = 'insert' | 'delete' | 'replace' | 'selection';
+export type InputType = 'insert' | 'delete' | 'replace' | 'selection';
 
+/**
+ * A WYSIWYG editor that focuses on source code and provides the ability of instant rendering.
+ *
+ * @example Editor.create({ parent: window.document });
+ */
 class Editor {
   private editorDOM = ElementTools.createEditorElement();
 
@@ -48,19 +70,20 @@ class Editor {
 
   private innerDoc: MarkdownNode;
   private oldDoc: MarkdownNode;
-  private innerRangeBounds: Required<RangeBounds> | null = null;
 
   private innerRoot: Document;
   private innerSource: Source;
 
   private innerPlugins: Extension[] = [];
 
-  public constructor(options: EditorOptions) {
+  public constructor(options: EditorConfig) {
     const { doc = '', plugins = [] } = options;
 
-    this.innerPlugins = plugins
-      .concat(defaultPlugins)
-      .map((Plugin) => new Plugin({ context: this }));
+    {
+      this.innerPlugins = plugins
+        .concat(defaultPlugins)
+        .map((Plugin) => new Plugin({ context: this }));
+    }
 
     {
       this.parser = Parser.builder()
@@ -92,37 +115,61 @@ class Editor {
       this.attachNode();
     }
 
-    this.update({ type: 'insert', from: 0, text: doc });
+    // Initialization of document.
+    this.update({ from: 0, text: doc });
   }
 
+  /**
+   * @returns {Document} The document where the editor elements are located. - default at {@link window.document}
+   */
   public get root(): Document {
     return this.innerRoot;
   }
 
+  /**
+   * @returns {string} The source code corresponding to the editor’s document.
+   */
   public get source(): string {
     return this.innerSource.toString();
   }
 
+  /**
+   * @returns {Required<RangeBounds> | null} The delineated range within the editor. When the focus is not within the editor, it is null.
+   */
   public get rangeBounds(): Required<RangeBounds> | null {
-    if (this.innerRangeBounds) {
-      return { ...this.innerRangeBounds };
-    }
-
-    return null;
+    return this.docSelection.rangeBounds;
   }
 
+  /**
+   * @returns {number} The length of the editor’s document is always the length of the source code.
+   */
   public get length(): number {
     return this.innerSource.length;
   }
 
-  public get doc(): MarkdownNode {
+  /**
+   * @returns {MarkdownDocument} The Markdown document corresponding to the editor’s document.
+   */
+  public get doc(): MarkdownDocument {
     return this.innerDoc;
   }
 
+  /**
+   * @returns {boolean} When the focus is in the editor, return true.
+   */
   public get isFocus(): boolean {
     return this.innerRoot.activeElement === this.editorDOM;
   }
 
+  /**
+   * Dispatch an action. This method is usually used to change the document.
+   *
+   * @param action
+   * @returns {boolean} When the document is successfully changed, return true.
+   * @example
+   * const editor = Editor.create({ parent: window.parent });
+   * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
+   */
   public dispatch(action: InputAction): boolean {
     action.to ??= this.innerSource.length;
     action.force ??= false;
@@ -158,6 +205,14 @@ class Editor {
     return result;
   }
 
+  /**
+   * Locate the source code position through DOM range.
+   *
+   * @param range DOM range.
+   * @returns {Required<RangeBounds>} The range bounds in the source code.
+   * @example
+   * editor.locateSrcPos(editor.getRange());
+   */
   public locateSrcPos(range: EditorRange): Required<RangeBounds> {
     const from = this.locateFormPoint(range.startContainer, range.startOffset);
 
@@ -170,63 +225,59 @@ class Editor {
     return { from, to };
   }
 
-  public locateRangeFromSrcPos(selection: RangeBounds): EditorRange | null {
-    selection.to ??= this.length;
+  /**
+   * Locate the DOM range through the source code position.
+   *
+   * @param rangeBounds The range bounds in the source code.
+   * @returns {EditorRange | null} DOM range.
+   * @example
+   * editor.locateRangeFromSrcPos({ from: 42, to: 80 });
+   */
+  public locateRangeFromSrcPos(rangeBounds: RangeBounds): EditorRange | null {
+    rangeBounds.to ??= this.length;
 
-    return this.docSelection.locateRange(selection.from, selection.to);
+    return this.docSelection.locateRange(rangeBounds.from, rangeBounds.to);
   }
 
-  public getRange(): EditorRange | null {
-    const originSelection = this.root.getSelection();
-
-    if (!(this.isFocus && originSelection && originSelection.rangeCount !== 0)) {
-      return (this.innerRangeBounds = null);
-    }
-
-    return originSelection.getRangeAt(0);
-  }
-
+  /**
+   * Update the delineated range of the source code in the editor.
+   *
+   * @returns {boolean} When the update is successful, return true.
+   */
   public updateRangeBounds(): boolean {
-    const range = this.getRange();
-
-    let rangeBounds: Required<RangeBounds>;
-
-    if (
-      range &&
-      (rangeBounds = this.locateSrcPos(range)) &&
-      rangeBounds.from !== -1 &&
-      rangeBounds.to !== -1
-    ) {
-      if (
-        this.innerRangeBounds &&
-        rangeBounds.from === this.innerRangeBounds.from &&
-        rangeBounds.to === this.innerRangeBounds.to
-      ) {
-        return false;
-      }
-
-      this.innerRangeBounds = rangeBounds;
-
-      return true;
-    }
-
-    this.innerRangeBounds = null;
-
-    return false;
+    return this.docSelection.updateRangeBounds();
   }
 
+  /**
+   * Render the Markdown node using the built-in renderer.
+   *
+   * @param node
+   * @returns {string}
+   */
   public render(node: MarkdownNode): string {
     return this.renderer.render(node);
   }
 
-  public getPlugins(type: typeof MarkdownNode): Extension[] {
-    return this.innerPlugins.filter((plugin) => plugin.getTypes().includes(type));
+  /**
+   * Obtain the instance of the plugin.
+   *
+   * @param type Any constructor class that inherits from MarkdownNode.
+   * @returns {Extension[]} Extension instance
+   */
+  public getPlugins(type?: typeof MarkdownNode): Extension[] {
+    return type === void 0
+      ? this.innerPlugins.slice(0)
+      : this.innerPlugins.filter((plugin) => plugin.getTypes().includes(type));
   }
 
+  /**
+   * Destroy the editor and remove all event listeners.
+   */
   public destroy(): void {
     this.editorDOM.blur();
-    this.editorInput.off(this.editorDOM);
     this.editorDOM.remove();
+
+    this.editorInput.off(this.editorDOM);
   }
 
   private getParserExtensions(pluginInstances: Extension[]): ParserExtension[] {
@@ -257,13 +308,19 @@ class Editor {
     return result;
   }
 
-  private update(action: InputAction): boolean {
-    action.text ??= '';
+  /**
+   * Update the source code and synchronize it to the DOM.
+   *
+   * @param payload payload of the this update
+   * @returns {boolean} Return true if updated.
+   */
+  private update(payload: Omit<InputAction, 'type'>): boolean {
+    payload.text ??= '';
 
     const oldSource = this.innerSource.toString();
-    this.innerSource.update(action.from, action.to, action.text);
+    this.innerSource.update(payload.from, payload.to, payload.text);
 
-    if (!action.force && this.innerSource.compare(oldSource)) {
+    if (!payload.force && this.innerSource.compare(oldSource)) {
       return false;
     }
 
@@ -277,11 +334,20 @@ class Editor {
     return result;
   }
 
+  /**
+   * Append the Markdown node to the DOM tree.
+   */
   private attachNode(): void {
     this.syncDoc.attach(this.innerDoc, this.editorDOM);
   }
 
-  public static create(options: EditorOptions): Editor {
+  /**
+   * Create an instance of the editor.
+   *
+   * @param options Editor configuration.
+   * @returns {Editor}
+   */
+  public static create(options: EditorConfig): Editor {
     return new Editor(options);
   }
 }

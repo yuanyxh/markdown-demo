@@ -8,7 +8,7 @@ import EnhanceExtension from '@/abstracts/enhanceextension';
 import { ElementTools } from '@/utils';
 
 class TextPlugin extends EnhanceExtension {
-  public getTypes(): (typeof MarkdownNode)[] {
+  public override getTypes(): (typeof MarkdownNode)[] {
     return [MarkdownText];
   }
 

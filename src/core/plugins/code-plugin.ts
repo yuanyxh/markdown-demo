@@ -8,7 +8,7 @@ import EnhanceExtension from '@/abstracts/enhanceextension';
 import { ElementTools, NodeTools, TypeTools } from '@/utils';
 
 class CodePlugin extends EnhanceExtension {
-  public getTypes(): (typeof MarkdownNode)[] {
+  public override getTypes(): (typeof MarkdownNode)[] {
     return [Code, FencedCodeBlock, IndentedCodeBlock];
   }
 

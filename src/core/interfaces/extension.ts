@@ -64,7 +64,7 @@ export interface Extension {
    * This is usually used to display the source code of inline nodes and HTML nodes.
    *
    * @param node The Markdown node corresponding to the DOM node.
-   * @returns {void}
+   * @returns {MarkdownNode} Adjusted node.
    */
-  adjustNode(node: MarkdownNode): void;
+  adjustNode(node: MarkdownNode): MarkdownNode;
 }

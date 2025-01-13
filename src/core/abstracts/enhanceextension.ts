@@ -10,6 +10,7 @@ import type {
 } from '@/interfaces';
 
 class EnhanceExtension implements Extension {
+  /** Editor context. Through it, one can access the data of the editor */
   protected context: Editor;
 
   public constructor(config: EditorContextConfig) {
@@ -36,7 +37,9 @@ class EnhanceExtension implements Extension {
     return null;
   }
 
-  public adjustNode(node: MarkdownNode): void {}
+  public adjustNode(node: MarkdownNode): MarkdownNode {
+    return node;
+  }
 }
 
 export default EnhanceExtension;

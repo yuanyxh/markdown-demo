@@ -8,8 +8,55 @@ import { ElementTools, NodeTools } from '@/utils';
 class DocSelection {
   private context: Editor;
 
+  private innerRangeBounds: Required<RangeBounds> | null = null;
+
   public constructor(config: EditorContextConfig) {
     this.context = config.context;
+  }
+
+  /**
+   * @returns {Required<RangeBounds> | null} The delineated range within the editor. When the focus is not within the editor, it is null.
+   */
+  public get rangeBounds(): Required<RangeBounds> | null {
+    if (this.innerRangeBounds) {
+      return { ...this.innerRangeBounds };
+    }
+
+    return null;
+  }
+
+  /**
+   * Update the delineated range of the source code in the editor.
+   *
+   * @returns {boolean} When the update is successful, return true.
+   */
+  public updateRangeBounds(): boolean {
+    const range = this.getDOMRange();
+
+    let rangeBounds: Required<RangeBounds>;
+
+    if (
+      range &&
+      (rangeBounds = this.context.locateSrcPos(range)) &&
+      rangeBounds.from !== -1 &&
+      rangeBounds.to !== -1
+    ) {
+      if (
+        this.innerRangeBounds &&
+        rangeBounds.from === this.innerRangeBounds.from &&
+        rangeBounds.to === this.innerRangeBounds.to
+      ) {
+        return false;
+      }
+
+      this.innerRangeBounds = rangeBounds;
+
+      return true;
+    }
+
+    this.innerRangeBounds = null;
+
+    return false;
   }
 
   /**
@@ -81,6 +128,21 @@ class DocSelection {
       endContainer: end.node,
       endOffset: end.offset
     };
+  }
+
+  /**
+   * Obtain the DOM range.
+   *
+   * @returns {EditorRange | null} DOM range.
+   */
+  public getDOMRange(): EditorRange | null {
+    const originSelection = this.context.root.getSelection();
+
+    if (!(this.context.isFocus && originSelection && originSelection.rangeCount !== 0)) {
+      return (this.innerRangeBounds = null);
+    }
+
+    return originSelection.getRangeAt(0);
   }
 
   /**

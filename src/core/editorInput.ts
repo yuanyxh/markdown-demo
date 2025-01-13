@@ -49,8 +49,6 @@ class EditorInput {
 
   private handlers: InputHandler = {};
 
-  private innerInputing = false;
-
   public constructor(config: EditorContextConfig) {
     this.context = config.context;
 
@@ -59,15 +57,21 @@ class EditorInput {
     this.listenForSelectionChange();
   }
 
-  public get isInputting() {
-    return this.innerInputing;
-  }
-
+  /**
+   * Listen for any necessary input events.
+   *
+   * @param el
+   */
   public on(el: HTMLElement): void {
     el.addEventListener('blur', this.onBlur);
     el.addEventListener('beforeinput', this.onBeforeInput);
   }
 
+  /**
+   * Remove the listener.
+   *
+   * @param el
+   */
   public off(el: HTMLElement): void {
     el.removeEventListener('blur', this.onBlur);
     el.removeEventListener('beforeinput', this.onBeforeInput);
@@ -79,24 +83,18 @@ class EditorInput {
     this.context.root.addEventListener('selectionchange', this.onSelectionChange);
   }
 
-  private exec(cb: () => void): void {
-    this.innerInputing = true;
-    cb();
-    this.innerInputing = false;
-  }
-
   private onBlur = (): void => {
     this.context.updateRangeBounds();
   };
 
   private onBeforeInput = (e: InputEvent): void => {
     if (this.handlers[e.inputType]) {
-      this.exec(() => this.handlers[e.inputType].call(this.context, e));
+      this.handlers[e.inputType].call(this.context, e);
     }
   };
 
   private onSelectionChange = (): void => {
-    if (this.innerInputing || !this.context.isFocus) {
+    if (!this.context.isFocus) {
       return;
     }
 

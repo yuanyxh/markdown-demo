@@ -4,6 +4,7 @@ import type Editor from '@/editor';
 
 /** Default editor context configuration. */
 export interface EditorContextConfig {
+  /** Editor context. Through it, one can access the data of the editor. */
   context: Editor;
 }
 
