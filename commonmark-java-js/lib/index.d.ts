@@ -2103,7 +2103,7 @@ export declare interface UrlSanitizer {
  * <p>
  * Implementations should subclass {@link AbstractVisitor} instead of implementing this directly.
  */
-declare interface Visitor {
+export declare interface Visitor {
   visit(node: MarkdownNode): void;
 }
 

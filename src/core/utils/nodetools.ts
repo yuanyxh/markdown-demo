@@ -1,6 +1,6 @@
-import type { Block } from 'commonmark-java-js';
+import type { Block, MarkdownNode } from 'commonmark-java-js';
 
-import type { ExtendsMarkdownNode, MarkdownCode } from '@/types';
+import type { MarkdownCode } from '@/types';
 
 import { isUnDef } from 'commonmark-java-js';
 import TypeTools from './typetools';
@@ -162,9 +162,9 @@ class NodeTools {
    * Obtain the constructor class of a node instance.
    *
    * @param node Markdown node
-   * @returns {typeof ExtendsMarkdownNode} constructor class of a node instance
+   * @returns {typeof MarkdownNode} constructor class of a node instance
    */
-  public static getConstructor(node: ExtendsMarkdownNode): typeof ExtendsMarkdownNode {
+  public static getConstructor(node: MarkdownNode): typeof MarkdownNode {
     return Object.getPrototypeOf(node).constructor;
   }
 }

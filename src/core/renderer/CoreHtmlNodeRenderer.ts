@@ -28,6 +28,7 @@ import {
   AbstractVisitor
 } from 'commonmark-java-js';
 
+import { SourceBlock, SourceText } from '@/node';
 import HtmlWriter from './HtmlWriter';
 
 class AltTextVisitor extends AbstractVisitor {
@@ -89,6 +90,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       HtmlBlock,
       ThematicBreak,
       IndentedCodeBlock,
+      SourceBlock,
       Link,
       ListItem,
       OrderedList,
@@ -99,7 +101,8 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       Code,
       HtmlInline,
       SoftLineBreak,
-      HardLineBreak
+      HardLineBreak,
+      SourceText
     ] as (typeof MarkdownNode)[]);
   }
 
@@ -208,6 +211,16 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
           indentedCodeBlock,
           new Map<string, string>()
         );
+
+        break;
+      }
+
+      case node instanceof SourceBlock: {
+        const sourceBlock = node;
+
+        this.html.tag('pre', this.getAttrs(sourceBlock, 'pre'));
+        this.html.text(sourceBlock.getLiteral());
+        this.html.tag('/pre');
 
         break;
       }
@@ -345,6 +358,16 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const hardLineBreak = node;
 
         this.html.tag('br', this.getAttrs(hardLineBreak, 'br'), true);
+
+        break;
+      }
+
+      case node instanceof SourceText: {
+        const sourceText = node;
+
+        this.html.tag('span', this.getAttrs(sourceText, 'span'));
+        this.html.text(sourceText.getLiteral());
+        this.html.tag('/span');
 
         break;
       }

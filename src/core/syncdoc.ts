@@ -68,7 +68,7 @@ class SyncDoc {
       // Apply plugins and execute the adjustNode program for pre-transformation.
       newNode = this.context
         .getPlugins(NodeTools.getConstructor(newNode))
-        .reduce((n, plugin) => plugin.adjustNode(n), newNode);
+        .reduce((n, plugin) => plugin.adjustNode(n) as ExtendsMarkdownNode, newNode);
     }
 
     const newChildren = newNode.children;

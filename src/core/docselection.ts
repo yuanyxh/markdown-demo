@@ -166,17 +166,13 @@ class DocSelection {
     }
 
     const scopes = this.getScopes(range);
-    let result = false;
+    let result = this.scopes.length !== scopes.length;
 
-    if (scopes.length !== this.scopes.length) {
-      result = true;
-    } else {
-      for (let i = 0; i < this.scopes.length; i++) {
-        if (!scopes.includes(this.scopes[i])) {
-          result = true;
+    for (let i = 0; i < this.scopes.length; i++) {
+      if (!scopes.includes(this.scopes[i])) {
+        result = true;
 
-          break;
-        }
+        break;
       }
     }
 
@@ -228,12 +224,24 @@ class DocSelection {
    * @returns {boolean}
    */
   private forceRerender(): boolean {
-    return this.context.dispatch({
+    const cacheRangeBounds = this.context.rangeBounds;
+
+    if (!cacheRangeBounds) {
+      return false;
+    }
+
+    const result = this.context.dispatch({
       type: 'insert',
       force: true,
       from: 0,
       text: this.context.source
     });
+
+    if (result) {
+      return this.updateSelection(cacheRangeBounds);
+    }
+
+    return false;
   }
 
   /**

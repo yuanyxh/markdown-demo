@@ -26,7 +26,7 @@ export type {
 } from '@/parser';
 export { Parser, IncludeSourceSpans, Scanner, LinkResult } from '@/parser';
 
-export type { Delimited } from '@/node';
+export type { Delimited, Visitor } from '@/node';
 export {
   MarkdownNode,
   Block,

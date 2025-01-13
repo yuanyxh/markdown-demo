@@ -38,7 +38,7 @@ class EnhanceExtension implements Extension {
     return null;
   }
 
-  public adjustNode(node: ExtendsMarkdownNode): ExtendsMarkdownNode {
+  public adjustNode(node: MarkdownNode): MarkdownNode {
     return node;
   }
 }

@@ -10,7 +10,7 @@ import type {
   MarkdownNode
 } from 'commonmark-java-js';
 
-import type { CodeBlock, MarkdownCode } from '@/types';
+import type { CodeBlock, MarkdownCode, SourceNode } from '@/types';
 
 /** Auxiliary tool class for validating types. */
 class TypeTools {
@@ -62,16 +62,8 @@ class TypeTools {
     return data.type === 'softline-break';
   }
 
-  public static isTransformNode(data: MarkdownNode): boolean {
-    return [
-      'image',
-      'link',
-      'html-block',
-      'html-inline',
-      'emphasis',
-      'strong-emphasis',
-      'text'
-    ].includes(data.type);
+  public static isSourceNode(data: MarkdownNode): data is SourceNode {
+    return ['source-text', 'source-block'].includes(data.type);
   }
 
   public static isImageFile(file: File): file is File {

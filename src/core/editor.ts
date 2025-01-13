@@ -13,7 +13,7 @@ import type EnhanceExtension from './abstracts/enhanceextension';
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
 
 import { HtmlRenderer } from '@/renderer';
-import { ElementTools } from '@/utils';
+import { ElementTools, TypeTools } from '@/utils';
 
 import EditorInput from './editorInput';
 import SyncDoc from './syncdoc';
@@ -188,8 +188,6 @@ class Editor {
    * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
    */
   public dispatch(action: InputAction): boolean {
-    console.time('default');
-
     if (this.innerIsInputing || !this.checkDispatchAction(action)) {
       return false;
     }
@@ -335,12 +333,19 @@ class Editor {
    * @param node
    * @returns {boolean} If the node is within the delineated boundary, return true.
    */
-  public isInRangeScope(node: ExtendsMarkdownNode): boolean {
+  public isInRangeScope(node: MarkdownNode): boolean {
     if (!this.rangeBounds) {
       return false;
     }
 
-    return this.rangeBounds.from >= node.inputIndex && this.rangeBounds.to <= node.inputEndIndex;
+    if (TypeTools.isSourceNode(node)) {
+      node = node.getCompanionNode();
+    }
+
+    return (
+      (this.rangeBounds.from >= node.inputIndex && this.rangeBounds.from <= node.inputEndIndex) ||
+      (this.rangeBounds.to >= node.inputIndex && this.rangeBounds.to <= node.inputEndIndex)
+    );
   }
 
   /**
