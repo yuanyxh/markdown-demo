@@ -1,9 +1,7 @@
-import type { Text as MarkdownText } from 'commonmark-java-js';
-
 import type Editor from './editor';
 import type { EditorContextConfig, ExtendsMarkdownNode, LiteralNode } from './types';
 
-import { NodeTools, TypeTools } from '@/utils';
+import { TypeTools } from '@/utils';
 
 /** Synchronize the document */
 class SyncDoc {
@@ -59,13 +57,6 @@ class SyncDoc {
   }
 
   private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
-    if (this.context.isInRangeScope(newNode)) {
-      // Apply plugins and execute the adjustNode program for pre-transformation.
-      newNode = this.context
-        .getPlugins(NodeTools.getConstructor(newNode))
-        .reduce((n, plugin) => plugin.adjustNode(n) as ExtendsMarkdownNode, newNode);
-    }
-
     const newChildren = newNode.children;
     const oldChildren = oldNode.children;
 
@@ -80,11 +71,9 @@ class SyncDoc {
       newChild = newChildren[nextIndex];
       oldChild = oldChildren[nextIndex];
 
-      // Find the old identical node.
       const oldIndex = oldChildren.findIndex((old) => this.isSomeNode(newChild, old));
 
       if (oldIndex !== -1) {
-        // Move to a new position.
         if (oldIndex < lastIndex) {
           this.moveTo(oldChild, nextIndex, oldNode);
 
@@ -93,48 +82,36 @@ class SyncDoc {
           lastIndex = oldIndex;
         }
 
-        if (this.diff(newChild, oldChildren[oldIndex])) {
+        oldChildren[oldIndex].meta.synced = true;
+      } else {
+        lastIndex = Math.max(nextIndex, lastIndex);
+
+        if (!oldChild) {
+          this.insert(newChild, nextIndex, oldNode);
+
+          changed = true;
+
+          continue;
+        } else if (this.isSomeNodeType(newChild, oldChild)) {
+          if (
+            TypeTools.isLiteralNode(newChild) &&
+            TypeTools.isLiteralNode(oldChild) &&
+            this.isTextChanged(newChild, oldChild)
+          ) {
+            this.replaceText(newChild, oldChild);
+
+            changed = true;
+          } else if (this.diff(newChild, oldChild)) {
+            changed = true;
+          }
+
+          oldChild.meta.synced = true;
+        } else {
+          this.insert(newChild, nextIndex, oldNode);
+
           changed = true;
         }
-
-        oldChildren[oldIndex].meta.synced = true;
-
-        continue;
       }
-
-      lastIndex = Math.max(nextIndex, lastIndex);
-
-      // Create a new node.
-      if (!oldChild) {
-        this.insert(newChild, nextIndex, oldNode);
-
-        changed = true;
-
-        continue;
-      }
-
-      // Replace the node. Here we use insertion. We will delete the old node later.
-      // This is to ensure the stability of elements that carry external resources (such as images).
-      if (!this.isSomeNodeType(newChild, oldChild)) {
-        this.insert(newChild, nextIndex, oldNode);
-        changed = true;
-
-        continue;
-      }
-
-      if (
-        TypeTools.isLiteralNode(newChild) &&
-        TypeTools.isLiteralNode(oldChild) &&
-        this.isTextChanged(newChild, oldChild)
-      ) {
-        this.replaceText(newChild, oldChild);
-
-        changed = true;
-      } else if (this.diff(newChild, oldChild)) {
-        changed = true;
-      }
-
-      oldChild.meta.synced = true;
     }
 
     for (let i = 0; i < oldChildren.length; i++) {

@@ -20,7 +20,6 @@ import EditorInput from './editorInput';
 import SyncDoc from './syncdoc';
 import DocSelection from './docselection';
 import Source from './source';
-import ActionProcessor from './action-processor';
 
 /** Editor configuration. */
 export interface EditorConfig {
@@ -69,7 +68,6 @@ class Editor {
   private docSelection: DocSelection;
   private syncDoc: SyncDoc;
   private editorInput: EditorInput;
-  private actionProcessor: ActionProcessor;
 
   private innerDoc: ExtendsMarkdownNode;
   private oldDoc: ExtendsMarkdownNode;
@@ -112,7 +110,6 @@ class Editor {
 
       this.syncDoc = new SyncDoc({ context: this });
       this.docSelection = new DocSelection({ context: this });
-      this.actionProcessor = new ActionProcessor();
     }
 
     {
@@ -185,13 +182,17 @@ class Editor {
    * Dispatch an action. This method is usually used to change the document.
    *
    * @param action
-   * @returns {void}
+   * @returns {boolean}
    * @example
    * const editor = Editor.create({ parent: window.parent });
    * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
    */
-  public dispatch(action: InputAction): void {
-    this.actionProcessor.enqueue(() => this.dispatchInner(action));
+  public dispatch(action: InputAction): boolean {
+    if (!this.checkDispatchAction(action)) {
+      return false;
+    }
+
+    return this.dispatchInner(action);
   }
 
   /**
@@ -247,9 +248,9 @@ class Editor {
   /**
    * Forcibly update.
    *
-   * @returns
+   * @returns {boolean}
    */
-  public forceUpdate(): void {
+  public forceUpdate(): boolean {
     return this.dispatch({
       type: 'insert',
       force: true,
@@ -286,19 +287,17 @@ class Editor {
    * @param action
    * @returns {boolean} If can be executed, return true.
    */
-  public checkDispatchAction(action: InputAction): boolean {
+  public checkDispatchAction(action: InputAction): action is Required<InputAction> {
     if (!this.checkRangeBounds(action)) {
       return false;
     }
 
     action.force ??= false;
+    action.text ??= '';
 
-    return (
-      action.force ||
-      action.type !== 'select' ||
-      this.rangeBounds?.from !== action.from ||
-      this.rangeBounds?.to !== action.to
-    );
+    const { from = -1, to = -1 } = this.rangeBounds || {};
+
+    return action.force || action.type !== 'select' || from !== action.from || to !== action.to;
   }
 
   /**
@@ -393,11 +392,7 @@ class Editor {
     return result;
   }
 
-  private dispatchInner(action: InputAction): boolean {
-    if (!this.checkDispatchAction(action)) {
-      return false;
-    }
-
+  private dispatchInner(action: Required<InputAction>): boolean {
     let result = false;
 
     switch (action.type) {
@@ -408,7 +403,7 @@ class Editor {
         break;
 
       case 'select':
-        result = this.docSelection.updateSelection(action as Required<RangeBounds>);
+        result = this.docSelection.updateSelection(action);
 
         break;
 

@@ -40,8 +40,6 @@ class EditorInput {
   };
 
   private onBeforeInput = (e: InputEvent): void => {
-    e.preventDefault();
-
     switch (e.inputType) {
       case 'insertText':
       case 'insertReplacementText':
@@ -70,13 +68,16 @@ class EditorInput {
 
     const text = getPlainData(e);
 
-    this.context.dispatch({ type: 'insert', from: bounds.from, to: bounds.to, text });
-    this.context.dispatch({
-      type: 'select',
-      from: bounds.from + text.length,
-      to: bounds.to + text.length,
-      text
-    });
+    if (this.context.dispatch({ type: 'insert', from: bounds.from, to: bounds.to, text })) {
+      e.preventDefault();
+
+      this.context.dispatch({
+        type: 'select',
+        from: bounds.from + text.length,
+        to: bounds.to + text.length,
+        text
+      });
+    }
   }
 }
 
