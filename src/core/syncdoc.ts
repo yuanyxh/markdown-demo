@@ -59,9 +59,6 @@ class SyncDoc {
   }
 
   private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
-    // Reset the flag bit.
-    newNode.resetFlag();
-
     if (this.context.isInRangeScope(newNode)) {
       // Apply plugins and execute the adjustNode program for pre-transformation.
       newNode = this.context
@@ -96,45 +93,48 @@ class SyncDoc {
           lastIndex = oldIndex;
         }
 
-        if (newNode.flag && this.diff(newChild, oldChildren[oldIndex])) {
+        if (this.diff(newChild, oldChildren[oldIndex])) {
           changed = true;
         }
 
         oldChildren[oldIndex].meta.synced = true;
-      } else {
-        lastIndex = Math.max(nextIndex, lastIndex);
 
-        // Create a new node.
-        if (!oldChild) {
-          this.insert(newChild, nextIndex, oldNode);
-
-          changed = true;
-
-          continue;
-        }
-
-        // Replace the node. Here we use insertion. We will delete the old node later.
-        if (!this.isSomeNodeType(newChild, oldChild)) {
-          this.insert(newChild, nextIndex, oldNode);
-          changed = true;
-
-          continue;
-        }
-
-        if (
-          TypeTools.isLiteralNode(newChild) &&
-          TypeTools.isLiteralNode(oldChild) &&
-          this.isTextChanged(newChild, oldChild)
-        ) {
-          this.replaceText(newChild, oldChild);
-
-          changed = true;
-        } else if (this.diff(newChild, oldChild)) {
-          changed = true;
-        }
-
-        oldChild.meta.synced = true;
+        continue;
       }
+
+      lastIndex = Math.max(nextIndex, lastIndex);
+
+      // Create a new node.
+      if (!oldChild) {
+        this.insert(newChild, nextIndex, oldNode);
+
+        changed = true;
+
+        continue;
+      }
+
+      // Replace the node. Here we use insertion. We will delete the old node later.
+      // This is to ensure the stability of elements that carry external resources (such as images).
+      if (!this.isSomeNodeType(newChild, oldChild)) {
+        this.insert(newChild, nextIndex, oldNode);
+        changed = true;
+
+        continue;
+      }
+
+      if (
+        TypeTools.isLiteralNode(newChild) &&
+        TypeTools.isLiteralNode(oldChild) &&
+        this.isTextChanged(newChild, oldChild)
+      ) {
+        this.replaceText(newChild, oldChild);
+
+        changed = true;
+      } else if (this.diff(newChild, oldChild)) {
+        changed = true;
+      }
+
+      oldChild.meta.synced = true;
     }
 
     for (let i = 0; i < oldChildren.length; i++) {

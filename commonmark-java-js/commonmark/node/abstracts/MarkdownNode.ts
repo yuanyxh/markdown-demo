@@ -12,7 +12,6 @@ abstract class MarkdownNode {
   private innerChildren: MarkdownNode[] = [];
   private innerInputIndex: number = -1;
   private innerInputEndInput: number = -1;
-  private innerFlag: 0 | 1 = 0;
 
   private parent: MarkdownNode | null = null;
   private firstChild: MarkdownNode | null = null;
@@ -30,25 +29,6 @@ abstract class MarkdownNode {
    */
   public get type(): string {
     return this.innerType;
-  }
-
-  /**
-   * @returns {0 | 1} Return the status flag of the node. 0 means unchanged, and 1 means changed.
-   */
-  public get flag(): 0 | 1 {
-    if (this.innerFlag) {
-      return 1;
-    }
-
-    const children = this.children;
-
-    for (let i = 0; i < children.length; i++) {
-      if (children[i].flag) {
-        return 1;
-      }
-    }
-
-    return 0;
   }
 
   /**
@@ -119,26 +99,6 @@ abstract class MarkdownNode {
   public abstract accept(visitor: Visitor): void;
 
   /**
-   * Reset the flag bit of the node.
-   */
-  public resetFlag(): void {
-    this.setFlag(0);
-
-    for (let i = 0; i < this.children.length; i++) {
-      this.children[i].resetFlag();
-    }
-  }
-
-  /**
-   * Set the flag bit of the node.
-   *
-   * @param flag
-   */
-  public setFlag(flag: 0 | 1): void {
-    this.innerFlag = flag;
-  }
-
-  /**
    *
    * @returns {boolean} Is's a block node.
    */
@@ -191,8 +151,6 @@ abstract class MarkdownNode {
    */
   public setParent(parent: MarkdownNode): void {
     this.parent = parent;
-
-    this.setFlag(1);
   }
 
   /**
@@ -203,8 +161,6 @@ abstract class MarkdownNode {
   public appendChild(child: MarkdownNode): void {
     child.unlink();
     child.setParent(this);
-
-    this.setFlag(1);
 
     if (this.lastChild !== null) {
       this.lastChild.next = child;
@@ -225,8 +181,6 @@ abstract class MarkdownNode {
     child.unlink();
     child.setParent(this);
 
-    this.setFlag(1);
-
     if (this.firstChild !== null) {
       this.firstChild.prev = child;
       child.next = this.firstChild;
@@ -242,8 +196,6 @@ abstract class MarkdownNode {
    */
   public unlink(): void {
     this.innerChildren.length = 0;
-
-    this.setFlag(0);
 
     if (this.prev !== null) {
       this.prev.next = this.next;
@@ -268,8 +220,6 @@ abstract class MarkdownNode {
   public insertAfter(sibling: MarkdownNode): void {
     sibling.unlink();
 
-    this.setFlag(1);
-
     sibling.next = this.next;
     if (sibling.next !== null) {
       sibling.next.prev = sibling;
@@ -289,8 +239,6 @@ abstract class MarkdownNode {
    */
   public insertBefore(sibling: MarkdownNode): void {
     sibling.unlink();
-
-    this.setFlag(1);
 
     sibling.prev = this.prev;
     if (sibling.prev !== null) {

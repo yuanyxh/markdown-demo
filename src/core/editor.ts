@@ -54,7 +54,7 @@ export interface InputAction {
   force?: boolean;
 }
 
-export type InputType = 'insert' | 'delete' | 'select' | 'selectionchange';
+export type InputType = 'insert' | 'delete' | 'select';
 
 /**
  * A WYSIWYG editor that focuses on source code and provides the ability of instant rendering.
@@ -239,14 +239,23 @@ class Editor {
     const result = this.docSelection.updateRangeBounds();
 
     // Whenever the selection changes, enforce a check. We need to know which nodes need to be transformed.
-    this.dispatch({
+    this.forceUpdate();
+
+    return result;
+  }
+
+  /**
+   * Forcibly update.
+   *
+   * @returns
+   */
+  public forceUpdate(): void {
+    return this.dispatch({
       type: 'insert',
       force: true,
       from: 0,
-      text: this.innerSource.toString()
+      text: this.source
     });
-
-    return result;
   }
 
   /**
@@ -286,7 +295,7 @@ class Editor {
 
     return (
       action.force ||
-      action.type !== 'selectionchange' ||
+      action.type !== 'select' ||
       this.rangeBounds?.from !== action.from ||
       this.rangeBounds?.to !== action.to
     );
@@ -398,7 +407,7 @@ class Editor {
 
         break;
 
-      case 'selectionchange':
+      case 'select':
         result = this.docSelection.updateSelection(action as Required<RangeBounds>);
 
         break;
@@ -419,7 +428,7 @@ class Editor {
   private update(payload: Omit<InputAction, 'type'>): boolean {
     payload.text ??= '';
 
-    const oldSource = this.innerSource.toString();
+    const oldSource = this.source;
     this.innerSource.update(payload.from, payload.to, payload.text);
 
     if (!payload.force && this.innerSource.compare(oldSource)) {

@@ -71,6 +71,12 @@ class EditorInput {
     const text = getPlainData(e);
 
     this.context.dispatch({ type: 'insert', from: bounds.from, to: bounds.to, text });
+    this.context.dispatch({
+      type: 'select',
+      from: bounds.from + text.length,
+      to: bounds.to + text.length,
+      text
+    });
   }
 }
 

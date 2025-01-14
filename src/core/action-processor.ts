@@ -33,7 +33,7 @@ class ActionProcessor {
   }
 
   private process() {
-    window.requestAnimationFrame(this.exec);
+    this.exec();
   }
 
   private exec = () => {
@@ -43,7 +43,9 @@ class ActionProcessor {
       return;
     }
 
+    console.time('d');
     executor();
+    console.timeEnd('d');
 
     if (this.isEmpty()) {
       this.isRunning = false;

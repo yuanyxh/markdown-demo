@@ -1,9 +1,11 @@
 import type { MarkdownNode, Visitor } from 'commonmark-java-js';
 
+import type { LiteralNode } from '@/types';
+
 import { CustomBlock } from 'commonmark-java-js';
 
 /** Block-level source code node. Use it to control the rendering of other Markdown block nodes. */
-class SourceBlock extends CustomBlock {
+class SourceBlock extends CustomBlock implements LiteralNode {
   private literal: string;
   private companionNode: MarkdownNode;
 
