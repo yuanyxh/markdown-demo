@@ -31,10 +31,10 @@ class ElementTools {
    * @returns {Node} DOM Node
    */
   public static getDomByNodeType(node: ExtendsMarkdownNode): Node {
-    if (TypeTools.isMarkdownText(node) || TypeTools.isInlineCode(node)) {
-      return node.meta.$dom.childNodes[0];
-    } else if (TypeTools.isCodeBlock(node)) {
+    if (TypeTools.isCodeBlock(node)) {
       return node.meta.$dom.childNodes[0].childNodes[0];
+    } else if (TypeTools.isLiteralNode(node)) {
+      return node.meta.$dom.childNodes[0];
     } else {
       return this.getDom(node);
     }

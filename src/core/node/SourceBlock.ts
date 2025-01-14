@@ -22,7 +22,7 @@ class SourceBlock extends CustomBlock {
     return this.literal;
   }
 
-  public setLiteral(literal: string) {
+  public setLiteral(literal: string): void {
     this.literal = literal;
   }
 

@@ -13,7 +13,7 @@ import type EnhanceExtension from './abstracts/enhanceextension';
 import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
 
 import { HtmlRenderer } from '@/renderer';
-import { ElementTools } from '@/utils';
+import { ElementTools, NodeTools } from '@/utils';
 
 import { defaultPlugins } from './plugins';
 import EditorInput from './editorInput';
@@ -52,11 +52,9 @@ export interface InputAction {
   text?: string;
   /** Enforce action even if the document is not changed. */
   force?: boolean;
-  /** Perform a deep comparison on the document. When set to true, {@link force} is forcibly set to true. */
-  deep?: boolean;
 }
 
-export type InputType = 'insert' | 'delete' | 'replace' | 'selection';
+export type InputType = 'insert' | 'delete' | 'select' | 'selectionchange';
 
 /**
  * A WYSIWYG editor that focuses on source code and provides the ability of instant rendering.
@@ -120,7 +118,7 @@ class Editor {
     {
       this.innerSource = new Source();
       this.innerDoc = this.oldDoc = this.parser.parse(this.innerSource) as ExtendsMarkdownNode;
-      this.attachNode();
+      this.syncDoc.attach(this.innerDoc, this.editorDOM);
     }
 
     // Initialization of document.
@@ -193,7 +191,6 @@ class Editor {
    * editor.dispatch({ type: 'insert', from: 0, to: 0, text: 'inserted' });
    */
   public dispatch(action: InputAction): void {
-    // FIXME: bugs for selection
     this.actionProcessor.enqueue(() => this.dispatchInner(action));
   }
 
@@ -239,13 +236,15 @@ class Editor {
    * @returns {boolean} When the update is successful, return true.
    */
   public updateRangeBounds(): boolean {
-    const cacheBounds = this.rangeBounds;
-
     const result = this.docSelection.updateRangeBounds();
 
-    if (this.rangeBounds !== cacheBounds) {
-      this.dispatch({ type: 'insert', deep: true, from: 0, text: this.innerSource.toString() });
-    }
+    // Whenever the selection changes, enforce a check. We need to know which nodes need to be transformed.
+    this.dispatch({
+      type: 'insert',
+      force: true,
+      from: 0,
+      text: this.innerSource.toString()
+    });
 
     return result;
   }
@@ -283,12 +282,11 @@ class Editor {
       return false;
     }
 
-    action.deep ??= false;
-    action.force = action.deep;
+    action.force ??= false;
 
     return (
       action.force ||
-      action.type !== 'selection' ||
+      action.type !== 'selectionchange' ||
       this.rangeBounds?.from !== action.from ||
       this.rangeBounds?.to !== action.to
     );
@@ -307,13 +305,15 @@ class Editor {
 
     const { from, to } = this.rangeBounds;
 
-    let curr: MarkdownNode | null = node;
+    // For block nodes, we only check the node itself.
+    if (node.isBlock()) {
+      return NodeTools.isInsideNode(node, from) || NodeTools.isInsideNode(node, to);
+    }
 
-    while (curr && curr !== this.innerDoc) {
-      if (
-        (from >= curr.inputIndex && from <= curr.inputEndIndex) ||
-        (to >= curr.inputIndex && to <= curr.inputEndIndex)
-      ) {
+    // For inline nodes, check all of its inline ancestors.
+    let curr: MarkdownNode | null = node;
+    while (curr && !curr.isBlock()) {
+      if (NodeTools.isInsideNode(curr, from) || NodeTools.isInsideNode(curr, to)) {
         return true;
       }
 
@@ -398,7 +398,7 @@ class Editor {
 
         break;
 
-      case 'selection':
+      case 'selectionchange':
         result = this.docSelection.updateSelection(action as Required<RangeBounds>);
 
         break;
@@ -429,18 +429,11 @@ class Editor {
     this.oldDoc = this.innerDoc;
     this.innerDoc = this.parser.parse(this.innerSource) as ExtendsMarkdownNode;
 
-    const result = this.syncDoc.sync(this.innerDoc, this.oldDoc, payload.deep);
+    const result = this.syncDoc.sync(this.innerDoc, this.oldDoc);
 
-    this.attachNode();
+    this.syncDoc.attach(this.innerDoc, this.editorDOM);
 
     return result;
-  }
-
-  /**
-   * Append the Markdown node to the DOM tree.
-   */
-  private attachNode(): void {
-    this.syncDoc.attach(this.innerDoc, this.editorDOM);
   }
 
   /**

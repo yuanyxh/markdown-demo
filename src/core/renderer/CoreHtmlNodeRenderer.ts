@@ -180,7 +180,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
           attributes.set('class', 'language-' + language);
         }
 
-        this.renderCodeBlock(literal || '', fencedCodeBlock, attributes);
+        this.renderCodeBlock(literal, fencedCodeBlock, attributes);
 
         break;
       }

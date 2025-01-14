@@ -12,6 +12,7 @@ abstract class MarkdownNode {
   private innerChildren: MarkdownNode[] = [];
   private innerInputIndex: number = -1;
   private innerInputEndInput: number = -1;
+  private innerFlag: 0 | 1 = 0;
 
   private parent: MarkdownNode | null = null;
   private firstChild: MarkdownNode | null = null;
@@ -24,7 +25,36 @@ abstract class MarkdownNode {
     this.innerType = type;
   }
 
-  public get meta() {
+  /**
+   * @returns {string} This property reflects the type of the node.
+   */
+  public get type(): string {
+    return this.innerType;
+  }
+
+  /**
+   * @returns {0 | 1} Return the status flag of the node. 0 means unchanged, and 1 means changed.
+   */
+  public get flag(): 0 | 1 {
+    if (this.innerFlag) {
+      return 1;
+    }
+
+    const children = this.children;
+
+    for (let i = 0; i < children.length; i++) {
+      if (children[i].flag) {
+        return 1;
+      }
+    }
+
+    return 0;
+  }
+
+  /**
+   * @returns {Record<string, any>} This property allows external data to be attached.
+   */
+  public get meta(): Record<string, any> {
     return this.innerMeta;
   }
 
@@ -32,11 +62,10 @@ abstract class MarkdownNode {
     this.innerMeta = meta;
   }
 
-  public get type() {
-    return this.innerType;
-  }
-
-  public get inputIndex() {
+  /**
+   * @returns {number} This property returns the position of the start of the node in the source code.
+   */
+  public get inputIndex(): number {
     if (this.innerInputIndex === -1) {
       this.innerInputIndex = this.getSourceSpans()[0]?.getInputIndex() || 0;
     }
@@ -44,7 +73,10 @@ abstract class MarkdownNode {
     return this.innerInputIndex;
   }
 
-  public get inputEndIndex() {
+  /**
+   * @returns {number} This property returns the position of the end of the node in the source code.
+   */
+  public get inputEndIndex(): number {
     if (this.innerInputEndInput === -1) {
       const spans = this.getSourceSpans();
       const lastSpan = spans[spans.length - 1];
@@ -59,7 +91,10 @@ abstract class MarkdownNode {
     return this.innerInputEndInput;
   }
 
-  public get children() {
+  /**
+   * @returns {MarkdownNode[]} This property returns the list of child nodes to which the node belongs.
+   */
+  public get children(): MarkdownNode[] {
     if (this.innerChildren.length) {
       return this.innerChildren;
     }
@@ -83,36 +118,93 @@ abstract class MarkdownNode {
 
   public abstract accept(visitor: Visitor): void;
 
-  public isBlock() {
+  /**
+   * Reset the flag bit of the node.
+   */
+  public resetFlag(): void {
+    this.setFlag(0);
+
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].resetFlag();
+    }
+  }
+
+  /**
+   * Set the flag bit of the node.
+   *
+   * @param flag
+   */
+  public setFlag(flag: 0 | 1): void {
+    this.innerFlag = flag;
+  }
+
+  /**
+   *
+   * @returns {boolean} Is's a block node.
+   */
+  public isBlock(): boolean {
     return false;
   }
 
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the next node.
+   */
   public getNext(): MarkdownNode | null {
     return this.next;
   }
 
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the prev node.
+   */
   public getPrevious(): MarkdownNode | null {
     return this.prev;
   }
 
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the first child.
+   */
   public getFirstChild(): MarkdownNode | null {
     return this.firstChild;
   }
 
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the last child.
+   */
   public getLastChild(): MarkdownNode | null {
     return this.lastChild;
   }
 
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the parent node.
+   */
   public getParent(): MarkdownNode | null {
     return this.parent;
   }
-  public setParent(parent: MarkdownNode) {
+
+  /**
+   * Set the parent node.
+   */
+  public setParent(parent: MarkdownNode): void {
     this.parent = parent;
+
+    this.setFlag(1);
   }
 
-  public appendChild(child: MarkdownNode) {
+  /**
+   * Append a child node.
+   *
+   * @param child
+   */
+  public appendChild(child: MarkdownNode): void {
     child.unlink();
     child.setParent(this);
+
+    this.setFlag(1);
 
     if (this.lastChild !== null) {
       this.lastChild.next = child;
@@ -124,9 +216,16 @@ abstract class MarkdownNode {
     }
   }
 
-  public prependChild(child: MarkdownNode) {
+  /**
+   * Prepend a child node.
+   *
+   * @param child
+   */
+  public prependChild(child: MarkdownNode): void {
     child.unlink();
     child.setParent(this);
+
+    this.setFlag(1);
 
     if (this.firstChild !== null) {
       this.firstChild.prev = child;
@@ -138,8 +237,13 @@ abstract class MarkdownNode {
     }
   }
 
-  public unlink() {
+  /**
+   * Remove all links.
+   */
+  public unlink(): void {
     this.innerChildren.length = 0;
+
+    this.setFlag(0);
 
     if (this.prev !== null) {
       this.prev.next = this.next;
@@ -164,6 +268,8 @@ abstract class MarkdownNode {
   public insertAfter(sibling: MarkdownNode): void {
     sibling.unlink();
 
+    this.setFlag(1);
+
     sibling.next = this.next;
     if (sibling.next !== null) {
       sibling.next.prev = sibling;
@@ -183,6 +289,8 @@ abstract class MarkdownNode {
    */
   public insertBefore(sibling: MarkdownNode): void {
     sibling.unlink();
+
+    this.setFlag(1);
 
     sibling.prev = this.prev;
     if (sibling.prev !== null) {

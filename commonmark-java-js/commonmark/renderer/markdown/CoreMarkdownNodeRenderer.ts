@@ -1,10 +1,10 @@
-import type { MarkdownNode } from "@/node";
+import type { MarkdownNode } from '@/node';
 
-import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { MarkdownNodeRendererContext } from "./interfaces/MarkdownNodeRendererContext";
+import type { NodeRenderer } from '../interfaces/NodeRenderer';
+import type { MarkdownNodeRendererContext } from './interfaces/MarkdownNodeRendererContext';
 
-import { AsciiMatcher, Characters, CharMatcher } from "@/text";
-import { isNotUnDef, isUnDef } from "@helpers/index";
+import { AsciiMatcher, Characters, CharMatcher } from '@/text';
+import { isNotUnDef, isUnDef } from '@helpers/index';
 import {
   Document,
   Heading,
@@ -26,10 +26,10 @@ import {
   HtmlInline,
   SoftLineBreak,
   HardLineBreak,
-  AbstractVisitor,
-} from "@/node";
+  AbstractVisitor
+} from '@/node';
 
-import MarkdownWriter from "./MarkdownWriter";
+import MarkdownWriter from './MarkdownWriter';
 
 class ListHolder {
   public readonly parent: ListHolder;
@@ -46,7 +46,7 @@ class BulletListHolder extends ListHolder {
     super(parent);
 
     const marker = bulletList.getMarker();
-    this.marker = isNotUnDef(marker) ? marker : "-";
+    this.marker = isNotUnDef(marker) ? marker : '-';
   }
 }
 
@@ -60,7 +60,7 @@ class OrderedListHolder extends ListHolder {
     const markerDelimiter = orderedList.getMarkerDelimiter();
     const markerStartNumber = orderedList.getMarkerStartNumber();
 
-    this.delimiter = isNotUnDef(markerDelimiter) ? markerDelimiter : ".";
+    this.delimiter = isNotUnDef(markerDelimiter) ? markerDelimiter : '.';
     this.number = markerStartNumber ? markerStartNumber : 1;
   }
 }
@@ -106,24 +106,27 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
   private readonly textEscape: AsciiMatcher;
   private readonly textEscapeInHeading: CharMatcher;
 
-  private readonly linkDestinationNeedsAngleBrackets: CharMatcher =
-    AsciiMatcher.builder()
-      .c(" ")
-      .c("(")
-      .c(")")
-      .c("<")
-      .c(">")
-      .c("\n")
-      .c("\\")
-      .build();
+  private readonly linkDestinationNeedsAngleBrackets: CharMatcher = AsciiMatcher.builder()
+    .c(' ')
+    .c('(')
+    .c(')')
+    .c('<')
+    .c('>')
+    .c('\n')
+    .c('\\')
+    .build();
 
-  private readonly linkDestinationEscapeInAngleBrackets: CharMatcher =
-    AsciiMatcher.builder().c("<").c(">").c("\n").c("\\").build();
+  private readonly linkDestinationEscapeInAngleBrackets: CharMatcher = AsciiMatcher.builder()
+    .c('<')
+    .c('>')
+    .c('\n')
+    .c('\\')
+    .build();
 
   private readonly linkTitleEscapeInQuotes: CharMatcher = AsciiMatcher.builder()
     .c('"')
-    .c("\n")
-    .c("\\")
+    .c('\n')
+    .c('\\')
     .build();
 
   private readonly orderedListMarkerPattern = /^([0-9]{1,9})([.)])/;
@@ -143,12 +146,10 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.writer = context.getWriter();
 
     this.textEscape = AsciiMatcher.builder()
-      .anyOf("[]<>`*_&\n\\")
+      .anyOf('[]<>`*_&\n\\')
       .anyOf(context.getSpecialCharacters())
       .build();
-    this.textEscapeInHeading = AsciiMatcher.builder(this.textEscape)
-      .anyOf("#")
-      .build();
+    this.textEscapeInHeading = AsciiMatcher.builder(this.textEscape).anyOf('#').build();
   }
 
   public beforeRoot(rootNode: MarkdownNode) {}
@@ -175,7 +176,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       SoftLineBreak,
       StrongEmphasis,
       Text,
-      ThematicBreak,
+      ThematicBreak
     ] as unknown as (typeof MarkdownNode)[]);
   }
 
@@ -202,7 +203,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         if (isUnDef(literal)) {
           // Let's use ___ as it doesn't introduce ambiguity with * or - list item markers
-          literal = "___";
+          literal = '___';
         }
 
         this.writer.raw(literal);
@@ -215,8 +216,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const heading = node;
 
         if (heading.getLevel() <= 2) {
-          const lineBreakVisitor =
-            new CoreMarkdownNodeRenderer.LineBreakVisitor();
+          const lineBreakVisitor = new CoreMarkdownNodeRenderer.LineBreakVisitor();
 
           heading.accept(lineBreakVisitor);
           const isMultipleLines = lineBreakVisitor.hasLineBreak();
@@ -229,9 +229,9 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
             if (heading.getLevel() === 1) {
               // Note that it would be nice to match the length of the contents instead of just using 3, but that's
               // not easy.
-              this.writer.raw("===");
+              this.writer.raw('===');
             } else {
-              this.writer.raw("---");
+              this.writer.raw('---');
             }
 
             this.writer.block();
@@ -242,10 +242,10 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         // ATX headings: Can't have multiple lines, but up to level 6.
         for (let i = 0; i < heading.getLevel(); i++) {
-          this.writer.raw("#");
+          this.writer.raw('#');
         }
 
-        this.writer.raw(" ");
+        this.writer.raw(' ');
         this.visitChildren(heading);
 
         this.writer.block();
@@ -259,8 +259,8 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
         let literal = indentedCodeBlock.getLiteral();
         // We need to respect line prefixes which is why we need to write it line by line (e.g. an indented code block
         // within a block quote)
-        this.writer.writePrefix("    ");
-        this.writer.pushPrefix("    ");
+        this.writer.writePrefix('    ');
+        this.writer.pushPrefix('    ');
         const lines: string[] = CoreMarkdownNodeRenderer.getLines(literal);
 
         for (let i = 0; i < lines.length; i++) {
@@ -283,7 +283,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         const literal = codeBlock.getLiteral();
         const fenceCharacter = codeBlock.getFenceCharacter();
-        const fenceChar = isNotUnDef(fenceCharacter) ? fenceCharacter : "`";
+        const fenceChar = isNotUnDef(fenceCharacter) ? fenceCharacter : '`';
 
         let openingFenceLength: number;
 
@@ -295,10 +295,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
           // Otherwise, calculate the closing fence length pessimistically, e.g. if the code block itself contains a
           // line with ```, we need to use a fence of length 4. If ``` occurs with non-whitespace characters on a
           // line, we technically don't need a longer fence, but it's not incorrect to do so.
-          const fenceCharsInLiteral = CoreMarkdownNodeRenderer.findMaxRunLength(
-            fenceChar,
-            literal || ""
-          );
+          const fenceCharsInLiteral = CoreMarkdownNodeRenderer.findMaxRunLength(fenceChar, literal);
 
           openingFenceLength = Math.max(fenceCharsInLiteral + 1, 3);
         }
@@ -308,19 +305,13 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
           ? codeBlockClosingFenceLength
           : openingFenceLength;
 
-        const openingFence = CoreMarkdownNodeRenderer.repeat(
-          fenceChar,
-          openingFenceLength
-        );
-        const closingFence = CoreMarkdownNodeRenderer.repeat(
-          fenceChar,
-          closingFenceLength
-        );
+        const openingFence = CoreMarkdownNodeRenderer.repeat(fenceChar, openingFenceLength);
+        const closingFence = CoreMarkdownNodeRenderer.repeat(fenceChar, closingFenceLength);
 
         const indent = codeBlock.getFenceIndent() || 0;
 
         if (indent > 0) {
-          const indentPrefix = CoreMarkdownNodeRenderer.repeat(" ", indent);
+          const indentPrefix = CoreMarkdownNodeRenderer.repeat(' ', indent);
 
           this.writer.writePrefix(indentPrefix);
           this.writer.pushPrefix(indentPrefix);
@@ -356,9 +347,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof HtmlBlock: {
         const htmlBlock = node;
 
-        const lines: string[] = CoreMarkdownNodeRenderer.getLines(
-          htmlBlock.getLiteral()
-        );
+        const lines: string[] = CoreMarkdownNodeRenderer.getLines(htmlBlock.getLiteral());
 
         for (let i = 0; i < lines.length; i++) {
           let line = lines[i];
@@ -386,8 +375,8 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof BlockQuote: {
         const blockQuote = node;
 
-        this.writer.writePrefix("> ");
-        this.writer.pushPrefix("> ");
+        this.writer.writePrefix('> ');
+        this.writer.pushPrefix('> ');
         this.visitChildren(blockQuote);
         this.writer.popPrefix();
         this.writer.block();
@@ -432,31 +421,27 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
         if (this.listHolder instanceof BulletListHolder) {
           const bulletListHolder = this.listHolder as BulletListHolder;
 
-          marker =
-            CoreMarkdownNodeRenderer.repeat(" ", markerIndent) +
-            bulletListHolder.marker;
+          marker = CoreMarkdownNodeRenderer.repeat(' ', markerIndent) + bulletListHolder.marker;
         } else if (this.listHolder instanceof OrderedListHolder) {
           const orderedListHolder = this.listHolder as OrderedListHolder;
 
           marker =
-            CoreMarkdownNodeRenderer.repeat(" ", markerIndent) +
+            CoreMarkdownNodeRenderer.repeat(' ', markerIndent) +
             orderedListHolder.number +
             orderedListHolder.delimiter;
           orderedListHolder.number++;
         } else {
-          throw new Error("Unknown list holder type: " + this.listHolder);
+          throw new Error('Unknown list holder type: ' + this.listHolder);
         }
 
         const contentIndent = listItem.getContentIndent();
         const spaces = isNotUnDef(contentIndent)
-          ? CoreMarkdownNodeRenderer.repeat(" ", contentIndent - marker.length)
-          : " ";
+          ? CoreMarkdownNodeRenderer.repeat(' ', contentIndent - marker.length)
+          : ' ';
 
         this.writer.writePrefix(marker);
         this.writer.writePrefix(spaces);
-        this.writer.pushPrefix(
-          CoreMarkdownNodeRenderer.repeat(" ", marker.length + spaces.length)
-        );
+        this.writer.pushPrefix(CoreMarkdownNodeRenderer.repeat(' ', marker.length + spaces.length));
 
         if (listItem.getFirstChild() === null) {
           // Empty list item
@@ -475,37 +460,32 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         const literal = code.getLiteral();
         // If the literal includes backticks, we can surround them by using one more backtick.
-        const backticks = CoreMarkdownNodeRenderer.findMaxRunLength(
-          "`",
-          literal
-        );
+        const backticks = CoreMarkdownNodeRenderer.findMaxRunLength('`', literal);
 
         for (let i = 0; i < backticks + 1; i++) {
-          this.writer.raw("`");
+          this.writer.raw('`');
         }
 
         // If the literal starts or ends with a backtick, surround it with a single space.
         // If it starts and ends with a space (but is not only spaces), add an additional space (otherwise they would
         // get removed on parsing).
         const addSpace =
-          literal.startsWith("`") ||
-          literal.endsWith("`") ||
-          (literal.startsWith(" ") &&
-            literal.endsWith(" ") &&
-            Characters.hasNonSpace(literal));
+          literal.startsWith('`') ||
+          literal.endsWith('`') ||
+          (literal.startsWith(' ') && literal.endsWith(' ') && Characters.hasNonSpace(literal));
 
         if (addSpace) {
-          this.writer.raw(" ");
+          this.writer.raw(' ');
         }
 
         this.writer.raw(literal);
 
         if (addSpace) {
-          this.writer.raw(" ");
+          this.writer.raw(' ');
         }
 
         for (let i = 0; i < backticks + 1; i++) {
-          this.writer.raw("`");
+          this.writer.raw('`');
         }
 
         break;
@@ -518,7 +498,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
         // Use delimiter that was parsed if available
         if (isUnDef(delimiter)) {
           // When emphasis is nested, a different delimiter needs to be used
-          delimiter = this.writer.getLastChar() === "*" ? "_" : "*";
+          delimiter = this.writer.getLastChar() === '*' ? '_' : '*';
         }
 
         this.writer.raw(delimiter);
@@ -531,9 +511,9 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof StrongEmphasis: {
         const strongEmphasis = node;
 
-        this.writer.raw("**");
+        this.writer.raw('**');
         super.visit(strongEmphasis);
-        this.writer.raw("**");
+        this.writer.raw('**');
 
         break;
       }
@@ -541,7 +521,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Link: {
         const link = node;
 
-        this.writeLinkLike(link.getTitle(), link.getDestination(), link, "[");
+        this.writeLinkLike(link.getTitle(), link.getDestination(), link, '[');
 
         break;
       }
@@ -549,12 +529,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Image: {
         const image = node;
 
-        this.writeLinkLike(
-          image.getTitle(),
-          image.getDestination(),
-          image,
-          "!["
-        );
+        this.writeLinkLike(image.getTitle(), image.getDestination(), image, '![');
 
         break;
       }
@@ -568,7 +543,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       }
 
       case node instanceof HardLineBreak: {
-        this.writer.raw("  ");
+        this.writer.raw('  ');
         this.writer.line();
 
         break;
@@ -596,45 +571,45 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
           const c = literal.charAt(0);
 
           switch (c) {
-            case "-":
+            case '-':
               // Would be ambiguous with a bullet list marker, escape
-              this.writer.raw("\\-");
+              this.writer.raw('\\-');
               literal = literal.substring(1);
 
               break;
 
-            case "#":
+            case '#':
               // Would be ambiguous with an ATX heading, escape
-              this.writer.raw("\\#");
+              this.writer.raw('\\#');
               literal = literal.substring(1);
 
               break;
 
-            case "=":
+            case '=':
               // Would be ambiguous with a Setext heading, escape unless it's the first line in the block
               if (text.getPrevious() !== null) {
-                this.writer.raw("\\=");
+                this.writer.raw('\\=');
                 literal = literal.substring(1);
               }
 
               break;
 
-            case "0":
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "8":
-            case "9":
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
               // Check for ordered list marker
               const m = this.orderedListMarkerPattern.exec(literal);
 
               if (m) {
                 this.writer.raw(m[1]);
-                this.writer.raw("\\" + m[2]);
+                this.writer.raw('\\' + m[2]);
                 literal = literal.substring(m.index, m[0].length);
 
                 this.orderedListMarkerPattern.lastIndex = 0;
@@ -642,14 +617,14 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
               break;
 
-            case "\t":
-              this.writer.raw("&#9;");
+            case '\t':
+              this.writer.raw('&#9;');
               literal = literal.substring(1);
 
               break;
 
-            case " ":
-              this.writer.raw("&#32;");
+            case ' ':
+              this.writer.raw('&#32;');
               literal = literal.substring(1);
 
               break;
@@ -659,14 +634,12 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
         }
 
         const escape =
-          text.getParent() instanceof Heading
-            ? this.textEscapeInHeading
-            : this.textEscape;
+          text.getParent() instanceof Heading ? this.textEscapeInHeading : this.textEscape;
 
-        if (literal.endsWith("!") && text.getNext() instanceof Link) {
+        if (literal.endsWith('!') && text.getNext() instanceof Link) {
           // If we wrote the `!` unescaped, it would turn the link into an image instead.
           this.writer.text(literal.substring(0, literal.length - 1), escape);
-          this.writer.raw("\\!");
+          this.writer.raw('\\!');
         } else {
           this.writer.text(literal, escape);
         }
@@ -725,8 +698,8 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     // Without -1, split would discard all trailing empty strings, which is not what we want, e.g. it would
     // return the same result for "abc", "abc\n" and "abc\n\n".
     // With -1, it returns ["abc"], ["abc", ""] and ["abc", "", ""].
-    let parts: string[] = literal.split("\n");
-    if (parts[parts.length - 1] === "") {
+    let parts: string[] = literal.split('\n');
+    if (parts[parts.length - 1] === '') {
       // But we don't want the last empty string, as "\n" is used as a line terminator (not a separator),
       // so return without the last element.
       return parts.slice(0, parts.length - 1);
@@ -743,30 +716,25 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
   ) {
     this.writer.raw(opener);
     this.visitChildren(node);
-    this.writer.raw("]");
-    this.writer.raw("(");
+    this.writer.raw(']');
+    this.writer.raw('(');
 
-    if (
-      CoreMarkdownNodeRenderer.contains(
-        destination,
-        this.linkDestinationNeedsAngleBrackets
-      )
-    ) {
-      this.writer.raw("<");
+    if (CoreMarkdownNodeRenderer.contains(destination, this.linkDestinationNeedsAngleBrackets)) {
+      this.writer.raw('<');
       this.writer.text(destination, this.linkDestinationEscapeInAngleBrackets);
-      this.writer.raw(">");
+      this.writer.raw('>');
     } else {
       this.writer.raw(destination);
     }
 
     if (isNotUnDef(title)) {
-      this.writer.raw(" ");
+      this.writer.raw(' ');
       this.writer.raw('"');
       this.writer.text(title, this.linkTitleEscapeInQuotes);
       this.writer.raw('"');
     }
 
-    this.writer.raw(")");
+    this.writer.raw(')');
   }
 
   public static ListHolder = ListHolder;

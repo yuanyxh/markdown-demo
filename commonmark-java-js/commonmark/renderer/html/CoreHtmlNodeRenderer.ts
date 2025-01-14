@@ -1,9 +1,9 @@
-import type { MarkdownNode } from "@/node";
+import type { MarkdownNode } from '@/node';
 
-import type { HtmlNodeRendererContext } from "./interfaces/HtmlNodeRendererContext";
-import type { NodeRenderer } from "../interfaces/NodeRenderer";
+import type { HtmlNodeRendererContext } from './interfaces/HtmlNodeRendererContext';
+import type { NodeRenderer } from '../interfaces/NodeRenderer';
 
-import { Appendable, isNotUnDef } from "@helpers/index";
+import { Appendable, isNotUnDef } from '@helpers/index';
 import {
   ListBlock,
   Document,
@@ -26,10 +26,10 @@ import {
   HtmlInline,
   SoftLineBreak,
   HardLineBreak,
-  AbstractVisitor,
-} from "@/node";
+  AbstractVisitor
+} from '@/node';
 
-import HtmlWriter from "./HtmlWriter";
+import HtmlWriter from './HtmlWriter';
 
 class AltTextVisitor extends AbstractVisitor {
   private readonly sb: Appendable = new Appendable();
@@ -49,13 +49,13 @@ class AltTextVisitor extends AbstractVisitor {
       }
 
       case node instanceof SoftLineBreak: {
-        this.sb.append("\n");
+        this.sb.append('\n');
 
         break;
       }
 
       case node instanceof HardLineBreak: {
-        this.sb.append("\n");
+        this.sb.append('\n');
 
         break;
       }
@@ -100,7 +100,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       Code,
       HtmlInline,
       SoftLineBreak,
-      HardLineBreak,
+      HardLineBreak
     ] as unknown as (typeof MarkdownNode)[]);
   }
 
@@ -122,11 +122,11 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Heading: {
         const heading = node;
 
-        const htag = "h" + heading.getLevel();
+        const htag = 'h' + heading.getLevel();
         this.html.line();
         this.html.tag(htag, this.getAttrs(heading, htag));
         this.visitChildren(heading);
-        this.html.tag("/" + htag);
+        this.html.tag('/' + htag);
         this.html.line();
 
         break;
@@ -156,9 +156,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         const paragraph = node;
         this.html.line();
-        this.html.tag("p", this.getAttrs(paragraph, "p"));
+        this.html.tag('p', this.getAttrs(paragraph, 'p'));
         this.visitChildren(paragraph);
-        this.html.tag("/p");
+        this.html.tag('/p');
         this.html.line();
 
         break;
@@ -168,11 +168,11 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const blockQuote = node;
 
         this.html.line();
-        this.html.tag("blockquote", this.getAttrs(blockQuote, "blockquote"));
+        this.html.tag('blockquote', this.getAttrs(blockQuote, 'blockquote'));
         this.html.line();
         this.visitChildren(blockQuote);
         this.html.line();
-        this.html.tag("/blockquote");
+        this.html.tag('/blockquote');
         this.html.line();
 
         break;
@@ -181,7 +181,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof BulletList: {
         const bulletList = node;
 
-        this.renderListBlock(bulletList, "ul", this.getAttrs(bulletList, "ul"));
+        this.renderListBlock(bulletList, 'ul', this.getAttrs(bulletList, 'ul'));
 
         break;
       }
@@ -194,7 +194,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const info = fencedCodeBlock.getInfo();
 
         if (info) {
-          const space = info.indexOf(" ");
+          const space = info.indexOf(' ');
           let language: string;
 
           if (space === -1) {
@@ -203,10 +203,10 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
             language = info.substring(0, space);
           }
 
-          attributes.set("class", "language-" + language);
+          attributes.set('class', 'language-' + language);
         }
 
-        this.renderCodeBlock(literal || "", fencedCodeBlock, attributes);
+        this.renderCodeBlock(literal, fencedCodeBlock, attributes);
 
         break;
       }
@@ -216,9 +216,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         this.html.line();
         if (this.context.shouldEscapeHtml()) {
-          this.html.tag("p", this.getAttrs(htmlBlock, "p"));
+          this.html.tag('p', this.getAttrs(htmlBlock, 'p'));
           this.html.text(htmlBlock.getLiteral());
-          this.html.tag("/p");
+          this.html.tag('/p');
         } else {
           this.html.raw(htmlBlock.getLiteral());
         }
@@ -232,7 +232,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const thematicBreak = node;
 
         this.html.line();
-        this.html.tag("hr", this.getAttrs(thematicBreak, "hr"), true);
+        this.html.tag('hr', this.getAttrs(thematicBreak, 'hr'), true);
         this.html.line();
 
         break;
@@ -258,20 +258,20 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
 
         if (this.context.shouldSanitizeUrls()) {
           url = this.context.urlSanitizer().sanitizeLinkUrl(url);
-          attrs.set("rel", "nofollow");
+          attrs.set('rel', 'nofollow');
         }
 
         url = this.context.encodeUrl(url);
-        attrs.set("href", url);
+        attrs.set('href', url);
 
         const title = link.getTitle();
         if (isNotUnDef(title)) {
-          attrs.set("title", title);
+          attrs.set('title', title);
         }
 
-        this.html.tag("a", this.getAttrs(link, "a", attrs));
+        this.html.tag('a', this.getAttrs(link, 'a', attrs));
         this.visitChildren(link);
-        this.html.tag("/a");
+        this.html.tag('/a');
 
         break;
       }
@@ -279,9 +279,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof ListItem: {
         const listItem = node;
 
-        this.html.tag("li", this.getAttrs(listItem, "li"));
+        this.html.tag('li', this.getAttrs(listItem, 'li'));
         this.visitChildren(listItem);
-        this.html.tag("/li");
+        this.html.tag('/li');
         this.html.line();
 
         break;
@@ -296,14 +296,10 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const attrs = new Map<string, string>();
 
         if (start !== 1) {
-          attrs.set("start", start.toString());
+          attrs.set('start', start.toString());
         }
 
-        this.renderListBlock(
-          orderedList,
-          "ol",
-          this.getAttrs(orderedList, "ol", attrs)
-        );
+        this.renderListBlock(orderedList, 'ol', this.getAttrs(orderedList, 'ol', attrs));
 
         break;
       }
@@ -324,15 +320,15 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
           url = this.context.urlSanitizer().sanitizeImageUrl(url);
         }
 
-        attrs.set("src", this.context.encodeUrl(url));
-        attrs.set("alt", altText);
+        attrs.set('src', this.context.encodeUrl(url));
+        attrs.set('alt', altText);
 
         const title = image.getTitle();
         if (isNotUnDef(title)) {
-          attrs.set("title", title);
+          attrs.set('title', title);
         }
 
-        this.html.tag("img", this.getAttrs(image, "img", attrs), true);
+        this.html.tag('img', this.getAttrs(image, 'img', attrs), true);
 
         break;
       }
@@ -340,9 +336,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Emphasis: {
         const emphasis = node;
 
-        this.html.tag("em", this.getAttrs(emphasis, "em"));
+        this.html.tag('em', this.getAttrs(emphasis, 'em'));
         this.visitChildren(emphasis);
-        this.html.tag("/em");
+        this.html.tag('/em');
 
         break;
       }
@@ -350,9 +346,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof StrongEmphasis: {
         const strongEmphasis = node;
 
-        this.html.tag("strong", this.getAttrs(strongEmphasis, "strong"));
+        this.html.tag('strong', this.getAttrs(strongEmphasis, 'strong'));
         this.visitChildren(strongEmphasis);
-        this.html.tag("/strong");
+        this.html.tag('/strong');
 
         break;
       }
@@ -360,9 +356,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Text: {
         const text = node;
 
-        this.html.tag("span", this.getAttrs(text, "span"));
+        this.html.tag('span', this.getAttrs(text, 'span'));
         this.html.text(text.getLiteral());
-        this.html.tag("/span");
+        this.html.tag('/span');
 
         break;
       }
@@ -370,9 +366,9 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof Code: {
         const code = node;
 
-        this.html.tag("code", this.getAttrs(code, "code"));
+        this.html.tag('code', this.getAttrs(code, 'code'));
         this.html.text(code.getLiteral());
-        this.html.tag("/code");
+        this.html.tag('/code');
 
         break;
       }
@@ -398,7 +394,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       case node instanceof HardLineBreak: {
         const hardLineBreak = node;
 
-        this.html.tag("br", this.getAttrs(hardLineBreak, "br"), true);
+        this.html.tag('br', this.getAttrs(hardLineBreak, 'br'), true);
         this.html.line();
 
         break;
@@ -416,31 +412,23 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     }
   }
 
-  private renderCodeBlock(
-    literal: string,
-    node: MarkdownNode,
-    attributes: Map<string, string>
-  ) {
+  private renderCodeBlock(literal: string, node: MarkdownNode, attributes: Map<string, string>) {
     this.html.line();
-    this.html.tag("pre", this.getAttrs(node, "pre"));
-    this.html.tag("code", this.getAttrs(node, "code", attributes));
+    this.html.tag('pre', this.getAttrs(node, 'pre'));
+    this.html.tag('code', this.getAttrs(node, 'code', attributes));
     this.html.text(literal);
-    this.html.tag("/code");
-    this.html.tag("/pre");
+    this.html.tag('/code');
+    this.html.tag('/pre');
     this.html.line();
   }
 
-  private renderListBlock(
-    listBlock: ListBlock,
-    tagName: string,
-    attributes: Map<string, string>
-  ) {
+  private renderListBlock(listBlock: ListBlock, tagName: string, attributes: Map<string, string>) {
     this.html.line();
     this.html.tag(tagName, attributes);
     this.html.line();
     this.visitChildren(listBlock);
     this.html.line();
-    this.html.tag("/" + tagName);
+    this.html.tag('/' + tagName);
     this.html.line();
   }
 

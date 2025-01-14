@@ -1,11 +1,11 @@
-import type { ListHolder } from "@/internal";
-import type { MarkdownNode } from "@/node";
+import type { ListHolder } from '@/internal';
+import type { MarkdownNode } from '@/node';
 
-import type TextContentWriter from "./TextContentWriter";
-import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";
-import type { NodeRenderer } from "../interfaces/NodeRenderer";
+import type TextContentWriter from './TextContentWriter';
+import type { TextContentNodeRendererContext } from './interfaces/TextContentNodeRendererContext';
+import type { NodeRenderer } from '../interfaces/NodeRenderer';
 
-import { OrderedListHolder, BulletListHolder } from "@/internal";
+import { OrderedListHolder, BulletListHolder } from '@/internal';
 import {
   Document,
   Heading,
@@ -27,20 +27,17 @@ import {
   HtmlInline,
   SoftLineBreak,
   HardLineBreak,
-  AbstractVisitor,
-} from "@/node";
+  AbstractVisitor
+} from '@/node';
 
-import LineBreakRendering from "./enums/LineBreakRendering";
+import LineBreakRendering from './enums/LineBreakRendering';
 
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).
  *
  * 渲染所有核心节点的默认节点渲染器（按节点渲染器的顺序排在最后）
  */
-class CoreTextContentNodeRenderer
-  extends AbstractVisitor
-  implements NodeRenderer
-{
+class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRenderer {
   protected readonly context: TextContentNodeRendererContext;
   private readonly textContent: TextContentWriter;
 
@@ -77,7 +74,7 @@ class CoreTextContentNodeRenderer
       Code,
       HtmlInline,
       SoftLineBreak,
-      HardLineBreak,
+      HardLineBreak
     ] as unknown as (typeof MarkdownNode)[]);
   }
 
@@ -93,10 +90,10 @@ class CoreTextContentNodeRenderer
         break;
 
       case node instanceof BlockQuote:
-        this.textContent.write("\u00AB");
+        this.textContent.write('\u00AB');
         this.visitChildren(node);
         this.textContent.resetBlock();
-        this.textContent.write("\u00BB");
+        this.textContent.write('\u00BB');
         this.textContent.block();
 
         break;
@@ -119,10 +116,9 @@ class CoreTextContentNodeRenderer
         break;
 
       case node instanceof FencedCodeBlock:
-        const fencedCodeBlockLiteral =
-          CoreTextContentNodeRenderer.stripTrailingNewline(
-            node.getLiteral() || ""
-          );
+        const fencedCodeBlockLiteral = CoreTextContentNodeRenderer.stripTrailingNewline(
+          node.getLiteral()
+        );
 
         if (this.stripNewlines()) {
           this.textContent.writeStripped(fencedCodeBlockLiteral);
@@ -147,7 +143,7 @@ class CoreTextContentNodeRenderer
         this.visitChildren(node);
 
         if (this.stripNewlines()) {
-          this.textContent.write(": ");
+          this.textContent.write(': ');
         } else {
           this.textContent.block();
         }
@@ -156,7 +152,7 @@ class CoreTextContentNodeRenderer
 
       case node instanceof ThematicBreak:
         if (!this.stripNewlines()) {
-          this.textContent.write("***");
+          this.textContent.write('***');
         }
 
         this.textContent.block();
@@ -174,13 +170,14 @@ class CoreTextContentNodeRenderer
         break;
 
       case node instanceof Image:
-        this.writeLink(node, node.getTitle() || "", node.getDestination());
+        this.writeLink(node, node.getTitle() || '', node.getDestination());
 
         break;
 
       case node instanceof IndentedCodeBlock:
-        const indentedCodeBlockLiteral =
-          CoreTextContentNodeRenderer.stripTrailingNewline(node.getLiteral());
+        const indentedCodeBlockLiteral = CoreTextContentNodeRenderer.stripTrailingNewline(
+          node.getLiteral()
+        );
 
         if (this.stripNewlines()) {
           this.textContent.writeStripped(indentedCodeBlockLiteral);
@@ -193,40 +190,29 @@ class CoreTextContentNodeRenderer
         break;
 
       case node instanceof Link:
-        this.writeLink(node, node.getTitle() || "", node.getDestination());
+        this.writeLink(node, node.getTitle() || '', node.getDestination());
 
         break;
 
       case node instanceof ListItem:
-        if (
-          this.listHolder !== null &&
-          this.listHolder instanceof OrderedListHolder
-        ) {
+        if (this.listHolder !== null && this.listHolder instanceof OrderedListHolder) {
           const orderedListHolder = this.listHolder;
-          const indent = this.stripNewlines()
-            ? ""
-            : orderedListHolder.getIndent();
+          const indent = this.stripNewlines() ? '' : orderedListHolder.getIndent();
 
           this.textContent.write(
-            indent +
-              orderedListHolder.getCounter() +
-              orderedListHolder.getDelimiter() +
-              " "
+            indent + orderedListHolder.getCounter() + orderedListHolder.getDelimiter() + ' '
           );
 
           this.visitChildren(node);
           this.textContent.block();
 
           orderedListHolder.increaseCounter();
-        } else if (
-          this.listHolder !== null &&
-          this.listHolder instanceof BulletListHolder
-        ) {
+        } else if (this.listHolder !== null && this.listHolder instanceof BulletListHolder) {
           const bulletListHolder = this.listHolder;
 
           if (!this.stripNewlines()) {
             this.textContent.write(
-              bulletListHolder.getIndent() + bulletListHolder.getMarker() + " "
+              bulletListHolder.getIndent() + bulletListHolder.getMarker() + ' '
             );
           }
 
@@ -286,14 +272,10 @@ class CoreTextContentNodeRenderer
     }
   }
 
-  private writeLink(
-    node: MarkdownNode,
-    title: string,
-    destination: string
-  ): void {
+  private writeLink(node: MarkdownNode, title: string, destination: string): void {
     const hasChild = node.getFirstChild() !== null;
     const hasTitle = title !== destination;
-    const hasDestination = destination !== "";
+    const hasDestination = destination !== '';
 
     if (hasChild) {
       this.textContent.write('"');
@@ -302,7 +284,7 @@ class CoreTextContentNodeRenderer
 
       if (hasTitle || hasDestination) {
         this.textContent.whitespace();
-        this.textContent.write("(");
+        this.textContent.write('(');
       }
     }
 
@@ -320,7 +302,7 @@ class CoreTextContentNodeRenderer
     }
 
     if (hasChild && (hasTitle || hasDestination)) {
-      this.textContent.write(")");
+      this.textContent.write(')');
     }
   }
 
@@ -329,7 +311,7 @@ class CoreTextContentNodeRenderer
   }
 
   private static stripTrailingNewline(s: string) {
-    if (s.endsWith("\n")) {
+    if (s.endsWith('\n')) {
       return s.substring(0, s.length - 1);
     } else {
       return s;

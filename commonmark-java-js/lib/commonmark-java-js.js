@@ -441,6 +441,7 @@ class U {
     i(this, "innerChildren", []);
     i(this, "innerInputIndex", -1);
     i(this, "innerInputEndInput", -1);
+    i(this, "innerFlag", 0);
     i(this, "parent", null);
     i(this, "firstChild", null);
     i(this, "lastChild", null);
@@ -449,19 +450,43 @@ class U {
     i(this, "sourceSpans", null);
     this.innerType = e;
   }
+  /**
+   * @returns {string} This property reflects the type of the node.
+   */
+  get type() {
+    return this.innerType;
+  }
+  /**
+   * @returns {0 | 1} Return the status flag of the node. 0 means unchanged, and 1 means changed.
+   */
+  get flag() {
+    if (this.innerFlag)
+      return 1;
+    const e = this.children;
+    for (let t = 0; t < e.length; t++)
+      if (e[t].flag)
+        return 1;
+    return 0;
+  }
+  /**
+   * @returns {Record<string, any>} This property allows external data to be attached.
+   */
   get meta() {
     return this.innerMeta;
   }
   set meta(e) {
     this.innerMeta = e;
   }
-  get type() {
-    return this.innerType;
-  }
+  /**
+   * @returns {number} This property returns the position of the start of the node in the source code.
+   */
   get inputIndex() {
     var e;
     return this.innerInputIndex === -1 && (this.innerInputIndex = ((e = this.getSourceSpans()[0]) == null ? void 0 : e.getInputIndex()) || 0), this.innerInputIndex;
   }
+  /**
+   * @returns {number} This property returns the position of the end of the node in the source code.
+   */
   get inputEndIndex() {
     if (this.innerInputEndInput === -1) {
       const e = this.getSourceSpans(), t = e[e.length - 1];
@@ -469,6 +494,9 @@ class U {
     }
     return this.innerInputEndInput;
   }
+  /**
+   * @returns {MarkdownNode[]} This property returns the list of child nodes to which the node belongs.
+   */
   get children() {
     if (this.innerChildren.length)
       return this.innerChildren;
@@ -480,47 +508,103 @@ class U {
       t.push(e);
     return t;
   }
+  /**
+   * Reset the flag bit of the node.
+   */
+  resetFlag() {
+    this.setFlag(0);
+    for (let e = 0; e < this.children.length; e++)
+      this.children[e].resetFlag();
+  }
+  /**
+   * Set the flag bit of the node.
+   *
+   * @param flag
+   */
+  setFlag(e) {
+    this.innerFlag = e;
+  }
+  /**
+   *
+   * @returns {boolean} Is's a block node.
+   */
   isBlock() {
     return !1;
   }
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the next node.
+   */
   getNext() {
     return this.next;
   }
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the prev node.
+   */
   getPrevious() {
     return this.prev;
   }
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the first child.
+   */
   getFirstChild() {
     return this.firstChild;
   }
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the last child.
+   */
   getLastChild() {
     return this.lastChild;
   }
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the parent node.
+   */
   getParent() {
     return this.parent;
   }
+  /**
+   * Set the parent node.
+   */
   setParent(e) {
-    this.parent = e;
+    this.parent = e, this.setFlag(1);
   }
+  /**
+   * Append a child node.
+   *
+   * @param child
+   */
   appendChild(e) {
-    e.unlink(), e.setParent(this), this.lastChild !== null ? (this.lastChild.next = e, e.prev = this.lastChild, this.lastChild = e) : (this.firstChild = e, this.lastChild = e);
+    e.unlink(), e.setParent(this), this.setFlag(1), this.lastChild !== null ? (this.lastChild.next = e, e.prev = this.lastChild, this.lastChild = e) : (this.firstChild = e, this.lastChild = e);
   }
+  /**
+   * Prepend a child node.
+   *
+   * @param child
+   */
   prependChild(e) {
-    e.unlink(), e.setParent(this), this.firstChild !== null ? (this.firstChild.prev = e, e.next = this.firstChild, this.firstChild = e) : (this.firstChild = e, this.lastChild = e);
+    e.unlink(), e.setParent(this), this.setFlag(1), this.firstChild !== null ? (this.firstChild.prev = e, e.next = this.firstChild, this.firstChild = e) : (this.firstChild = e, this.lastChild = e);
   }
+  /**
+   * Remove all links.
+   */
   unlink() {
-    this.innerChildren.length = 0, this.prev !== null ? this.prev.next = this.next : this.parent !== null && (this.parent.firstChild = this.next), this.next !== null ? this.next.prev = this.prev : this.parent !== null && (this.parent.lastChild = this.prev), this.parent = null, this.next = null, this.prev = null;
+    this.innerChildren.length = 0, this.setFlag(0), this.prev !== null ? this.prev.next = this.next : this.parent !== null && (this.parent.firstChild = this.next), this.next !== null ? this.next.prev = this.prev : this.parent !== null && (this.parent.lastChild = this.prev), this.parent = null, this.next = null, this.prev = null;
   }
   /**
    * Inserts the {@code sibling} node after {@code this} node.
    */
   insertAfter(e) {
-    e.unlink(), e.next = this.next, e.next !== null && (e.next.prev = e), e.prev = this, this.next = e, e.parent = this.parent, e.parent && e.next === null && (e.parent.lastChild = e);
+    e.unlink(), this.setFlag(1), e.next = this.next, e.next !== null && (e.next.prev = e), e.prev = this, this.next = e, e.parent = this.parent, e.parent && e.next === null && (e.parent.lastChild = e);
   }
   /**
    * Inserts the {@code sibling} node before {@code this} node.
    */
   insertBefore(e) {
-    e.unlink(), e.prev = this.prev, e.prev !== null && (e.prev.next = e), e.next = this, this.prev = e, e.parent = this.parent, e.parent && e.prev === null && (e.parent.firstChild = e);
+    e.unlink(), this.setFlag(1), e.prev = this.prev, e.prev !== null && (e.prev.next = e), e.next = this, this.prev = e, e.parent = this.parent, e.parent && e.prev === null && (e.parent.firstChild = e);
   }
   /**
    * @return the source spans of this node if included by the parser, an empty list otherwise
@@ -873,7 +957,7 @@ class F extends N {
     i(this, "closingFenceLength");
     i(this, "fenceIndent");
     i(this, "info");
-    i(this, "literal");
+    i(this, "literal", "");
   }
   accept(t) {
     t.visit(this);
@@ -903,10 +987,7 @@ class F extends N {
   setOpeningFenceLength(t) {
     if (C(t) && t < 3)
       throw Error("openingFenceLength needs to be >= 3");
-    F.checkFenceLengths(
-      t,
-      this.closingFenceLength
-    ), this.openingFenceLength = t;
+    F.checkFenceLengths(t, this.closingFenceLength), this.openingFenceLength = t;
   }
   /**
    * @return the length of the closing fence (how many of {@link #getFenceCharacter()} were used to end the code
@@ -918,10 +999,7 @@ class F extends N {
   setClosingFenceLength(t) {
     if (C(t) && t < 3)
       throw Error("closingFenceLength needs to be >= 3");
-    F.checkFenceLengths(
-      this.openingFenceLength,
-      t
-    ), this.closingFenceLength = t;
+    F.checkFenceLengths(this.openingFenceLength, t), this.closingFenceLength = t;
   }
   getFenceIndent() {
     return this.fenceIndent;
@@ -946,9 +1024,7 @@ class F extends N {
   }
   static checkFenceLengths(t, r) {
     if (C(t) && C(r) && r < t)
-      throw Error(
-        "fence lengths required to be: closingFenceLength >= openingFenceLength"
-      );
+      throw Error("fence lengths required to be: closingFenceLength >= openingFenceLength");
   }
 }
 class W extends U {
@@ -6490,7 +6566,7 @@ class Ue extends Ne {
         break;
       case t instanceof F:
         const r = Ue.stripTrailingNewline(
-          t.getLiteral() || ""
+          t.getLiteral()
         );
         this.stripNewlines() ? this.textContent.writeStripped(r) : this.textContent.write(r), this.textContent.block();
         break;
@@ -6513,7 +6589,9 @@ class Ue extends Ne {
         this.writeLink(t, t.getTitle() || "", t.getDestination());
         break;
       case t instanceof X:
-        const s = Ue.stripTrailingNewline(t.getLiteral());
+        const s = Ue.stripTrailingNewline(
+          t.getLiteral()
+        );
         this.stripNewlines() ? this.textContent.writeStripped(s) : this.textContent.write(s), this.textContent.block();
         break;
       case t instanceof j:
@@ -6877,19 +6955,10 @@ const x = class x extends Ne {
         if (C(c))
           l = c;
         else {
-          const B = x.findMaxRunLength(
-            a,
-            s || ""
-          );
+          const B = x.findMaxRunLength(a, s);
           l = Math.max(B + 1, 3);
         }
-        const h = r.getClosingFenceLength(), u = C(h) ? h : l, p = x.repeat(
-          a,
-          l
-        ), f = x.repeat(
-          a,
-          u
-        ), S = r.getFenceIndent() || 0;
+        const h = r.getClosingFenceLength(), u = C(h) ? h : l, p = x.repeat(a, l), f = x.repeat(a, u), S = r.getFenceIndent() || 0;
         if (S > 0) {
           const B = x.repeat(" ", S);
           this.writer.writePrefix(B), this.writer.pushPrefix(B);
@@ -6905,9 +6974,7 @@ const x = class x extends Ne {
         break;
       }
       case t instanceof J: {
-        const r = t, s = x.getLines(
-          r.getLiteral()
-        );
+        const r = t, s = x.getLines(r.getLiteral());
         for (let n = 0; n < s.length; n++) {
           let a = s[n];
           this.writer.raw(a), n !== s.length - 1 && this.writer.line();
@@ -6947,16 +7014,11 @@ const x = class x extends Ne {
         } else
           throw new Error("Unknown list holder type: " + this.listHolder);
         const l = r.getContentIndent(), c = C(l) ? x.repeat(" ", l - a.length) : " ";
-        this.writer.writePrefix(a), this.writer.writePrefix(c), this.writer.pushPrefix(
-          x.repeat(" ", a.length + c.length)
-        ), r.getFirstChild() === null ? this.writer.block() : this.visitChildren(r), this.writer.popPrefix();
+        this.writer.writePrefix(a), this.writer.writePrefix(c), this.writer.pushPrefix(x.repeat(" ", a.length + c.length)), r.getFirstChild() === null ? this.writer.block() : this.visitChildren(r), this.writer.popPrefix();
         break;
       }
       case t instanceof ue: {
-        const s = t.getLiteral(), n = x.findMaxRunLength(
-          "`",
-          s
-        );
+        const s = t.getLiteral(), n = x.findMaxRunLength("`", s);
         for (let l = 0; l < n + 1; l++)
           this.writer.raw("`");
         const a = s.startsWith("`") || s.endsWith("`") || s.startsWith(" ") && s.endsWith(" ") && m.hasNonSpace(s);
@@ -6983,12 +7045,7 @@ const x = class x extends Ne {
       }
       case t instanceof ge: {
         const r = t;
-        this.writeLinkLike(
-          r.getTitle(),
-          r.getDestination(),
-          r,
-          "!["
-        );
+        this.writeLinkLike(r.getTitle(), r.getDestination(), r, "![");
         break;
       }
       case t instanceof de: {
@@ -7080,10 +7137,7 @@ const x = class x extends Ne {
     return r[r.length - 1] === "" ? r.slice(0, r.length - 1) : r.slice(0);
   }
   writeLinkLike(t, r, s, n) {
-    this.writer.raw(n), this.visitChildren(s), this.writer.raw("]"), this.writer.raw("("), x.contains(
-      r,
-      this.linkDestinationNeedsAngleBrackets
-    ) ? (this.writer.raw("<"), this.writer.text(r, this.linkDestinationEscapeInAngleBrackets), this.writer.raw(">")) : this.writer.raw(r), C(t) && (this.writer.raw(" "), this.writer.raw('"'), this.writer.text(t, this.linkTitleEscapeInQuotes), this.writer.raw('"')), this.writer.raw(")");
+    this.writer.raw(n), this.visitChildren(s), this.writer.raw("]"), this.writer.raw("("), x.contains(r, this.linkDestinationNeedsAngleBrackets) ? (this.writer.raw("<"), this.writer.text(r, this.linkDestinationEscapeInAngleBrackets), this.writer.raw(">")) : this.writer.raw(r), C(t) && (this.writer.raw(" "), this.writer.raw('"'), this.writer.text(t, this.linkTitleEscapeInQuotes), this.writer.raw('"')), this.writer.raw(")");
   }
 };
 i(x, "ListHolder", lt), i(x, "BulletListHolder", Ye), i(x, "OrderedListHolder", je), /**
@@ -7438,7 +7492,7 @@ class Ot extends Ne {
           let c;
           l === -1 ? c = a : c = a.substring(0, l), n.set("class", "language-" + c);
         }
-        this.renderCodeBlock(s || "", r, n);
+        this.renderCodeBlock(s, r, n);
         break;
       }
       case t instanceof J: {
@@ -7475,11 +7529,7 @@ class Ot extends Ne {
       }
       case t instanceof V: {
         const r = t, s = r.getMarkerStartNumber(), n = C(s) ? s : 1, a = /* @__PURE__ */ new Map();
-        n !== 1 && a.set("start", n.toString()), this.renderListBlock(
-          r,
-          "ol",
-          this.getAttrs(r, "ol", a)
-        );
+        n !== 1 && a.set("start", n.toString()), this.renderListBlock(r, "ol", this.getAttrs(r, "ol", a));
         break;
       }
       case t instanceof ge: {

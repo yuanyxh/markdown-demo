@@ -454,7 +454,7 @@ export declare class FencedCodeBlock extends Block {
    */
   getInfo(): string | undefined;
   setInfo(info: string): void;
-  getLiteral(): string | undefined;
+  getLiteral(): string;
   setLiteral(literal: string): void;
   private static checkFenceLengths;
 }
@@ -1135,6 +1135,7 @@ export declare abstract class MarkdownNode {
   private innerChildren;
   private innerInputIndex;
   private innerInputEndInput;
+  private innerFlag;
   private parent;
   private firstChild;
   private lastChild;
@@ -1142,22 +1143,91 @@ export declare abstract class MarkdownNode {
   private next;
   private sourceSpans;
   constructor(type: string);
+  /**
+   * @returns {string} This property reflects the type of the node.
+   */
+  get type(): string;
+  /**
+   * @returns {0 | 1} Return the status flag of the node. 0 means unchanged, and 1 means changed.
+   */
+  get flag(): 0 | 1;
+  /**
+   * @returns {Record<string, any>} This property allows external data to be attached.
+   */
   get meta(): Record<string, any>;
   set meta(meta: Record<string, any>);
-  get type(): string;
+  /**
+   * @returns {number} This property returns the position of the start of the node in the source code.
+   */
   get inputIndex(): number;
+  /**
+   * @returns {number} This property returns the position of the end of the node in the source code.
+   */
   get inputEndIndex(): number;
+  /**
+   * @returns {MarkdownNode[]} This property returns the list of child nodes to which the node belongs.
+   */
   get children(): MarkdownNode[];
   abstract accept(visitor: Visitor): void;
+  /**
+   * Reset the flag bit of the node.
+   */
+  resetFlag(): void;
+  /**
+   * Set the flag bit of the node.
+   *
+   * @param flag
+   */
+  setFlag(flag: 0 | 1): void;
+  /**
+   *
+   * @returns {boolean} Is's a block node.
+   */
   isBlock(): boolean;
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the next node.
+   */
   getNext(): MarkdownNode | null;
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the prev node.
+   */
   getPrevious(): MarkdownNode | null;
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the first child.
+   */
   getFirstChild(): MarkdownNode | null;
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the last child.
+   */
   getLastChild(): MarkdownNode | null;
+  /**
+   *
+   * @returns {MarkdownNode | null} Return the parent node.
+   */
   getParent(): MarkdownNode | null;
+  /**
+   * Set the parent node.
+   */
   setParent(parent: MarkdownNode): void;
+  /**
+   * Append a child node.
+   *
+   * @param child
+   */
   appendChild(child: MarkdownNode): void;
+  /**
+   * Prepend a child node.
+   *
+   * @param child
+   */
   prependChild(child: MarkdownNode): void;
+  /**
+   * Remove all links.
+   */
   unlink(): void;
   /**
    * Inserts the {@code sibling} node after {@code this} node.

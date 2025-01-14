@@ -5,12 +5,11 @@ import type {
   ThematicBreak,
   SoftLineBreak,
   Image,
-  Text as MarkdownText,
   Code,
   MarkdownNode
 } from 'commonmark-java-js';
 
-import type { CodeBlock, MarkdownCode, SourceNode } from '@/types';
+import type { CodeBlock, LiteralNode, MarkdownCode, SourceNode } from '@/types';
 
 /** Auxiliary tool class for validating types. */
 class TypeTools {
@@ -54,8 +53,8 @@ class TypeTools {
     return data.type === 'image';
   }
 
-  public static isMarkdownText(data: MarkdownNode): data is MarkdownText {
-    return data.type === 'text';
+  public static isLiteralNode(data: any): data is LiteralNode {
+    return data && typeof data.getLiteral === 'function' && typeof data.setLiteral === 'function';
   }
 
   public static isSoftLineBreak(data: MarkdownNode): data is SoftLineBreak {

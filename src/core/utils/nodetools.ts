@@ -167,6 +167,17 @@ class NodeTools {
   public static getConstructor(node: MarkdownNode): typeof MarkdownNode {
     return Object.getPrototypeOf(node).constructor;
   }
+
+  /**
+   * Check whether the position is inside the node.
+   *
+   * @param node
+   * @param pos
+   * @returns {boolean} When the pos is inside the node, return true.
+   */
+  public static isInsideNode(node: MarkdownNode, pos: number): boolean {
+    return pos >= node.inputIndex && pos <= node.inputEndIndex;
+  }
 }
 
 export default NodeTools;

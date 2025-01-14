@@ -1,8 +1,8 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import { isNotUnDef } from "@helpers/index";
+import { isNotUnDef } from '@helpers/index';
 
-import Block from "./abstracts/Block";
+import Block from './abstracts/Block';
 
 class FencedCodeBlock extends Block {
   private fenceCharacter: string | undefined;
@@ -11,10 +11,10 @@ class FencedCodeBlock extends Block {
   private fenceIndent: number | undefined;
 
   private info: string | undefined;
-  private literal: string | undefined;
+  private literal: string = '';
 
   public constructor() {
-    super("fenced-code-block");
+    super('fenced-code-block');
   }
 
   public override accept(visitor: Visitor) {
@@ -48,13 +48,10 @@ class FencedCodeBlock extends Block {
    */
   public setOpeningFenceLength(openingFenceLength: number | undefined) {
     if (isNotUnDef(openingFenceLength) && openingFenceLength < 3) {
-      throw Error("openingFenceLength needs to be >= 3");
+      throw Error('openingFenceLength needs to be >= 3');
     }
 
-    FencedCodeBlock.checkFenceLengths(
-      openingFenceLength,
-      this.closingFenceLength
-    );
+    FencedCodeBlock.checkFenceLengths(openingFenceLength, this.closingFenceLength);
 
     this.openingFenceLength = openingFenceLength;
   }
@@ -69,13 +66,10 @@ class FencedCodeBlock extends Block {
 
   public setClosingFenceLength(closingFenceLength: number | undefined) {
     if (isNotUnDef(closingFenceLength) && closingFenceLength < 3) {
-      throw Error("closingFenceLength needs to be >= 3");
+      throw Error('closingFenceLength needs to be >= 3');
     }
 
-    FencedCodeBlock.checkFenceLengths(
-      this.openingFenceLength,
-      closingFenceLength
-    );
+    FencedCodeBlock.checkFenceLengths(this.openingFenceLength, closingFenceLength);
     this.closingFenceLength = closingFenceLength;
   }
 
@@ -98,7 +92,7 @@ class FencedCodeBlock extends Block {
     this.info = info;
   }
 
-  public getLiteral(): string | undefined {
+  public getLiteral(): string {
     return this.literal;
   }
 
@@ -112,9 +106,7 @@ class FencedCodeBlock extends Block {
   ) {
     if (isNotUnDef(openingFenceLength) && isNotUnDef(closingFenceLength)) {
       if (closingFenceLength < openingFenceLength) {
-        throw Error(
-          "fence lengths required to be: closingFenceLength >= openingFenceLength"
-        );
+        throw Error('fence lengths required to be: closingFenceLength >= openingFenceLength');
       }
     }
   }

@@ -21,6 +21,7 @@ export interface NodePoint {
   offset: number;
 }
 
+/** node for source code */
 export type SourceNode = SourceText | SourceBlock;
 
 /** node for code block */

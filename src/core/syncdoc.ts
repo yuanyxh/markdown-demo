@@ -1,7 +1,7 @@
 import type { Text as MarkdownText } from 'commonmark-java-js';
 
 import type Editor from './editor';
-import type { EditorContextConfig, ExtendsMarkdownNode } from './types';
+import type { EditorContextConfig, ExtendsMarkdownNode, LiteralNode } from './types';
 
 import { NodeTools, TypeTools } from '@/utils';
 
@@ -52,14 +52,16 @@ class SyncDoc {
    *
    * @param node The {@link ExtendsMarkdownNode | Markdown node}.
    * @param oldNode The {@link ExtendsMarkdownNode | Old Markdown node}.
-   * @param [deep=false] Enforce deep comparison. - default is false.
    * @returns
    */
-  public sync(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode, deep = false): boolean {
-    return this.diff(newNode, oldNode, deep);
+  public sync(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
+    return this.diff(newNode, oldNode);
   }
 
-  private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode, deep: boolean): boolean {
+  private diff(newNode: ExtendsMarkdownNode, oldNode: ExtendsMarkdownNode): boolean {
+    // Reset the flag bit.
+    newNode.resetFlag();
+
     if (this.context.isInRangeScope(newNode)) {
       // Apply plugins and execute the adjustNode program for pre-transformation.
       newNode = this.context
@@ -81,9 +83,11 @@ class SyncDoc {
       newChild = newChildren[nextIndex];
       oldChild = oldChildren[nextIndex];
 
+      // Find the old identical node.
       const oldIndex = oldChildren.findIndex((old) => this.isSomeNode(newChild, old));
 
       if (oldIndex !== -1) {
+        // Move to a new position.
         if (oldIndex < lastIndex) {
           this.moveTo(oldChild, nextIndex, oldNode);
 
@@ -92,7 +96,7 @@ class SyncDoc {
           lastIndex = oldIndex;
         }
 
-        if (deep && this.diff(newChild, oldChildren[oldIndex], deep)) {
+        if (newNode.flag && this.diff(newChild, oldChildren[oldIndex])) {
           changed = true;
         }
 
@@ -100,35 +104,36 @@ class SyncDoc {
       } else {
         lastIndex = Math.max(nextIndex, lastIndex);
 
+        // Create a new node.
         if (!oldChild) {
           this.insert(newChild, nextIndex, oldNode);
 
           changed = true;
 
           continue;
-        } else if (this.isSomeNodeType(newChild, oldChild)) {
-          if (
-            TypeTools.isMarkdownText(newChild) &&
-            TypeTools.isMarkdownText(oldChild) &&
-            this.isTextChanged(newChild, oldChild)
-          ) {
-            this.replaceText(newChild, oldChild);
+        }
 
-            changed = true;
-          } else {
-            const childChanged = this.diff(newChild, oldChild, deep);
-
-            if (!changed) {
-              changed = childChanged;
-            }
-          }
-
-          oldChild.meta.synced = true;
-        } else {
+        // Replace the node. Here we use insertion. We will delete the old node later.
+        if (!this.isSomeNodeType(newChild, oldChild)) {
           this.insert(newChild, nextIndex, oldNode);
+          changed = true;
+
+          continue;
+        }
+
+        if (
+          TypeTools.isLiteralNode(newChild) &&
+          TypeTools.isLiteralNode(oldChild) &&
+          this.isTextChanged(newChild, oldChild)
+        ) {
+          this.replaceText(newChild, oldChild);
 
           changed = true;
+        } else if (this.diff(newChild, oldChild)) {
+          changed = true;
         }
+
+        oldChild.meta.synced = true;
       }
     }
 
@@ -151,7 +156,7 @@ class SyncDoc {
     return (node.meta.key = this.context.source.slice(node.inputIndex, node.inputEndIndex));
   }
 
-  private isTextChanged(newNode: MarkdownText, oldNode: MarkdownText): boolean {
+  private isTextChanged(newNode: LiteralNode, oldNode: LiteralNode): boolean {
     return newNode.getLiteral() !== oldNode.getLiteral();
   }
 
@@ -167,7 +172,10 @@ class SyncDoc {
     return newNode.type === oldNode.type;
   }
 
-  private replaceText(newNode: MarkdownText, oldNode: MarkdownText): void {
+  private replaceText(
+    newNode: ExtendsMarkdownNode & LiteralNode,
+    oldNode: ExtendsMarkdownNode & LiteralNode
+  ): void {
     oldNode.meta.$dom.textContent = newNode.getLiteral();
   }
 
