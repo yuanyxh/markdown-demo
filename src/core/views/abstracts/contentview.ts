@@ -128,9 +128,11 @@ abstract class ContentView {
   public sync(node: MarkdownNode): void {
     const children = this.children.slice(0);
     const nodeChildren = node.children;
+    let unusedChildren = children;
 
     let index = 0;
     let lastIndex = 0;
+    let oldIndex = -1;
     let child: ContentView;
     let nodeChild: MarkdownNode;
 
@@ -138,7 +140,9 @@ abstract class ContentView {
       child = children[index];
       nodeChild = nodeChildren[index];
 
-      const oldIndex = children.findIndex((child) => child.eq(nodeChild));
+      unusedChildren = unusedChildren.filter((child, index) =>
+        child.eq(nodeChild) ? !!(oldIndex = index) : false
+      );
 
       if (oldIndex >= 0) {
         if (oldIndex < lastIndex) {
@@ -159,6 +163,8 @@ abstract class ContentView {
 
         // this.appendChild();
       }
+
+      oldIndex = -1;
     }
 
     this.setNode(node);
