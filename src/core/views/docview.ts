@@ -15,6 +15,10 @@ class DocView extends BlockView {
   }
 
   public override toDOMRepr(): HTMLElement {
+    if (this._dom) {
+      return this._dom;
+    }
+
     const docDOM = window.document.createElement('div');
 
     docDOM.classList.add('editor');
@@ -25,6 +29,8 @@ class DocView extends BlockView {
     docDOM.translate = false;
     docDOM.role = 'textbox';
     docDOM.ariaMultiLine = 'true';
+
+    this.setDOM(docDOM);
 
     return docDOM;
   }

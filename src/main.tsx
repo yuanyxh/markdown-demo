@@ -4,9 +4,16 @@ import './styles/editor-init.less';
 
 import source from './examples/example.md?raw';
 
-import { Editor } from './core';
+import { IncludeSourceSpans, Parser } from 'commonmark-java-js';
+import DocView from '@/views/docview';
 
-Editor.create({
-  parent: window.document.getElementById('root')!,
-  doc: source
-});
+const parser = Parser.builder()
+  .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
+  .build();
+const node = parser.parse(source);
+
+const docView = new DocView();
+const docDOM = docView.toDOMRepr();
+docView.sync(node);
+
+window.document.getElementById('root')?.appendChild(docDOM);

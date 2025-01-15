@@ -1,13 +1,6 @@
-import type { MarkdownNode } from 'commonmark-java-js';
-
 import type EventHandler from '@/views/event/eventhandler';
 
-export interface Difference {
-  type: 'insert' | 'remove' | 'move';
-  index: number;
-  node: MarkdownNode;
-  view?: ContentView;
-}
+import { MarkdownNode } from 'commonmark-java-js';
 
 abstract class ContentView {
   public abstract length: number;
@@ -75,6 +68,8 @@ abstract class ContentView {
 
   public setParent(parent: ContentView): void {
     if (this.parent != parent) {
+      this.parent?.removeChild(this, false);
+
       this._parent = parent;
     }
   }
@@ -90,12 +85,49 @@ abstract class ContentView {
     return -1;
   }
 
-  public sync(node: MarkdownNode): void {
-    const children = this.children;
-    const nodeChildren = node.children;
+  public appendChild(view: ContentView): void {
+    this.children.push(view);
 
-    const differences: Difference[] = [];
-    const usedChild: ContentView[] = [];
+    view.setParent(this);
+    this.dom.appendChild(view.toDOMRepr());
+  }
+
+  public insertBefore(view: ContentView, reference: ContentView): void {
+    const newChildren: ContentView[] = [];
+
+    for (const child of this.children) {
+      if (child === reference) {
+        newChildren.push(view, reference);
+
+        view.setParent(this);
+        this.dom.insertBefore(view.toDOMRepr(), reference.dom);
+      } else {
+        newChildren.push(child);
+      }
+    }
+
+    this.children = newChildren;
+  }
+
+  public removeChild(view: ContentView, shouldDestroy = true): ContentView {
+    const newChildren: ContentView[] = [];
+
+    for (const child of this.children) {
+      if (child === view) {
+        shouldDestroy && child.destroy();
+      } else {
+        newChildren.push(child);
+      }
+    }
+
+    this.children = newChildren;
+
+    return view;
+  }
+
+  public sync(node: MarkdownNode): void {
+    const children = this.children.slice(0);
+    const nodeChildren = node.children;
 
     let index = 0;
     let lastIndex = 0;
@@ -110,36 +142,26 @@ abstract class ContentView {
 
       if (oldIndex >= 0) {
         if (oldIndex < lastIndex) {
-          differences.push({
-            type: 'move',
-            index: index,
-            view: children[oldIndex],
-            node: nodeChild
-          });
+          if (children[index + 1]) {
+            this.insertBefore(children[oldIndex], children[index + 1]);
+          } else {
+            this.appendChild(children[oldIndex]);
+          }
         } else {
           lastIndex = Math.max(oldIndex, lastIndex);
         }
 
         children[oldIndex].sync(nodeChild);
-        usedChild.push(children[oldIndex]);
       } else {
-        lastIndex = Math.max(index, lastIndex);
-
         if (child) {
-          differences.push({ type: 'remove', index, view: child, node: child.node });
+          this.removeChild(child);
         }
 
-        differences.push({ type: 'insert', index, node: nodeChild });
+        // this.appendChild();
       }
     }
 
-    for (const child of children) {
-      if (!usedChild.includes(child)) {
-        differences.push({ type: 'remove', index: -1, view: child, node: child.node });
-      }
-    }
-
-    console.log(differences);
+    this.setNode(node);
   }
 
   public shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean {

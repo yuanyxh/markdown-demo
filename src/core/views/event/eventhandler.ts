@@ -24,7 +24,7 @@ class EventHandler {
   }
 
   protected shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean {
-    return !this.view.shouldHandleEvent(e);
+    return this.view.shouldHandleEvent(e);
   }
 
   protected onEventProxy = (e: CustomEvent<ViewEventDetails>): void => {
