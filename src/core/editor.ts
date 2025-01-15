@@ -34,7 +34,7 @@ export interface EditorConfig {
    *
    * It is used to help the editor locate and can also enhance the built-in parser and renderer.
    */
-  plugins: (typeof EnhanceExtension)[];
+  plugins?: (typeof EnhanceExtension)[];
 }
 
 /** Input action. */
