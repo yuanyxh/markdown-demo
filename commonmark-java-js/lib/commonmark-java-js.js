@@ -441,7 +441,6 @@ class U {
     i(this, "innerChildren", []);
     i(this, "innerInputIndex", -1);
     i(this, "innerInputEndInput", -1);
-    i(this, "innerFlag", 0);
     i(this, "parent", null);
     i(this, "firstChild", null);
     i(this, "lastChild", null);
@@ -455,18 +454,6 @@ class U {
    */
   get type() {
     return this.innerType;
-  }
-  /**
-   * @returns {0 | 1} Return the status flag of the node. 0 means unchanged, and 1 means changed.
-   */
-  get flag() {
-    if (this.innerFlag)
-      return 1;
-    const e = this.children;
-    for (let t = 0; t < e.length; t++)
-      if (e[t].flag)
-        return 1;
-    return 0;
   }
   /**
    * @returns {Record<string, any>} This property allows external data to be attached.
@@ -507,22 +494,6 @@ class U {
     for (t.push(e); e = e.getNext(); )
       t.push(e);
     return t;
-  }
-  /**
-   * Reset the flag bit of the node.
-   */
-  resetFlag() {
-    this.setFlag(0);
-    for (let e = 0; e < this.children.length; e++)
-      this.children[e].resetFlag();
-  }
-  /**
-   * Set the flag bit of the node.
-   *
-   * @param flag
-   */
-  setFlag(e) {
-    this.innerFlag = e;
   }
   /**
    *
@@ -570,7 +541,7 @@ class U {
    * Set the parent node.
    */
   setParent(e) {
-    this.parent = e, this.setFlag(1);
+    this.parent = e;
   }
   /**
    * Append a child node.
@@ -578,7 +549,7 @@ class U {
    * @param child
    */
   appendChild(e) {
-    e.unlink(), e.setParent(this), this.setFlag(1), this.lastChild !== null ? (this.lastChild.next = e, e.prev = this.lastChild, this.lastChild = e) : (this.firstChild = e, this.lastChild = e);
+    e.unlink(), e.setParent(this), this.lastChild !== null ? (this.lastChild.next = e, e.prev = this.lastChild, this.lastChild = e) : (this.firstChild = e, this.lastChild = e);
   }
   /**
    * Prepend a child node.
@@ -586,25 +557,25 @@ class U {
    * @param child
    */
   prependChild(e) {
-    e.unlink(), e.setParent(this), this.setFlag(1), this.firstChild !== null ? (this.firstChild.prev = e, e.next = this.firstChild, this.firstChild = e) : (this.firstChild = e, this.lastChild = e);
+    e.unlink(), e.setParent(this), this.firstChild !== null ? (this.firstChild.prev = e, e.next = this.firstChild, this.firstChild = e) : (this.firstChild = e, this.lastChild = e);
   }
   /**
    * Remove all links.
    */
   unlink() {
-    this.innerChildren.length = 0, this.setFlag(0), this.prev !== null ? this.prev.next = this.next : this.parent !== null && (this.parent.firstChild = this.next), this.next !== null ? this.next.prev = this.prev : this.parent !== null && (this.parent.lastChild = this.prev), this.parent = null, this.next = null, this.prev = null;
+    this.innerChildren.length = 0, this.prev !== null ? this.prev.next = this.next : this.parent !== null && (this.parent.firstChild = this.next), this.next !== null ? this.next.prev = this.prev : this.parent !== null && (this.parent.lastChild = this.prev), this.parent = null, this.next = null, this.prev = null;
   }
   /**
    * Inserts the {@code sibling} node after {@code this} node.
    */
   insertAfter(e) {
-    e.unlink(), this.setFlag(1), e.next = this.next, e.next !== null && (e.next.prev = e), e.prev = this, this.next = e, e.parent = this.parent, e.parent && e.next === null && (e.parent.lastChild = e);
+    e.unlink(), e.next = this.next, e.next !== null && (e.next.prev = e), e.prev = this, this.next = e, e.parent = this.parent, e.parent && e.next === null && (e.parent.lastChild = e);
   }
   /**
    * Inserts the {@code sibling} node before {@code this} node.
    */
   insertBefore(e) {
-    e.unlink(), this.setFlag(1), e.prev = this.prev, e.prev !== null && (e.prev.next = e), e.next = this, this.prev = e, e.parent = this.parent, e.parent && e.prev === null && (e.parent.firstChild = e);
+    e.unlink(), e.prev = this.prev, e.prev !== null && (e.prev.next = e), e.next = this, this.prev = e, e.parent = this.parent, e.parent && e.prev === null && (e.parent.firstChild = e);
   }
   /**
    * @return the source spans of this node if included by the parser, an empty list otherwise

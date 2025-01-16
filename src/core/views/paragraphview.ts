@@ -1,22 +1,19 @@
-import type { MarkdownNode } from 'commonmark-java-js';
+import type { Paragraph } from 'commonmark-java-js';
 
-import EventHandler from '@/views/event/eventhandler';
+import type InlineView from './abstracts/inlineview';
+
 import BlockView from './abstracts/blockview';
-import InlineView from './abstracts/inlineview';
 
 class ParagraphView extends BlockView {
   public length: number = 0;
   public children: InlineView[] = [];
-  protected handler: EventHandler;
 
-  public constructor() {
-    super();
-
-    this.handler = EventHandler.create(this);
+  protected override createElement(): HTMLElement {
+    return window.document.createElement('p');
   }
 
-  public override toDOMRepr(): HTMLElement {
-    return window.document.createElement('p');
+  public static override craete(node: Paragraph): ParagraphView {
+    return new this(node);
   }
 }
 

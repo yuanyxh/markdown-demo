@@ -7,17 +7,13 @@ class EventHandler {
     this.view = binding;
   }
 
-  public listenForView(): void {
-    const { dom } = this.view;
-
+  public listenForViewDOM(dom: HTMLElement): void {
     dom.addEventListener('modify', this.onEventProxy);
     dom.addEventListener('selectionenter', this.onEventProxy);
     dom.addEventListener('selectionleave', this.onEventProxy);
   }
 
-  public unlistenForView(): void {
-    const { dom } = this.view;
-
+  public unlistenForViewDOM(dom: HTMLElement): void {
     dom.removeEventListener('modify', this.onEventProxy);
     dom.removeEventListener('selectionenter', this.onEventProxy);
     dom.removeEventListener('selectionleave', this.onEventProxy);
@@ -32,7 +28,7 @@ class EventHandler {
       return void 0;
     }
 
-    console.log(e.type, e.detail);
+    console.log(e.type, e.detail, this.view);
     e.stopPropagation();
 
     switch (e.type) {

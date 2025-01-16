@@ -1135,7 +1135,6 @@ export declare abstract class MarkdownNode {
   private innerChildren;
   private innerInputIndex;
   private innerInputEndInput;
-  private innerFlag;
   private parent;
   private firstChild;
   private lastChild;
@@ -1147,10 +1146,6 @@ export declare abstract class MarkdownNode {
    * @returns {string} This property reflects the type of the node.
    */
   get type(): string;
-  /**
-   * @returns {0 | 1} Return the status flag of the node. 0 means unchanged, and 1 means changed.
-   */
-  get flag(): 0 | 1;
   /**
    * @returns {Record<string, any>} This property allows external data to be attached.
    */
@@ -1169,16 +1164,6 @@ export declare abstract class MarkdownNode {
    */
   get children(): MarkdownNode[];
   abstract accept(visitor: Visitor): void;
-  /**
-   * Reset the flag bit of the node.
-   */
-  resetFlag(): void;
-  /**
-   * Set the flag bit of the node.
-   *
-   * @param flag
-   */
-  setFlag(flag: 0 | 1): void;
   /**
    *
    * @returns {boolean} Is's a block node.

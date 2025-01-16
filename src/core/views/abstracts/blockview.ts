@@ -10,7 +10,9 @@ abstract class BlockView extends ContentView {
       const position = Math.max(0, offset - 1);
       let view: ContentView | null;
       if ((view = ContentView.get(dom.childNodes[position]))) {
-        return offset === 0 ? view.posAtStart : Math.min(this.node.inputEndIndex, this.posAtEnd);
+        return offset === 0
+          ? view.posAtStart
+          : Math.min(this.node?.inputEndIndex ?? 0, this.posAtEnd);
       }
     }
 

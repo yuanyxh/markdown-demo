@@ -1,26 +1,36 @@
-import type EventHandler from '@/views/event/eventhandler';
+import type { MarkdownNode } from 'commonmark-java-js';
 
-import { MarkdownNode } from 'commonmark-java-js';
+import EventHandler from '@/views/event/eventhandler';
 
 abstract class ContentView {
   public abstract length: number;
   public abstract children: ContentView[];
-  protected abstract handler: EventHandler;
 
-  protected _parent: ContentView | null = null;
-  protected _dom!: HTMLElement;
-  protected _node!: MarkdownNode;
+  protected handler: EventHandler = EventHandler.create(this);
+  protected parent: ContentView | null = null;
+  protected node: MarkdownNode;
+  private _dom: HTMLElement;
 
-  public get parent(): ContentView | null {
-    return this._parent;
+  protected static nodeRelationMap = new Map<typeof MarkdownNode, typeof ContentView>();
+
+  public constructor(node: MarkdownNode) {
+    this.node = node;
+    this._dom = this.createElement(node);
+
+    this.handler.listenForViewDOM(this._dom);
   }
 
   public get dom(): HTMLElement {
     return this._dom;
   }
 
-  protected get node(): MarkdownNode {
-    return this._node;
+  public set dom(dom: HTMLElement) {
+    if (this.dom) {
+      this.handler.unlistenForViewDOM(this.dom);
+    }
+
+    this._dom = dom;
+    this.handler.listenForViewDOM(dom);
   }
 
   public get posAtStart(): number {
@@ -50,27 +60,18 @@ abstract class ContentView {
   }
 
   public eq(node: MarkdownNode): boolean {
-    return node.type === this.node.type;
-  }
-
-  public setDOM(dom: HTMLElement): void {
-    if (this.dom) {
-      this.handler.unlistenForView();
-    }
-
-    this._dom = dom;
-    this.handler.listenForView();
+    return node.type === this.node?.type;
   }
 
   public setNode(node: MarkdownNode): void {
-    this._node = node;
+    this.node = node;
   }
 
   public setParent(parent: ContentView): void {
     if (this.parent != parent) {
       this.parent?.removeChild(this, false);
 
-      this._parent = parent;
+      this.parent = parent;
     }
   }
 
@@ -89,85 +90,106 @@ abstract class ContentView {
     this.children.push(view);
 
     view.setParent(this);
-    this.dom.appendChild(view.toDOMRepr());
+    this.dom.appendChild(view.dom);
   }
 
   public insertBefore(view: ContentView, reference: ContentView): void {
-    const newChildren: ContentView[] = [];
-
-    for (const child of this.children) {
-      if (child === reference) {
-        newChildren.push(view, reference);
+    for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i] === reference) {
+        this.children.splice(i, 0, view);
 
         view.setParent(this);
-        this.dom.insertBefore(view.toDOMRepr(), reference.dom);
-      } else {
-        newChildren.push(child);
+        this.dom.insertBefore(view.dom, reference.dom);
+
+        break;
       }
     }
-
-    this.children = newChildren;
   }
 
   public removeChild(view: ContentView, shouldDestroy = true): ContentView {
-    const newChildren: ContentView[] = [];
+    for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i] === view) {
+        shouldDestroy && this.children[i].destroy();
 
-    for (const child of this.children) {
-      if (child === view) {
-        shouldDestroy && child.destroy();
-      } else {
-        newChildren.push(child);
+        break;
       }
     }
-
-    this.children = newChildren;
 
     return view;
   }
 
   public sync(node: MarkdownNode): void {
-    const children = this.children.slice(0);
     const nodeChildren = node.children;
-    let unusedChildren = children;
+    const children = this.children.slice(0);
+
+    const finalSubList: (ContentView | MarkdownNode)[] = [];
 
     let index = 0;
-    let lastIndex = 0;
     let oldIndex = -1;
-    let child: ContentView;
     let nodeChild: MarkdownNode;
 
     for (; index < nodeChildren.length; index++) {
-      child = children[index];
       nodeChild = nodeChildren[index];
 
-      unusedChildren = unusedChildren.filter((child, index) =>
-        child.eq(nodeChild) ? !!(oldIndex = index) : false
-      );
+      oldIndex = children.findIndex((child) => child.eq(nodeChild));
 
       if (oldIndex >= 0) {
-        if (oldIndex < lastIndex) {
-          if (children[index + 1]) {
-            this.insertBefore(children[oldIndex], children[index + 1]);
-          } else {
-            this.appendChild(children[oldIndex]);
-          }
-        } else {
-          lastIndex = Math.max(oldIndex, lastIndex);
+        if (children[oldIndex].isOpend()) {
+          children[oldIndex].sync(nodeChild);
         }
 
-        children[oldIndex].sync(nodeChild);
+        finalSubList[index] = children[oldIndex];
       } else {
-        if (child) {
-          this.removeChild(child);
-        }
-
-        // this.appendChild();
+        finalSubList[index] = nodeChild;
       }
 
       oldIndex = -1;
     }
 
+    // These operations will change the children
+    for (const child of children) {
+      if (!finalSubList.includes(child)) {
+        this.removeChild(child);
+      }
+    }
+
+    const newChildren: ContentView[] = [];
+    let newChild: ContentView | MarkdownNode;
+    let view: ContentView | null;
+    for (let i = 0; i < finalSubList.length; i++) {
+      newChild = finalSubList[i];
+
+      if (newChild instanceof ContentView) {
+        if (i < this.children.indexOf(newChild)) {
+          this.children[i + 1]
+            ? this.insertBefore(newChild, this.children[i + 1])
+            : this.appendChild(newChild);
+        }
+
+        newChildren.push(newChild);
+
+        continue;
+      }
+
+      view = ContentView.createInstanceForNodeType(newChild);
+
+      if (view) {
+        this.children[i + 1]
+          ? this.insertBefore(view, this.children[i + 1])
+          : this.appendChild(view);
+
+        newChildren.push(view);
+
+        if (view.isOpend()) {
+          view.sync(newChild);
+        }
+      }
+    }
+
+    // Always replace the old markdown nodes.
     this.setNode(node);
+
+    this.children = newChildren;
   }
 
   public shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean {
@@ -177,20 +199,49 @@ abstract class ContentView {
     );
   }
 
+  public isOpend(): boolean {
+    return true;
+  }
+
   public destroy(): void {
+    if (this.dom.isConnected) {
+      this.dom.remove();
+    }
+
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].destroy();
     }
 
-    this._parent = null;
-    this.handler.unlistenForView();
-    this.dom.remove();
+    this.parent = null;
+    this.handler.unlistenForViewDOM(this.dom);
   }
 
-  public abstract toDOMRepr(): HTMLElement;
+  protected abstract createElement(node: MarkdownNode): HTMLElement;
 
   public static get(node: Node): ContentView | null {
     return (node && (node as any).$view) || null;
+  }
+
+  public static craete(node: MarkdownNode): ContentView {
+    throw Error(
+      'This static method cannot be called directly. It must be overridden by a subclass.'
+    );
+  }
+
+  public static setNodeRelationMap(
+    nodeRelationMap: Map<typeof MarkdownNode, typeof ContentView>
+  ): void {
+    this.nodeRelationMap = nodeRelationMap;
+  }
+
+  private static createInstanceForNodeType(node: MarkdownNode): ContentView | null {
+    const Constructor = this.nodeRelationMap.get(Object.getPrototypeOf(node).constructor);
+
+    if (Constructor) {
+      return Constructor.craete(node);
+    }
+
+    return null;
   }
 }
 

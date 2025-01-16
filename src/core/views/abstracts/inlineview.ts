@@ -1,6 +1,8 @@
 import ContentView from './contentview';
 
 abstract class InlineView extends ContentView {
+  public abstract children: InlineView[];
+
   public override locatePosFromDOM(dom: Node, offset: number): number {
     if (!this.dom.contains(dom)) {
       return -1;
