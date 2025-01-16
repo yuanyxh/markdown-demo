@@ -19,9 +19,9 @@ class LinkReferenceDefinitionView extends InlineView {
     return node.type === this.node.type && node.getDestination() === this.node.getDestination();
   }
 
-  // public override isOpend(): boolean {
-  //   return false;
-  // }
+  public override isOpend(): boolean {
+    return false;
+  }
 
   protected override createElement(node: LinkReferenceDefinition): HTMLElement {
     const wrapper = window.document.createElement('p');
