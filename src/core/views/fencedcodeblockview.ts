@@ -5,7 +5,6 @@ import type ContentView from './abstracts/contentview';
 import BlockView from './abstracts/blockview';
 
 class FencedCodeBlockView extends BlockView {
-  public length: number = 0;
   public children: ContentView[] = [];
   public node: FencedCodeBlock;
 
@@ -36,10 +35,14 @@ class FencedCodeBlockView extends BlockView {
     return false;
   }
 
-  protected override createElement(): HTMLPreElement {
+  protected override createElement(node: FencedCodeBlock): HTMLPreElement {
     const block = window.document.createElement('pre');
-    const code = window.document.createElement('code');
+    block.contentEditable = 'false';
 
+    const code = window.document.createElement('code');
+    code.contentEditable = 'true';
+
+    code.textContent = node.getLiteral();
     block.appendChild(code);
 
     return block;

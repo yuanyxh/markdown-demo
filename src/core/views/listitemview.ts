@@ -3,7 +3,6 @@ import type { ListItem } from 'commonmark-java-js';
 import BlockView from './abstracts/blockview';
 
 class ListItemView extends BlockView {
-  public length: number = 0;
   public children: BlockView[] = [];
   public node: ListItem;
 

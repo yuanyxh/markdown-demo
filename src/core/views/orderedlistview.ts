@@ -5,7 +5,6 @@ import type ListItemView from './listitemview';
 import BlockView from './abstracts/blockview';
 
 class OrderedListView extends BlockView {
-  public length: number = 0;
   public children: ListItemView[] = [];
   public node: OrderedList;
 

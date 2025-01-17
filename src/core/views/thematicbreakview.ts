@@ -5,11 +5,20 @@ import type ContentView from './abstracts/contentview';
 import BlockView from './abstracts/blockview';
 
 class ThematicBreakView extends BlockView {
-  public length: number = 0;
   public children: ContentView[] = [];
 
-  protected override createElement(): HTMLHRElement {
-    return window.document.createElement('hr');
+  public override isOpend(): boolean {
+    return false;
+  }
+
+  protected override createElement(): HTMLDivElement {
+    const wrapper = window.document.createElement('div');
+    wrapper.contentEditable = 'false';
+
+    const hr = window.document.createElement('hr');
+    wrapper.appendChild(hr);
+
+    return wrapper;
   }
 
   public static override craete(node: ThematicBreak): ThematicBreakView {

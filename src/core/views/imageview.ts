@@ -33,7 +33,6 @@ class AltTextVisitor extends AbstractVisitor {
 }
 
 class ImageView extends InlineView {
-  public length: number = 0;
   public children: ContentView[] = [];
   public node: Image;
 

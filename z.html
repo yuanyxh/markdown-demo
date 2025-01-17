@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div contenteditable="true"></div>
+
+    <script>
+      const div = window.document.querySelector('div');
+      div.addEventListener('beforeinput', (e) => {
+        if (div.textContent.includes('await')) {
+          const range = e.getTargetRanges()[0];
+
+          const newRange = window.document.createRange();
+          newRange.selectNodeContents(range.startContainer);
+
+          newRange.extractContents;
+          const parent = window.document.createElement('em');
+          newRange.surroundContents(parent);
+        }
+      });
+    </script>
+  </body>
+</html>

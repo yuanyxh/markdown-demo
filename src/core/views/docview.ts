@@ -4,7 +4,6 @@ import BlockView from './abstracts/blockview';
 import DocEventHandler from './event/doceventhandler';
 
 class DocView extends BlockView {
-  public length: number = 0;
   public children: BlockView[] = [];
 
   protected handler: DocEventHandler = DocEventHandler.create(this);
@@ -14,10 +13,21 @@ class DocView extends BlockView {
 
     this.handler.listenForViewDOM(this.dom);
 
-    this.sync(node);
+    this.applyNode(node);
   }
 
-  protected override createElement(node: Document): HTMLDivElement {
+  public override shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean {
+    // DocView always should the handle any events.
+    return true;
+  }
+
+  public override destroy(): void {
+    this.handler.unlistenForViewDOM(this.dom);
+
+    super.destroy();
+  }
+
+  protected override createElement(): HTMLDivElement {
     const dom = window.document.createElement('div');
 
     dom.classList.add('editor');

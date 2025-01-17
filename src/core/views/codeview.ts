@@ -5,7 +5,6 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class CodeView extends InlineView {
-  public length: number = 0;
   public children: ContentView[] = [];
 
   public override eq(node: Code): boolean {
@@ -24,8 +23,9 @@ class CodeView extends InlineView {
     return false;
   }
 
-  protected override createElement(): HTMLElement {
+  protected override createElement(node: Code): HTMLElement {
     const code = window.document.createElement('code');
+    code.textContent = node.getLiteral();
 
     code.setAttribute('data-inline', 'true');
 

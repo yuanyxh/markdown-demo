@@ -5,8 +5,11 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class SoftLineBreakView extends InlineView {
-  public length: number = 0;
   public children: ContentView[] = [];
+
+  public override isOpend(): boolean {
+    return false;
+  }
 
   protected override createElement(): HTMLBRElement {
     return window.document.createElement('br');

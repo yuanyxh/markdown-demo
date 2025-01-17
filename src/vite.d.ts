@@ -48,13 +48,14 @@ declare type InputType =
   | 'insertHorizontalRule'
   | 'insertFromPasteAsQuotation';
 
+declare type HandleEventType = 'viewselectionchange' | InputType;
+
 declare interface ViewEventDetails {
-  type: InputType;
+  type: HandleEventType;
   range: StaticRange;
 }
 
 declare interface HTMLElementEventMap {
   modify: CustomEvent<ViewEventDetails>;
-  selectionenter: CustomEvent<ViewEventDetails>;
-  selectionleave: CustomEvent<ViewEventDetails>;
+  viewselectionchange: CustomEvent<ViewEventDetails>;
 }

@@ -5,7 +5,6 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class LinkView extends InlineView {
-  public length: number = 0;
   public children: ContentView[] = [];
   public node: Link;
 

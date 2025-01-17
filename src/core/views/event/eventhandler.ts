@@ -8,22 +8,20 @@ class EventHandler {
   }
 
   public listenForViewDOM(dom: HTMLElement): void {
-    dom.addEventListener('modify', this.onEventProxy);
-    dom.addEventListener('selectionenter', this.onEventProxy);
-    dom.addEventListener('selectionleave', this.onEventProxy);
+    dom.addEventListener('modify', this.onAnyViewEventProxy);
+    dom.addEventListener('viewselectionchange', this.onAnyViewEventProxy, { capture: true });
   }
 
   public unlistenForViewDOM(dom: HTMLElement): void {
-    dom.removeEventListener('modify', this.onEventProxy);
-    dom.removeEventListener('selectionenter', this.onEventProxy);
-    dom.removeEventListener('selectionleave', this.onEventProxy);
+    dom.removeEventListener('modify', this.onAnyViewEventProxy);
+    dom.removeEventListener('viewselectionchange', this.onAnyViewEventProxy, { capture: true });
   }
 
   protected shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean {
     return this.view.shouldHandleEvent(e);
   }
 
-  protected onEventProxy = (e: CustomEvent<ViewEventDetails>): void => {
+  protected onAnyViewEventProxy = (e: CustomEvent<ViewEventDetails>): void => {
     if (!this.shouldHandleEvent(e)) {
       return void 0;
     }
@@ -37,13 +35,8 @@ class EventHandler {
 
         break;
 
-      case 'selectionenter':
-        this.onSelectionEnter(e);
-
-        break;
-
-      case 'selectionleave':
-        this.onSelectionLeave(e);
+      case 'viewselectionchange':
+        this.onViewSelectionChange(e);
 
         break;
 
@@ -54,9 +47,7 @@ class EventHandler {
 
   protected onModify(e: CustomEvent<ViewEventDetails>): void {}
 
-  protected onSelectionEnter(e: CustomEvent<ViewEventDetails>): void {}
-
-  protected onSelectionLeave(e: CustomEvent<ViewEventDetails>): void {}
+  protected onViewSelectionChange(e: CustomEvent<ViewEventDetails>): void {}
 
   public static create(view: ContentView): EventHandler {
     return new this(view);

@@ -3,7 +3,6 @@ import type { BlockQuote } from 'commonmark-java-js';
 import BlockView from './abstracts/blockview';
 
 class BlockQuoteView extends BlockView {
-  public length: number = 0;
   public children: BlockView[] = [];
   public node: BlockQuote;
 

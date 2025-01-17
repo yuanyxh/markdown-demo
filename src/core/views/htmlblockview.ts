@@ -5,7 +5,6 @@ import type ContentView from './abstracts/contentview';
 import BlockView from './abstracts/blockview';
 
 class HtmlBlockView extends BlockView {
-  public length: number = 0;
   public children: ContentView[] = [];
   public node: HtmlBlock;
 

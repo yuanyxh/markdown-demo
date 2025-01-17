@@ -5,7 +5,6 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class TextView extends InlineView {
-  public length: number = 0;
   public children: ContentView[] = [];
   public node: Text;
 
@@ -27,8 +26,15 @@ class TextView extends InlineView {
     }
   }
 
-  protected override createElement(): HTMLSpanElement {
-    return window.document.createElement('span');
+  public override isOpend(): boolean {
+    return false;
+  }
+
+  protected override createElement(node: Text): HTMLSpanElement {
+    const span = window.document.createElement('span');
+    span.textContent = node.getLiteral();
+
+    return span;
   }
 
   public static override craete(node: Text): TextView {

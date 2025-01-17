@@ -5,7 +5,6 @@ import type InlineView from './abstracts/inlineview';
 import BlockView from './abstracts/blockview';
 
 class ParagraphView extends BlockView {
-  public length: number = 0;
   public children: InlineView[] = [];
 
   protected override createElement(): HTMLParagraphElement {

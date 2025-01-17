@@ -5,7 +5,6 @@ import type InlineView from './abstracts/inlineview';
 import BlockView from './abstracts/blockview';
 
 class HeadingView extends BlockView {
-  public length: number = 0;
   public children: InlineView[] = [];
   public node: Heading;
 

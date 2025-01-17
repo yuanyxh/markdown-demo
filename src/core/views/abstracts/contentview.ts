@@ -3,12 +3,11 @@ import type { MarkdownNode } from 'commonmark-java-js';
 import EventHandler from '@/views/event/eventhandler';
 
 abstract class ContentView {
-  public abstract length: number;
   public abstract children: ContentView[];
 
-  protected handler: EventHandler = EventHandler.create(this);
   protected parent: ContentView | null = null;
   protected node: MarkdownNode;
+  protected handler: EventHandler = EventHandler.create(this);
 
   private _dom: HTMLElement;
 
@@ -17,6 +16,7 @@ abstract class ContentView {
   public constructor(node: MarkdownNode) {
     this.node = node;
     this._dom = this.createElement(node);
+    (this._dom as any).$view = this;
 
     this.handler.listenForViewDOM(this._dom);
   }
@@ -28,40 +28,16 @@ abstract class ContentView {
   public set dom(dom: HTMLElement) {
     if (this._dom) {
       this.handler.unlistenForViewDOM(this._dom);
+      delete (this._dom as any).$view;
     }
 
     this._dom = dom;
+    (this._dom as any).$view = this;
     this.handler.listenForViewDOM(dom);
   }
 
-  public get posAtStart(): number {
-    return this.parent ? this.parent.posBefore(this) : 0;
-  }
-
-  public get posAtEnd(): number {
-    return this.posAtStart + this.length;
-  }
-
-  public posBefore(view: ContentView): number {
-    let pos = this.posAtStart;
-
-    for (const child of this.children) {
-      if (child == view) {
-        return pos;
-      }
-
-      pos += child.length;
-    }
-
-    throw new RangeError('Invalid child in posBefore');
-  }
-
-  public posAfter(view: ContentView): number {
-    return this.posBefore(view) + view.length;
-  }
-
   public eq(node: MarkdownNode): boolean {
-    return node.type === this.node?.type;
+    return node.type === this.node.type;
   }
 
   public setNode(node: MarkdownNode): void {
@@ -74,17 +50,6 @@ abstract class ContentView {
 
       this.parent = parent;
     }
-  }
-
-  public locatePosFromDOM(dom: Node, offset: number): number {
-    let pos = -1;
-    for (const child of this.children) {
-      if ((pos = child.locatePosFromDOM(dom, offset)) !== -1) {
-        return pos;
-      }
-    }
-
-    return -1;
   }
 
   public appendChild(view: ContentView): void {
@@ -119,7 +84,7 @@ abstract class ContentView {
     return view;
   }
 
-  public sync(node: MarkdownNode): void {
+  public applyNode(node: MarkdownNode): void {
     const nodeChildren = node.children;
     const children = this.children.slice(0);
 
@@ -136,7 +101,7 @@ abstract class ContentView {
 
       if (oldIndex >= 0) {
         if (children[oldIndex].isOpend()) {
-          children[oldIndex].sync(nodeChild);
+          children[oldIndex].applyNode(nodeChild);
         }
 
         finalSubList[index] = children[oldIndex];
@@ -182,7 +147,7 @@ abstract class ContentView {
         newChildren.push(view);
 
         if (view.isOpend()) {
-          view.sync(newChild);
+          view.applyNode(newChild);
         }
       }
     }
@@ -191,13 +156,6 @@ abstract class ContentView {
     this.setNode(node);
 
     this.children = newChildren;
-  }
-
-  public shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean {
-    return (
-      this.dom.contains(e.detail.range.startContainer) &&
-      this.dom.contains(e.detail.range.endContainer)
-    );
   }
 
   public isOpend(): boolean {
@@ -214,8 +172,11 @@ abstract class ContentView {
     }
 
     this.parent = null;
+    this.node.unlink();
     this.handler.unlistenForViewDOM(this.dom);
   }
+
+  public abstract shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean;
 
   protected abstract createElement(node: MarkdownNode): HTMLElement;
 
