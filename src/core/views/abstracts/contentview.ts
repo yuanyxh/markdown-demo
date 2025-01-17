@@ -137,7 +137,7 @@ abstract class ContentView {
         continue;
       }
 
-      view = ContentView.createInstanceForNodeType(newChild);
+      view = ContentView.createViewByNodeType(newChild);
 
       if (view) {
         this.children[i + 1]
@@ -196,7 +196,7 @@ abstract class ContentView {
     this.nodeRelationMap = nodeRelationMap;
   }
 
-  private static createInstanceForNodeType(node: MarkdownNode): ContentView | null {
+  private static createViewByNodeType(node: MarkdownNode): ContentView | null {
     const Constructor = this.nodeRelationMap.get(Object.getPrototypeOf(node).constructor);
 
     if (Constructor) {

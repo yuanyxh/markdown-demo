@@ -16,8 +16,14 @@ class DocEventHandler extends EventHandler {
   private onBeforeInput = (e: InputEvent): void => {
     const range = e.getTargetRanges()[0];
 
-    // TODO: element
-    range.startContainer.dispatchEvent(
+    // e.preventDefault();
+
+    const newRange = window.document.createRange();
+    newRange.setStart(range.startContainer, range.startOffset);
+    newRange.setEnd(range.endContainer, range.endOffset);
+    console.log(newRange.commonAncestorContainer);
+
+    newRange.commonAncestorContainer.dispatchEvent(
       new CustomEvent<ViewEventDetails>('modify', {
         detail: { type: e.inputType as InputType, range: range },
         bubbles: true,

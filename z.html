@@ -4,24 +4,43 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+
+    <style>
+      div {
+        padding: 20px;
+      }
+    </style>
   </head>
   <body>
-    <div contenteditable="true"></div>
+    <div contenteditable="true">
+      <p><span>11111</span><span>22222</span></p>
+    </div>
+
+    <div></div>
+    <p>
+      <button>click me</button>
+    </p>
 
     <script>
       const div = window.document.querySelector('div');
-      div.addEventListener('beforeinput', (e) => {
-        if (div.textContent.includes('await')) {
-          const range = e.getTargetRanges()[0];
 
-          const newRange = window.document.createRange();
-          newRange.selectNodeContents(range.startContainer);
+      // div.addEventListener('input', () => {});
 
-          newRange.extractContents;
-          const parent = window.document.createElement('em');
-          newRange.surroundContents(parent);
-        }
-      });
+      const button = window.document.querySelector('button');
+
+      button.addEventListener(
+        'mousedown',
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const selection = window.getSelection();
+
+          const range = selection.getRangeAt(0);
+          console.log(range.intersectsNode(div.querySelector('p').childNodes[0]));
+        },
+        { capture: true }
+      );
     </script>
   </body>
 </html>

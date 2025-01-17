@@ -17,7 +17,6 @@ class DocView extends BlockView {
   }
 
   public override shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean {
-    // DocView always should the handle any events.
     return true;
   }
 
