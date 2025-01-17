@@ -9,6 +9,7 @@ abstract class ContentView {
   protected handler: EventHandler = EventHandler.create(this);
   protected parent: ContentView | null = null;
   protected node: MarkdownNode;
+
   private _dom: HTMLElement;
 
   protected static nodeRelationMap = new Map<typeof MarkdownNode, typeof ContentView>();
@@ -25,8 +26,8 @@ abstract class ContentView {
   }
 
   public set dom(dom: HTMLElement) {
-    if (this.dom) {
-      this.handler.unlistenForViewDOM(this.dom);
+    if (this._dom) {
+      this.handler.unlistenForViewDOM(this._dom);
     }
 
     this._dom = dom;

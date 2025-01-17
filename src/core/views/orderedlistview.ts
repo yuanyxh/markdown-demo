@@ -1,10 +1,12 @@
 import type { OrderedList } from 'commonmark-java-js';
 
+import type ListItemView from './listitemview';
+
 import BlockView from './abstracts/blockview';
 
 class OrderedListView extends BlockView {
   public length: number = 0;
-  public children: BlockView[] = [];
+  public children: ListItemView[] = [];
   public node: OrderedList;
 
   public constructor(node: OrderedList) {
@@ -21,7 +23,7 @@ class OrderedListView extends BlockView {
     );
   }
 
-  protected override createElement(node: OrderedList): HTMLElement {
+  protected override createElement(node: OrderedList): HTMLOListElement {
     const ol = window.document.createElement('ol');
 
     const startNumber = node.getMarkerStartNumber();

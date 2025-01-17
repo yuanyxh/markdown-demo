@@ -17,7 +17,7 @@ class DocView extends BlockView {
     this.sync(node);
   }
 
-  protected override createElement(node: Document): HTMLElement {
+  protected override createElement(node: Document): HTMLDivElement {
     const dom = window.document.createElement('div');
 
     dom.classList.add('editor');

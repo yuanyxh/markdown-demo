@@ -19,7 +19,7 @@ class LinkView extends InlineView {
     return node.type === this.node.type && node.getDestination() === this.node.getDestination();
   }
 
-  protected override createElement(node: Link): HTMLElement {
+  protected override createElement(node: Link): HTMLAnchorElement {
     const a = window.document.createElement('a');
     a.href = node.getDestination();
 

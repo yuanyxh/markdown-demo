@@ -19,7 +19,11 @@ class HardLineBreakView extends InlineView {
     return node.type === this.node.type;
   }
 
-  protected override createElement(): HTMLElement {
+  public override isOpend(): boolean {
+    return false;
+  }
+
+  protected override createElement(): HTMLBRElement {
     return window.document.createElement('br');
   }
 

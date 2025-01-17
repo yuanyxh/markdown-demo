@@ -14,10 +14,10 @@ class ListItemView extends BlockView {
   }
 
   public override eq(node: ListItem): boolean {
-    return node.type === this.node.type;
+    return node.type === this.node.type && node.getMarkerIndent() === this.node.getMarkerIndent();
   }
 
-  protected override createElement(): HTMLElement {
+  protected override createElement(): HTMLLIElement {
     return window.document.createElement('li');
   }
 

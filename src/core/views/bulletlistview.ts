@@ -1,10 +1,12 @@
 import type { BulletList } from 'commonmark-java-js';
 
+import type ListItemView from './listitemview';
+
 import BlockView from './abstracts/blockview';
 
 class BulletListView extends BlockView {
   public length: number = 0;
-  public children: BlockView[] = [];
+  public children: ListItemView[] = [];
   public node: BulletList;
 
   public constructor(node: BulletList) {
@@ -21,7 +23,7 @@ class BulletListView extends BlockView {
     );
   }
 
-  protected override createElement(): HTMLElement {
+  protected override createElement(): HTMLUListElement {
     return window.document.createElement('ul');
   }
 

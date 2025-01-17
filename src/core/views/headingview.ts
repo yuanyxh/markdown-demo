@@ -1,4 +1,4 @@
-import type { Heading, MarkdownNode } from 'commonmark-java-js';
+import type { Heading } from 'commonmark-java-js';
 
 import type InlineView from './abstracts/inlineview';
 
@@ -16,7 +16,7 @@ class HeadingView extends BlockView {
   }
 
   public override eq(node: Heading): boolean {
-    return node.getLevel() === this.node.getLevel();
+    return node.type === this.node.type && node.getLevel() === this.node.getLevel();
   }
 
   protected createElement(node: Heading): HTMLElement {

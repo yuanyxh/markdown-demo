@@ -27,7 +27,7 @@ class TextView extends InlineView {
     }
   }
 
-  protected override createElement(): HTMLElement {
+  protected override createElement(): HTMLSpanElement {
     return window.document.createElement('span');
   }
 

@@ -7,19 +7,8 @@ import InlineView from './abstracts/inlineview';
 class SoftLineBreakView extends InlineView {
   public length: number = 0;
   public children: ContentView[] = [];
-  public node: SoftLineBreak;
 
-  public constructor(node: SoftLineBreak) {
-    super(node);
-
-    this.node = node;
-  }
-
-  public override eq(node: SoftLineBreak): boolean {
-    return node.type === this.node.type;
-  }
-
-  protected override createElement(): HTMLElement {
+  protected override createElement(): HTMLBRElement {
     return window.document.createElement('br');
   }
 

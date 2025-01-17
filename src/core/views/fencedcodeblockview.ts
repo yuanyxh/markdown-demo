@@ -32,7 +32,11 @@ class FencedCodeBlockView extends BlockView {
     }
   }
 
-  protected override createElement(): HTMLElement {
+  public override isOpend(): boolean {
+    return false;
+  }
+
+  protected override createElement(): HTMLPreElement {
     const block = window.document.createElement('pre');
     const code = window.document.createElement('code');
 

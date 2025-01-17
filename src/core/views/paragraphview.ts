@@ -8,7 +8,7 @@ class ParagraphView extends BlockView {
   public length: number = 0;
   public children: InlineView[] = [];
 
-  protected override createElement(): HTMLElement {
+  protected override createElement(): HTMLParagraphElement {
     return window.document.createElement('p');
   }
 

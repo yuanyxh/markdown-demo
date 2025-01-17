@@ -51,7 +51,7 @@ class ImageView extends InlineView {
     return false;
   }
 
-  protected override createElement(node: Image): HTMLElement {
+  protected override createElement(node: Image): HTMLImageElement {
     const image = window.document.createElement('img');
     image.src = node.getDestination();
 
@@ -61,6 +61,7 @@ class ImageView extends InlineView {
 
     const altTextVisitor = new AltTextVisitor();
     node.accept(altTextVisitor);
+
     if (altTextVisitor.getAltText()) {
       image.alt = altTextVisitor.getAltText();
     }

@@ -7,19 +7,8 @@ import BlockView from './abstracts/blockview';
 class ThematicBreakView extends BlockView {
   public length: number = 0;
   public children: ContentView[] = [];
-  public node: ThematicBreak;
 
-  public constructor(node: ThematicBreak) {
-    super(node);
-
-    this.node = node;
-  }
-
-  public override eq(node: ThematicBreak): boolean {
-    return node.type === this.node.type && node.getLiteral() === this.node.getLiteral();
-  }
-
-  protected override createElement(): HTMLElement {
+  protected override createElement(): HTMLHRElement {
     return window.document.createElement('hr');
   }
 

@@ -9,7 +9,7 @@ class CodeView extends InlineView {
   public children: ContentView[] = [];
 
   public override eq(node: Code): boolean {
-    return node.type === this.node?.type && node.getLiteral() === this.dom.textContent;
+    return node.type === this.node.type && node.getLiteral() === this.dom.textContent;
   }
 
   public override setNode(node: Code): void {
@@ -18,6 +18,10 @@ class CodeView extends InlineView {
     if (node.getLiteral() !== this.dom.textContent) {
       this.dom.textContent = node.getLiteral();
     }
+  }
+
+  public override isOpend(): boolean {
+    return false;
   }
 
   protected override createElement(): HTMLElement {

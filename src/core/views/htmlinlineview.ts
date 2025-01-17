@@ -19,6 +19,10 @@ class HtmlInlineView extends InlineView {
     return node.type === this.node.type && node.getLiteral() === this.dom.innerHTML;
   }
 
+  public override isOpend(): boolean {
+    return false;
+  }
+
   protected override createElement(node: HtmlInline): HTMLElement {
     const wrapper = window.document.createElement('span');
 

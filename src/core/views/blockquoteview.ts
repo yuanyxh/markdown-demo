@@ -13,7 +13,7 @@ class BlockQuoteView extends BlockView {
     this.node = node;
   }
 
-  protected override createElement(): HTMLElement {
+  protected override createElement(): HTMLQuoteElement {
     const blockquote = window.document.createElement('blockquote');
 
     return blockquote;

@@ -19,7 +19,11 @@ class HtmlBlockView extends BlockView {
     return node.type === this.node.type && node.getLiteral() === this.dom.innerHTML;
   }
 
-  protected override createElement(node: HtmlBlock): HTMLElement {
+  public override isOpend(): boolean {
+    return false;
+  }
+
+  protected override createElement(node: HtmlBlock): HTMLDivElement {
     const wrapper = window.document.createElement('div');
 
     wrapper.innerHTML = node.getLiteral();
