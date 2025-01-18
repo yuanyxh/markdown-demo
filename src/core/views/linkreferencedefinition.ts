@@ -21,7 +21,7 @@ class LinkReferenceDefinitionView extends InlineView {
   protected override createElement(node: LinkReferenceDefinition): HTMLParagraphElement {
     const wrapper = window.document.createElement('p');
 
-    wrapper.innerHTML = `<span>[</span><span>${node.getLabel()}</span><span>]:</span> <span>${node.getDestination()}</span>&nbsp;<span>"</span><span>${node.getTitle()}</span><span>"</span>`;
+    wrapper.textContent = 'link referencedefinition: ' + node.getDestination();
 
     return wrapper;
   }

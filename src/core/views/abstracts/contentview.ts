@@ -1,13 +1,10 @@
 import type { MarkdownNode } from 'commonmark-java-js';
 
-import EventHandler from '@/views/event/eventhandler';
-
 abstract class ContentView {
   public abstract children: ContentView[];
 
   protected parent: ContentView | null = null;
   protected node: MarkdownNode;
-  protected handler: EventHandler = EventHandler.create(this);
 
   private _dom: HTMLElement;
 
@@ -17,8 +14,6 @@ abstract class ContentView {
     this.node = node;
     this._dom = this.createElement(node);
     (this._dom as any).$view = this;
-
-    this.handler.listenForViewDOM(this._dom);
   }
 
   public get dom(): HTMLElement {
@@ -27,13 +22,11 @@ abstract class ContentView {
 
   public set dom(dom: HTMLElement) {
     if (this._dom) {
-      this.handler.unlistenForViewDOM(this._dom);
       delete (this._dom as any).$view;
     }
 
     this._dom = dom;
     (this._dom as any).$view = this;
-    this.handler.listenForViewDOM(dom);
   }
 
   public eq(node: MarkdownNode): boolean {
@@ -165,6 +158,7 @@ abstract class ContentView {
   public destroy(): void {
     if (this.dom.isConnected) {
       this.dom.remove();
+      this.node.unlink();
     }
 
     for (let i = 0; i < this.children.length; i++) {
@@ -172,11 +166,7 @@ abstract class ContentView {
     }
 
     this.parent = null;
-    this.node.unlink();
-    this.handler.unlistenForViewDOM(this.dom);
   }
-
-  public abstract shouldHandleEvent(e: CustomEvent<ViewEventDetails>): boolean;
 
   protected abstract createElement(node: MarkdownNode): HTMLElement;
 
