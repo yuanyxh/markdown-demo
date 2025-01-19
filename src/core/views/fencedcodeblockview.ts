@@ -3,20 +3,15 @@ import type { FencedCodeBlock } from 'commonmark-java-js';
 import type ContentView from './abstracts/contentview';
 
 import BlockView from './abstracts/blockview';
-import CodeBlockHandler from '@/events/codeblockeventhandler';
 
 class FencedCodeBlockView extends BlockView {
   public children: ContentView[] = [];
   public node: FencedCodeBlock;
 
-  private handler: CodeBlockHandler = CodeBlockHandler.create(this);
-
   public constructor(node: FencedCodeBlock) {
     super(node);
 
     this.node = node;
-
-    this.handler.listenForCodeBlockViewDOM(this.dom);
   }
 
   public override eq(node: FencedCodeBlock): boolean {
@@ -42,8 +37,6 @@ class FencedCodeBlockView extends BlockView {
 
   public override destroy(): void {
     super.destroy();
-
-    this.handler.listenForCodeBlockViewDOM(this.dom);
   }
 
   protected override createElement(node: FencedCodeBlock): HTMLPreElement {

@@ -13,7 +13,7 @@ abstract class ContentView {
   public constructor(node: MarkdownNode) {
     this.node = node;
     this._dom = this.createElement(node);
-    (this._dom as any).$view = this;
+    this._dom.$view = this;
   }
 
   public get dom(): HTMLElement {
@@ -22,11 +22,11 @@ abstract class ContentView {
 
   public set dom(dom: HTMLElement) {
     if (this._dom) {
-      delete (this._dom as any).$view;
+      delete this._dom.$view;
     }
 
     this._dom = dom;
-    (this._dom as any).$view = this;
+    this._dom.$view = this;
   }
 
   public eq(node: MarkdownNode): boolean {
@@ -171,7 +171,7 @@ abstract class ContentView {
   protected abstract createElement(node: MarkdownNode): HTMLElement;
 
   public static get(node: Node): ContentView | null {
-    return (node && (node as any).$view) || null;
+    return node.$view || null;
   }
 
   public static craete(node: MarkdownNode): ContentView {

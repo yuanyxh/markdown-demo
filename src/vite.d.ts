@@ -59,3 +59,7 @@ declare interface HTMLElementEventMap {
   modify: CustomEvent<ViewEventDetails>;
   viewselectionchange: CustomEvent<ViewEventDetails>;
 }
+
+declare interface Node {
+  $view: ContentView;
+}
