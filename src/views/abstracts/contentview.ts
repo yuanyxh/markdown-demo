@@ -1,17 +1,19 @@
 import type { Node as MarkdownNode } from 'commonmark-java-js';
+import type EditorContext from '../../EditorContext';
 
 abstract class ContentView {
   abstract children: ContentView[];
 
   protected parent: ContentView | null = null;
   protected node: MarkdownNode;
+  protected context: EditorContext;
 
   private _dom: HTMLElement;
 
-  protected static nodeRelationMap = new Map<typeof MarkdownNode, typeof ContentView>();
-
-  constructor(node: MarkdownNode) {
+  constructor(node: MarkdownNode, context: EditorContext) {
     this.node = node;
+    this.context = context;
+
     this._dom = this.createElement(node);
     this._dom.$view = this;
   }
@@ -130,7 +132,7 @@ abstract class ContentView {
         continue;
       }
 
-      view = ContentView.createViewByNodeType(newChild);
+      view = this.context?.createViewByNodeType(newChild);
 
       if (view) {
         this.children[i + 1]
@@ -176,24 +178,10 @@ abstract class ContentView {
     return node.$view || null;
   }
 
-  static craete(node: MarkdownNode): ContentView {
+  static craete(node: MarkdownNode, context: EditorContext): ContentView {
     throw Error(
       'This static method cannot be called directly. It must be overridden by a subclass.'
     );
-  }
-
-  static setNodeRelationMap(nodeRelationMap: Map<typeof MarkdownNode, typeof ContentView>): void {
-    this.nodeRelationMap = nodeRelationMap;
-  }
-
-  private static createViewByNodeType(node: MarkdownNode): ContentView | null {
-    const Constructor = this.nodeRelationMap.get(Object.getPrototypeOf(node).constructor);
-
-    if (Constructor) {
-      return Constructor.craete(node);
-    }
-
-    return null;
   }
 }
 

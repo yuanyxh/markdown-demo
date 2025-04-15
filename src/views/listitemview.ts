@@ -1,13 +1,13 @@
 import type { ListItem } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import BlockView from './abstracts/blockview';
 
 class ListItemView extends BlockView {
   children: BlockView[] = [];
   node: ListItem;
 
-  constructor(node: ListItem) {
-    super(node);
+  constructor(node: ListItem, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -20,8 +20,8 @@ class ListItemView extends BlockView {
     return window.document.createElement('li');
   }
 
-  static override craete(node: ListItem): ListItemView {
-    return new this(node);
+  static override craete(node: ListItem, context: EditorContext): ListItemView {
+    return new this(node, context);
   }
 }
 

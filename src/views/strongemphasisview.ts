@@ -1,5 +1,5 @@
 import type { StrongEmphasis } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import InlineView from './abstracts/inlineview';
@@ -8,8 +8,8 @@ class StrongEmphasisView extends InlineView {
   children: ContentView[] = [];
   node: StrongEmphasis;
 
-  constructor(node: StrongEmphasis) {
-    super(node);
+  constructor(node: StrongEmphasis, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -26,8 +26,8 @@ class StrongEmphasisView extends InlineView {
     return window.document.createElement('strong');
   }
 
-  static override craete(node: StrongEmphasis): StrongEmphasisView {
-    return new this(node);
+  static override craete(node: StrongEmphasis, context: EditorContext): StrongEmphasisView {
+    return new this(node, context);
   }
 }
 

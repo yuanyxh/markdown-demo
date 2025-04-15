@@ -1,5 +1,5 @@
 import type { IndentedCodeBlock } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import BlockView from './abstracts/blockview';
@@ -8,8 +8,8 @@ class IndentedCodeBlockView extends BlockView {
   children: ContentView[] = [];
   node: IndentedCodeBlock;
 
-  constructor(node: IndentedCodeBlock) {
-    super(node);
+  constructor(node: IndentedCodeBlock, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -47,8 +47,8 @@ class IndentedCodeBlockView extends BlockView {
     return block;
   }
 
-  static override craete(node: IndentedCodeBlock): IndentedCodeBlockView {
-    return new this(node);
+  static override craete(node: IndentedCodeBlock, context: EditorContext): IndentedCodeBlockView {
+    return new this(node, context);
   }
 }
 

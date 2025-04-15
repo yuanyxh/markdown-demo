@@ -1,18 +1,18 @@
 import type { Document } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import BlockView from './abstracts/blockview';
 
 class DocView extends BlockView {
   children: BlockView[] = [];
 
-  constructor(node: Document) {
-    super(node);
+  constructor(node: Document, context: EditorContext) {
+    super(node, context);
 
     this.applyNode(node);
   }
 
-  override destroy(): void {
-    super.destroy();
+  attachTo(element: HTMLElement): void {
+    element.appendChild(this.dom);
   }
 
   protected override createElement(): HTMLDivElement {
@@ -30,8 +30,8 @@ class DocView extends BlockView {
     return dom;
   }
 
-  static override craete(node: Document): DocView {
-    return new this(node);
+  static override craete(node: Document, context: EditorContext): DocView {
+    return new this(node, context);
   }
 }
 

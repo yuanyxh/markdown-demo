@@ -1,5 +1,5 @@
 import type { LinkReferenceDefinition } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import InlineView from './abstracts/inlineview';
@@ -8,8 +8,8 @@ class LinkReferenceDefinitionView extends InlineView {
   children: ContentView[] = [];
   node: LinkReferenceDefinition;
 
-  constructor(node: LinkReferenceDefinition) {
-    super(node);
+  constructor(node: LinkReferenceDefinition, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -26,8 +26,11 @@ class LinkReferenceDefinitionView extends InlineView {
     return wrapper;
   }
 
-  static override craete(node: LinkReferenceDefinition): LinkReferenceDefinitionView {
-    return new this(node);
+  static override craete(
+    node: LinkReferenceDefinition,
+    context: EditorContext
+  ): LinkReferenceDefinitionView {
+    return new this(node, context);
   }
 }
 

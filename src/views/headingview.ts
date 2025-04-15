@@ -1,5 +1,5 @@
 import type { Heading } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type InlineView from './abstracts/inlineview';
 
 import BlockView from './abstracts/blockview';
@@ -8,8 +8,8 @@ class HeadingView extends BlockView {
   children: InlineView[] = [];
   node: Heading;
 
-  constructor(node: Heading) {
-    super(node);
+  constructor(node: Heading, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -22,8 +22,8 @@ class HeadingView extends BlockView {
     return window.document.createElement('h' + node.getLevel());
   }
 
-  static craete(node: Heading): HeadingView {
-    return new this(node);
+  static craete(node: Heading, context: EditorContext): HeadingView {
+    return new this(node, context);
   }
 }
 

@@ -1,5 +1,5 @@
 import type { BulletList } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ListItemView from './listitemview';
 
 import BlockView from './abstracts/blockview';
@@ -8,8 +8,8 @@ class BulletListView extends BlockView {
   children: ListItemView[] = [];
   node: BulletList;
 
-  constructor(node: BulletList) {
-    super(node);
+  constructor(node: BulletList, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -26,8 +26,8 @@ class BulletListView extends BlockView {
     return window.document.createElement('ul');
   }
 
-  static override craete(node: BulletList): BulletListView {
-    return new this(node);
+  static override craete(node: BulletList, context: EditorContext): BulletListView {
+    return new this(node, context);
   }
 }
 

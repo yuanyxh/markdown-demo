@@ -1,5 +1,5 @@
 import type { HtmlInline } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import InlineView from './abstracts/inlineview';
@@ -8,8 +8,8 @@ class HtmlInlineView extends InlineView {
   children: ContentView[] = [];
   node: HtmlInline;
 
-  constructor(node: HtmlInline) {
-    super(node);
+  constructor(node: HtmlInline, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -30,8 +30,8 @@ class HtmlInlineView extends InlineView {
     return wrapper;
   }
 
-  static override craete(node: HtmlInline): HtmlInlineView {
-    return new this(node);
+  static override craete(node: HtmlInline, context: EditorContext): HtmlInlineView {
+    return new this(node, context);
   }
 }
 

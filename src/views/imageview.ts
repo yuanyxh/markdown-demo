@@ -1,5 +1,5 @@
 import type ContentView from './abstracts/contentview';
-
+import type EditorContext from '../EditorContext';
 import { AbstractVisitor, Image, HardLineBreak, SoftLineBreak, Text } from 'commonmark-java-js';
 
 import InlineView from './abstracts/inlineview';
@@ -36,8 +36,8 @@ class ImageView extends InlineView {
   children: ContentView[] = [];
   node: Image;
 
-  constructor(node: Image) {
-    super(node);
+  constructor(node: Image, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -68,8 +68,8 @@ class ImageView extends InlineView {
     return image;
   }
 
-  static override craete(node: Image): ImageView {
-    return new this(node);
+  static override craete(node: Image, context: EditorContext): ImageView {
+    return new this(node, context);
   }
 }
 

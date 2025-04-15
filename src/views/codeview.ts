@@ -1,5 +1,5 @@
 import type { Code } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import InlineView from './abstracts/inlineview';
@@ -32,8 +32,8 @@ class CodeView extends InlineView {
     return code;
   }
 
-  static override craete(node: Code): CodeView {
-    return new this(node);
+  static override craete(node: Code, context: EditorContext): CodeView {
+    return new this(node, context);
   }
 }
 

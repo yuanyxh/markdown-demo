@@ -1,5 +1,5 @@
 import type { ThematicBreak } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import BlockView from './abstracts/blockview';
@@ -21,8 +21,8 @@ class ThematicBreakView extends BlockView {
     return wrapper;
   }
 
-  static override craete(node: ThematicBreak): ThematicBreakView {
-    return new this(node);
+  static override craete(node: ThematicBreak, context: EditorContext): ThematicBreakView {
+    return new this(node, context);
   }
 }
 

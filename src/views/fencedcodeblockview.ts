@@ -1,5 +1,5 @@
 import type { FencedCodeBlock } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import BlockView from './abstracts/blockview';
@@ -8,8 +8,8 @@ class FencedCodeBlockView extends BlockView {
   children: ContentView[] = [];
   node: FencedCodeBlock;
 
-  constructor(node: FencedCodeBlock) {
-    super(node);
+  constructor(node: FencedCodeBlock, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -52,8 +52,8 @@ class FencedCodeBlockView extends BlockView {
     return block;
   }
 
-  static override craete(node: FencedCodeBlock): FencedCodeBlockView {
-    return new this(node);
+  static override craete(node: FencedCodeBlock, context: EditorContext): FencedCodeBlockView {
+    return new this(node, context);
   }
 }
 

@@ -1,5 +1,5 @@
 import type { OrderedList } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ListItemView from './listitemview';
 
 import BlockView from './abstracts/blockview';
@@ -8,8 +8,8 @@ class OrderedListView extends BlockView {
   children: ListItemView[] = [];
   node: OrderedList;
 
-  constructor(node: OrderedList) {
-    super(node);
+  constructor(node: OrderedList, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -34,8 +34,8 @@ class OrderedListView extends BlockView {
     return ol;
   }
 
-  static override craete(node: OrderedList): OrderedListView {
-    return new this(node);
+  static override craete(node: OrderedList, context: EditorContext): OrderedListView {
+    return new this(node, context);
   }
 }
 

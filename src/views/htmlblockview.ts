@@ -1,5 +1,5 @@
 import type { HtmlBlock } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import BlockView from './abstracts/blockview';
@@ -8,8 +8,8 @@ class HtmlBlockView extends BlockView {
   children: ContentView[] = [];
   node: HtmlBlock;
 
-  constructor(node: HtmlBlock) {
-    super(node);
+  constructor(node: HtmlBlock, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -30,8 +30,8 @@ class HtmlBlockView extends BlockView {
     return wrapper;
   }
 
-  static override craete(node: HtmlBlock): HtmlBlockView {
-    return new this(node);
+  static override craete(node: HtmlBlock, context: EditorContext): HtmlBlockView {
+    return new this(node, context);
   }
 }
 

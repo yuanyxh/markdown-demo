@@ -1,5 +1,5 @@
 import type { Text } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import InlineView from './abstracts/inlineview';
@@ -8,8 +8,8 @@ class TextView extends InlineView {
   children: ContentView[] = [];
   node: Text;
 
-  constructor(node: Text) {
-    super(node);
+  constructor(node: Text, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -37,8 +37,8 @@ class TextView extends InlineView {
     return span;
   }
 
-  static override craete(node: Text): TextView {
-    return new this(node);
+  static override craete(node: Text, context: EditorContext): TextView {
+    return new this(node, context);
   }
 }
 

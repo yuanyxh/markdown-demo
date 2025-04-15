@@ -1,5 +1,5 @@
 import type { Link } from 'commonmark-java-js';
-
+import type EditorContext from '../EditorContext';
 import type ContentView from './abstracts/contentview';
 
 import InlineView from './abstracts/inlineview';
@@ -8,8 +8,8 @@ class LinkView extends InlineView {
   children: ContentView[] = [];
   node: Link;
 
-  constructor(node: Link) {
-    super(node);
+  constructor(node: Link, context: EditorContext) {
+    super(node, context);
 
     this.node = node;
   }
@@ -29,8 +29,8 @@ class LinkView extends InlineView {
     return a;
   }
 
-  static override craete(node: Link): LinkView {
-    return new this(node);
+  static override craete(node: Link, context: EditorContext): LinkView {
+    return new this(node, context);
   }
 }
 
