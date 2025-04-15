@@ -1,4 +1,4 @@
-import type { Block, Document } from "@/node";
+import type { Block, Document } from '@/node';
 import type {
   BlockParser,
   BlockParserFactory,
@@ -7,10 +7,10 @@ import type {
   InlineParserFactory,
   LinkProcessor,
   MatchedBlockParser,
-  ParserState,
-} from "@/parser";
+  ParserState
+} from '@/parser';
 
-import { Appendable } from "@helpers/index";
+import { Appendable } from '@helpers/index';
 import {
   BlockQuote,
   FencedCodeBlock,
@@ -20,25 +20,25 @@ import {
   ListBlock,
   Paragraph,
   SourceSpan,
-  ThematicBreak,
-} from "@/node";
-import { IncludeSourceSpans, SourceLine, SourceLines } from "@/parser";
-import { Characters } from "@/text";
+  ThematicBreak
+} from '@/node';
+import { IncludeSourceSpans, SourceLine, SourceLines } from '@/parser';
+import { Characters } from '@/text';
 
-import BlockContinueImpl from "../BlockContinueImpl";
-import BlockQuoteParser from "./BlockQuoteParser";
-import BlockStartImpl from "../BlockStartImpl";
-import Definitions from "../Definitions";
-import DocumentBlockParser from "./DocumentBlockParser";
-import FencedCodeBlockParser from "./FencedCodeBlockParser";
-import HeadingParser from "./HeadingParser";
-import HtmlBlockParser from "./HtmlBlockParser";
-import IndentedCodeBlockParser from "./IndentedCodeBlockParser";
-import InlineParserContextImpl from "./InlineParserContextImpl";
-import ListBlockParser from "./ListBlockParser";
-import ParagraphParser from "./ParagraphParser";
-import ThematicBreakParser from "./ThematicBreakParser";
-import Parsing from "../internal_util/Parsing";
+import BlockContinueImpl from '../BlockContinueImpl';
+import BlockQuoteParser from './BlockQuoteParser';
+import BlockStartImpl from '../BlockStartImpl';
+import Definitions from '../Definitions';
+import DocumentBlockParser from './DocumentBlockParser';
+import FencedCodeBlockParser from './FencedCodeBlockParser';
+import HeadingParser from './HeadingParser';
+import HtmlBlockParser from './HtmlBlockParser';
+import IndentedCodeBlockParser from './IndentedCodeBlockParser';
+import InlineParserContextImpl from './InlineParserContextImpl';
+import ListBlockParser from './ListBlockParser';
+import ParagraphParser from './ParagraphParser';
+import ThematicBreakParser from './ThematicBreakParser';
+import Parsing from '../internal_util/Parsing';
 
 class MatchedBlockParserImpl implements MatchedBlockParser {
   private readonly matchedBlockParser: BlockParser;
@@ -78,20 +78,17 @@ class DocumentParser implements ParserState {
     HtmlBlock,
     ThematicBreak,
     ListBlock,
-    IndentedCodeBlock,
-  ] as unknown as (typeof Block)[]);
+    IndentedCodeBlock
+  ]);
 
-  private static readonly NODES_TO_CORE_FACTORIES = new Map<
-    typeof Block,
-    BlockParserFactory
-  >([
+  private static readonly NODES_TO_CORE_FACTORIES = new Map<typeof Block, BlockParserFactory>([
     [BlockQuote, new BlockQuoteParser.Factory()],
     [Heading, new HeadingParser.Factory()],
     [FencedCodeBlock, new FencedCodeBlockParser.Factory()],
     [HtmlBlock, new HtmlBlockParser.Factory()],
     [ThematicBreak, new ThematicBreakParser.Factory()],
     [ListBlock, new ListBlockParser.Factory()],
-    [IndentedCodeBlock, new IndentedCodeBlockParser.Factory()],
+    [IndentedCodeBlock, new IndentedCodeBlockParser.Factory()]
   ]);
 
   private line!: SourceLine;
@@ -181,7 +178,7 @@ class DocumentParser implements ParserState {
         throw new Error(
           "Can't enable block type " +
             enabledBlockType +
-            ", possible options are: " +
+            ', possible options are: ' +
             DocumentParser.NODES_TO_CORE_FACTORIES.keys()
         );
       }
@@ -201,8 +198,8 @@ class DocumentParser implements ParserState {
 
       if (
         lineBreak + 1 < input.length &&
-        input.charAt(lineBreak) === "\r" &&
-        input.charAt(lineBreak + 1) === "\n"
+        input.charAt(lineBreak) === '\r' &&
+        input.charAt(lineBreak + 1) === '\n'
       ) {
         lineStart = lineBreak + 2;
       } else {
@@ -210,7 +207,7 @@ class DocumentParser implements ParserState {
       }
     }
 
-    if (input !== "" && (lineStart === 0 || lineStart < input.length)) {
+    if (input !== '' && (lineStart === 0 || lineStart < input.length)) {
       let line: string = input.substring(lineStart);
       this.parseLine(line, lineStart);
     }
@@ -288,8 +285,7 @@ class DocumentParser implements ParserState {
     }
 
     let unmatchedBlocks = this.openBlockParsers.length - matches;
-    let blockParser: BlockParser =
-      this.openBlockParsers[matches - 1].blockParser;
+    let blockParser: BlockParser = this.openBlockParsers[matches - 1].blockParser;
     let startedNewBlock: boolean = false;
 
     let lastIndex = this.index;
@@ -345,9 +341,7 @@ class DocumentParser implements ParserState {
       }
 
       for (let newBlockParser of blockStart.getBlockParsers()) {
-        this.addChild(
-          new DocumentParser.OpenBlockParser(newBlockParser, sourceIndex)
-        );
+        this.addChild(new DocumentParser.OpenBlockParser(newBlockParser, sourceIndex));
 
         if (replacedSourceSpans !== null) {
           newBlockParser.getBlock().setSourceSpans(replacedSourceSpans);
@@ -367,8 +361,7 @@ class DocumentParser implements ParserState {
       !this.isBlank() &&
       this.getActiveBlockParser().canHaveLazyContinuationLines()
     ) {
-      this.openBlockParsers[this.openBlockParsers.length - 1].sourceIndex =
-        lastIndex;
+      this.openBlockParsers[this.openBlockParsers.length - 1].sourceIndex = lastIndex;
       // lazy paragraph continuation
       this.addLine();
     } else {
@@ -382,9 +375,7 @@ class DocumentParser implements ParserState {
       } else if (!this.isBlank()) {
         // create paragraph container for line
         let paragraphParser: ParagraphParser = new ParagraphParser();
-        this.addChild(
-          new DocumentParser.OpenBlockParser(paragraphParser, lastIndex)
-        );
+        this.addChild(new DocumentParser.OpenBlockParser(paragraphParser, lastIndex));
         this.addLine();
       } else {
         // This can happen for a list item like this:
@@ -409,12 +400,7 @@ class DocumentParser implements ParserState {
     let sourceSpan: SourceSpan | null = null;
 
     if (this.includeSourceSpans !== IncludeSourceSpans.NONE) {
-      sourceSpan = SourceSpan.of(
-        this.lineIndex,
-        0,
-        inputIndex,
-        lineContent.length
-      );
+      sourceSpan = SourceSpan.of(this.lineIndex, 0, inputIndex, lineContent.length);
     }
 
     this.line = SourceLine.of(lineContent, sourceSpan);
@@ -431,13 +417,13 @@ class DocumentParser implements ParserState {
       const c = this.line.getContent().charAt(i);
 
       switch (c) {
-        case " ":
+        case ' ':
           i++;
           cols++;
 
           continue;
 
-        case "\t":
+        case '\t':
           i++;
           cols += 4 - (cols % 4);
 
@@ -500,7 +486,7 @@ class DocumentParser implements ParserState {
     const c = this.line.getContent().charAt(this.index);
     this.index++;
 
-    if (c === "\t") {
+    if (c === '\t') {
       this.column += Parsing.columnsToNextTabStop(this.column);
     } else {
       this.column++;
@@ -517,15 +503,13 @@ class DocumentParser implements ParserState {
     if (this.columnIsInTab) {
       // Our column is in a partially consumed tab. Expand the remaining columns (to the next tab stop) to spaces.
       const afterTab = this.index + 1;
-      const rest = this.line
-        .getContent()
-        .substring(afterTab, this.line.getContent().length);
+      const rest = this.line.getContent().substring(afterTab, this.line.getContent().length);
 
       const spaces = Parsing.columnsToNextTabStop(this.column);
       const sb = new Appendable();
 
       for (let i = 0; i < spaces; i++) {
-        sb.append(" ");
+        sb.append(' ');
       }
 
       sb.append(rest);
@@ -533,9 +517,7 @@ class DocumentParser implements ParserState {
     } else if (this.index === 0) {
       content = this.line.getContent();
     } else {
-      content = this.line
-        .getContent()
-        .substring(this.index, this.line.getContent().length);
+      content = this.line.getContent().substring(this.index, this.line.getContent().length);
     }
 
     let sourceSpan: SourceSpan | null = null;
@@ -563,17 +545,16 @@ class DocumentParser implements ParserState {
         const length = this.line.getContent().length - blockIndex;
 
         if (length !== 0) {
-          openBlockParser.blockParser.addSourceSpan(
-            this.line.getSourceSpan()!.subSpan(blockIndex)
-          );
+          openBlockParser.blockParser.addSourceSpan(this.line.getSourceSpan()!.subSpan(blockIndex));
         }
       }
     }
   }
 
   private findBlockStart(blockParser: BlockParser): BlockStartImpl | null {
-    const matchedBlockParser: MatchedBlockParser =
-      new DocumentParser.MatchedBlockParserImpl(blockParser);
+    const matchedBlockParser: MatchedBlockParser = new DocumentParser.MatchedBlockParserImpl(
+      blockParser
+    );
 
     for (const blockParserFactory of this.blockParserFactories) {
       const result = blockParserFactory.tryStart(this, matchedBlockParser);
@@ -609,17 +590,11 @@ class DocumentParser implements ParserState {
    * its parent, and so on until we find a block that can accept children.
    */
   private addChild(openBlockParser: OpenBlockParser) {
-    while (
-      !this.getActiveBlockParser().canContain(
-        openBlockParser.blockParser.getBlock()
-      )
-    ) {
+    while (!this.getActiveBlockParser().canContain(openBlockParser.blockParser.getBlock())) {
       this.closeBlockParsers(1);
     }
 
-    this.getActiveBlockParser()
-      .getBlock()
-      .appendChild(openBlockParser.blockParser.getBlock());
+    this.getActiveBlockParser().getBlock().appendChild(openBlockParser.blockParser.getBlock());
     this.activateBlockParser(openBlockParser);
   }
 
@@ -692,10 +667,10 @@ class DocumentParser implements ParserState {
    * Prepares the input line replacing {@code \0}
    */
   private static prepareLine(line: string): string {
-    if (line.indexOf("\0") === -1) {
+    if (line.indexOf('\0') === -1) {
       return line;
     } else {
-      return line.replace(/\0/g, "\uFFFD");
+      return line.replace(/\0/g, '\uFFFD');
     }
   }
 

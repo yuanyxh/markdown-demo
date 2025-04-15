@@ -49,7 +49,7 @@ class Link extends Node {
     return this.title;
   }
 
-  public setTitle(title: string | undefined) {
+  public setTitle(title?: string) {
     this.title = title;
   }
 

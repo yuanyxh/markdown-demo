@@ -75,7 +75,7 @@ class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRendere
       HtmlInline,
       SoftLineBreak,
       HardLineBreak
-    ] as unknown as (typeof Node)[]);
+    ]);
   }
 
   public render(node: Node) {

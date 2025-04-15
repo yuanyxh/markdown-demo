@@ -17,7 +17,7 @@ class NodeRendererMap {
   }
 
   public render(node: Node) {
-    const nodeRenderer = this.renderers.get(node.constructor as unknown as typeof Node);
+    const nodeRenderer = this.renderers.get(node.constructor as typeof Node);
 
     if (nodeRenderer) {
       nodeRenderer.render(node);

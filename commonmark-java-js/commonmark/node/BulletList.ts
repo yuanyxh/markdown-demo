@@ -1,12 +1,12 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import ListBlock from "./ListBlock";
+import ListBlock from './ListBlock';
 
 class BulletList extends ListBlock {
   private marker: string | undefined;
 
   public constructor() {
-    super("bullet-list");
+    super('bullet-list');
   }
 
   public override accept(visitor: Visitor) {
@@ -23,7 +23,7 @@ class BulletList extends ListBlock {
   /**
    * @param marker
    */
-  public setMarker(marker: string | undefined) {
+  public setMarker(marker?: string) {
     this.marker = marker;
   }
 }

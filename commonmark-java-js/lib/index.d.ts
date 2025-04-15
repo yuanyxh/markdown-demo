@@ -167,7 +167,7 @@ export declare class BulletList extends ListBlock {
   /**
    * @param marker
    */
-  setMarker(marker: string | undefined): void;
+  setMarker(marker?: string): void;
 }
 
 export declare class Character {
@@ -720,12 +720,12 @@ declare class HtmlWriter {
 declare class Image_2 extends Node_2 {
   private destination;
   private title;
-  constructor(destination: string | undefined, title: string | undefined);
+  constructor(destination?: string, title?: string);
   accept(visitor: Visitor): void;
   getDestination(): string;
   setDestination(destination: string): void;
   getTitle(): string | undefined;
-  setTitle(title: string): void;
+  setTitle(title?: string): void;
   protected toStringAttributes(): string;
 }
 export { Image_2 as Image };
@@ -915,7 +915,7 @@ export declare class Link extends Node_2 {
   getDestination(): string;
   setDestination(destination: string): void;
   getTitle(): string | undefined;
-  setTitle(title: string | undefined): void;
+  setTitle(title?: string): void;
   protected toStringAttributes(): string;
 }
 

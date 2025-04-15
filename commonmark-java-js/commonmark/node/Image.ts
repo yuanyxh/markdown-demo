@@ -6,7 +6,7 @@ class Image extends Node {
   private destination = '';
   private title: string | undefined;
 
-  public constructor(destination = '', title: string | undefined) {
+  public constructor(destination = '', title?: string) {
     super('image');
 
     this.destination = destination;
@@ -29,7 +29,7 @@ class Image extends Node {
     return this.title;
   }
 
-  public setTitle(title: string) {
+  public setTitle(title?: string) {
     this.title = title;
   }
 

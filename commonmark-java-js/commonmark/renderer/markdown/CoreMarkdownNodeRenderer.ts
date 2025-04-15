@@ -177,7 +177,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       StrongEmphasis,
       Text,
       ThematicBreak
-    ] as unknown as (typeof Node)[]);
+    ]);
   }
 
   public render(node: Node) {
