@@ -1,5 +1,5 @@
 import type { ListHolder } from '@/internal';
-import type { MarkdownNode } from '@/node';
+import type { Node } from '@/node';
 
 import type TextContentWriter from './TextContentWriter';
 import type { TextContentNodeRendererContext } from './interfaces/TextContentNodeRendererContext';
@@ -50,10 +50,10 @@ class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRendere
     this.textContent = context.getWriter();
   }
 
-  public beforeRoot(rootNode: MarkdownNode): void {}
-  public afterRoot(rootNode: MarkdownNode): void {}
+  public beforeRoot(rootNode: Node): void {}
+  public afterRoot(rootNode: Node): void {}
 
-  public getNodeTypes(): Set<typeof MarkdownNode> {
+  public getNodeTypes(): Set<typeof Node> {
     return new Set([
       Document,
       Heading,
@@ -75,14 +75,14 @@ class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRendere
       HtmlInline,
       SoftLineBreak,
       HardLineBreak
-    ] as unknown as (typeof MarkdownNode)[]);
+    ] as unknown as (typeof Node)[]);
   }
 
-  public render(node: MarkdownNode) {
+  public render(node: Node) {
     node.accept(this);
   }
 
-  public override visit(node: MarkdownNode) {
+  public override visit(node: Node) {
     switch (true) {
       case node instanceof Document:
         this.visitChildren(node);
@@ -254,7 +254,7 @@ class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRendere
     }
   }
 
-  protected override visitChildren(parent: MarkdownNode) {
+  protected override visitChildren(parent: Node) {
     let node = parent.getFirstChild();
 
     while (node !== null) {
@@ -272,7 +272,7 @@ class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRendere
     }
   }
 
-  private writeLink(node: MarkdownNode, title: string, destination: string): void {
+  private writeLink(node: Node, title: string, destination: string): void {
     const hasChild = node.getFirstChild() !== null;
     const hasTitle = title !== destination;
     const hasDestination = destination !== '';

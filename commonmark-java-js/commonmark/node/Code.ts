@@ -1,12 +1,12 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import MarkdownNode from "./abstracts/MarkdownNode";
+import Node from './abstracts/Node';
 
-class Code extends MarkdownNode {
+class Code extends Node {
   private literal: string;
 
-  public constructor(literal = "") {
-    super("code");
+  public constructor(literal = '') {
+    super('code');
 
     this.literal = literal;
   }

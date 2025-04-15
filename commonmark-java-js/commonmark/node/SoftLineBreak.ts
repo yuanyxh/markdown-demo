@@ -1,10 +1,10 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import MarkdownNode from "./abstracts/MarkdownNode";
+import Node from './abstracts/Node';
 
-class SoftLineBreak extends MarkdownNode {
+class SoftLineBreak extends Node {
   public constructor() {
-    super("softline-break");
+    super('softline-break');
   }
 
   public override accept(visitor: Visitor) {

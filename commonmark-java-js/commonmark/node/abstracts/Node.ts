@@ -6,18 +6,18 @@ import type { Visitor } from '../interfaces/Visitor';
  * <p>
  * A node can have multiple children, and a parent (except for the root node).
  */
-abstract class MarkdownNode {
+abstract class Node {
   private innerType: string;
   private innerMeta: Record<string, any> = {};
-  private innerChildren: MarkdownNode[] = [];
+  private innerChildren: Node[] = [];
   private innerInputIndex: number = -1;
   private innerInputEndInput: number = -1;
 
-  private parent: MarkdownNode | null = null;
-  private firstChild: MarkdownNode | null = null;
-  private lastChild: MarkdownNode | null = null;
-  private prev: MarkdownNode | null = null;
-  private next: MarkdownNode | null = null;
+  private parent: Node | null = null;
+  private firstChild: Node | null = null;
+  private lastChild: Node | null = null;
+  private prev: Node | null = null;
+  private next: Node | null = null;
   private sourceSpans: SourceSpan[] | null = null;
 
   public constructor(type: string) {
@@ -72,16 +72,16 @@ abstract class MarkdownNode {
   }
 
   /**
-   * @returns {MarkdownNode[]} This property returns the list of child nodes to which the node belongs.
+   * @returns {Node[]} This property returns the list of child nodes to which the node belongs.
    */
-  public get children(): MarkdownNode[] {
+  public get children(): Node[] {
     if (this.innerChildren.length) {
       return this.innerChildren;
     }
 
     let curr = this.getFirstChild();
 
-    const children: MarkdownNode[] = [];
+    const children: Node[] = [];
 
     if (!curr) {
       return children;
@@ -108,48 +108,48 @@ abstract class MarkdownNode {
 
   /**
    *
-   * @returns {MarkdownNode | null} Return the next node.
+   * @returns {Node | null} Return the next node.
    */
-  public getNext(): MarkdownNode | null {
+  public getNext(): Node | null {
     return this.next;
   }
 
   /**
    *
-   * @returns {MarkdownNode | null} Return the prev node.
+   * @returns {Node | null} Return the prev node.
    */
-  public getPrevious(): MarkdownNode | null {
+  public getPrevious(): Node | null {
     return this.prev;
   }
 
   /**
    *
-   * @returns {MarkdownNode | null} Return the first child.
+   * @returns {Node | null} Return the first child.
    */
-  public getFirstChild(): MarkdownNode | null {
+  public getFirstChild(): Node | null {
     return this.firstChild;
   }
 
   /**
    *
-   * @returns {MarkdownNode | null} Return the last child.
+   * @returns {Node | null} Return the last child.
    */
-  public getLastChild(): MarkdownNode | null {
+  public getLastChild(): Node | null {
     return this.lastChild;
   }
 
   /**
    *
-   * @returns {MarkdownNode | null} Return the parent node.
+   * @returns {Node | null} Return the parent node.
    */
-  public getParent(): MarkdownNode | null {
+  public getParent(): Node | null {
     return this.parent;
   }
 
   /**
    * Set the parent node.
    */
-  public setParent(parent: MarkdownNode): void {
+  public setParent(parent: Node): void {
     this.parent = parent;
   }
 
@@ -158,7 +158,7 @@ abstract class MarkdownNode {
    *
    * @param child
    */
-  public appendChild(child: MarkdownNode): void {
+  public appendChild(child: Node): void {
     child.unlink();
     child.setParent(this);
 
@@ -177,7 +177,7 @@ abstract class MarkdownNode {
    *
    * @param child
    */
-  public prependChild(child: MarkdownNode): void {
+  public prependChild(child: Node): void {
     child.unlink();
     child.setParent(this);
 
@@ -217,7 +217,7 @@ abstract class MarkdownNode {
   /**
    * Inserts the {@code sibling} node after {@code this} node.
    */
-  public insertAfter(sibling: MarkdownNode): void {
+  public insertAfter(sibling: Node): void {
     sibling.unlink();
 
     sibling.next = this.next;
@@ -237,7 +237,7 @@ abstract class MarkdownNode {
   /**
    * Inserts the {@code sibling} node before {@code this} node.
    */
-  public insertBefore(sibling: MarkdownNode): void {
+  public insertBefore(sibling: Node): void {
     sibling.unlink();
 
     sibling.prev = this.prev;
@@ -291,4 +291,4 @@ abstract class MarkdownNode {
   }
 }
 
-export default MarkdownNode;
+export default Node;

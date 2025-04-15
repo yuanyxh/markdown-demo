@@ -1,5 +1,5 @@
-import type { Appendable } from "@helpers/index";
-import type { MarkdownNode } from "@/node";
+import type { Appendable } from '@helpers/index';
+import type { Node } from '@/node';
 
 export interface Renderer {
   /**
@@ -8,5 +8,5 @@ export interface Renderer {
    * @param node the root node
    * @param output output for rendering
    */
-  render(node: MarkdownNode, output: Appendable): void;
+  render(node: Node, output: Appendable): void;
 }

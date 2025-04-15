@@ -1,5 +1,5 @@
-import type MarkdownNode from "./MarkdownNode";
-import type { Visitor } from "../interfaces/Visitor";
+import type Node from './Node';
+import type { Visitor } from '../interfaces/Visitor';
 
 /**
  * Abstract visitor that visits all children by default.
@@ -8,11 +8,11 @@ import type { Visitor } from "../interfaces/Visitor";
  * call {@link #visitChildren}.
  */
 abstract class AbstractVisitor implements Visitor {
-  public visit(node: MarkdownNode) {
+  public visit(node: Node) {
     this.visitChildren(node);
   }
 
-  protected visitChildren(parent: MarkdownNode): void {
+  protected visitChildren(parent: Node): void {
     let node = parent.getFirstChild();
 
     while (node !== null) {

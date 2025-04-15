@@ -1,9 +1,9 @@
-import MarkdownNode from './MarkdownNode';
+import Node from './Node';
 
 /**
  * Block nodes such as paragraphs, list blocks, code blocks etc.
  */
-abstract class Block extends MarkdownNode {
+abstract class Block extends Node {
   public override isBlock(): boolean {
     return true;
   }
@@ -22,7 +22,7 @@ abstract class Block extends MarkdownNode {
     return null;
   }
 
-  public override setParent(parent: MarkdownNode): void {
+  public override setParent(parent: Node): void {
     if (!(parent instanceof Block)) {
       throw Error('Parent of block must also be block (can not be inline)');
     }

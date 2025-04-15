@@ -1,16 +1,16 @@
-import type { Extension } from "@/Extension";
-import type { MarkdownNode } from "@/node";
-import type { Appendable } from "@helpers/index";
+import type { Extension } from '@/Extension';
+import type { Node } from '@/node';
+import type { Appendable } from '@helpers/index';
 
-import type { TextContentNodeRendererFactory } from "./interfaces/TextContentNodeRendererFactory";
-import type { TextContentNodeRendererContext } from "./interfaces/TextContentNodeRendererContext";
-import type { Renderer } from "../interfaces/Renderer";
+import type { TextContentNodeRendererFactory } from './interfaces/TextContentNodeRendererFactory';
+import type { TextContentNodeRendererContext } from './interfaces/TextContentNodeRendererContext';
+import type { Renderer } from '../interfaces/Renderer';
 
-import { NodeRendererMap } from "@/internal";
+import { NodeRendererMap } from '@/internal';
 
-import LineBreakRendering from "./enums/LineBreakRendering";
-import CoreTextContentNodeRenderer from "./CoreTextContentNodeRenderer";
-import TextContentWriter from "./TextContentWriter";
+import LineBreakRendering from './enums/LineBreakRendering';
+import CoreTextContentNodeRenderer from './CoreTextContentNodeRenderer';
+import TextContentWriter from './TextContentWriter';
 
 /**
  * Extension for {@link TextContentRenderer}.
@@ -37,9 +37,7 @@ class TextContentRendererBuilder {
    * @param lineBreakRendering the mode to use
    * @return {@code this}
    */
-  public setLineBreakRendering(
-    lineBreakRendering: LineBreakRendering
-  ): TextContentRendererBuilder {
+  public setLineBreakRendering(lineBreakRendering: LineBreakRendering): TextContentRendererBuilder {
     this.lineBreakRendering = lineBreakRendering;
 
     return this;
@@ -82,10 +80,7 @@ class RendererContext implements TextContentNodeRendererContext {
   private readonly nodeRendererMap = new NodeRendererMap();
   private readonly context: TextContentRenderer;
 
-  public constructor(
-    context: TextContentRenderer,
-    textContentWriter: TextContentWriter
-  ) {
+  public constructor(context: TextContentRenderer, textContentWriter: TextContentWriter) {
     this.textContentWriter = textContentWriter;
     this.context = context;
 
@@ -107,7 +102,7 @@ class RendererContext implements TextContentNodeRendererContext {
     return this.textContentWriter;
   }
 
-  public render(node: MarkdownNode) {
+  public render(node: Node) {
     this.nodeRendererMap.render(node);
   }
 }
@@ -129,7 +124,7 @@ class TextContentRenderer implements Renderer {
     this.nodeRendererFactories.push({
       create(context) {
         return new CoreTextContentNodeRenderer(context);
-      },
+      }
     });
   }
 
@@ -142,7 +137,7 @@ class TextContentRenderer implements Renderer {
     return new TextContentRendererBuilder();
   }
 
-  public render(node: MarkdownNode, output: Appendable) {
+  public render(node: Node, output: Appendable) {
     const context = new RendererContext(
       this,
       new TextContentWriter(output, this.lineBreakRendering)

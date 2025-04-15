@@ -28,7 +28,7 @@ export { Parser, IncludeSourceSpans, Scanner, LinkResult } from '@/parser';
 
 export type { Delimited, Visitor } from '@/node';
 export {
-  MarkdownNode,
+  Node,
   Block,
   CustomNode,
   CustomBlock,

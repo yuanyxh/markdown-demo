@@ -1,17 +1,17 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import MarkdownNode from "./abstracts/MarkdownNode";
+import Node from './abstracts/Node';
 
 /**
  * Inline HTML element.
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#raw-html">CommonMark Spec</a>
  */
-class HtmlInline extends MarkdownNode {
-  private literal = "";
+class HtmlInline extends Node {
+  private literal = '';
 
   public constructor() {
-    super("html-inline");
+    super('html-inline');
   }
 
   public override accept(visitor: Visitor) {

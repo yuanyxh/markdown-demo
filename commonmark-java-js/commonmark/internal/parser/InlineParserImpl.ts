@@ -9,35 +9,29 @@ import type {
   LinkInfo,
   LinkProcessor,
   Position,
-  SourceLines,
-} from "@/parser";
+  SourceLines
+} from '@/parser';
 
-import { Appendable, BitSet } from "@helpers/index";
-import { Scanner } from "@/parser";
-import {
-  HardLineBreak,
-  MarkdownNode,
-  SoftLineBreak,
-  SourceSpans,
-  Text,
-} from "@/node";
-import { Characters } from "@/text";
+import { Appendable, BitSet } from '@helpers/index';
+import { Scanner } from '@/parser';
+import { HardLineBreak, Node, SoftLineBreak, SourceSpans, Text } from '@/node';
+import { Characters } from '@/text';
 
-import AsteriskDelimiterProcessor from "../inline/AsteriskDelimiterProcessor";
-import AutolinkInlineParser from "../inline/AutolinkInlineParser";
-import BackslashInlineParser from "../inline/BackslashInlineParser";
-import BackticksInlineParser from "../inline/BackticksInlineParser";
-import CoreLinkProcessor from "../inline/CoreLinkProcessor";
-import EntityInlineParser from "../inline/EntityInlineParser";
-import HtmlInlineParser from "../inline/HtmlInlineParser";
-import LinkResultImpl from "../inline/LinkResultImpl";
-import ParsedInlineImpl from "../inline/ParsedInlineImpl";
-import UnderscoreDelimiterProcessor from "../inline/UnderscoreDelimiterProcessor";
-import Escaping from "../internal_util/Escaping";
-import LinkScanner from "../internal_util/LinkScanner";
-import Bracket from "../Bracket";
-import Delimiter from "../Delimiter";
-import StaggeredDelimiterProcessor from "../StaggeredDelimiterProcessor";
+import AsteriskDelimiterProcessor from '../inline/AsteriskDelimiterProcessor';
+import AutolinkInlineParser from '../inline/AutolinkInlineParser';
+import BackslashInlineParser from '../inline/BackslashInlineParser';
+import BackticksInlineParser from '../inline/BackticksInlineParser';
+import CoreLinkProcessor from '../inline/CoreLinkProcessor';
+import EntityInlineParser from '../inline/EntityInlineParser';
+import HtmlInlineParser from '../inline/HtmlInlineParser';
+import LinkResultImpl from '../inline/LinkResultImpl';
+import ParsedInlineImpl from '../inline/ParsedInlineImpl';
+import UnderscoreDelimiterProcessor from '../inline/UnderscoreDelimiterProcessor';
+import Escaping from '../internal_util/Escaping';
+import LinkScanner from '../internal_util/LinkScanner';
+import Bracket from '../Bracket';
+import Delimiter from '../Delimiter';
+import StaggeredDelimiterProcessor from '../StaggeredDelimiterProcessor';
 
 class DelimiterData {
   public readonly characters: Text[];
@@ -117,9 +111,7 @@ class LinkInfoImpl implements LinkInfo {
   }
 }
 
-class InlineParserImpl
-  implements InlineParser, InlineParserState, InlineParserFactory
-{
+class InlineParserImpl implements InlineParser, InlineParserState, InlineParserFactory {
   private readonly context: InlineParserContext;
   private readonly inlineContentParserFactories: InlineContentParserFactory[];
   private readonly delimiterProcessors: Map<string, DelimiterProcessor>;
@@ -146,19 +138,14 @@ class InlineParserImpl
   public constructor(context: InlineParserContext) {
     this.context = context;
 
-    this.inlineContentParserFactories =
-      this.calculateInlineContentParserFactories(
-        context.getCustomInlineContentParserFactories()
-      );
+    this.inlineContentParserFactories = this.calculateInlineContentParserFactories(
+      context.getCustomInlineContentParserFactories()
+    );
     this.delimiterProcessors = InlineParserImpl.calculateDelimiterProcessors(
       context.getCustomDelimiterProcessors()
     );
-    this.linkProcessors = this.calculateLinkProcessors(
-      context.getCustomLinkProcessors()
-    );
-    this.linkMarkers = InlineParserImpl.calculateLinkMarkers(
-      context.getCustomLinkMarkers()
-    );
+    this.linkProcessors = this.calculateLinkProcessors(context.getCustomLinkProcessors());
+    this.linkMarkers = InlineParserImpl.calculateLinkMarkers(context.getCustomLinkMarkers());
 
     this.specialCharacters = InlineParserImpl.calculateSpecialCharacters(
       this.linkMarkers,
@@ -182,9 +169,7 @@ class InlineParserImpl
     return list;
   }
 
-  private calculateLinkProcessors(
-    linkProcessors: LinkProcessor[]
-  ): LinkProcessor[] {
+  private calculateLinkProcessors(linkProcessors: LinkProcessor[]): LinkProcessor[] {
     // Custom link processors can override the built-in behavior, so make sure they are tried first
     const list = [...linkProcessors];
     list.push(new CoreLinkProcessor());
@@ -230,24 +215,12 @@ class InlineParserImpl
           s.add(delimiterProcessor);
           map.set(opening, s);
         } else {
-          InlineParserImpl.addDelimiterProcessorForChar(
-            opening,
-            delimiterProcessor,
-            map
-          );
+          InlineParserImpl.addDelimiterProcessorForChar(opening, delimiterProcessor, map);
         }
       } else {
-        InlineParserImpl.addDelimiterProcessorForChar(
-          opening,
-          delimiterProcessor,
-          map
-        );
+        InlineParserImpl.addDelimiterProcessorForChar(opening, delimiterProcessor, map);
 
-        InlineParserImpl.addDelimiterProcessorForChar(
-          closing,
-          delimiterProcessor,
-          map
-        );
+        InlineParserImpl.addDelimiterProcessorForChar(closing, delimiterProcessor, map);
       }
     }
   }
@@ -266,11 +239,7 @@ class InlineParserImpl
     delimiterProcessors.set(delimiterChar, toAdd);
 
     if (existing) {
-      throw new Error(
-        "Delimiter processor conflict with delimiter char '" +
-          delimiterChar +
-          "'"
-      );
+      throw new Error("Delimiter processor conflict with delimiter char '" + delimiterChar + "'");
     }
   }
 
@@ -281,7 +250,7 @@ class InlineParserImpl
       bitSet.set(c.charCodeAt(0));
     }
 
-    bitSet.set("!".charCodeAt(0));
+    bitSet.set('!'.charCodeAt(0));
 
     return bitSet;
   }
@@ -302,10 +271,10 @@ class InlineParserImpl
       }
     }
 
-    bitSet.set("[".charCodeAt(0));
-    bitSet.set("]".charCodeAt(0));
-    bitSet.set("!".charCodeAt(0));
-    bitSet.set("\n".charCodeAt(0));
+    bitSet.set('['.charCodeAt(0));
+    bitSet.set(']'.charCodeAt(0));
+    bitSet.set('!'.charCodeAt(0));
+    bitSet.set('\n'.charCodeAt(0));
 
     return bitSet;
   }
@@ -333,7 +302,7 @@ class InlineParserImpl
   /**
    * Parse content in block into inline children, appending them to the block node.
    */
-  public parse(lines: SourceLines, block: MarkdownNode) {
+  public parse(lines: SourceLines, block: Node) {
     this.reset(lines);
 
     while (true) {
@@ -372,15 +341,15 @@ class InlineParserImpl
    * On success, return the new inline node.
    * On failure, return null.
    */
-  private parseInline(): MarkdownNode[] | null {
+  private parseInline(): Node[] | null {
     const c = this.scanner.peek();
 
     switch (c) {
-      case "[":
+      case '[':
         return [this.parseOpenBracket()];
-      case "]":
+      case ']':
         return [this.parseCloseBracket()];
-      case "\n":
+      case '\n':
         return [this.parseLineBreak()];
       case Scanner.END:
         return null;
@@ -417,9 +386,7 @@ class InlineParserImpl
           this.scanner.setPosition(parsedInline.getPosition());
           if (this.includeSourceSpans && node.getSourceSpans().length === 0) {
             node.setSourceSpans(
-              this.scanner
-                .getSource(position, this.scanner.position())
-                .getSourceSpans()
+              this.scanner.getSource(position, this.scanner.position()).getSourceSpans()
             );
           }
 
@@ -450,7 +417,7 @@ class InlineParserImpl
   private parseDelimiters(
     delimiterProcessor: DelimiterProcessor,
     delimiterChar: string
-  ): MarkdownNode[] | null {
+  ): Node[] | null {
     const res = this.scanDelimiters(delimiterProcessor, delimiterChar);
 
     if (res === null) {
@@ -478,7 +445,7 @@ class InlineParserImpl
   /**
    * Add open bracket to delimiter stack and add a text node to block's children.
    */
-  private parseOpenBracket(): MarkdownNode {
+  private parseOpenBracket(): Node {
     const start: Position = this.scanner.position();
     this.scanner.next();
     const contentPosition: Position = this.scanner.position();
@@ -487,13 +454,7 @@ class InlineParserImpl
 
     // Add entry to stack for this opener
     this.addBracket(
-      Bracket.link(
-        node,
-        start,
-        contentPosition,
-        this.lastBracket!,
-        this.lastDelimiter!
-      )
+      Bracket.link(node, start, contentPosition, this.lastBracket!, this.lastDelimiter!)
     );
 
     return node;
@@ -503,19 +464,15 @@ class InlineParserImpl
    * If next character is {@code [}, add a bracket to the stack.
    * Otherwise, return null.
    */
-  private parseLinkMarker(): MarkdownNode[] | null {
+  private parseLinkMarker(): Node[] | null {
     const markerPosition = this.scanner.position();
     this.scanner.next();
     const bracketPosition = this.scanner.position();
 
-    if (this.scanner.next("[")) {
+    if (this.scanner.next('[')) {
       const contentPosition = this.scanner.position();
-      const bangNode = this.text(
-        this.scanner.getSource(markerPosition, bracketPosition)
-      );
-      const bracketNode = this.text(
-        this.scanner.getSource(bracketPosition, contentPosition)
-      );
+      const bangNode = this.text(this.scanner.getSource(markerPosition, bracketPosition));
+      const bracketNode = this.text(this.scanner.getSource(bracketPosition, contentPosition));
 
       // Add entry to stack for this opener
       this.addBracket(
@@ -539,7 +496,7 @@ class InlineParserImpl
    * Try to match close bracket against an opening in the delimiter stack. Return either a link or image, or a
    * plain [ character. If there is a matching delimiter, remove it from the delimiter stack.
    */
-  private parseCloseBracket(): MarkdownNode {
+  private parseCloseBracket(): Node {
     const beforeClose = this.scanner.position();
     this.scanner.next();
     const afterClose: Position = this.scanner.position();
@@ -568,10 +525,7 @@ class InlineParserImpl
     }
   }
 
-  private parseLinkOrImage(
-    opener: Bracket,
-    beforeClose: Position
-  ): MarkdownNode | null {
+  private parseLinkOrImage(opener: Bracket, beforeClose: Position): Node | null {
     const linkInfo = this.parseLinkInfo(opener, beforeClose);
     if (linkInfo === null) {
       return null;
@@ -579,11 +533,7 @@ class InlineParserImpl
     const processorStartPosition = this.scanner.position();
 
     for (const linkProcessor of this.linkProcessors) {
-      const linkResult = linkProcessor.process(
-        linkInfo,
-        this.scanner,
-        this.context
-      );
+      const linkResult = linkProcessor.process(linkInfo, this.scanner, this.context);
       if (!(linkResult instanceof LinkResultImpl)) {
         // Reset position in case the processor used the scanner, and it didn't work out.
         this.scanner.setPosition(processorStartPosition);
@@ -611,10 +561,7 @@ class InlineParserImpl
     return null;
   }
 
-  private parseLinkInfo(
-    opener: Bracket,
-    beforeClose: Position
-  ): LinkInfo | null {
+  private parseLinkInfo(opener: Bracket, beforeClose: Position): LinkInfo | null {
     // Check to see if we have a link (or image, with a ! in front). The different types:
     // - Inline:       `[foo](/uri)` or with optional title `[foo](/uri "title")`
     // - Reference links
@@ -622,17 +569,13 @@ class InlineParserImpl
     //   - Collapsed: `[foo][]`    (foo is both the text and label)
     //   - Shortcut:  `[foo]`      (foo is both the text and label)
 
-    const text = this.scanner
-      .getSource(opener.contentPosition!, beforeClose)
-      .getContent();
+    const text = this.scanner.getSource(opener.contentPosition!, beforeClose).getContent();
 
     // Starting position is after the closing `]`
     const afterClose = this.scanner.position();
 
     // Maybe an inline link/image
-    const destinationTitle = InlineParserImpl.parseInlineDestinationTitle(
-      this.scanner
-    );
+    const destinationTitle = InlineParserImpl.parseInlineDestinationTitle(this.scanner);
 
     if (destinationTitle !== null) {
       return new LinkInfoImpl(
@@ -659,7 +602,7 @@ class InlineParserImpl
       this.scanner.setPosition(afterClose);
     }
 
-    const textIsReference = label === null || label === "";
+    const textIsReference = label === null || label === '';
     if (opener.bracketAfter && textIsReference && opener.markerNode === null) {
       // In case of shortcut or collapsed links, the text is used as the reference. But the reference is not allowed to
       // contain an unescaped bracket, so if that's the case we don't need to continue. This is an optimization.
@@ -677,11 +620,7 @@ class InlineParserImpl
     );
   }
 
-  private wrapBracket(
-    opener: Bracket,
-    wrapperNode: MarkdownNode,
-    includeMarker: boolean
-  ): MarkdownNode {
+  private wrapBracket(opener: Bracket, wrapperNode: Node, includeMarker: boolean): Node {
     // Add all nodes between the opening bracket and now (closing bracket) as child nodes of the link
     let n = opener.bracketNode?.getNext() || null;
     while (n !== null) {
@@ -697,9 +636,7 @@ class InlineParserImpl
           : opener.bracketPosition;
 
       wrapperNode.setSourceSpans(
-        this.scanner
-          .getSource(startPosition!, this.scanner.position())
-          .getSourceSpans()
+        this.scanner.getSource(startPosition!, this.scanner.position()).getSourceSpans()
       );
     }
 
@@ -732,16 +669,9 @@ class InlineParserImpl
     return wrapperNode;
   }
 
-  private replaceBracket(
-    opener: Bracket,
-    node: MarkdownNode,
-    includeMarker: boolean
-  ): MarkdownNode {
+  private replaceBracket(opener: Bracket, node: Node, includeMarker: boolean): Node {
     // Remove delimiters (but keep text nodes)
-    while (
-      this.lastDelimiter !== null &&
-      this.lastDelimiter !== opener.previousDelimiter
-    ) {
+    while (this.lastDelimiter !== null && this.lastDelimiter !== opener.previousDelimiter) {
       this.removeDelimiterKeepNode(this.lastDelimiter);
     }
 
@@ -751,19 +681,15 @@ class InlineParserImpl
           ? opener.markerPosition
           : opener.bracketPosition;
       node.setSourceSpans(
-        this.scanner
-          .getSource(startPosition!, this.scanner.position())
-          .getSourceSpans()
+        this.scanner.getSource(startPosition!, this.scanner.position()).getSourceSpans()
       );
     }
 
     this.removeLastBracket();
 
     // Remove nodes that we added since the opener, because we're replacing them
-    let n: MarkdownNode | null =
-      includeMarker && opener.markerNode !== null
-        ? opener.markerNode
-        : opener.bracketNode;
+    let n: Node | null =
+      includeMarker && opener.markerNode !== null ? opener.markerNode : opener.bracketNode;
 
     while (n !== null) {
       let next = n.getNext();
@@ -789,10 +715,8 @@ class InlineParserImpl
   /**
    * Try to parse the destination and an optional title for an inline link/image.
    */
-  private static parseInlineDestinationTitle(
-    scanner: Scanner
-  ): DestinationTitle | null {
-    if (!scanner.next("(")) {
+  private static parseInlineDestinationTitle(scanner: Scanner): DestinationTitle | null {
+    if (!scanner.next('(')) {
       return null;
     }
 
@@ -811,13 +735,13 @@ class InlineParserImpl
       scanner.whitespace();
     }
 
-    if (!scanner.next(")")) {
+    if (!scanner.next(')')) {
       // Don't have a closing `)`, so it's not a destination and title.
       // Note that something like `[foo](` could still be valid later, `(` will just be text.
       return null;
     }
 
-    return new DestinationTitle(dest, title || "");
+    return new DestinationTitle(dest, title || '');
   }
 
   /**
@@ -832,11 +756,9 @@ class InlineParserImpl
     }
 
     let dest: string;
-    if (delimiter === "<") {
+    if (delimiter === '<') {
       // chop off surrounding <..>:
-      const rawDestination = scanner
-        .getSource(start, scanner.position())
-        .getContent();
+      const rawDestination = scanner.getSource(start, scanner.position()).getContent();
       dest = rawDestination.substring(1, rawDestination.length - 1);
     } else {
       dest = scanner.getSource(start, scanner.position()).getContent();
@@ -866,7 +788,7 @@ class InlineParserImpl
    * Attempt to parse a link label, returning the label between the brackets or null.
    */
   protected static parseLinkLabel(scanner: Scanner): string | null {
-    if (!scanner.next("[")) {
+    if (!scanner.next('[')) {
       return null;
     }
 
@@ -876,7 +798,7 @@ class InlineParserImpl
     }
     const end: Position = scanner.position();
 
-    if (!scanner.next("]")) {
+    if (!scanner.next(']')) {
       return null;
     }
 
@@ -889,7 +811,7 @@ class InlineParserImpl
     return content;
   }
 
-  private parseLineBreak(): MarkdownNode {
+  private parseLineBreak(): Node {
     this.scanner.next();
 
     if (this.trailingSpaces >= 2) {
@@ -902,7 +824,7 @@ class InlineParserImpl
   /**
    * Parse the next character as plain text, and possibly more if the following characters are non-special.
    */
-  private parseText(): MarkdownNode {
+  private parseText(): Node {
     const start: Position = this.scanner.position();
     this.scanner.next();
 
@@ -921,16 +843,14 @@ class InlineParserImpl
     const source = this.scanner.getSource(start, this.scanner.position());
     let content = source.getContent();
 
-    if (c === "\n") {
+    if (c === '\n') {
       // We parsed until the end of the line. Trim any trailing spaces and remember them (for hard line breaks).
-      const end =
-        Characters.skipBackwards(" ", content, content.length - 1, 0) + 1;
+      const end = Characters.skipBackwards(' ', content, content.length - 1, 0) + 1;
       this.trailingSpaces = content.length - end;
       content = content.substring(0, end);
     } else if (c === Scanner.END) {
       // For the last line, both tabs and spaces are trimmed for some reason (checked with commonmark.js).
-      const end =
-        Characters.skipSpaceTabBackwards(content, content.length - 1, 0) + 1;
+      const end = Characters.skipSpaceTabBackwards(content, content.length - 1, 0) + 1;
       content = content.substring(0, end);
     }
 
@@ -966,11 +886,7 @@ class InlineParserImpl
     let positionBefore = start;
 
     while (this.scanner.next(delimiterChar)) {
-      delimiters.push(
-        this.text(
-          this.scanner.getSource(positionBefore, this.scanner.position())
-        )
-      );
+      delimiters.push(this.text(this.scanner.getSource(positionBefore, this.scanner.position())));
 
       positionBefore = this.scanner.position();
     }
@@ -978,34 +894,24 @@ class InlineParserImpl
     const after = this.scanner.peekCodePoint();
 
     // We could be more lazy here, in most cases we don't need to do every match case.
-    const beforeIsPunctuation =
-      before === 0 || Characters.isPunctuationCodePoint(before);
-    const beforeIsWhitespace: boolean =
-      before === 0 || Characters.isWhitespaceCodePoint(before);
-    const afterIsPunctuation: boolean =
-      after === 0 || Characters.isPunctuationCodePoint(after);
-    const afterIsWhitespace: boolean =
-      after === 0 || Characters.isWhitespaceCodePoint(after);
+    const beforeIsPunctuation = before === 0 || Characters.isPunctuationCodePoint(before);
+    const beforeIsWhitespace: boolean = before === 0 || Characters.isWhitespaceCodePoint(before);
+    const afterIsPunctuation: boolean = after === 0 || Characters.isPunctuationCodePoint(after);
+    const afterIsWhitespace: boolean = after === 0 || Characters.isWhitespaceCodePoint(after);
 
     const leftFlanking: boolean =
-      !afterIsWhitespace &&
-      (!afterIsPunctuation || beforeIsWhitespace || beforeIsPunctuation);
+      !afterIsWhitespace && (!afterIsPunctuation || beforeIsWhitespace || beforeIsPunctuation);
     const rightFlanking: boolean =
-      !beforeIsWhitespace &&
-      (!beforeIsPunctuation || afterIsWhitespace || afterIsPunctuation);
+      !beforeIsWhitespace && (!beforeIsPunctuation || afterIsWhitespace || afterIsPunctuation);
 
     let canOpen: boolean;
     let canClose: boolean;
-    if (delimiterChar === "_") {
+    if (delimiterChar === '_') {
       canOpen = leftFlanking && (!rightFlanking || beforeIsPunctuation);
       canClose = rightFlanking && (!leftFlanking || afterIsPunctuation);
     } else {
-      canOpen =
-        leftFlanking &&
-        delimiterChar === delimiterProcessor.getOpeningCharacter();
-      canClose =
-        rightFlanking &&
-        delimiterChar === delimiterProcessor.getClosingCharacter();
+      canOpen = leftFlanking && delimiterChar === delimiterProcessor.getOpeningCharacter();
+      canClose = rightFlanking && delimiterChar === delimiterProcessor.getClosingCharacter();
     }
 
     return new DelimiterData(delimiters, canOpen, canClose);
@@ -1024,8 +930,7 @@ class InlineParserImpl
     while (closer !== null) {
       const delimiterChar = closer.delimiterChar;
 
-      const delimiterProcessor =
-        this.delimiterProcessors.get(delimiterChar) || null;
+      const delimiterProcessor = this.delimiterProcessors.get(delimiterChar) || null;
       if (!closer.getCanClose() || delimiterProcessor === null) {
         closer = closer.next;
         continue;
@@ -1043,10 +948,7 @@ class InlineParserImpl
         opener !== stackBottom &&
         opener !== openersBottom.get(delimiterChar)
       ) {
-        if (
-          opener.getCanOpen() &&
-          opener.delimiterChar === openingDelimiterChar
-        ) {
+        if (opener.getCanOpen() && opener.delimiterChar === openingDelimiterChar) {
           potentialOpenerFound = true;
           usedDelims = delimiterProcessor.process(opener, closer);
 
@@ -1083,10 +985,7 @@ class InlineParserImpl
 
       // Remove number of used delimiters nodes.
       for (let i = 0; i < usedDelims; i++) {
-        const delimiter = opener?.characters.splice(
-          opener!.characters.length - 1,
-          1
-        );
+        const delimiter = opener?.characters.splice(opener!.characters.length - 1, 1);
 
         delimiter?.forEach((d) => d.unlink());
       }
@@ -1152,7 +1051,7 @@ class InlineParserImpl
     }
   }
 
-  private mergeChildTextNodes(node: MarkdownNode) {
+  private mergeChildTextNodes(node: Node) {
     // No children, no need for merging
     if (node.getFirstChild() === null) {
       return;
@@ -1161,15 +1060,12 @@ class InlineParserImpl
     this.mergeTextNodesInclusive(node.getFirstChild(), node.getLastChild());
   }
 
-  private mergeTextNodesInclusive(
-    fromNode: MarkdownNode | null,
-    toNode: MarkdownNode | null
-  ): void {
+  private mergeTextNodesInclusive(fromNode: Node | null, toNode: Node | null): void {
     let first: Text | null = null;
     let last: Text | null = null;
     let length = 0;
 
-    let node: MarkdownNode | null = fromNode;
+    let node: Node | null = fromNode;
     while (node !== null) {
       if (node instanceof Text) {
         let text = node;
@@ -1199,11 +1095,7 @@ class InlineParserImpl
     this.mergeIfNeeded(first, last, length);
   }
 
-  private mergeIfNeeded(
-    first: Text | null,
-    last: Text | null,
-    textLength: number
-  ): void {
+  private mergeIfNeeded(first: Text | null, last: Text | null, textLength: number): void {
     if (first !== null && last !== null && first !== last) {
       const sb = new Appendable();
       sb.append(first.getLiteral());

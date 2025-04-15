@@ -1,7 +1,7 @@
-import type { MarkdownNode } from "@/node";
+import type { Node } from '@/node';
 
-import type LineBreakRendering from "../enums/LineBreakRendering";
-import type TextContentWriter from "../TextContentWriter";
+import type LineBreakRendering from '../enums/LineBreakRendering';
+import type TextContentWriter from '../TextContentWriter';
 
 export interface TextContentNodeRendererContext {
   /**
@@ -27,5 +27,5 @@ export interface TextContentNodeRendererContext {
    *
    * @param node the node to render
    */
-  render(node: MarkdownNode): void;
+  render(node: Node): void;
 }

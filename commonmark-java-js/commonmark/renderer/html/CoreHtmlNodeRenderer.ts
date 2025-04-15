@@ -1,4 +1,4 @@
-import type { MarkdownNode } from '@/node';
+import type { Node } from '@/node';
 
 import type { HtmlNodeRendererContext } from './interfaces/HtmlNodeRendererContext';
 import type { NodeRenderer } from '../interfaces/NodeRenderer';
@@ -76,10 +76,10 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.html = context.getWriter();
   }
 
-  public beforeRoot(rootNode: MarkdownNode) {}
-  public afterRoot(rootNode: MarkdownNode) {}
+  public beforeRoot(rootNode: Node) {}
+  public afterRoot(rootNode: Node) {}
 
-  public getNodeTypes(): Set<typeof MarkdownNode> {
+  public getNodeTypes(): Set<typeof Node> {
     return new Set([
       Document,
       Heading,
@@ -101,14 +101,14 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
       HtmlInline,
       SoftLineBreak,
       HardLineBreak
-    ] as unknown as (typeof MarkdownNode)[]);
+    ] as unknown as (typeof Node)[]);
   }
 
-  public render(node: MarkdownNode) {
+  public render(node: Node) {
     node.accept(this);
   }
 
-  public override visit(node: MarkdownNode) {
+  public override visit(node: Node) {
     switch (true) {
       case node instanceof Document: {
         const document = node;
@@ -402,7 +402,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     }
   }
 
-  protected override visitChildren(parent: MarkdownNode) {
+  protected override visitChildren(parent: Node) {
     let node = parent.getFirstChild();
 
     while (node !== null) {
@@ -412,7 +412,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     }
   }
 
-  private renderCodeBlock(literal: string, node: MarkdownNode, attributes: Map<string, string>) {
+  private renderCodeBlock(literal: string, node: Node, attributes: Map<string, string>) {
     this.html.line();
     this.html.tag('pre', this.getAttrs(node, 'pre'));
     this.html.tag('code', this.getAttrs(node, 'code', attributes));
@@ -446,7 +446,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   }
 
   private getAttrs(
-    node: MarkdownNode,
+    node: Node,
     tagName: string,
     defaultAttributes = new Map<string, string>()
   ): Map<string, string> {

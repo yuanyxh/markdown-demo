@@ -1,10 +1,10 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import MarkdownNode from "./abstracts/MarkdownNode";
+import Node from './abstracts/Node';
 
-class HardLineBreak extends MarkdownNode {
+class HardLineBreak extends Node {
   public constructor() {
-    super("hardline-break");
+    super('hardline-break');
   }
 
   public override accept(visitor: Visitor): void {

@@ -1,6 +1,6 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import MarkdownNode from "./abstracts/MarkdownNode";
+import Node from './abstracts/Node';
 
 /**
  * A link with a destination and an optional title; the link text is in child nodes.
@@ -22,12 +22,12 @@ import MarkdownNode from "./abstracts/MarkdownNode";
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#links">CommonMark Spec for links</a>
  */
-class Link extends MarkdownNode {
-  private destination = "";
+class Link extends Node {
+  private destination = '';
   private title: string | undefined;
 
-  public constructor(destination = "", title?: string) {
-    super("link");
+  public constructor(destination = '', title?: string) {
+    super('link');
 
     this.destination = destination;
     this.title = title;
@@ -54,7 +54,7 @@ class Link extends MarkdownNode {
   }
 
   protected toStringAttributes(): string {
-    return "destination=" + this.destination + ", title=" + this.title;
+    return 'destination=' + this.destination + ', title=' + this.title;
   }
 }
 

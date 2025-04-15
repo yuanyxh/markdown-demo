@@ -1,21 +1,21 @@
-import type { Extension } from "@/Extension";
-import type { MarkdownNode } from "@/node";
+import type { Extension } from '@/Extension';
+import type { Node } from '@/node';
 
-import type { HtmlNodeRendererContext } from "./interfaces/HtmlNodeRendererContext";
-import type { AttributeProviderFactory } from "./interfaces/AttributeProviderFactory";
-import type { AttributeProvider } from "./interfaces/AttributeProvider";
-import type { AttributeProviderContext } from "./interfaces/AttributeProviderContext";
-import type { UrlSanitizer } from "./interfaces/UrlSanitizer";
-import type { HtmlNodeRendererFactory } from "./interfaces/HtmlNodeRendererFactory";
-import type { NodeRenderer } from "../interfaces/NodeRenderer";
-import type { Renderer } from "../interfaces/Renderer";
+import type { HtmlNodeRendererContext } from './interfaces/HtmlNodeRendererContext';
+import type { AttributeProviderFactory } from './interfaces/AttributeProviderFactory';
+import type { AttributeProvider } from './interfaces/AttributeProvider';
+import type { AttributeProviderContext } from './interfaces/AttributeProviderContext';
+import type { UrlSanitizer } from './interfaces/UrlSanitizer';
+import type { HtmlNodeRendererFactory } from './interfaces/HtmlNodeRendererFactory';
+import type { NodeRenderer } from '../interfaces/NodeRenderer';
+import type { Renderer } from '../interfaces/Renderer';
 
-import { Appendable } from "@helpers/index";
-import { NodeRendererMap, Escaping } from "@/internal";
+import { Appendable } from '@helpers/index';
+import { NodeRendererMap, Escaping } from '@/internal';
 
-import CoreHtmlNodeRenderer from "./CoreHtmlNodeRenderer";
-import DefaultUrlSanitizer from "./html_utils/DefaultUrlSanitizer";
-import HtmlWriter from "./HtmlWriter";
+import CoreHtmlNodeRenderer from './CoreHtmlNodeRenderer';
+import DefaultUrlSanitizer from './html_utils/DefaultUrlSanitizer';
+import HtmlWriter from './HtmlWriter';
 
 /**
  * Extension for {@link HtmlRenderer}.
@@ -25,7 +25,7 @@ class HtmlRendererExtension implements Extension {
 }
 
 class HtmlRendererBuilder {
-  public softbreak = "\n";
+  public softbreak = '\n';
   public escapeHtml = false;
   public sanitizeUrls = false;
   public urlSanitizer: UrlSanitizer = new DefaultUrlSanitizer();
@@ -120,9 +120,7 @@ class HtmlRendererBuilder {
    *
    * @return {@code this}
    */
-  public setOmitSingleParagraphP(
-    omitSingleParagraphP: boolean
-  ): HtmlRendererBuilder {
+  public setOmitSingleParagraphP(omitSingleParagraphP: boolean): HtmlRendererBuilder {
     this.omitSingleParagraphP = omitSingleParagraphP;
     return this;
   }
@@ -151,9 +149,7 @@ class HtmlRendererBuilder {
    * @param nodeRendererFactory the factory for creating a node renderer
    * @return {@code this}
    */
-  public nodeRendererFactory(
-    nodeRendererFactory: HtmlNodeRendererFactory
-  ): HtmlRendererBuilder {
+  public nodeRendererFactory(nodeRendererFactory: HtmlNodeRendererFactory): HtmlRendererBuilder {
     this.nodeRendererFactories.push(nodeRendererFactory);
 
     return this;
@@ -174,9 +170,7 @@ class HtmlRendererBuilder {
   }
 }
 
-class RendererContext
-  implements HtmlNodeRendererContext, AttributeProviderContext
-{
+class RendererContext implements HtmlNodeRendererContext, AttributeProviderContext {
   private readonly htmlWriter: HtmlWriter;
   private readonly attributeProviders: AttributeProvider[];
   private readonly nodeRendererMap = new NodeRendererMap();
@@ -187,8 +181,7 @@ class RendererContext
     this.htmlWriter = htmlWriter;
 
     this.attributeProviders = [];
-    for (const attributeProviderFactory of this.context
-      .attributeProviderFactories) {
+    for (const attributeProviderFactory of this.context.attributeProviderFactories) {
       this.attributeProviders.push(attributeProviderFactory.create(this));
     }
 
@@ -223,7 +216,7 @@ class RendererContext
   }
 
   public extendAttributes(
-    node: MarkdownNode,
+    node: Node,
     tagName: string,
     attributes: Map<string, string>
   ): Map<string, string> {
@@ -241,23 +234,19 @@ class RendererContext
     return this.context.softbreak;
   }
 
-  public render(node: MarkdownNode) {
+  public render(node: Node) {
     this.nodeRendererMap.render(node);
   }
 
-  public beforeRoot(node: MarkdownNode) {
+  public beforeRoot(node: Node) {
     this.nodeRendererMap.beforeRoot(node);
   }
 
-  public afterRoot(node: MarkdownNode) {
+  public afterRoot(node: Node) {
     this.nodeRendererMap.afterRoot(node);
   }
 
-  private setCustomAttributes(
-    node: MarkdownNode,
-    tagName: string,
-    attrs: Map<string, string>
-  ) {
+  private setCustomAttributes(node: Node, tagName: string, attrs: Map<string, string>) {
     for (const attributeProvider of this.attributeProviders) {
       attributeProvider.setAttributes(node, tagName, attrs);
     }
@@ -299,7 +288,7 @@ class HtmlRenderer implements Renderer {
     this.nodeRendererFactories.push({
       create(context: HtmlNodeRendererContext): NodeRenderer {
         return new CoreHtmlNodeRenderer(context);
-      },
+      }
     });
   }
 
@@ -312,7 +301,7 @@ class HtmlRenderer implements Renderer {
     return new HtmlRendererBuilder();
   }
 
-  public render(node: MarkdownNode, output?: Appendable) {
+  public render(node: Node, output?: Appendable) {
     if (!output) {
       output = new Appendable();
     }

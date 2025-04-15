@@ -1,7 +1,7 @@
-import type { MarkdownNode } from "@/node";
+import type { Node } from '@/node';
 
-import type { UrlSanitizer } from "./UrlSanitizer";
-import type HtmlWriter from "../HtmlWriter";
+import type { UrlSanitizer } from './UrlSanitizer';
+import type HtmlWriter from '../HtmlWriter';
 
 export interface HtmlNodeRendererContext {
   /**
@@ -19,7 +19,7 @@ export interface HtmlNodeRendererContext {
    * @return the extended attributes with added/updated/removed entries
    */
   extendAttributes(
-    node: MarkdownNode,
+    node: Node,
     tagName: string,
     attributes: Map<string, string>
   ): Map<string, string>;
@@ -40,7 +40,7 @@ export interface HtmlNodeRendererContext {
    *
    * @param node the node to render
    */
-  render(node: MarkdownNode): void;
+  render(node: Node): void;
 
   /**
    * @return whether HTML blocks and tags should be escaped or not

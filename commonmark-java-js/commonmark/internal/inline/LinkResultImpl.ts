@@ -1,9 +1,9 @@
-import type { MarkdownNode } from "@/node";
-import type { LinkResult, Position } from "@/parser";
+import type { Node } from '@/node';
+import type { LinkResult, Position } from '@/parser';
 
 enum Type {
-  WRAP = "WRAP",
-  REPLACE = "REPLACE",
+  WRAP = 'WRAP',
+  REPLACE = 'REPLACE'
 }
 
 class LinkResultImpl implements LinkResult {
@@ -16,12 +16,12 @@ class LinkResultImpl implements LinkResult {
   public static Type = Type;
 
   private readonly type: Type;
-  private readonly node: MarkdownNode;
+  private readonly node: Node;
   private readonly position: Position;
 
   private includeMarker: boolean = false;
 
-  public constructor(type: Type, node: MarkdownNode, position: Position) {
+  public constructor(type: Type, node: Node, position: Position) {
     this.type = type;
     this.node = node;
     this.position = position;
@@ -31,7 +31,7 @@ class LinkResultImpl implements LinkResult {
     return this.type;
   }
 
-  public getNode(): MarkdownNode {
+  public getNode(): Node {
     return this.node;
   }
 

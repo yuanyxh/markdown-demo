@@ -1,13 +1,13 @@
-import type { Delimited } from "./interfaces/Delimited";
-import type { Visitor } from "./interfaces/Visitor";
+import type { Delimited } from './interfaces/Delimited';
+import type { Visitor } from './interfaces/Visitor';
 
-import MarkdownNode from "./abstracts/MarkdownNode";
+import Node from './abstracts/Node';
 
-class Emphasis extends MarkdownNode implements Delimited {
+class Emphasis extends Node implements Delimited {
   private delimiter: string | undefined;
 
-  public constructor(delimiter = "") {
-    super("emphasis");
+  public constructor(delimiter = '') {
+    super('emphasis');
 
     this.delimiter = delimiter;
   }

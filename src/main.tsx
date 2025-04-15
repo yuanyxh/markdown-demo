@@ -21,7 +21,7 @@ import {
   Link,
   LinkReferenceDefinition,
   ListItem,
-  MarkdownNode,
+  Node,
   OrderedList,
   Paragraph,
   Parser,
@@ -60,7 +60,7 @@ const parser = Parser.builder()
 const node = parser.parse(source.split(/\r\n|\r|\n/).join('\n'));
 
 ContentView.setNodeRelationMap(
-  new Map<typeof MarkdownNode, typeof ContentView>([
+  new Map<typeof Node, typeof ContentView>([
     [Document, DocView],
     [BlockQuote, BlockQuoteView],
     [BulletList, BulletListView],

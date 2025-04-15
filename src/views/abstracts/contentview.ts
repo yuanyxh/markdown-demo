@@ -1,4 +1,4 @@
-import type { MarkdownNode } from 'commonmark-java-js';
+import type { Node as MarkdownNode } from 'commonmark-java-js';
 
 abstract class ContentView {
   public abstract children: ContentView[];

@@ -1,8 +1,8 @@
-import type { Visitor } from "../interfaces/Visitor";
+import type { Visitor } from '../interfaces/Visitor';
 
-import MarkdownNode from "./MarkdownNode";
+import Node from './Node';
 
-abstract class CustomNode extends MarkdownNode {
+abstract class CustomNode extends Node {
   public override accept(visitor: Visitor) {
     visitor.visit(this);
   }

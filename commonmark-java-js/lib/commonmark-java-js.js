@@ -182,7 +182,7 @@ class ht {
     return xe.checkEnabledBlockTypes(e), this.enabledBlockTypes = e, this;
   }
   /**
-   * Whether to calculate source positions for parsed {@link MarkdownNode Nodes}, see {@link MarkdownNode#getSourceSpans()}.
+   * Whether to calculate source positions for parsed {@link Node Nodes}, see {@link Node#getSourceSpans()}.
    * <p>
    * By default, source spans are disabled.
    *
@@ -341,7 +341,7 @@ class Qe {
    * <pre><code>
    * Parser parser = Parser.builder().build();
    * try (InputStreamReader reader = new InputStreamReader(new FileInputStream("file.md"), StandardCharsets.UTF_8)) {
-   *     MarkdownNode document = parser.parseReader(reader);
+   *     Node document = parser.parseReader(reader);
    *     // ...
    * }
    * </code></pre>
@@ -482,7 +482,7 @@ class U {
     return this.innerInputEndInput;
   }
   /**
-   * @returns {MarkdownNode[]} This property returns the list of child nodes to which the node belongs.
+   * @returns {Node[]} This property returns the list of child nodes to which the node belongs.
    */
   get children() {
     if (this.innerChildren.length)
@@ -504,35 +504,35 @@ class U {
   }
   /**
    *
-   * @returns {MarkdownNode | null} Return the next node.
+   * @returns {Node | null} Return the next node.
    */
   getNext() {
     return this.next;
   }
   /**
    *
-   * @returns {MarkdownNode | null} Return the prev node.
+   * @returns {Node | null} Return the prev node.
    */
   getPrevious() {
     return this.prev;
   }
   /**
    *
-   * @returns {MarkdownNode | null} Return the first child.
+   * @returns {Node | null} Return the first child.
    */
   getFirstChild() {
     return this.firstChild;
   }
   /**
    *
-   * @returns {MarkdownNode | null} Return the last child.
+   * @returns {Node | null} Return the last child.
    */
   getLastChild() {
     return this.lastChild;
   }
   /**
    *
-   * @returns {MarkdownNode | null} Return the parent node.
+   * @returns {Node | null} Return the parent node.
    */
   getParent() {
     return this.parent;
@@ -5883,11 +5883,7 @@ const L = class L {
       e.getCustomInlineContentParserFactories()
     ), this.delimiterProcessors = L.calculateDelimiterProcessors(
       e.getCustomDelimiterProcessors()
-    ), this.linkProcessors = this.calculateLinkProcessors(
-      e.getCustomLinkProcessors()
-    ), this.linkMarkers = L.calculateLinkMarkers(
-      e.getCustomLinkMarkers()
-    ), this.specialCharacters = L.calculateSpecialCharacters(
+    ), this.linkProcessors = this.calculateLinkProcessors(e.getCustomLinkProcessors()), this.linkMarkers = L.calculateLinkMarkers(e.getCustomLinkMarkers()), this.specialCharacters = L.calculateSpecialCharacters(
       this.linkMarkers,
       new Set(this.delimiterProcessors.keys()),
       this.inlineContentParserFactories
@@ -5917,29 +5913,15 @@ const L = class L {
           let l;
           a instanceof ft ? l = a : (l = new ft(s), l.add(a)), l.add(r), t.set(s, l);
         } else
-          L.addDelimiterProcessorForChar(
-            s,
-            r,
-            t
-          );
+          L.addDelimiterProcessorForChar(s, r, t);
       } else
-        L.addDelimiterProcessorForChar(
-          s,
-          r,
-          t
-        ), L.addDelimiterProcessorForChar(
-          n,
-          r,
-          t
-        );
+        L.addDelimiterProcessorForChar(s, r, t), L.addDelimiterProcessorForChar(n, r, t);
     }
   }
   static addDelimiterProcessorForChar(e, t, r) {
     let s = !1;
     if (r.has(e) && (s = !0), r.set(e, t), s)
-      throw new Error(
-        "Delimiter processor conflict with delimiter char '" + e + "'"
-      );
+      throw new Error("Delimiter processor conflict with delimiter char '" + e + "'");
   }
   static calculateLinkMarkers(e) {
     let t = new Ge();
@@ -6063,13 +6045,7 @@ const L = class L {
     this.scanner.next();
     const t = this.scanner.position(), r = this.text(this.scanner.getSource(e, t));
     return this.addBracket(
-      Ee.link(
-        r,
-        e,
-        t,
-        this.lastBracket,
-        this.lastDelimiter
-      )
+      Ee.link(r, e, t, this.lastBracket, this.lastDelimiter)
     ), r;
   }
   /**
@@ -6081,11 +6057,7 @@ const L = class L {
     this.scanner.next();
     const t = this.scanner.position();
     if (this.scanner.next("[")) {
-      const r = this.scanner.position(), s = this.text(
-        this.scanner.getSource(e, t)
-      ), n = this.text(
-        this.scanner.getSource(t, r)
-      );
+      const r = this.scanner.position(), s = this.text(this.scanner.getSource(e, t)), n = this.text(this.scanner.getSource(t, r));
       return this.addBracket(
         Ee.withMarker(
           s,
@@ -6122,11 +6094,7 @@ const L = class L {
       return null;
     const s = this.scanner.position();
     for (const n of this.linkProcessors) {
-      const a = n.process(
-        r,
-        this.scanner,
-        this.context
-      );
+      const a = n.process(r, this.scanner, this.context);
       if (!(a instanceof ie)) {
         this.scanner.setPosition(s);
         continue;
@@ -6142,9 +6110,7 @@ const L = class L {
     return null;
   }
   parseLinkInfo(e, t) {
-    const r = this.scanner.getSource(e.contentPosition, t).getContent(), s = this.scanner.position(), n = L.parseInlineDestinationTitle(
-      this.scanner
-    );
+    const r = this.scanner.getSource(e.contentPosition, t).getContent(), s = this.scanner.position(), n = L.parseInlineDestinationTitle(this.scanner);
     if (n !== null)
       return new $e(
         e.markerNode,
@@ -6305,11 +6271,7 @@ const L = class L {
     this.scanner.setPosition(s);
     let l = s;
     for (; this.scanner.next(t); )
-      a.push(
-        this.text(
-          this.scanner.getSource(l, this.scanner.position())
-        )
-      ), l = this.scanner.position();
+      a.push(this.text(this.scanner.getSource(l, this.scanner.position()))), l = this.scanner.position();
     const c = this.scanner.peekCodePoint(), h = r === 0 || m.isPunctuationCodePoint(r), u = r === 0 || m.isWhitespaceCodePoint(r), p = c === 0 || m.isPunctuationCodePoint(c), f = c === 0 || m.isWhitespaceCodePoint(c), S = !f && (!p || u || h), H = !u && (!h || f || p);
     let B, Ce;
     return t === "_" ? (B = S && (!H || h), Ce = H && (!S || p)) : (B = S && t === e.getOpeningCharacter(), Ce = H && t === e.getClosingCharacter()), new kt(a, B, Ce);
@@ -6338,10 +6300,7 @@ const L = class L {
         continue;
       }
       for (let p = 0; p < l; p++) {
-        const f = u == null ? void 0 : u.characters.splice(
-          u.characters.length - 1,
-          1
-        );
+        const f = u == null ? void 0 : u.characters.splice(u.characters.length - 1, 1);
         f == null || f.forEach((S) => S.unlink());
       }
       for (let p = 0; p < l; p++)
@@ -6429,9 +6388,7 @@ class ot {
       this.renderers.has(t) || this.renderers.set(t, e);
   }
   render(e) {
-    const t = this.renderers.get(
-      e.constructor
-    );
+    const t = this.renderers.get(e.constructor);
     t && t.render(e);
   }
   beforeRoot(e) {
@@ -7895,8 +7852,8 @@ export {
   Ze as LinkResult,
   me as ListBlock,
   _ as ListItem,
-  U as MarkdownNode,
   rt as MarkdownRenderer,
+  U as Node,
   ot as NodeRendererMap,
   Je as Nodes,
   V as OrderedList,

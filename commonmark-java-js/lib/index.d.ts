@@ -5,8 +5,8 @@
  * call {@link #visitChildren}.
  */
 export declare abstract class AbstractVisitor implements Visitor {
-  visit(node: MarkdownNode): void;
-  protected visitChildren(parent: MarkdownNode): void;
+  visit(node: Node_2): void;
+  protected visitChildren(parent: Node_2): void;
 }
 
 export declare class Appendable {
@@ -36,7 +36,7 @@ export declare interface AttributeProvider {
    * @param tagName the HTML tag name that these attributes are for (e.g. {@code h1}, {@code pre}, {@code code}).
    * @param attributes the attributes, with any default attributes already set in the map
    */
-  setAttributes(node: MarkdownNode, tagName: string, attributes: Map<string, string>): void;
+  setAttributes(node: Node_2, tagName: string, attributes: Map<string, string>): void;
 }
 
 /**
@@ -70,10 +70,10 @@ export declare class BitSet {
 /**
  * Block nodes such as paragraphs, list blocks, code blocks etc.
  */
-export declare abstract class Block extends MarkdownNode {
+export declare abstract class Block extends Node_2 {
   isBlock(): boolean;
   getParent(): Block | null;
-  setParent(parent: MarkdownNode): void;
+  setParent(parent: Node_2): void;
 }
 
 /**
@@ -226,7 +226,7 @@ declare interface CharMatcher {
   matches(c: string): boolean;
 }
 
-export declare class Code extends MarkdownNode {
+export declare class Code extends Node_2 {
   private literal;
   constructor(literal?: string);
   accept(visitor: Visitor): void;
@@ -238,7 +238,7 @@ export declare abstract class CustomBlock extends Block {
   accept(visitor: Visitor): void;
 }
 
-export declare abstract class CustomNode extends MarkdownNode {
+export declare abstract class CustomNode extends Node_2 {
   accept(visitor: Visitor): void;
 }
 
@@ -376,7 +376,7 @@ declare class Document_2 extends Block {
 }
 export { Document_2 as Document };
 
-export declare class Emphasis extends MarkdownNode implements Delimited {
+export declare class Emphasis extends Node_2 implements Delimited {
   private delimiter;
   constructor(delimiter?: string);
   accept(visitor: Visitor): void;
@@ -461,7 +461,7 @@ export declare class FencedCodeBlock extends Block {
 
 export declare function fromCodePoint(...codes: number[]): string;
 
-export declare class HardLineBreak extends MarkdownNode {
+export declare class HardLineBreak extends Node_2 {
   constructor();
   accept(visitor: Visitor): void;
 }
@@ -492,7 +492,7 @@ export declare class HtmlBlock extends Block {
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#raw-html">CommonMark Spec</a>
  */
-export declare class HtmlInline extends MarkdownNode {
+export declare class HtmlInline extends Node_2 {
   private literal;
   constructor();
   accept(visitor: Visitor): void;
@@ -515,7 +515,7 @@ declare interface HtmlNodeRendererContext {
    * @return the extended attributes with added/updated/removed entries
    */
   extendAttributes(
-    node: MarkdownNode,
+    node: Node_2,
     tagName: string,
     attributes: Map<string, string>
   ): Map<string, string>;
@@ -533,7 +533,7 @@ declare interface HtmlNodeRendererContext {
    *
    * @param node the node to render
    */
-  render(node: MarkdownNode): void;
+  render(node: Node_2): void;
   /**
    * @return whether HTML blocks and tags should be escaped or not
    */
@@ -592,7 +592,7 @@ export declare class HtmlRenderer implements Renderer {
    * @return a builder
    */
   static builder(): HtmlRendererBuilder;
-  render(node: MarkdownNode, output?: Appendable): string;
+  render(node: Node_2, output?: Appendable): string;
   /**
    * Builder for configuring an {@link HtmlRenderer}. See methods for default configuration.
    */
@@ -717,7 +717,7 @@ declare class HtmlWriter {
   protected append(s: string): void;
 }
 
-declare class Image_2 extends MarkdownNode {
+declare class Image_2 extends Node_2 {
   private destination;
   private title;
   constructor(destination: string | undefined, title: string | undefined);
@@ -799,7 +799,7 @@ declare interface InlineParser extends InlineParserFactory {
    * @param lines the source content to parse as inline
    * @param node the node to append resulting nodes to (as children)
    */
-  parse(lines: SourceLines, node: MarkdownNode): void;
+  parse(lines: SourceLines, node: Node_2): void;
 }
 
 /**
@@ -907,7 +907,7 @@ declare enum LineBreakRendering {
  *
  * @see <a href="http://spec.commonmark.org/0.31.2/#links">CommonMark Spec for links</a>
  */
-export declare class Link extends MarkdownNode {
+export declare class Link extends Node_2 {
   private destination;
   private title;
   constructor(destination?: string, title?: string);
@@ -1058,7 +1058,7 @@ export declare abstract class LinkResult {
    * @param node     the node to which the link text nodes will be added as child nodes
    * @param position the position to continue parsing from
    */
-  static wrapTextIn(node: MarkdownNode, position: Position): LinkResult;
+  static wrapTextIn(node: Node_2, position: Position): LinkResult;
   /**
    * Replace the link with a node. E.g. for this:
    * <pre><code>
@@ -1069,7 +1069,7 @@ export declare abstract class LinkResult {
    * @param node     the node to replace the link with
    * @param position the position to continue parsing from
    */
-  static replaceWith(node: MarkdownNode, position: Position): LinkResult;
+  static replaceWith(node: Node_2, position: Position): LinkResult;
   /**
    * If a {@link LinkInfo#marker()} is present, include it in processing (i.e. treat it the same way as the brackets).
    */
@@ -1124,138 +1124,19 @@ export declare class ListItem extends Block {
   setContentIndent(contentIndent: number): void;
 }
 
-/**
- * The base class of all CommonMark AST nodes ({@link Block} and inlines).
- * <p>
- * A node can have multiple children, and a parent (except for the root node).
- */
-export declare abstract class MarkdownNode {
-  private innerType;
-  private innerMeta;
-  private innerChildren;
-  private innerInputIndex;
-  private innerInputEndInput;
-  private parent;
-  private firstChild;
-  private lastChild;
-  private prev;
-  private next;
-  private sourceSpans;
-  constructor(type: string);
-  /**
-   * @returns {string} This property reflects the type of the node.
-   */
-  get type(): string;
-  /**
-   * @returns {Record<string, any>} This property allows external data to be attached.
-   */
-  get meta(): Record<string, any>;
-  set meta(meta: Record<string, any>);
-  /**
-   * @returns {number} This property returns the position of the start of the node in the source code.
-   */
-  get inputIndex(): number;
-  /**
-   * @returns {number} This property returns the position of the end of the node in the source code.
-   */
-  get inputEndIndex(): number;
-  /**
-   * @returns {MarkdownNode[]} This property returns the list of child nodes to which the node belongs.
-   */
-  get children(): MarkdownNode[];
-  abstract accept(visitor: Visitor): void;
-  /**
-   *
-   * @returns {boolean} Is's a block node.
-   */
-  isBlock(): boolean;
-  /**
-   *
-   * @returns {MarkdownNode | null} Return the next node.
-   */
-  getNext(): MarkdownNode | null;
-  /**
-   *
-   * @returns {MarkdownNode | null} Return the prev node.
-   */
-  getPrevious(): MarkdownNode | null;
-  /**
-   *
-   * @returns {MarkdownNode | null} Return the first child.
-   */
-  getFirstChild(): MarkdownNode | null;
-  /**
-   *
-   * @returns {MarkdownNode | null} Return the last child.
-   */
-  getLastChild(): MarkdownNode | null;
-  /**
-   *
-   * @returns {MarkdownNode | null} Return the parent node.
-   */
-  getParent(): MarkdownNode | null;
-  /**
-   * Set the parent node.
-   */
-  setParent(parent: MarkdownNode): void;
-  /**
-   * Append a child node.
-   *
-   * @param child
-   */
-  appendChild(child: MarkdownNode): void;
-  /**
-   * Prepend a child node.
-   *
-   * @param child
-   */
-  prependChild(child: MarkdownNode): void;
-  /**
-   * Remove all links.
-   */
-  unlink(): void;
-  /**
-   * Inserts the {@code sibling} node after {@code this} node.
-   */
-  insertAfter(sibling: MarkdownNode): void;
-  /**
-   * Inserts the {@code sibling} node before {@code this} node.
-   */
-  insertBefore(sibling: MarkdownNode): void;
-  /**
-   * @return the source spans of this node if included by the parser, an empty list otherwise
-   * @since 0.16.0
-   */
-  getSourceSpans(): SourceSpan[];
-  /**
-   * Replace the current source spans with the provided list.
-   *
-   * @param sourceSpans the new source spans to set
-   * @since 0.16.0
-   */
-  setSourceSpans(sourceSpans: SourceSpan[]): void;
-  /**
-   * Add a source span to the end of the list.
-   *
-   * @param sourceSpan the source span to add
-   * @since 0.16.0
-   */
-  addSourceSpan(sourceSpan: SourceSpan): void;
-}
-
-declare class MarkdownNodeIterable implements Iterable<MarkdownNode> {
+declare class MarkdownNodeIterable implements Iterable<Node_2> {
   private readonly first;
   private readonly end;
-  constructor(first: MarkdownNode, end: MarkdownNode);
-  [Symbol.iterator](): Iterator<MarkdownNode, any, any>;
-  iterator(): Iterator<MarkdownNode>;
+  constructor(first: Node_2, end: Node_2);
+  [Symbol.iterator](): Iterator<Node_2, any, any>;
+  iterator(): Iterator<Node_2>;
 }
 
-declare class MarkdownNodeIterator implements Iterator<MarkdownNode> {
+declare class MarkdownNodeIterator implements Iterator<Node_2> {
   private node;
   private readonly end;
-  constructor(first: MarkdownNode, end: MarkdownNode);
-  next(): IteratorResult<MarkdownNode>;
+  constructor(first: Node_2, end: Node_2);
+  next(): IteratorResult<Node_2>;
 }
 
 declare class MarkdownNodeRendererBuilder {
@@ -1298,7 +1179,7 @@ declare interface MarkdownNodeRendererContext {
    *
    * @param node the node to render
    */
-  render(node: MarkdownNode): void;
+  render(node: Node_2): void;
   /**
    * @return additional special characters that need to be escaped if they occur in normal text; currently only ASCII
    * characters are allowed
@@ -1347,7 +1228,7 @@ export declare class MarkdownRenderer implements Renderer {
    * @return a builder
    */
   static builder(): MarkdownNodeRendererBuilder;
-  render(node: MarkdownNode, output?: Appendable): string;
+  render(node: Node_2, output?: Appendable): string;
   /**
    * Builder for configuring a {@link MarkdownRenderer}. See methods for default configuration.
    */
@@ -1474,44 +1355,164 @@ declare interface MatchedBlockParser {
 }
 
 /**
+ * The base class of all CommonMark AST nodes ({@link Block} and inlines).
+ * <p>
+ * A node can have multiple children, and a parent (except for the root node).
+ */
+declare abstract class Node_2 {
+  private innerType;
+  private innerMeta;
+  private innerChildren;
+  private innerInputIndex;
+  private innerInputEndInput;
+  private parent;
+  private firstChild;
+  private lastChild;
+  private prev;
+  private next;
+  private sourceSpans;
+  constructor(type: string);
+  /**
+   * @returns {string} This property reflects the type of the node.
+   */
+  get type(): string;
+  /**
+   * @returns {Record<string, any>} This property allows external data to be attached.
+   */
+  get meta(): Record<string, any>;
+  set meta(meta: Record<string, any>);
+  /**
+   * @returns {number} This property returns the position of the start of the node in the source code.
+   */
+  get inputIndex(): number;
+  /**
+   * @returns {number} This property returns the position of the end of the node in the source code.
+   */
+  get inputEndIndex(): number;
+  /**
+   * @returns {Node[]} This property returns the list of child nodes to which the node belongs.
+   */
+  get children(): Node_2[];
+  abstract accept(visitor: Visitor): void;
+  /**
+   *
+   * @returns {boolean} Is's a block node.
+   */
+  isBlock(): boolean;
+  /**
+   *
+   * @returns {Node | null} Return the next node.
+   */
+  getNext(): Node_2 | null;
+  /**
+   *
+   * @returns {Node | null} Return the prev node.
+   */
+  getPrevious(): Node_2 | null;
+  /**
+   *
+   * @returns {Node | null} Return the first child.
+   */
+  getFirstChild(): Node_2 | null;
+  /**
+   *
+   * @returns {Node | null} Return the last child.
+   */
+  getLastChild(): Node_2 | null;
+  /**
+   *
+   * @returns {Node | null} Return the parent node.
+   */
+  getParent(): Node_2 | null;
+  /**
+   * Set the parent node.
+   */
+  setParent(parent: Node_2): void;
+  /**
+   * Append a child node.
+   *
+   * @param child
+   */
+  appendChild(child: Node_2): void;
+  /**
+   * Prepend a child node.
+   *
+   * @param child
+   */
+  prependChild(child: Node_2): void;
+  /**
+   * Remove all links.
+   */
+  unlink(): void;
+  /**
+   * Inserts the {@code sibling} node after {@code this} node.
+   */
+  insertAfter(sibling: Node_2): void;
+  /**
+   * Inserts the {@code sibling} node before {@code this} node.
+   */
+  insertBefore(sibling: Node_2): void;
+  /**
+   * @return the source spans of this node if included by the parser, an empty list otherwise
+   * @since 0.16.0
+   */
+  getSourceSpans(): SourceSpan[];
+  /**
+   * Replace the current source spans with the provided list.
+   *
+   * @param sourceSpans the new source spans to set
+   * @since 0.16.0
+   */
+  setSourceSpans(sourceSpans: SourceSpan[]): void;
+  /**
+   * Add a source span to the end of the list.
+   *
+   * @param sourceSpan the source span to add
+   * @since 0.16.0
+   */
+  addSourceSpan(sourceSpan: SourceSpan): void;
+}
+export { Node_2 as Node };
+
+/**
  * A renderer for a set of node types.
  */
 export declare interface NodeRenderer {
   /**
    * @return the types of nodes that this renderer handles
    */
-  getNodeTypes(): Set<typeof MarkdownNode>;
+  getNodeTypes(): Set<typeof Node_2>;
   /**
    * Render the specified node.
    *
    * @param node the node to render, will be an instance of one of {@link #getNodeTypes()}
    */
-  render(node: MarkdownNode): void;
+  render(node: Node_2): void;
   /**
    * Called before the root node is rendered, to do any initial processing at the start.
    *
    * @param rootNode the root (top-level) node
    */
-  beforeRoot(rootNode: MarkdownNode): void;
+  beforeRoot(rootNode: Node_2): void;
   /**
    * Called after the root node is rendered, to do any final processing at the end.
    *
    * @param rootNode the root (top-level) node
    */
-  afterRoot(rootNode: MarkdownNode): void;
+  afterRoot(rootNode: Node_2): void;
 }
 
 export declare class NodeRendererMap {
   private readonly nodeRenderers;
   private readonly renderers;
   add(nodeRenderer: NodeRenderer): void;
-  render(node: MarkdownNode): void;
-  beforeRoot(node: MarkdownNode): void;
-  afterRoot(node: MarkdownNode): void;
+  render(node: Node_2): void;
+  beforeRoot(node: Node_2): void;
+  afterRoot(node: Node_2): void;
 }
 
 /**
- * Utility class for working with multiple {@link MarkdownNode}s.
+ * Utility class for working with multiple {@link Node}s.
  *
  * @since 0.16.0
  */
@@ -1519,7 +1520,7 @@ export declare class Nodes {
   /**
    * The nodes between (not including) start and end.
    */
-  static between(start: MarkdownNode, end: MarkdownNode): MarkdownNodeIterable;
+  static between(start: Node_2, end: Node_2): MarkdownNodeIterable;
   static MarkdownNodeIterable: typeof MarkdownNodeIterable;
   static MarkdownNodeIterator: typeof MarkdownNodeIterator;
 }
@@ -1556,7 +1557,7 @@ export declare class Paragraph extends Block {
  */
 declare abstract class ParsedInline {
   static none(): ParsedInline | null;
-  static of(node: MarkdownNode, position: Position): ParsedInline;
+  static of(node: Node_2, position: Position): ParsedInline;
 }
 
 /**
@@ -1565,7 +1566,7 @@ declare abstract class ParsedInline {
  * Start with the {@link #builder} method, configure the parser and build it. Example:
  * <pre><code>
  * Parser parser = Parser.builder().build();
- * MarkdownNode document = parser.parse("input text");
+ * Node document = parser.parse("input text");
  * </code></pre>
  */
 export declare class Parser {
@@ -1592,13 +1593,13 @@ export declare class Parser {
    * @param input the text to parse - must not be null
    * @return the root node
    */
-  parse(input: string | String): MarkdownNode;
+  parse(input: string | String): Node_2;
   /**
    * Parse the specified reader into a tree of nodes. The caller is responsible for closing the reader.
    * <pre><code>
    * Parser parser = Parser.builder().build();
    * try (InputStreamReader reader = new InputStreamReader(new FileInputStream("file.md"), StandardCharsets.UTF_8)) {
-   *     MarkdownNode document = parser.parseReader(reader);
+   *     Node document = parser.parseReader(reader);
    *     // ...
    * }
    * </code></pre>
@@ -1611,7 +1612,7 @@ export declare class Parser {
    * @return the root node
    * @throws IOException when reading throws an exception
    */
-  parseReader(input: File): Promise<MarkdownNode>;
+  parseReader(input: File): Promise<Node_2>;
   private createDocumentParser;
   private postProcess;
   /**
@@ -1669,7 +1670,7 @@ declare class ParserBuilder {
    */
   setEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>): ParserBuilder;
   /**
-   * Whether to calculate source positions for parsed {@link MarkdownNode Nodes}, see {@link MarkdownNode#getSourceSpans()}.
+   * Whether to calculate source positions for parsed {@link Node Nodes}, see {@link Node#getSourceSpans()}.
    * <p>
    * By default, source spans are disabled.
    *
@@ -1820,7 +1821,7 @@ export declare interface PostProcessor {
    * @param node the node to post-process
    * @return the result of post-processing, may be a modified {@code node} argument
    */
-  process(node: MarkdownNode): MarkdownNode;
+  process(node: Node_2): Node_2;
 }
 
 export declare interface Renderer {
@@ -1830,7 +1831,7 @@ export declare interface Renderer {
    * @param node the root node
    * @param output output for rendering
    */
-  render(node: MarkdownNode, output: Appendable): void;
+  render(node: Node_2, output: Appendable): void;
 }
 
 export declare class Scanner {
@@ -1871,7 +1872,7 @@ export declare class Scanner {
   private checkPosition;
 }
 
-export declare class SoftLineBreak extends MarkdownNode {
+export declare class SoftLineBreak extends Node_2 {
   constructor();
   accept(visitor: Visitor): void;
 }
@@ -1961,7 +1962,7 @@ export declare class SourceSpan {
   static of(line: number, col: number, input: number | undefined, length: number): SourceSpan;
 }
 
-export declare class StrongEmphasis extends MarkdownNode implements Delimited {
+export declare class StrongEmphasis extends Node_2 implements Delimited {
   private delimiter;
   constructor(delimiter: string);
   accept(visitor: Visitor): void;
@@ -1970,7 +1971,7 @@ export declare class StrongEmphasis extends MarkdownNode implements Delimited {
   getClosingDelimiter(): string;
 }
 
-declare class Text_2 extends MarkdownNode {
+declare class Text_2 extends Node_2 {
   private literal;
   constructor(literal: string);
   accept(visitor: Visitor): void;
@@ -2001,7 +2002,7 @@ declare interface TextContentNodeRendererContext {
    *
    * @param node the node to render
    */
-  render(node: MarkdownNode): void;
+  render(node: Node_2): void;
 }
 
 /**
@@ -2030,7 +2031,7 @@ export declare class TextContentRenderer implements Renderer {
    * @return a builder
    */
   static builder(): TextContentRendererBuilder;
-  render(node: MarkdownNode, output: Appendable): void;
+  render(node: Node_2, output: Appendable): void;
   /**
    * Builder for configuring a {@link TextContentRenderer}. See methods for default configuration.
    */
@@ -2154,12 +2155,12 @@ export declare interface UrlSanitizer {
 }
 
 /**
- * MarkdownNode visitor.
+ * Node visitor.
  * <p>
  * Implementations should subclass {@link AbstractVisitor} instead of implementing this directly.
  */
 export declare interface Visitor {
-  visit(node: MarkdownNode): void;
+  visit(node: Node_2): void;
 }
 
 export {};

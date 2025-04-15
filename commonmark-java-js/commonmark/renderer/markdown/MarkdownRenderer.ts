@@ -1,17 +1,17 @@
-import type { Extension } from "@/Extension";
+import type { Extension } from '@/Extension';
 
-import type { MarkdownNode } from "@/node";
+import type { Node } from '@/node';
 
-import type { MarkdownNodeRendererContext } from "./interfaces/MarkdownNodeRendererContext";
-import type { MarkdownNodeRendererFactory } from "./interfaces/MarkdownNodeRendererFactory";
-import type { Renderer } from "../interfaces/Renderer";
-import type { NodeRenderer } from "../interfaces/NodeRenderer";
+import type { MarkdownNodeRendererContext } from './interfaces/MarkdownNodeRendererContext';
+import type { MarkdownNodeRendererFactory } from './interfaces/MarkdownNodeRendererFactory';
+import type { Renderer } from '../interfaces/Renderer';
+import type { NodeRenderer } from '../interfaces/NodeRenderer';
 
-import { Appendable } from "@helpers/index";
-import { NodeRendererMap } from "@/internal";
+import { Appendable } from '@helpers/index';
+import { NodeRendererMap } from '@/internal';
 
-import CoreMarkdownNodeRenderer from "./CoreMarkdownNodeRenderer";
-import MarkdownWriter from "./MarkdownWriter";
+import CoreMarkdownNodeRenderer from './CoreMarkdownNodeRenderer';
+import MarkdownWriter from './MarkdownWriter';
 
 class MarkdownRendererExtension implements Extension {
   /**
@@ -98,7 +98,7 @@ class RendererContext implements MarkdownNodeRendererContext {
     return this.writer;
   }
 
-  public render(node: MarkdownNode) {
+  public render(node: Node) {
     this.nodeRendererMap.render(node);
   }
 
@@ -137,7 +137,7 @@ export class MarkdownRenderer implements Renderer {
 
       getSpecialCharacters() {
         return new Set();
-      },
+      }
     });
   }
 
@@ -150,7 +150,7 @@ export class MarkdownRenderer implements Renderer {
     return new MarkdownNodeRendererBuilder();
   }
 
-  public render(node: MarkdownNode, output?: Appendable) {
+  public render(node: Node, output?: Appendable) {
     output = output ? output : new Appendable();
 
     let context = new RendererContext(this, new MarkdownWriter(output));

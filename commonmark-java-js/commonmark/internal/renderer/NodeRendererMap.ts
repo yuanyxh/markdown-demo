@@ -1,9 +1,9 @@
-import type { MarkdownNode } from "@/node";
-import type { NodeRenderer } from "@/renderer";
+import type { Node } from '@/node';
+import type { NodeRenderer } from '@/renderer';
 
 class NodeRendererMap {
   private readonly nodeRenderers: NodeRenderer[] = [];
-  private readonly renderers = new Map<typeof MarkdownNode, NodeRenderer>();
+  private readonly renderers = new Map<typeof Node, NodeRenderer>();
 
   public add(nodeRenderer: NodeRenderer) {
     this.nodeRenderers.push(nodeRenderer);
@@ -16,21 +16,19 @@ class NodeRendererMap {
     }
   }
 
-  public render(node: MarkdownNode) {
-    const nodeRenderer = this.renderers.get(
-      node.constructor as unknown as typeof MarkdownNode
-    );
+  public render(node: Node) {
+    const nodeRenderer = this.renderers.get(node.constructor as unknown as typeof Node);
 
     if (nodeRenderer) {
       nodeRenderer.render(node);
     }
   }
 
-  public beforeRoot(node: MarkdownNode) {
+  public beforeRoot(node: Node) {
     this.nodeRenderers.forEach((r) => r.beforeRoot(node));
   }
 
-  public afterRoot(node: MarkdownNode) {
+  public afterRoot(node: Node) {
     this.nodeRenderers.forEach((r) => r.afterRoot(node));
   }
 }

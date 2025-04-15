@@ -1,6 +1,6 @@
-import type MarkdownNode from "../abstracts/MarkdownNode";
+import type Node from '../abstracts/Node';
 
-import SourceSpan from "./SourceSpan";
+import SourceSpan from './SourceSpan';
 
 /**
  * A list of source spans that can be added to. Takes care of merging adjacent source spans.
@@ -14,7 +14,7 @@ class SourceSpans {
     return this.sourceSpans ? this.sourceSpans : [];
   }
 
-  public addAllFrom(nodes: MarkdownNode[]): void {
+  public addAllFrom(nodes: Node[]): void {
     for (const node of nodes) {
       this.addAll(node.getSourceSpans());
     }

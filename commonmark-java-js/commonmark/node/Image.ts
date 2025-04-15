@@ -1,13 +1,13 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import MarkdownNode from "./abstracts/MarkdownNode";
+import Node from './abstracts/Node';
 
-class Image extends MarkdownNode {
-  private destination = "";
+class Image extends Node {
+  private destination = '';
   private title: string | undefined;
 
-  public constructor(destination = "", title: string | undefined) {
-    super("image");
+  public constructor(destination = '', title: string | undefined) {
+    super('image');
 
     this.destination = destination;
     this.title = title;
@@ -34,7 +34,7 @@ class Image extends MarkdownNode {
   }
 
   protected toStringAttributes(): string {
-    return "destination=" + this.destination + ", title=" + this.title;
+    return 'destination=' + this.destination + ', title=' + this.title;
   }
 }
 

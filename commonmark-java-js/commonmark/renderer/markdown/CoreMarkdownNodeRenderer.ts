@@ -1,4 +1,4 @@
-import type { MarkdownNode } from '@/node';
+import type { Node } from '@/node';
 
 import type { NodeRenderer } from '../interfaces/NodeRenderer';
 import type { MarkdownNodeRendererContext } from './interfaces/MarkdownNodeRendererContext';
@@ -100,7 +100,7 @@ class LineBreakVisitor extends AbstractVisitor {
  * <p>
  * Note that while sometimes it would be easier to record what kind of syntax was used on parsing (e.g. ATX vs Setext
  * heading), this renderer is intended to also work for documents that were created by directly creating
- * {@link MarkdownNode Nodes} instead. So in order to support that, it sometimes needs to do a bit more work.
+ * {@link Node Nodes} instead. So in order to support that, it sometimes needs to do a bit more work.
  */
 class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
   private readonly textEscape: AsciiMatcher;
@@ -152,10 +152,10 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.textEscapeInHeading = AsciiMatcher.builder(this.textEscape).anyOf('#').build();
   }
 
-  public beforeRoot(rootNode: MarkdownNode) {}
-  public afterRoot(rootNode: MarkdownNode) {}
+  public beforeRoot(rootNode: Node) {}
+  public afterRoot(rootNode: Node) {}
 
-  public getNodeTypes(): Set<typeof MarkdownNode> {
+  public getNodeTypes(): Set<typeof Node> {
     return new Set([
       BlockQuote,
       BulletList,
@@ -177,14 +177,14 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
       StrongEmphasis,
       Text,
       ThematicBreak
-    ] as unknown as (typeof MarkdownNode)[]);
+    ] as unknown as (typeof Node)[]);
   }
 
-  public render(node: MarkdownNode) {
+  public render(node: Node) {
     node.accept(this);
   }
 
-  public override visit(node: MarkdownNode) {
+  public override visit(node: Node) {
     switch (true) {
       case node instanceof Document: {
         const document = node;
@@ -559,10 +559,10 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
         const text = node;
 
         // Text is tricky. In Markdown special characters (`-`, `#` etc.) can be escaped (`\-`, `\#` etc.) so that
-        // they're parsed as plain text. Currently, whether a character was escaped or not is not recorded in the MarkdownNode,
+        // they're parsed as plain text. Currently, whether a character was escaped or not is not recorded in the Node,
         // so here we don't know. If we just wrote out those characters unescaped, the resulting Markdown would change
         // meaning (turn into a list item, heading, etc.).
-        // You might say "Why not store that in the MarkdownNode when parsing", but that wouldn't work for the use case where
+        // You might say "Why not store that in the Node when parsing", but that wouldn't work for the use case where
         // nodes are constructed directly instead of via parsing. This renderer needs to work for that too.
         // So currently, when in doubt, we escape. For special characters only occurring at the beginning of a line,
         // we only escape them then (we wouldn't want to escape every `.` for example).
@@ -649,7 +649,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     }
   }
 
-  protected override visitChildren(parent: MarkdownNode) {
+  protected override visitChildren(parent: Node) {
     let node = parent.getFirstChild();
     while (node !== null) {
       let next = node.getNext();
@@ -711,7 +711,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
   private writeLinkLike(
     title: string | undefined,
     destination: string,
-    node: MarkdownNode,
+    node: Node,
     opener: string
   ) {
     this.writer.raw(opener);
