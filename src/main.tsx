@@ -31,28 +31,28 @@ import {
   ThematicBreak
 } from 'commonmark-java-js';
 
-import ContentView from '@/views/abstracts/contentview';
-import DocView from '@/views/docview';
-import BlockQuoteView from '@/views/blockquoteview';
-import BulletListView from '@/views/bulletlistview';
-import OrderedListView from '@/views/orderedlistview';
-import ListItemView from '@/views/listitemview';
-import HeadingView from '@/views/headingview';
-import FencedCodeBlockView from '@/views/fencedcodeblockview';
-import IndentedCodeBlockView from '@/views/indentedcodeblockview';
-import HtmlBlockView from '@/views/htmlblockview';
-import ThematicBreakView from '@/views/thematicbreakview';
-import ParagraphView from '@/views/paragraphview';
-import TextView from '@/views/textview';
-import CodeView from '@/views/codeview';
-import StrongEmphasisView from '@/views/strongemphasisview';
-import EmphasisView from '@/views/emphasisview';
-import LinkView from '@/views/linkview';
-import ImageView from '@/views/imageview';
-import HtmlInlineView from '@/views/htmlinlineview';
-import SoftLineBreakView from '@/views/softlinebreakview';
-import HardLineBreakView from '@/views/hardlinebreakview';
-import LinkReferenceDefinitionView from '@/views/linkreferencedefinition';
+import ContentView from 'src/views/abstracts/contentview';
+import DocView from 'src/views/docview';
+import BlockQuoteView from 'src/views/blockquoteview';
+import BulletListView from 'src/views/bulletlistview';
+import OrderedListView from 'src/views/orderedlistview';
+import ListItemView from 'src/views/listitemview';
+import HeadingView from 'src/views/headingview';
+import FencedCodeBlockView from 'src/views/fencedcodeblockview';
+import IndentedCodeBlockView from 'src/views/indentedcodeblockview';
+import HtmlBlockView from 'src/views/htmlblockview';
+import ThematicBreakView from 'src/views/thematicbreakview';
+import ParagraphView from 'src/views/paragraphview';
+import TextView from 'src/views/textview';
+import CodeView from 'src/views/codeview';
+import StrongEmphasisView from 'src/views/strongemphasisview';
+import EmphasisView from 'src/views/emphasisview';
+import LinkView from 'src/views/linkview';
+import ImageView from 'src/views/imageview';
+import HtmlInlineView from 'src/views/htmlinlineview';
+import SoftLineBreakView from 'src/views/softlinebreakview';
+import HardLineBreakView from 'src/views/hardlinebreakview';
+import LinkReferenceDefinitionView from 'src/views/linkreferencedefinition';
 
 const parser = Parser.builder()
   .setIncludeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
