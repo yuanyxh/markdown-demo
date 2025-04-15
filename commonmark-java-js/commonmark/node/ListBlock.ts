@@ -1,4 +1,4 @@
-import Block from "./abstracts/Block";
+import Block from './abstracts/Block';
 
 abstract class ListBlock extends Block {
   private tight = false;
@@ -7,11 +7,11 @@ abstract class ListBlock extends Block {
    * @return whether this list is tight or loose
    * @see <a href="https://spec.commonmark.org/0.31.2/#tight">CommonMark Spec for tight lists</a>
    */
-  public isTight(): boolean {
+  isTight(): boolean {
     return this.tight;
   }
 
-  public setTight(tight: boolean) {
+  setTight(tight: boolean) {
     this.tight = tight;
   }
 }

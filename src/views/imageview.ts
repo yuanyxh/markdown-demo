@@ -7,11 +7,11 @@ import InlineView from './abstracts/inlineview';
 class AltTextVisitor extends AbstractVisitor {
   private altText = '';
 
-  public getAltText() {
+  getAltText() {
     return this.altText;
   }
 
-  public visit(node: Image | Text | SoftLineBreak | HardLineBreak) {
+  visit(node: Image | Text | SoftLineBreak | HardLineBreak) {
     switch (true) {
       case node instanceof Image:
         this.visitChildren(node);
@@ -33,20 +33,20 @@ class AltTextVisitor extends AbstractVisitor {
 }
 
 class ImageView extends InlineView {
-  public children: ContentView[] = [];
-  public node: Image;
+  children: ContentView[] = [];
+  node: Image;
 
-  public constructor(node: Image) {
+  constructor(node: Image) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: Image): boolean {
+  override eq(node: Image): boolean {
     return node.type === this.node.type && node.getDestination() === this.node.getDestination();
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -68,7 +68,7 @@ class ImageView extends InlineView {
     return image;
   }
 
-  public static override craete(node: Image): ImageView {
+  static override craete(node: Image): ImageView {
     return new this(node);
   }
 }

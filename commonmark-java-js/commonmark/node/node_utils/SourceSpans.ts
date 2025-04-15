@@ -10,17 +10,17 @@ import SourceSpan from './SourceSpan';
 class SourceSpans {
   private sourceSpans: SourceSpan[] | null = null;
 
-  public getSourceSpans(): SourceSpan[] {
+  getSourceSpans(): SourceSpan[] {
     return this.sourceSpans ? this.sourceSpans : [];
   }
 
-  public addAllFrom(nodes: Node[]): void {
+  addAllFrom(nodes: Node[]): void {
     for (const node of nodes) {
       this.addAll(node.getSourceSpans());
     }
   }
 
-  public addAll(other: SourceSpan[]) {
+  addAll(other: SourceSpan[]) {
     if (other.length === 0) {
       return;
     }
@@ -50,7 +50,7 @@ class SourceSpans {
     }
   }
 
-  public static empty(): SourceSpans {
+  static empty(): SourceSpans {
     return new SourceSpans();
   }
 }

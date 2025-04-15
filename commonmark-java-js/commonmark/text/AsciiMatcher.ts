@@ -1,17 +1,17 @@
-import { BitSet, fromCodePoint } from "@helpers/index";
+import { BitSet, fromCodePoint } from '@helpers/index';
 
-import { CharMatcher } from "./interfaces/CharMatcher";
+import { CharMatcher } from './interfaces/CharMatcher';
 
 class AsciiMatcherBuilder {
-  public readonly set: BitSet;
+  readonly set: BitSet;
 
-  public constructor(set: BitSet) {
+  constructor(set: BitSet) {
     this.set = set;
   }
 
-  public c(c: string): AsciiMatcherBuilder {
+  c(c: string): AsciiMatcherBuilder {
     if (c.charCodeAt(0) > 127) {
-      throw Error("Can only match ASCII characters");
+      throw Error('Can only match ASCII characters');
     }
 
     this.set.set(c.charCodeAt(0));
@@ -19,10 +19,10 @@ class AsciiMatcherBuilder {
     return this;
   }
 
-  public anyOf(s: string): AsciiMatcherBuilder;
-  public anyOf(characters: Set<string>): AsciiMatcherBuilder;
-  public anyOf(data: string | Set<string>): AsciiMatcherBuilder {
-    if (typeof data === "string") {
+  anyOf(s: string): AsciiMatcherBuilder;
+  anyOf(characters: Set<string>): AsciiMatcherBuilder;
+  anyOf(data: string | Set<string>): AsciiMatcherBuilder {
+    if (typeof data === 'string') {
       for (let i = 0; i < data.length; i++) {
         this.c(data.charAt(i));
       }
@@ -35,7 +35,7 @@ class AsciiMatcherBuilder {
     return this;
   }
 
-  public range(from: string, toInclusive: string): AsciiMatcherBuilder {
+  range(from: string, toInclusive: string): AsciiMatcherBuilder {
     for (let c = from.charCodeAt(0); c <= toInclusive.charCodeAt(0); c++) {
       this.c(fromCodePoint(c));
     }
@@ -43,7 +43,7 @@ class AsciiMatcherBuilder {
     return this;
   }
 
-  public build(): AsciiMatcher {
+  build(): AsciiMatcher {
     return new AsciiMatcher(this);
   }
 }
@@ -54,19 +54,19 @@ class AsciiMatcherBuilder {
 class AsciiMatcher implements CharMatcher {
   private readonly set: BitSet;
 
-  public constructor(builder: AsciiMatcherBuilder) {
+  constructor(builder: AsciiMatcherBuilder) {
     this.set = builder.set;
   }
 
-  public matches(c: string): boolean {
+  matches(c: string): boolean {
     return this.set.get(c.charCodeAt(0));
   }
 
-  public newBuilder(): AsciiMatcherBuilder {
+  newBuilder(): AsciiMatcherBuilder {
     return new AsciiMatcherBuilder(this.set.clone());
   }
 
-  public static builder(matcher?: AsciiMatcher): AsciiMatcherBuilder {
+  static builder(matcher?: AsciiMatcher): AsciiMatcherBuilder {
     if (matcher) {
       return new AsciiMatcherBuilder(matcher.set.clone());
     } else {
@@ -74,7 +74,7 @@ class AsciiMatcher implements CharMatcher {
     }
   }
 
-  public static Builder = AsciiMatcherBuilder;
+  static Builder = AsciiMatcherBuilder;
 }
 
 export default AsciiMatcher;

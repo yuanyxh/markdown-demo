@@ -1,7 +1,7 @@
-import type { Appendable } from "@helpers/index";
+import type { Appendable } from '@helpers/index';
 
-import { fromCodePoint } from "@helpers/index";
-import { Escaping } from "@/internal";
+import { fromCodePoint } from '@helpers/index';
+import { Escaping } from '@/internal';
 
 class HtmlWriter {
   private static readonly NO_ATTRIBUTES = new Map<string, string>();
@@ -9,29 +9,25 @@ class HtmlWriter {
   private readonly buffer: Appendable;
   private lastChar = fromCodePoint(0);
 
-  public constructor(out: Appendable) {
+  constructor(out: Appendable) {
     this.buffer = out;
   }
 
-  public raw(s: string) {
+  raw(s: string) {
     this.append(s);
   }
 
-  public text(text: string) {
+  text(text: string) {
     this.append(Escaping.escapeHtml(text));
   }
 
-  public tag(
-    name: string,
-    attrs = HtmlWriter.NO_ATTRIBUTES,
-    voidElement = false
-  ) {
-    this.append("<");
+  tag(name: string, attrs = HtmlWriter.NO_ATTRIBUTES, voidElement = false) {
+    this.append('<');
     this.append(name);
 
     if (attrs.size) {
       for (const attr of attrs) {
-        this.append(" ");
+        this.append(' ');
         this.append(Escaping.escapeHtml(attr[0]));
 
         this.append('="');
@@ -41,15 +37,15 @@ class HtmlWriter {
     }
 
     if (voidElement) {
-      this.append(" /");
+      this.append(' /');
     }
 
-    this.append(">");
+    this.append('>');
   }
 
-  public line() {
-    if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== "\n") {
-      this.append("\n");
+  line() {
+    if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== '\n') {
+      this.append('\n');
     }
   }
 

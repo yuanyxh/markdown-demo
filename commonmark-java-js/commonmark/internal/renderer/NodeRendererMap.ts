@@ -5,7 +5,7 @@ class NodeRendererMap {
   private readonly nodeRenderers: NodeRenderer[] = [];
   private readonly renderers = new Map<typeof Node, NodeRenderer>();
 
-  public add(nodeRenderer: NodeRenderer) {
+  add(nodeRenderer: NodeRenderer) {
     this.nodeRenderers.push(nodeRenderer);
 
     for (const nodeType of nodeRenderer.getNodeTypes()) {
@@ -16,7 +16,7 @@ class NodeRendererMap {
     }
   }
 
-  public render(node: Node) {
+  render(node: Node) {
     const nodeRenderer = this.renderers.get(node.constructor as typeof Node);
 
     if (nodeRenderer) {
@@ -24,11 +24,11 @@ class NodeRendererMap {
     }
   }
 
-  public beforeRoot(node: Node) {
+  beforeRoot(node: Node) {
     this.nodeRenderers.forEach((r) => r.beforeRoot(node));
   }
 
-  public afterRoot(node: Node) {
+  afterRoot(node: Node) {
     this.nodeRenderers.forEach((r) => r.afterRoot(node));
   }
 }

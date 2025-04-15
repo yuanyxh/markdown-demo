@@ -20,32 +20,32 @@ abstract class Node {
   private next: Node | null = null;
   private sourceSpans: SourceSpan[] | null = null;
 
-  public constructor(type: string) {
+  constructor(type: string) {
     this.innerType = type;
   }
 
   /**
    * @returns {string} This property reflects the type of the node.
    */
-  public get type(): string {
+  get type(): string {
     return this.innerType;
   }
 
   /**
    * @returns {Record<string, any>} This property allows external data to be attached.
    */
-  public get meta(): Record<string, any> {
+  get meta(): Record<string, any> {
     return this.innerMeta;
   }
 
-  public set meta(meta: Record<string, any>) {
+  set meta(meta: Record<string, any>) {
     this.innerMeta = meta;
   }
 
   /**
    * @returns {number} This property returns the position of the start of the node in the source code.
    */
-  public get inputIndex(): number {
+  get inputIndex(): number {
     if (this.innerInputIndex === -1) {
       this.innerInputIndex = this.getSourceSpans()[0]?.getInputIndex() || 0;
     }
@@ -56,7 +56,7 @@ abstract class Node {
   /**
    * @returns {number} This property returns the position of the end of the node in the source code.
    */
-  public get inputEndIndex(): number {
+  get inputEndIndex(): number {
     if (this.innerInputEndInput === -1) {
       const spans = this.getSourceSpans();
       const lastSpan = spans[spans.length - 1];
@@ -74,7 +74,7 @@ abstract class Node {
   /**
    * @returns {Node[]} This property returns the list of child nodes to which the node belongs.
    */
-  public get children(): Node[] {
+  get children(): Node[] {
     if (this.innerChildren.length) {
       return this.innerChildren;
     }
@@ -96,13 +96,13 @@ abstract class Node {
     return children;
   }
 
-  public abstract accept(visitor: Visitor): void;
+  abstract accept(visitor: Visitor): void;
 
   /**
    *
    * @returns {boolean} Is's a block node.
    */
-  public isBlock(): boolean {
+  isBlock(): boolean {
     return false;
   }
 
@@ -110,7 +110,7 @@ abstract class Node {
    *
    * @returns {Node | null} Return the next node.
    */
-  public getNext(): Node | null {
+  getNext(): Node | null {
     return this.next;
   }
 
@@ -118,7 +118,7 @@ abstract class Node {
    *
    * @returns {Node | null} Return the prev node.
    */
-  public getPrevious(): Node | null {
+  getPrevious(): Node | null {
     return this.prev;
   }
 
@@ -126,7 +126,7 @@ abstract class Node {
    *
    * @returns {Node | null} Return the first child.
    */
-  public getFirstChild(): Node | null {
+  getFirstChild(): Node | null {
     return this.firstChild;
   }
 
@@ -134,7 +134,7 @@ abstract class Node {
    *
    * @returns {Node | null} Return the last child.
    */
-  public getLastChild(): Node | null {
+  getLastChild(): Node | null {
     return this.lastChild;
   }
 
@@ -142,14 +142,14 @@ abstract class Node {
    *
    * @returns {Node | null} Return the parent node.
    */
-  public getParent(): Node | null {
+  getParent(): Node | null {
     return this.parent;
   }
 
   /**
    * Set the parent node.
    */
-  public setParent(parent: Node): void {
+  setParent(parent: Node): void {
     this.parent = parent;
   }
 
@@ -158,7 +158,7 @@ abstract class Node {
    *
    * @param child
    */
-  public appendChild(child: Node): void {
+  appendChild(child: Node): void {
     child.unlink();
     child.setParent(this);
 
@@ -177,7 +177,7 @@ abstract class Node {
    *
    * @param child
    */
-  public prependChild(child: Node): void {
+  prependChild(child: Node): void {
     child.unlink();
     child.setParent(this);
 
@@ -194,7 +194,7 @@ abstract class Node {
   /**
    * Remove all links.
    */
-  public unlink(): void {
+  unlink(): void {
     this.innerChildren.length = 0;
 
     if (this.prev !== null) {
@@ -217,7 +217,7 @@ abstract class Node {
   /**
    * Inserts the {@code sibling} node after {@code this} node.
    */
-  public insertAfter(sibling: Node): void {
+  insertAfter(sibling: Node): void {
     sibling.unlink();
 
     sibling.next = this.next;
@@ -237,7 +237,7 @@ abstract class Node {
   /**
    * Inserts the {@code sibling} node before {@code this} node.
    */
-  public insertBefore(sibling: Node): void {
+  insertBefore(sibling: Node): void {
     sibling.unlink();
 
     sibling.prev = this.prev;
@@ -258,7 +258,7 @@ abstract class Node {
    * @return the source spans of this node if included by the parser, an empty list otherwise
    * @since 0.16.0
    */
-  public getSourceSpans(): SourceSpan[] {
+  getSourceSpans(): SourceSpan[] {
     return this.sourceSpans !== null ? this.sourceSpans.slice(0) : [];
   }
 
@@ -268,7 +268,7 @@ abstract class Node {
    * @param sourceSpans the new source spans to set
    * @since 0.16.0
    */
-  public setSourceSpans(sourceSpans: SourceSpan[]) {
+  setSourceSpans(sourceSpans: SourceSpan[]) {
     if (sourceSpans.length === 0) {
       this.sourceSpans = null;
     } else {
@@ -282,7 +282,7 @@ abstract class Node {
    * @param sourceSpan the source span to add
    * @since 0.16.0
    */
-  public addSourceSpan(sourceSpan: SourceSpan) {
+  addSourceSpan(sourceSpan: SourceSpan) {
     if (this.sourceSpans === null) {
       this.sourceSpans = [];
     }

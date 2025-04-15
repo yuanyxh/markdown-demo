@@ -5,9 +5,9 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class SoftLineBreakView extends InlineView {
-  public children: ContentView[] = [];
+  children: ContentView[] = [];
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -15,7 +15,7 @@ class SoftLineBreakView extends InlineView {
     return window.document.createElement('br');
   }
 
-  public static override craete(node: SoftLineBreak): SoftLineBreakView {
+  static override craete(node: SoftLineBreak): SoftLineBreakView {
     return new this(node);
   }
 }

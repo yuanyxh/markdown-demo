@@ -1,9 +1,9 @@
-import type { DefinitionMap } from "@/node";
+import type { DefinitionMap } from '@/node';
 
 class Definitions {
   private readonly definitionsByType = new Map<any, DefinitionMap<any>>();
 
-  public addDefinitions<D extends abstract new (...args: any) => any>(
+  addDefinitions<D extends abstract new (...args: any) => any>(
     definitionMap: DefinitionMap<InstanceType<D>>
   ) {
     const existingMap = this.getMap(definitionMap.getType());
@@ -15,7 +15,7 @@ class Definitions {
     }
   }
 
-  public getDefinition<V extends abstract new (...args: any) => any>(
+  getDefinition<V extends abstract new (...args: any) => any>(
     type: V,
     label: string
   ): InstanceType<V> | null {
@@ -32,10 +32,7 @@ class Definitions {
     type: V
   ): DefinitionMap<InstanceType<V>> | null {
     // noinspection unchecked
-    return (
-      (this.definitionsByType.get(type) as DefinitionMap<InstanceType<V>>) ||
-      null
-    );
+    return (this.definitionsByType.get(type) as DefinitionMap<InstanceType<V>>) || null;
   }
 }
 

@@ -34,11 +34,11 @@ import Delimiter from '../Delimiter';
 import StaggeredDelimiterProcessor from '../StaggeredDelimiterProcessor';
 
 class DelimiterData {
-  public readonly characters: Text[];
-  public readonly canClose: boolean;
-  public readonly canOpen: boolean;
+  readonly characters: Text[];
+  readonly canClose: boolean;
+  readonly canOpen: boolean;
 
-  public constructor(characters: Text[], canOpen: boolean, canClose: boolean) {
+  constructor(characters: Text[], canOpen: boolean, canClose: boolean) {
     this.characters = characters;
     this.canOpen = canOpen;
     this.canClose = canClose;
@@ -46,10 +46,10 @@ class DelimiterData {
 }
 
 class DestinationTitle {
-  public readonly destination: string;
-  public readonly title: string;
+  readonly destination: string;
+  readonly title: string;
 
-  public constructor(destination: string, title: string) {
+  constructor(destination: string, title: string) {
     this.destination = destination;
     this.title = title;
   }
@@ -64,7 +64,7 @@ class LinkInfoImpl implements LinkInfo {
   private readonly title: string | null;
   private readonly afterTextBracket: Position;
 
-  public constructor(
+  constructor(
     marker: Text | null,
     openingBracket: Text | null,
     text: string | null,
@@ -82,31 +82,31 @@ class LinkInfoImpl implements LinkInfo {
     this.afterTextBracket = afterTextBracket;
   }
 
-  public getMarker(): Text | null {
+  getMarker(): Text | null {
     return this.marker;
   }
 
-  public getOpeningBracket(): Text | null {
+  getOpeningBracket(): Text | null {
     return this.openingBracket;
   }
 
-  public getText(): string | null {
+  getText(): string | null {
     return this.text;
   }
 
-  public getLabel(): string | null {
+  getLabel(): string | null {
     return this.label;
   }
 
-  public getDestination(): string | null {
+  getDestination(): string | null {
     return this.destination;
   }
 
-  public getTitle(): string | null {
+  getTitle(): string | null {
     return this.title;
   }
 
-  public getAfterTextBracket(): Position {
+  getAfterTextBracket(): Position {
     return this.afterTextBracket;
   }
 }
@@ -135,7 +135,7 @@ class InlineParserImpl implements InlineParser, InlineParserState, InlineParserF
    */
   private lastBracket: Bracket | null = null;
 
-  public constructor(context: InlineParserContext) {
+  constructor(context: InlineParserContext) {
     this.context = context;
 
     this.inlineContentParserFactories = this.calculateInlineContentParserFactories(
@@ -295,14 +295,14 @@ class InlineParserImpl implements InlineParser, InlineParserState, InlineParserF
     return map;
   }
 
-  public getScanner(): Scanner {
+  getScanner(): Scanner {
     return this.scanner;
   }
 
   /**
    * Parse content in block into inline children, appending them to the block node.
    */
-  public parse(lines: SourceLines, block: Node) {
+  parse(lines: SourceLines, block: Node) {
     this.reset(lines);
 
     while (true) {
@@ -1131,18 +1131,18 @@ class InlineParserImpl implements InlineParser, InlineParserState, InlineParserF
     }
   }
 
-  public create(inlineParserContext: InlineParserContext): InlineParserImpl {
+  create(inlineParserContext: InlineParserContext): InlineParserImpl {
     return new InlineParserImpl(inlineParserContext);
   }
 
-  public static DelimiterData = DelimiterData;
+  static DelimiterData = DelimiterData;
 
   /**
    * A destination and optional title for a link or image.
    */
-  public static DestinationTitle = DestinationTitle;
+  static DestinationTitle = DestinationTitle;
 
-  public static LinkInfoImpl = LinkInfoImpl;
+  static LinkInfoImpl = LinkInfoImpl;
 }
 
 export default InlineParserImpl;

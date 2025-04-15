@@ -1,29 +1,20 @@
-import type { Block } from "@/node";
-import type {
-  BlockParserFactory,
-  MatchedBlockParser,
-  ParserState,
-} from "@/parser";
+import type { Block } from '@/node';
+import type { BlockParserFactory, MatchedBlockParser, ParserState } from '@/parser';
 
-import { BlockQuote } from "@/node";
-import Parsing from "../internal_util/Parsing";
-import { Characters } from "@/text";
-import { AbstractBlockParser, BlockStart, BlockContinue } from "@/parser";
+import { BlockQuote } from '@/node';
+import Parsing from '../internal_util/Parsing';
+import { Characters } from '@/text';
+import { AbstractBlockParser, BlockStart, BlockContinue } from '@/parser';
 
 class Factory implements BlockParserFactory {
-  public tryStart(
-    state: ParserState,
-    matchedBlockParser: MatchedBlockParser
-  ): BlockStart | null {
+  tryStart(state: ParserState, matchedBlockParser: MatchedBlockParser): BlockStart | null {
     const nextNonSpace = state.getNextNonSpaceIndex();
 
     if (BlockQuoteParser.isMarker(state, nextNonSpace)) {
       let newColumn = state.getColumn() + state.getIndent() + 1;
 
       // optional following space or tab
-      if (
-        Characters.isSpaceOrTab(state.getLine().getContent(), nextNonSpace + 1)
-      ) {
+      if (Characters.isSpaceOrTab(state.getLine().getContent(), nextNonSpace + 1)) {
         newColumn++;
       }
 
@@ -37,28 +28,26 @@ class Factory implements BlockParserFactory {
 class BlockQuoteParser extends AbstractBlockParser {
   private readonly block = new BlockQuote();
 
-  public override isContainer(): boolean {
+  override isContainer(): boolean {
     return true;
   }
 
-  public override canContain(block: Block): boolean {
+  override canContain(block: Block): boolean {
     return true;
   }
 
-  public override getBlock(): BlockQuote {
+  override getBlock(): BlockQuote {
     return this.block;
   }
 
-  public override tryContinue(state: ParserState): BlockContinue | null {
+  override tryContinue(state: ParserState): BlockContinue | null {
     const nextNonSpace = state.getNextNonSpaceIndex();
 
     if (BlockQuoteParser.isMarker(state, nextNonSpace)) {
       let newColumn = state.getColumn() + state.getIndent() + 1;
 
       // optional following space or tab
-      if (
-        Characters.isSpaceOrTab(state.getLine().getContent(), nextNonSpace + 1)
-      ) {
+      if (Characters.isSpaceOrTab(state.getLine().getContent(), nextNonSpace + 1)) {
         newColumn++;
       }
 
@@ -68,17 +57,17 @@ class BlockQuoteParser extends AbstractBlockParser {
     }
   }
 
-  public static isMarker(state: ParserState, index: number): boolean {
+  static isMarker(state: ParserState, index: number): boolean {
     const line = state.getLine().getContent();
 
     return (
       state.getIndent() < Parsing.CODE_BLOCK_INDENT &&
       index < line.length &&
-      line.charAt(index) === ">"
+      line.charAt(index) === '>'
     );
   }
 
-  public static Factory = Factory;
+  static Factory = Factory;
 }
 
 export default BlockQuoteParser;

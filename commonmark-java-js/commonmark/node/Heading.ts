@@ -1,23 +1,23 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import Block from "./abstracts/Block";
+import Block from './abstracts/Block';
 
 class Heading extends Block {
   private level = -1;
 
-  public constructor() {
-    super("heading");
+  constructor() {
+    super('heading');
   }
 
-  public override accept(visitor: Visitor) {
+  override accept(visitor: Visitor) {
     visitor.visit(this);
   }
 
-  public getLevel(): number {
+  getLevel(): number {
     return this.level;
   }
 
-  public setLevel(level: number) {
+  setLevel(level: number) {
     this.level = level;
   }
 }

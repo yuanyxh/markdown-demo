@@ -1,6 +1,6 @@
-import type { BlockParser } from "@/parser";
+import type { BlockParser } from '@/parser';
 
-import { BlockStart } from "@/parser";
+import { BlockStart } from '@/parser';
 
 class BlockStartImpl extends BlockStart {
   private readonly blockParsers: BlockParser[];
@@ -8,41 +8,41 @@ class BlockStartImpl extends BlockStart {
   private newColumn = -1;
   private replaceActiveBlockParser = false;
 
-  public constructor(...blockParsers: BlockParser[]) {
+  constructor(...blockParsers: BlockParser[]) {
     super();
 
     this.blockParsers = blockParsers;
   }
 
-  public getBlockParsers(): BlockParser[] {
+  getBlockParsers(): BlockParser[] {
     return this.blockParsers;
   }
 
-  public getNewIndex(): number {
+  getNewIndex(): number {
     return this.newIndex;
   }
 
-  public getNewColumn(): number {
+  getNewColumn(): number {
     return this.newColumn;
   }
 
-  public isReplaceActiveBlockParser(): boolean {
+  isReplaceActiveBlockParser(): boolean {
     return this.replaceActiveBlockParser;
   }
 
-  public override atIndex(newIndex: number): BlockStart {
+  override atIndex(newIndex: number): BlockStart {
     this.newIndex = newIndex;
 
     return this;
   }
 
-  public override atColumn(newColumn: number): BlockStart {
+  override atColumn(newColumn: number): BlockStart {
     this.newColumn = newColumn;
 
     return this;
   }
 
-  public override setReplaceActiveBlockParser(): BlockStart {
+  override setReplaceActiveBlockParser(): BlockStart {
     this.replaceActiveBlockParser = true;
 
     return this;

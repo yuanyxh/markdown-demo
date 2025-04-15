@@ -20,13 +20,13 @@ class TextContentRendererExtension implements Extension {
 }
 
 class TextContentRendererBuilder {
-  public nodeRendererFactories: TextContentNodeRendererFactory[] = [];
-  public lineBreakRendering = LineBreakRendering.COMPACT;
+  nodeRendererFactories: TextContentNodeRendererFactory[] = [];
+  lineBreakRendering = LineBreakRendering.COMPACT;
 
   /**
    * @return the configured {@link TextContentRenderer}
    */
-  public build(): TextContentRenderer {
+  build(): TextContentRenderer {
     return new TextContentRenderer(this);
   }
 
@@ -37,7 +37,7 @@ class TextContentRendererBuilder {
    * @param lineBreakRendering the mode to use
    * @return {@code this}
    */
-  public setLineBreakRendering(lineBreakRendering: LineBreakRendering): TextContentRendererBuilder {
+  setLineBreakRendering(lineBreakRendering: LineBreakRendering): TextContentRendererBuilder {
     this.lineBreakRendering = lineBreakRendering;
 
     return this;
@@ -53,7 +53,7 @@ class TextContentRendererBuilder {
    * @param nodeRendererFactory the factory for creating a node renderer
    * @return {@code this}
    */
-  public nodeRendererFactory(
+  nodeRendererFactory(
     nodeRendererFactory: TextContentNodeRendererFactory
   ): TextContentRendererBuilder {
     this.nodeRendererFactories.push(nodeRendererFactory);
@@ -64,7 +64,7 @@ class TextContentRendererBuilder {
    * @param extensions extensions to use on this text content renderer
    * @return {@code this}
    */
-  public extensions(extensions: Extension[]): TextContentRendererBuilder {
+  extensions(extensions: Extension[]): TextContentRendererBuilder {
     for (const extension of extensions) {
       if (extension instanceof TextContentRendererExtension) {
         extension.extend(this);
@@ -80,7 +80,7 @@ class RendererContext implements TextContentNodeRendererContext {
   private readonly nodeRendererMap = new NodeRendererMap();
   private readonly context: TextContentRenderer;
 
-  public constructor(context: TextContentRenderer, textContentWriter: TextContentWriter) {
+  constructor(context: TextContentRenderer, textContentWriter: TextContentWriter) {
     this.textContentWriter = textContentWriter;
     this.context = context;
 
@@ -90,19 +90,19 @@ class RendererContext implements TextContentNodeRendererContext {
     }
   }
 
-  public lineBreakRendering(): LineBreakRendering {
+  lineBreakRendering(): LineBreakRendering {
     return this.context.lineBreakRendering;
   }
 
-  public stripNewlines(): boolean {
+  stripNewlines(): boolean {
     return this.context.lineBreakRendering == LineBreakRendering.STRIP;
   }
 
-  public getWriter(): TextContentWriter {
+  getWriter(): TextContentWriter {
     return this.textContentWriter;
   }
 
-  public render(node: Node) {
+  render(node: Node) {
     this.nodeRendererMap.render(node);
   }
 }
@@ -111,11 +111,11 @@ class RendererContext implements TextContentNodeRendererContext {
  * Renders nodes to plain text content with minimal markup-like additions.
  */
 class TextContentRenderer implements Renderer {
-  public readonly lineBreakRendering: LineBreakRendering;
+  readonly lineBreakRendering: LineBreakRendering;
 
-  public readonly nodeRendererFactories: TextContentNodeRendererFactory[];
+  readonly nodeRendererFactories: TextContentNodeRendererFactory[];
 
-  public constructor(builder: TextContentRendererBuilder) {
+  constructor(builder: TextContentRendererBuilder) {
     this.lineBreakRendering = builder.lineBreakRendering;
 
     this.nodeRendererFactories = [];
@@ -133,11 +133,11 @@ class TextContentRenderer implements Renderer {
    *
    * @return a builder
    */
-  public static builder(): TextContentRendererBuilder {
+  static builder(): TextContentRendererBuilder {
     return new TextContentRendererBuilder();
   }
 
-  public render(node: Node, output: Appendable) {
+  render(node: Node, output: Appendable) {
     const context = new RendererContext(
       this,
       new TextContentWriter(output, this.lineBreakRendering)
@@ -149,9 +149,9 @@ class TextContentRenderer implements Renderer {
   /**
    * Builder for configuring a {@link TextContentRenderer}. See methods for default configuration.
    */
-  public static Builder = TextContentRendererBuilder;
+  static Builder = TextContentRendererBuilder;
 
-  public static TextContentRendererExtension = TextContentRendererExtension;
+  static TextContentRendererExtension = TextContentRendererExtension;
 }
 
 export default TextContentRenderer;

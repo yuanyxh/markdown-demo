@@ -5,16 +5,16 @@ import type ListItemView from './listitemview';
 import BlockView from './abstracts/blockview';
 
 class BulletListView extends BlockView {
-  public children: ListItemView[] = [];
-  public node: BulletList;
+  children: ListItemView[] = [];
+  node: BulletList;
 
-  public constructor(node: BulletList) {
+  constructor(node: BulletList) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: BulletList): boolean {
+  override eq(node: BulletList): boolean {
     return (
       node.type === this.node.type &&
       node.getMarker() === this.node.getMarker() &&
@@ -26,7 +26,7 @@ class BulletListView extends BlockView {
     return window.document.createElement('ul');
   }
 
-  public static override craete(node: BulletList): BulletListView {
+  static override craete(node: BulletList): BulletListView {
     return new this(node);
   }
 }

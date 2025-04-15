@@ -1,11 +1,11 @@
-import type { SourceSpan } from "@/node";
-import type { CharMatcher } from "@/text";
+import type { SourceSpan } from '@/node';
+import type { CharMatcher } from '@/text';
 
-import { Character, fromCodePoint } from "@helpers/index";
+import { Character, fromCodePoint } from '@helpers/index';
 
-import SourceLine from "./SourceLine";
-import SourceLines from "./SourceLines";
-import Position from "./Position";
+import SourceLine from './SourceLine';
+import SourceLines from './SourceLines';
+import Position from './Position';
 
 class Scanner {
   /**
@@ -14,7 +14,7 @@ class Scanner {
    * Note that we can use NULL to represent this because CommonMark does not allow those in the input (we replace them
    * in the beginning of parsing).
    */
-  public static readonly END = fromCodePoint(0);
+  static readonly END = fromCodePoint(0);
 
   // Lines without newlines at the end. The scanner will yield `\n` between lines because they're significant for
   // parsing and the final output. There is no `\n` after the last line.
@@ -26,7 +26,7 @@ class Scanner {
   private index: number;
 
   // Current line or "" if at the end of the lines (using "" instead of null saves a null check)
-  private line: SourceLine = SourceLine.of("", null);
+  private line: SourceLine = SourceLine.of('', null);
   private lineLength: number = 0;
 
   protected constructor(lines: SourceLine[], lineIndex: number, index: number) {
@@ -40,16 +40,16 @@ class Scanner {
     }
   }
 
-  public static of(lines: SourceLines): Scanner {
+  static of(lines: SourceLines): Scanner {
     return new Scanner(lines.getLines(), 0, 0);
   }
 
-  public peek(): string {
+  peek(): string {
     if (this.index < this.lineLength) {
       return this.line.getContent().charAt(this.index);
     } else {
       if (this.lineIndex < this.lines.length - 1) {
-        return "\n";
+        return '\n';
       } else {
         // Don't return newline for end of last line
         return Scanner.END;
@@ -57,14 +57,11 @@ class Scanner {
     }
   }
 
-  public peekCodePoint(): number {
+  peekCodePoint(): number {
     if (this.index < this.lineLength) {
       const c = this.line.getContent().charAt(this.index);
 
-      if (
-        Character.isHighSurrogate(c.charCodeAt(0)) &&
-        this.index + 1 < this.lineLength
-      ) {
+      if (Character.isHighSurrogate(c.charCodeAt(0)) && this.index + 1 < this.lineLength) {
         const low = this.line.getContent().charAt(this.index + 1);
 
         if (Character.isLowSurrogate(low.charCodeAt(0))) {
@@ -75,7 +72,7 @@ class Scanner {
       return c.charCodeAt(0);
     } else {
       if (this.lineIndex < this.lines.length - 1) {
-        return "\n".charCodeAt(0);
+        return '\n'.charCodeAt(0);
       } else {
         // Don't return newline for end of last line
         return Scanner.END.charCodeAt(0);
@@ -83,7 +80,7 @@ class Scanner {
     }
   }
 
-  public peekPreviousCodePoint(): number {
+  peekPreviousCodePoint(): number {
     if (this.index > 0) {
       const prev = this.index - 1;
 
@@ -99,14 +96,14 @@ class Scanner {
       return c.charCodeAt(0);
     } else {
       if (this.lineIndex > 0) {
-        return "\n".charCodeAt(0);
+        return '\n'.charCodeAt(0);
       } else {
         return Scanner.END.charCodeAt(0);
       }
     }
   }
 
-  public hasNext(): boolean {
+  hasNext(): boolean {
     if (this.index < this.lineLength) {
       return true;
     } else {
@@ -122,8 +119,8 @@ class Scanner {
    * @param content the text content to match on a single line (excluding newline characters)
    * @return true if matched and position was advanced, false otherwise
    */
-  public next(content?: string): boolean {
-    if (typeof content === "undefined") {
+  next(content?: string): boolean {
+    if (typeof content === 'undefined') {
       this.index++;
 
       if (this.index > this.lineLength) {
@@ -131,7 +128,7 @@ class Scanner {
         if (this.lineIndex < this.lines.length) {
           this.setLine(this.lines[this.lineIndex]);
         } else {
-          this.setLine(SourceLine.of("", null));
+          this.setLine(SourceLine.of('', null));
         }
 
         this.index = 0;
@@ -139,15 +136,10 @@ class Scanner {
 
       return true;
     } else {
-      if (
-        this.index < this.lineLength &&
-        this.index + content.length <= this.lineLength
-      ) {
+      if (this.index < this.lineLength && this.index + content.length <= this.lineLength) {
         // Can't use startsWith because it's not available on CharSequence
         for (let i = 0; i < content.length; i++) {
-          if (
-            this.line.getContent().charAt(this.index + i) !== content.charAt(i)
-          ) {
+          if (this.line.getContent().charAt(this.index + i) !== content.charAt(i)) {
             return false;
           }
         }
@@ -161,7 +153,7 @@ class Scanner {
     }
   }
 
-  public matchMultiple(c: string): number {
+  matchMultiple(c: string): number {
     let count = 0;
 
     while (this.peek() === c) {
@@ -172,7 +164,7 @@ class Scanner {
     return count;
   }
 
-  public match(matcher: CharMatcher): number {
+  match(matcher: CharMatcher): number {
     let count = 0;
 
     while (matcher.matches(this.peek())) {
@@ -183,16 +175,16 @@ class Scanner {
     return count;
   }
 
-  public whitespace(): number {
+  whitespace(): number {
     let count = 0;
     while (true) {
       switch (this.peek()) {
-        case " ":
-        case "\t":
-        case "\n":
-        case "\u000B":
-        case "\f":
-        case "\r":
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\u000B':
+        case '\f':
+        case '\r':
           count++;
           this.next();
 
@@ -204,8 +196,8 @@ class Scanner {
     }
   }
 
-  public find(c: string | CharMatcher): number {
-    if (typeof c === "string") {
+  find(c: string | CharMatcher): number {
+    if (typeof c === 'string') {
       let count = 0;
       while (true) {
         const cur = this.peek();
@@ -239,11 +231,11 @@ class Scanner {
 
   // Don't expose the int index, because it would be good if we could switch input to a List<String> of lines later
   // instead of one contiguous String.
-  public position(): Position {
+  position(): Position {
     return new Position(this.lineIndex, this.index);
   }
 
-  public setPosition(position: Position) {
+  setPosition(position: Position) {
     this.checkPosition(position.lineIndex, position.index);
 
     this.lineIndex = position.lineIndex;
@@ -254,7 +246,7 @@ class Scanner {
 
   // For cases where the caller appends the result to a StringBuilder, we could offer another method to avoid some
   // unnecessary copying.
-  public getSource(begin: Position, end: Position): SourceLines {
+  getSource(begin: Position, end: Position): SourceLines {
     if (begin.lineIndex === end.lineIndex) {
       // Shortcut for common case of text from a single line
       const line: SourceLine = this.lines[begin.lineIndex];
@@ -271,9 +263,7 @@ class Scanner {
       let sourceLines: SourceLines = SourceLines.empty();
 
       const firstLine: SourceLine = this.lines[begin.lineIndex];
-      sourceLines.addLine(
-        firstLine.substring(begin.index, firstLine.getContent().length)
-      );
+      sourceLines.addLine(firstLine.substring(begin.index, firstLine.getContent().length));
 
       // Lines between begin and end (we are appending the full line)
       for (let line = begin.lineIndex + 1; line < end.lineIndex; line++) {
@@ -295,21 +285,13 @@ class Scanner {
   private checkPosition(lineIndex: number, index: number) {
     if (lineIndex < 0 || lineIndex >= this.lines.length) {
       throw new Error(
-        "Line index " +
-          lineIndex +
-          " out of range, number of lines: " +
-          this.lines.length
+        'Line index ' + lineIndex + ' out of range, number of lines: ' + this.lines.length
       );
     }
 
     const line: SourceLine = this.lines[lineIndex];
     if (index < 0 || index > line.getContent().length) {
-      throw Error(
-        "Index " +
-          index +
-          " out of range, line length: " +
-          line.getContent().length
-      );
+      throw Error('Index ' + index + ' out of range, line length: ' + line.getContent().length);
     }
   }
 }

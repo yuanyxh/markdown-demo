@@ -5,20 +5,20 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class HtmlInlineView extends InlineView {
-  public children: ContentView[] = [];
-  public node: HtmlInline;
+  children: ContentView[] = [];
+  node: HtmlInline;
 
-  public constructor(node: HtmlInline) {
+  constructor(node: HtmlInline) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: HtmlInline): boolean {
+  override eq(node: HtmlInline): boolean {
     return node.type === this.node.type && node.getLiteral() === this.dom.innerHTML;
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -30,7 +30,7 @@ class HtmlInlineView extends InlineView {
     return wrapper;
   }
 
-  public static override craete(node: HtmlInline): HtmlInlineView {
+  static override craete(node: HtmlInline): HtmlInlineView {
     return new this(node);
   }
 }

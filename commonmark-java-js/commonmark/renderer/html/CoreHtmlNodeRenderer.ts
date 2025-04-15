@@ -34,11 +34,11 @@ import HtmlWriter from './HtmlWriter';
 class AltTextVisitor extends AbstractVisitor {
   private readonly sb: Appendable = new Appendable();
 
-  public getAltText() {
+  getAltText() {
     return this.sb.toString();
   }
 
-  public visit(node: Text | SoftLineBreak | HardLineBreak) {
+  visit(node: Text | SoftLineBreak | HardLineBreak) {
     switch (true) {
       case node instanceof Text: {
         const text = node;
@@ -70,16 +70,16 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
   protected readonly context: HtmlNodeRendererContext;
   private readonly html: HtmlWriter;
 
-  public constructor(context: HtmlNodeRendererContext) {
+  constructor(context: HtmlNodeRendererContext) {
     super();
     this.context = context;
     this.html = context.getWriter();
   }
 
-  public beforeRoot(rootNode: Node) {}
-  public afterRoot(rootNode: Node) {}
+  beforeRoot(rootNode: Node) {}
+  afterRoot(rootNode: Node) {}
 
-  public getNodeTypes(): Set<typeof Node> {
+  getNodeTypes(): Set<typeof Node> {
     return new Set([
       Document,
       Heading,
@@ -104,11 +104,11 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     ]);
   }
 
-  public render(node: Node) {
+  render(node: Node) {
     node.accept(this);
   }
 
-  public override visit(node: Node) {
+  override visit(node: Node) {
     switch (true) {
       case node instanceof Document: {
         const document = node;
@@ -453,7 +453,7 @@ class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     return this.context.extendAttributes(node, tagName, defaultAttributes);
   }
 
-  public static AltTextVisitor = AltTextVisitor;
+  static AltTextVisitor = AltTextVisitor;
 }
 
 export default CoreHtmlNodeRenderer;

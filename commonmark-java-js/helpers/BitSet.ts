@@ -1,7 +1,7 @@
 class BitSet {
   private readonly values: boolean[] = [];
 
-  public constructor(values?: boolean[]) {
+  constructor(values?: boolean[]) {
     if (values) {
       this.values = values;
     }

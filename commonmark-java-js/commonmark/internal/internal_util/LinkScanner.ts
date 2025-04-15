@@ -1,6 +1,6 @@
-import type { Scanner } from "@/parser";
+import type { Scanner } from '@/parser';
 
-import { Character } from "@helpers/index";
+import { Character } from '@helpers/index';
 
 class LinkScanner {
   /**
@@ -8,18 +8,18 @@ class LinkScanner {
    * The stopped position can bei either the closing {@code ]}, or the end of the line if the label continues on
    * the next line.
    */
-  public static scanLinkLabelContent(scanner: Scanner): boolean {
+  static scanLinkLabelContent(scanner: Scanner): boolean {
     while (scanner.hasNext()) {
       switch (scanner.peek()) {
-        case "\\":
+        case '\\':
           scanner.next();
           if (LinkScanner.isEscapable(scanner.peek())) {
             scanner.next();
           }
           break;
-        case "]":
+        case ']':
           return true;
-        case "[":
+        case '[':
           // spec: Unescaped square bracket characters are not allowed inside the opening and closing
           // square brackets of link labels.
           return false;
@@ -34,24 +34,24 @@ class LinkScanner {
   /**
    * Attempt to scan a link destination, stopping after the destination or returning false.
    */
-  public static scanLinkDestination(scanner: Scanner): boolean {
+  static scanLinkDestination(scanner: Scanner): boolean {
     if (!scanner.hasNext()) {
       return false;
     }
 
-    if (scanner.next("<")) {
+    if (scanner.next('<')) {
       while (scanner.hasNext()) {
         switch (scanner.peek()) {
-          case "\\":
+          case '\\':
             scanner.next();
             if (LinkScanner.isEscapable(scanner.peek())) {
               scanner.next();
             }
             break;
-          case "\n":
-          case "<":
+          case '\n':
+          case '<':
             return false;
-          case ">":
+          case '>':
             scanner.next();
             return true;
           default:
@@ -65,7 +65,7 @@ class LinkScanner {
     }
   }
 
-  public static scanLinkTitle(scanner: Scanner): boolean {
+  static scanLinkTitle(scanner: Scanner): boolean {
     if (!scanner.hasNext()) {
       return false;
     }
@@ -78,8 +78,8 @@ class LinkScanner {
       case "'":
         endDelimiter = "'";
         break;
-      case "(":
-        endDelimiter = ")";
+      case '(':
+        endDelimiter = ')';
         break;
       default:
         return false;
@@ -100,21 +100,18 @@ class LinkScanner {
     return true;
   }
 
-  public static scanLinkTitleContent(
-    scanner: Scanner,
-    endDelimiter: string
-  ): boolean {
+  static scanLinkTitleContent(scanner: Scanner, endDelimiter: string): boolean {
     while (scanner.hasNext()) {
       let c = scanner.peek();
 
-      if (c === "\\") {
+      if (c === '\\') {
         scanner.next();
         if (LinkScanner.isEscapable(scanner.peek())) {
           scanner.next();
         }
       } else if (c === endDelimiter) {
         return true;
-      } else if (endDelimiter === ")" && c === "(") {
+      } else if (endDelimiter === ')' && c === '(') {
         // unescaped '(' in title within parens is invalid
         return false;
       } else {
@@ -128,24 +125,22 @@ class LinkScanner {
   // spec: a nonempty sequence of characters that does not start with <, does not include ASCII space or control
   // characters, and includes parentheses only if (a) they are backslash-escaped or (b) they are part of a balanced
   // pair of unescaped parentheses
-  private static scanLinkDestinationWithBalancedParens(
-    scanner: Scanner
-  ): boolean {
+  private static scanLinkDestinationWithBalancedParens(scanner: Scanner): boolean {
     let parens = 0;
     let empty: boolean = true;
 
     while (scanner.hasNext()) {
       let c = scanner.peek();
       switch (c) {
-        case " ":
+        case ' ':
           return !empty;
-        case "\\":
+        case '\\':
           scanner.next();
           if (LinkScanner.isEscapable(scanner.peek())) {
             scanner.next();
           }
           break;
-        case "(":
+        case '(':
           parens++;
           // Limit to 32 nested parens for pathological cases
           if (parens > 32) {
@@ -154,7 +149,7 @@ class LinkScanner {
 
           scanner.next();
           break;
-        case ")":
+        case ')':
           if (parens === 0) {
             return true;
           } else {
@@ -180,38 +175,38 @@ class LinkScanner {
 
   private static isEscapable(c: string): boolean {
     switch (c) {
-      case "!":
+      case '!':
       case '"':
-      case "#":
-      case "$":
-      case "%":
-      case "&":
+      case '#':
+      case '$':
+      case '%':
+      case '&':
       case "'":
-      case "(":
-      case ")":
-      case "*":
-      case "+":
-      case ",":
-      case "-":
-      case ".":
-      case "/":
-      case ":":
-      case ";":
-      case "<":
-      case "=":
-      case ">":
-      case "?":
-      case "@":
-      case "[":
-      case "\\":
-      case "]":
-      case "^":
-      case "_":
-      case "`":
-      case "{":
-      case "|":
-      case "}":
-      case "~":
+      case '(':
+      case ')':
+      case '*':
+      case '+':
+      case ',':
+      case '-':
+      case '.':
+      case '/':
+      case ':':
+      case ';':
+      case '<':
+      case '=':
+      case '>':
+      case '?':
+      case '@':
+      case '[':
+      case '\\':
+      case ']':
+      case '^':
+      case '_':
+      case '`':
+      case '{':
+      case '|':
+      case '}':
+      case '~':
         return true;
 
       default:

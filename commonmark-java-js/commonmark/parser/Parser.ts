@@ -20,20 +20,20 @@ class ParserExtension implements Extension {
 }
 
 class ParserBuilder {
-  public readonly blockParserFactories: BlockParserFactory[] = [];
-  public readonly inlineContentParserFactories: InlineContentParserFactory[] = [];
-  public readonly delimiterProcessors: DelimiterProcessor[] = [];
-  public readonly linkProcessors: LinkProcessor[] = [];
-  public readonly postProcessors: PostProcessor[] = [];
-  public readonly linkMarkers: Set<string> = new Set();
-  public enabledBlockTypes: Set<typeof Block> = DocumentParser.getDefaultBlockParserTypes();
+  readonly blockParserFactories: BlockParserFactory[] = [];
+  readonly inlineContentParserFactories: InlineContentParserFactory[] = [];
+  readonly delimiterProcessors: DelimiterProcessor[] = [];
+  readonly linkProcessors: LinkProcessor[] = [];
+  readonly postProcessors: PostProcessor[] = [];
+  readonly linkMarkers: Set<string> = new Set();
+  enabledBlockTypes: Set<typeof Block> = DocumentParser.getDefaultBlockParserTypes();
   private inlineParserFactory: InlineParserFactory | null = null;
-  public includeSourceSpans = IncludeSourceSpans.NONE;
+  includeSourceSpans = IncludeSourceSpans.NONE;
 
   /**
    * @return the configured {@link Parser}
    */
-  public build(): Parser {
+  build(): Parser {
     return new Parser(this);
   }
 
@@ -41,7 +41,7 @@ class ParserBuilder {
    * @param extensions extensions to use on this parser
    * @return {@code this}
    */
-  public extensions(extensions: Extension[]): ParserBuilder {
+  extensions(extensions: Extension[]): ParserBuilder {
     for (const extension of extensions) {
       if (extension instanceof ParserExtension) {
         extension.extend(this);
@@ -77,7 +77,7 @@ class ParserBuilder {
    *                          If this list is empty, the parser will not recognize any CommonMark core features.
    * @return {@code this}
    */
-  public setEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>): ParserBuilder {
+  setEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>): ParserBuilder {
     DocumentParser.checkEnabledBlockTypes(enabledBlockTypes);
 
     this.enabledBlockTypes = enabledBlockTypes;
@@ -93,7 +93,7 @@ class ParserBuilder {
    * @return {@code this}
    * @since 0.16.0
    */
-  public setIncludeSourceSpans(includeSourceSpans: IncludeSourceSpans): ParserBuilder {
+  setIncludeSourceSpans(includeSourceSpans: IncludeSourceSpans): ParserBuilder {
     this.includeSourceSpans = includeSourceSpans;
     return this;
   }
@@ -108,7 +108,7 @@ class ParserBuilder {
    * @param blockParserFactory a block parser factory implementation
    * @return {@code this}
    */
-  public customBlockParserFactory(blockParserFactory: BlockParserFactory): ParserBuilder {
+  customBlockParserFactory(blockParserFactory: BlockParserFactory): ParserBuilder {
     this.blockParserFactories.push(blockParserFactory);
     return this;
   }
@@ -121,7 +121,7 @@ class ParserBuilder {
    * character, or even for some built-in special character such as {@code `}. The custom parsers are tried first
    * in order in which they are registered, and then the built-in ones.
    */
-  public customInlineContentParserFactory(
+  customInlineContentParserFactory(
     inlineContentParserFactory: InlineContentParserFactory
   ): ParserBuilder {
     this.inlineContentParserFactories.push(inlineContentParserFactory);
@@ -141,7 +141,7 @@ class ParserBuilder {
    * @param delimiterProcessor a delimiter processor implementation
    * @return {@code this}
    */
-  public customDelimiterProcessor(delimiterProcessor: DelimiterProcessor): ParserBuilder {
+  customDelimiterProcessor(delimiterProcessor: DelimiterProcessor): ParserBuilder {
     this.delimiterProcessors.push(delimiterProcessor);
     return this;
   }
@@ -155,7 +155,7 @@ class ParserBuilder {
    * @param linkProcessor a link processor implementation
    * @return {@code this}
    */
-  public linkProcessor(linkProcessor: LinkProcessor): ParserBuilder {
+  linkProcessor(linkProcessor: LinkProcessor): ParserBuilder {
     this.linkProcessors.push(linkProcessor);
     return this;
   }
@@ -171,12 +171,12 @@ class ParserBuilder {
    * @param linkMarker a link marker character
    * @return {@code this}
    */
-  public linkMarker(linkMarker: string): ParserBuilder {
+  linkMarker(linkMarker: string): ParserBuilder {
     this.linkMarkers.add(linkMarker);
     return this;
   }
 
-  public postProcessor(postProcessor: PostProcessor): ParserBuilder {
+  postProcessor(postProcessor: PostProcessor): ParserBuilder {
     this.postProcessors.push(postProcessor);
     return this;
   }
@@ -199,12 +199,12 @@ class ParserBuilder {
    * @param inlineParserFactory an inline parser factory implementation
    * @return {@code this}
    */
-  public setInlineParserFactory(inlineParserFactory: InlineParserFactory | null): ParserBuilder {
+  setInlineParserFactory(inlineParserFactory: InlineParserFactory | null): ParserBuilder {
     this.inlineParserFactory = inlineParserFactory;
     return this;
   }
 
-  public getInlineParserFactory(): InlineParserFactory {
+  getInlineParserFactory(): InlineParserFactory {
     if (this.inlineParserFactory) {
       return this.inlineParserFactory;
     }
@@ -236,7 +236,7 @@ export class Parser {
   private readonly inlineParserFactory: InlineParserFactory;
   private readonly includeSourceSpans: IncludeSourceSpans;
 
-  public constructor(builder: ParserBuilder) {
+  constructor(builder: ParserBuilder) {
     this.blockParserFactories = DocumentParser.calculateBlockParserFactories(
       builder.blockParserFactories,
       builder.enabledBlockTypes
@@ -268,7 +268,7 @@ export class Parser {
    *
    * @return a builder
    */
-  public static builder(): ParserBuilder {
+  static builder(): ParserBuilder {
     return new ParserBuilder();
   }
 
@@ -280,7 +280,7 @@ export class Parser {
    * @param input the text to parse - must not be null
    * @return the root node
    */
-  public parse(input: string | String): Node {
+  parse(input: string | String): Node {
     const documentParser = this.createDocumentParser();
     const document = documentParser.parse(input.toString());
 
@@ -305,7 +305,7 @@ export class Parser {
    * @return the root node
    * @throws IOException when reading throws an exception
    */
-  public async parseReader(input: File): Promise<Node> {
+  async parseReader(input: File): Promise<Node> {
     return new Promise<Node>((resolve, reject) => {
       const reader = new FileReader();
 
@@ -345,9 +345,9 @@ export class Parser {
   /**
    * Builder for configuring a {@link Parser}.
    */
-  public static Builder = ParserBuilder;
+  static Builder = ParserBuilder;
 
-  public static ParserExtension = ParserExtension;
+  static ParserExtension = ParserExtension;
 }
 
 export default Parser;

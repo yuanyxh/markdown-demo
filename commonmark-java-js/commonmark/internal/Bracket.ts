@@ -1,6 +1,6 @@
-import type Delimiter from "./Delimiter";
-import type { Text } from "@/node";
-import type { Position } from "@/parser";
+import type Delimiter from './Delimiter';
+import type { Text } from '@/node';
+import type { Position } from '@/parser';
 
 /**
  * Opening bracket for links ({@code [}), images ({@code ![}), or links with other markers.
@@ -9,47 +9,47 @@ class Bracket {
   /**
    * The node of a marker such as {@code !} if present, null otherwise.
    */
-  public readonly markerNode: Text | null;
+  readonly markerNode: Text | null;
 
   /**
    * The position of the marker if present, null otherwise.
    */
-  public readonly markerPosition: Position | null;
+  readonly markerPosition: Position | null;
 
   /**
    * The node of {@code [}.
    */
-  public readonly bracketNode: Text | null;
+  readonly bracketNode: Text | null;
 
   /**
    * The position of {@code [}.
    */
-  public readonly bracketPosition: Position | null;
+  readonly bracketPosition: Position | null;
 
   /**
    * The position of the content (after the opening bracket)
    */
-  public readonly contentPosition: Position | null;
+  readonly contentPosition: Position | null;
 
   /**
    * Previous bracket.
    */
-  public readonly previous: Bracket | null;
+  readonly previous: Bracket | null;
 
   /**
    * Previous delimiter (emphasis, etc) before this bracket.
    */
-  public readonly previousDelimiter: Delimiter | null;
+  readonly previousDelimiter: Delimiter | null;
 
   /**
    * Whether this bracket is allowed to form a link/image (also known as "active").
    */
-  public allowed: boolean = true;
+  allowed: boolean = true;
 
   /**
    * Whether there is an unescaped bracket (opening or closing) after this opening bracket in the text parsed so far.
    */
-  public bracketAfter: boolean = false;
+  bracketAfter: boolean = false;
 
   private constructor(
     markerNode: Text | null,
@@ -69,7 +69,7 @@ class Bracket {
     this.previousDelimiter = previousDelimiter;
   }
 
-  public static link(
+  static link(
     bracketNode: Text,
     bracketPosition: Position,
     contentPosition: Position,
@@ -87,7 +87,7 @@ class Bracket {
     );
   }
 
-  public static withMarker(
+  static withMarker(
     markerNode: Text,
     markerPosition: Position,
     bracketNode: Text,

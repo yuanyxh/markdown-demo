@@ -10,19 +10,19 @@ import Node from './abstracts/Node';
 class HtmlInline extends Node {
   private literal = '';
 
-  public constructor() {
+  constructor() {
     super('html-inline');
   }
 
-  public override accept(visitor: Visitor) {
+  override accept(visitor: Visitor) {
     visitor.visit(this);
   }
 
-  public getLiteral(): string {
+  getLiteral(): string {
     return this.literal;
   }
 
-  public setLiteral(literal: string) {
+  setLiteral(literal: string) {
     this.literal = literal;
   }
 }

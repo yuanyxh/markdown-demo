@@ -1,4 +1,4 @@
-import type { DelimiterProcessor, DelimiterRun } from "@/parser";
+import type { DelimiterProcessor, DelimiterRun } from '@/parser';
 
 /**
  * An implementation of DelimiterProcessor that dispatches all calls to two or more other DelimiterProcessors
@@ -11,23 +11,23 @@ class StaggeredDelimiterProcessor implements DelimiterProcessor {
   private minLength = 0;
   private processors: DelimiterProcessor[] = []; // in reverse getMinLength order
 
-  public constructor(delim: string) {
+  constructor(delim: string) {
     this.delim = delim;
   }
 
-  public getOpeningCharacter(): string {
+  getOpeningCharacter(): string {
     return this.delim;
   }
 
-  public getClosingCharacter(): string {
+  getClosingCharacter(): string {
     return this.delim;
   }
 
-  public getMinLength(): number {
+  getMinLength(): number {
     return this.minLength;
   }
 
-  public add(dp: DelimiterProcessor) {
+  add(dp: DelimiterProcessor) {
     let len = dp.getMinLength();
     let added = false;
 
@@ -45,9 +45,9 @@ class StaggeredDelimiterProcessor implements DelimiterProcessor {
             this.delim +
             "' and minimum length " +
             len +
-            "; conflicting processors: " +
+            '; conflicting processors: ' +
             p +
-            ", " +
+            ', ' +
             dp
         );
       }
@@ -69,11 +69,8 @@ class StaggeredDelimiterProcessor implements DelimiterProcessor {
     return this.processors[0];
   }
 
-  public process(openingRun: DelimiterRun, closingRun: DelimiterRun): number {
-    return this.findProcessor(openingRun.length()).process(
-      openingRun,
-      closingRun
-    );
+  process(openingRun: DelimiterRun, closingRun: DelimiterRun): number {
+    return this.findProcessor(openingRun.length()).process(openingRun, closingRun);
   }
 }
 

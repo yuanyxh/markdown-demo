@@ -3,16 +3,16 @@ import type { ListItem } from 'commonmark-java-js';
 import BlockView from './abstracts/blockview';
 
 class ListItemView extends BlockView {
-  public children: BlockView[] = [];
-  public node: ListItem;
+  children: BlockView[] = [];
+  node: ListItem;
 
-  public constructor(node: ListItem) {
+  constructor(node: ListItem) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: ListItem): boolean {
+  override eq(node: ListItem): boolean {
     return node.type === this.node.type && node.getMarkerIndent() === this.node.getMarkerIndent();
   }
 
@@ -20,7 +20,7 @@ class ListItemView extends BlockView {
     return window.document.createElement('li');
   }
 
-  public static override craete(node: ListItem): ListItemView {
+  static override craete(node: ListItem): ListItemView {
     return new this(node);
   }
 }

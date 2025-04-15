@@ -1,8 +1,8 @@
-import EmphasisDelimiterProcessor from "./EmphasisDelimiterProcessor";
+import EmphasisDelimiterProcessor from './EmphasisDelimiterProcessor';
 
 class AsteriskDelimiterProcessor extends EmphasisDelimiterProcessor {
-  public constructor() {
-    super("*");
+  constructor() {
+    super('*');
   }
 }
 

@@ -1,24 +1,24 @@
-import { Appendable } from "@helpers/index";
+import { Appendable } from '@helpers/index';
 
 class BlockContent {
   private readonly sb: Appendable;
 
   private lineCount = 0;
 
-  public constructor(content: string = "") {
+  constructor(content: string = '') {
     this.sb = new Appendable(content);
   }
 
-  public add(line: string) {
+  add(line: string) {
     if (this.lineCount !== 0) {
-      this.sb.append("\n");
+      this.sb.append('\n');
     }
 
     this.sb.append(line);
     this.lineCount++;
   }
 
-  public getString(): string {
+  getString(): string {
     return this.sb.toString();
   }
 }

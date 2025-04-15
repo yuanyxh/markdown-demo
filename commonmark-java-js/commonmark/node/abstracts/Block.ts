@@ -4,11 +4,11 @@ import Node from './Node';
  * Block nodes such as paragraphs, list blocks, code blocks etc.
  */
 abstract class Block extends Node {
-  public override isBlock(): boolean {
+  override isBlock(): boolean {
     return true;
   }
 
-  public override getParent(): Block | null {
+  override getParent(): Block | null {
     const parent = super.getParent();
 
     if (parent) {
@@ -22,7 +22,7 @@ abstract class Block extends Node {
     return null;
   }
 
-  public override setParent(parent: Node): void {
+  override setParent(parent: Node): void {
     if (!(parent instanceof Block)) {
       throw Error('Parent of block must also be block (can not be inline)');
     }

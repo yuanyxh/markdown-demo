@@ -1,7 +1,7 @@
 import type { Node as MarkdownNode } from 'commonmark-java-js';
 
 abstract class ContentView {
-  public abstract children: ContentView[];
+  abstract children: ContentView[];
 
   protected parent: ContentView | null = null;
   protected node: MarkdownNode;
@@ -10,17 +10,17 @@ abstract class ContentView {
 
   protected static nodeRelationMap = new Map<typeof MarkdownNode, typeof ContentView>();
 
-  public constructor(node: MarkdownNode) {
+  constructor(node: MarkdownNode) {
     this.node = node;
     this._dom = this.createElement(node);
     this._dom.$view = this;
   }
 
-  public get dom(): HTMLElement {
+  get dom(): HTMLElement {
     return this._dom;
   }
 
-  public set dom(dom: HTMLElement) {
+  set dom(dom: HTMLElement) {
     if (this._dom) {
       delete this._dom.$view;
     }
@@ -29,15 +29,15 @@ abstract class ContentView {
     this._dom.$view = this;
   }
 
-  public eq(node: MarkdownNode): boolean {
+  eq(node: MarkdownNode): boolean {
     return node.type === this.node.type;
   }
 
-  public setNode(node: MarkdownNode): void {
+  setNode(node: MarkdownNode): void {
     this.node = node;
   }
 
-  public setParent(parent: ContentView): void {
+  setParent(parent: ContentView): void {
     if (this.parent != parent) {
       this.parent?.removeChild(this, false);
 
@@ -45,14 +45,14 @@ abstract class ContentView {
     }
   }
 
-  public appendChild(view: ContentView): void {
+  appendChild(view: ContentView): void {
     this.children.push(view);
 
     view.setParent(this);
     this.dom.appendChild(view.dom);
   }
 
-  public insertBefore(view: ContentView, reference: ContentView): void {
+  insertBefore(view: ContentView, reference: ContentView): void {
     for (let i = 0; i < this.children.length; i++) {
       if (this.children[i] === reference) {
         this.children.splice(i, 0, view);
@@ -65,7 +65,7 @@ abstract class ContentView {
     }
   }
 
-  public removeChild(view: ContentView, shouldDestroy = true): ContentView {
+  removeChild(view: ContentView, shouldDestroy = true): ContentView {
     for (let i = 0; i < this.children.length; i++) {
       if (this.children[i] === view) {
         shouldDestroy && this.children[i].destroy();
@@ -77,7 +77,7 @@ abstract class ContentView {
     return view;
   }
 
-  public applyNode(node: MarkdownNode): void {
+  applyNode(node: MarkdownNode): this {
     const nodeChildren = node.children;
     const children = this.children.slice(0);
 
@@ -149,13 +149,15 @@ abstract class ContentView {
     this.setNode(node);
 
     this.children = newChildren;
+
+    return this;
   }
 
-  public isOpend(): boolean {
+  isOpend(): boolean {
     return true;
   }
 
-  public destroy(): void {
+  destroy(): void {
     if (this.dom.isConnected) {
       this.dom.remove();
       this.node.unlink();
@@ -170,19 +172,17 @@ abstract class ContentView {
 
   protected abstract createElement(node: MarkdownNode): HTMLElement;
 
-  public static get(node: Node): ContentView | null {
+  static get(node: Node): ContentView | null {
     return node.$view || null;
   }
 
-  public static craete(node: MarkdownNode): ContentView {
+  static craete(node: MarkdownNode): ContentView {
     throw Error(
       'This static method cannot be called directly. It must be overridden by a subclass.'
     );
   }
 
-  public static setNodeRelationMap(
-    nodeRelationMap: Map<typeof MarkdownNode, typeof ContentView>
-  ): void {
+  static setNodeRelationMap(nodeRelationMap: Map<typeof MarkdownNode, typeof ContentView>): void {
     this.nodeRelationMap = nodeRelationMap;
   }
 

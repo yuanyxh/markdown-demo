@@ -23,12 +23,12 @@ class MarkdownRendererExtension implements Extension {
 }
 
 class MarkdownNodeRendererBuilder {
-  public readonly nodeRendererFactories: MarkdownNodeRendererFactory[] = [];
+  readonly nodeRendererFactories: MarkdownNodeRendererFactory[] = [];
 
   /**
    * @return the configured {@link MarkdownRenderer}
    */
-  public build(): MarkdownRenderer {
+  build(): MarkdownRenderer {
     return new MarkdownRenderer(this);
   }
 
@@ -42,7 +42,7 @@ class MarkdownNodeRendererBuilder {
    * @param nodeRendererFactory the factory for creating a node renderer
    * @return {@code this}
    */
-  public nodeRendererFactory(
+  nodeRendererFactory(
     nodeRendererFactory: MarkdownNodeRendererFactory
   ): MarkdownNodeRendererBuilder {
     this.nodeRendererFactories.push(nodeRendererFactory);
@@ -54,7 +54,7 @@ class MarkdownNodeRendererBuilder {
    * @param extensions extensions to use on this renderer
    * @return {@code this}
    */
-  public extensions(extensions: Extension[]): MarkdownNodeRendererBuilder {
+  extensions(extensions: Extension[]): MarkdownNodeRendererBuilder {
     for (const extension of extensions) {
       if (extension instanceof MarkdownRendererExtension) {
         extension.extend(this);
@@ -71,7 +71,7 @@ class RendererContext implements MarkdownNodeRendererContext {
   private readonly additionalTextEscapes: Set<string>;
   private readonly context: MarkdownRenderer;
 
-  public constructor(context: MarkdownRenderer, writer: MarkdownWriter) {
+  constructor(context: MarkdownRenderer, writer: MarkdownWriter) {
     // Set fields that are used by interface
     this.writer = writer;
     this.context = context;
@@ -94,15 +94,15 @@ class RendererContext implements MarkdownNodeRendererContext {
     }
   }
 
-  public getWriter(): MarkdownWriter {
+  getWriter(): MarkdownWriter {
     return this.writer;
   }
 
-  public render(node: Node) {
+  render(node: Node) {
     this.nodeRendererMap.render(node);
   }
 
-  public getSpecialCharacters(): Set<string> {
+  getSpecialCharacters(): Set<string> {
     return this.additionalTextEscapes;
   }
 }
@@ -122,9 +122,9 @@ class RendererContext implements MarkdownNodeRendererContext {
  * again and compared against the original AST, it should be the same (minus bugs).
  */
 export class MarkdownRenderer implements Renderer {
-  public readonly nodeRendererFactories: MarkdownNodeRendererFactory[];
+  readonly nodeRendererFactories: MarkdownNodeRendererFactory[];
 
-  public constructor(builder: MarkdownNodeRendererBuilder) {
+  constructor(builder: MarkdownNodeRendererBuilder) {
     this.nodeRendererFactories = [];
 
     this.nodeRendererFactories.push(...builder.nodeRendererFactories);
@@ -146,11 +146,11 @@ export class MarkdownRenderer implements Renderer {
    *
    * @return a builder
    */
-  public static builder(): MarkdownNodeRendererBuilder {
+  static builder(): MarkdownNodeRendererBuilder {
     return new MarkdownNodeRendererBuilder();
   }
 
-  public render(node: Node, output?: Appendable) {
+  render(node: Node, output?: Appendable) {
     output = output ? output : new Appendable();
 
     let context = new RendererContext(this, new MarkdownWriter(output));
@@ -163,9 +163,9 @@ export class MarkdownRenderer implements Renderer {
   /**
    * Builder for configuring a {@link MarkdownRenderer}. See methods for default configuration.
    */
-  public static Builder = MarkdownNodeRendererBuilder;
+  static Builder = MarkdownNodeRendererBuilder;
 
-  public static MarkdownRendererExtension = MarkdownRendererExtension;
+  static MarkdownRendererExtension = MarkdownRendererExtension;
 }
 
 export default MarkdownRenderer;

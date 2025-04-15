@@ -1,11 +1,11 @@
-import { BlockContinue } from "@/parser";
+import { BlockContinue } from '@/parser';
 
 class BlockContinueImpl extends BlockContinue {
   private readonly newIndex: number;
   private readonly newColumn: number;
   private readonly finalize: boolean;
 
-  public constructor(newIndex: number, newColumn: number, finalize: boolean) {
+  constructor(newIndex: number, newColumn: number, finalize: boolean) {
     super();
 
     this.newIndex = newIndex;
@@ -13,15 +13,15 @@ class BlockContinueImpl extends BlockContinue {
     this.finalize = finalize;
   }
 
-  public getNewIndex(): number {
+  getNewIndex(): number {
     return this.newIndex;
   }
 
-  public getNewColumn(): number {
+  getNewColumn(): number {
     return this.newColumn;
   }
 
-  public isFinalize(): boolean {
+  isFinalize(): boolean {
     return this.finalize;
   }
 }

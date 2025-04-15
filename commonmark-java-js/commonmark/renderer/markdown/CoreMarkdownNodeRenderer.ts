@@ -32,17 +32,17 @@ import {
 import MarkdownWriter from './MarkdownWriter';
 
 class ListHolder {
-  public readonly parent: ListHolder;
+  readonly parent: ListHolder;
 
-  public constructor(parent: ListHolder) {
+  constructor(parent: ListHolder) {
     this.parent = parent;
   }
 }
 
 class BulletListHolder extends ListHolder {
-  public readonly marker: string;
+  readonly marker: string;
 
-  public constructor(parent: ListHolder, bulletList: BulletList) {
+  constructor(parent: ListHolder, bulletList: BulletList) {
     super(parent);
 
     const marker = bulletList.getMarker();
@@ -51,10 +51,10 @@ class BulletListHolder extends ListHolder {
 }
 
 class OrderedListHolder extends ListHolder {
-  public readonly delimiter: string;
-  public number: number;
+  readonly delimiter: string;
+  number: number;
 
-  public constructor(parent: ListHolder, orderedList: OrderedList) {
+  constructor(parent: ListHolder, orderedList: OrderedList) {
     super(parent);
 
     const markerDelimiter = orderedList.getMarkerDelimiter();
@@ -68,11 +68,11 @@ class OrderedListHolder extends ListHolder {
 class LineBreakVisitor extends AbstractVisitor {
   private lineBreak: boolean = false;
 
-  public hasLineBreak(): boolean {
+  hasLineBreak(): boolean {
     return this.lineBreak;
   }
 
-  public visit(lineBreak: SoftLineBreak | HardLineBreak) {
+  visit(lineBreak: SoftLineBreak | HardLineBreak) {
     switch (true) {
       case lineBreak instanceof SoftLineBreak: {
         const softLineBreak = lineBreak;
@@ -139,7 +139,7 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
    */
   private listHolder: ListHolder | null = null;
 
-  public constructor(context: MarkdownNodeRendererContext) {
+  constructor(context: MarkdownNodeRendererContext) {
     super();
 
     this.context = context;
@@ -152,10 +152,10 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.textEscapeInHeading = AsciiMatcher.builder(this.textEscape).anyOf('#').build();
   }
 
-  public beforeRoot(rootNode: Node) {}
-  public afterRoot(rootNode: Node) {}
+  beforeRoot(rootNode: Node) {}
+  afterRoot(rootNode: Node) {}
 
-  public getNodeTypes(): Set<typeof Node> {
+  getNodeTypes(): Set<typeof Node> {
     return new Set([
       BlockQuote,
       BulletList,
@@ -180,11 +180,11 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     ]);
   }
 
-  public render(node: Node) {
+  render(node: Node) {
     node.accept(this);
   }
 
-  public override visit(node: Node) {
+  override visit(node: Node) {
     switch (true) {
       case node instanceof Document: {
         const document = node;
@@ -737,16 +737,16 @@ class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
     this.writer.raw(')');
   }
 
-  public static ListHolder = ListHolder;
+  static ListHolder = ListHolder;
 
-  public static BulletListHolder = BulletListHolder;
+  static BulletListHolder = BulletListHolder;
 
-  public static OrderedListHolder = OrderedListHolder;
+  static OrderedListHolder = OrderedListHolder;
 
   /**
    * Visits nodes to check if there are any soft or hard line breaks.
    */
-  public static LineBreakVisitor = LineBreakVisitor;
+  static LineBreakVisitor = LineBreakVisitor;
 }
 
 export default CoreMarkdownNodeRenderer;

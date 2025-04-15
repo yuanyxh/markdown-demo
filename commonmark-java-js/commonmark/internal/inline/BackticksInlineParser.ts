@@ -1,19 +1,15 @@
-import type {
-  InlineContentParser,
-  InlineContentParserFactory,
-  InlineParserState,
-} from "@/parser";
+import type { InlineContentParser, InlineContentParserFactory, InlineParserState } from '@/parser';
 
-import { ParsedInline } from "@/parser";
-import { Characters } from "@/text";
-import { Code, Text } from "@/node";
+import { ParsedInline } from '@/parser';
+import { Characters } from '@/text';
+import { Code, Text } from '@/node';
 
 class Factory implements InlineContentParserFactory {
-  public getTriggerCharacters(): Set<string> {
-    return new Set("`");
+  getTriggerCharacters(): Set<string> {
+    return new Set('`');
   }
 
-  public create(): InlineContentParser {
+  create(): InlineContentParser {
     return new BackticksInlineParser();
   }
 }
@@ -22,29 +18,27 @@ class Factory implements InlineContentParserFactory {
  * Attempt to parse backticks, returning either a backtick code span or a literal sequence of backticks.
  */
 class BackticksInlineParser implements InlineContentParser {
-  public tryParse(inlineParserState: InlineParserState): ParsedInline {
+  tryParse(inlineParserState: InlineParserState): ParsedInline {
     const scanner = inlineParserState.getScanner();
     const start = scanner.position();
-    const openingTicks = scanner.matchMultiple("`");
+    const openingTicks = scanner.matchMultiple('`');
     const afterOpening = scanner.position();
 
-    while (scanner.find("`") > 0) {
+    while (scanner.find('`') > 0) {
       const beforeClosing = scanner.position();
-      const count = scanner.matchMultiple("`");
+      const count = scanner.matchMultiple('`');
       if (count === openingTicks) {
         const node = new Code();
 
-        let content: string = scanner
-          .getSource(afterOpening, beforeClosing)
-          .getContent();
-        content = content.replace("\n", " ");
+        let content: string = scanner.getSource(afterOpening, beforeClosing).getContent();
+        content = content.replace('\n', ' ');
 
         // spec: If the resulting string both begins and ends with a space character, but does not consist
         // entirely of space characters, a single space character is removed from the front and back.
         if (
           content.length >= 3 &&
-          content.charAt(0) === " " &&
-          content.charAt(content.length - 1) === " " &&
+          content.charAt(0) === ' ' &&
+          content.charAt(content.length - 1) === ' ' &&
           Characters.hasNonSpace(content)
         ) {
           content = content.substring(1, content.length - 1);
@@ -62,7 +56,7 @@ class BackticksInlineParser implements InlineContentParser {
     return ParsedInline.of(text, afterOpening);
   }
 
-  public static Factory = Factory;
+  static Factory = Factory;
 }
 
 export default BackticksInlineParser;

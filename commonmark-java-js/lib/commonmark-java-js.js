@@ -764,7 +764,7 @@ class At {
     i(this, "end");
     this.node = e, this.end = t;
   }
-  // public hasNext(): boolean {
+  // hasNext(): boolean {
   //   return this.node !== null && this.node !== this.end;
   // }
   next() {
@@ -830,17 +830,13 @@ class ce {
     if (e < 0)
       throw Error("beginIndex " + e + " + must be >= 0");
     if (e > this.length)
-      throw Error(
-        "beginIndex " + e + " must be <= length " + this.length
-      );
+      throw Error("beginIndex " + e + " must be <= length " + this.length);
     if (t < 0)
       throw Error("endIndex " + t + " + must be >= 0");
     if (t > this.length)
       throw Error("endIndex " + t + " must be <= length " + this.length);
     if (e > t)
-      throw Error(
-        "beginIndex " + e + " must be <= endIndex " + t
-      );
+      throw Error("beginIndex " + e + " must be <= endIndex " + t);
     return e === 0 && t === this.length ? this : new ce(
       this.lineIndex,
       this.columnIndex + e,
@@ -1555,9 +1551,7 @@ const Z = class Z {
     } else {
       let r = q.empty();
       const s = this.lines[e.lineIndex];
-      r.addLine(
-        s.substring(e.index, s.getContent().length)
-      );
+      r.addLine(s.substring(e.index, s.getContent().length));
       for (let a = e.lineIndex + 1; a < t.lineIndex; a++)
         r.addLine(this.lines[a]);
       let n = this.lines[t.lineIndex];
@@ -1574,9 +1568,7 @@ const Z = class Z {
       );
     const r = this.lines[e];
     if (t < 0 || t > r.getContent().length)
-      throw Error(
-        "Index " + t + " out of range, line length: " + r.getContent().length
-      );
+      throw Error("Index " + t + " out of range, line length: " + r.getContent().length);
   }
 };
 /**
@@ -1685,10 +1677,7 @@ class m {
       case "\r":
         return !0;
       default:
-        return P.isUnicodeCharOfCategory(
-          P.UnicodeCategory.Zs,
-          t
-        );
+        return P.isUnicodeCharOfCategory(P.UnicodeCategory.Zs, t);
     }
   }
   static skip(e, t, r, s) {
@@ -1952,19 +1941,12 @@ class Kt {
   }
   getOpeners(e) {
     if (!(e >= 1 && e <= this.length()))
-      throw Error(
-        "length must be between 1 and " + this.length() + ", was " + e
-      );
-    return this.characters.slice(
-      this.characters.length - e,
-      this.characters.length
-    );
+      throw Error("length must be between 1 and " + this.length() + ", was " + e);
+    return this.characters.slice(this.characters.length - e, this.characters.length);
   }
   getClosers(e) {
     if (!(e >= 1 && e <= this.length()))
-      throw Error(
-        "length must be between 1 and " + this.length() + ", was " + e
-      );
+      throw Error("length must be between 1 and " + this.length() + ", was " + e);
     return this.characters.slice(0, e);
   }
 }
@@ -4181,18 +4163,10 @@ const k = class k {
    * Replace entities and backslash escapes with literal characters.
    */
   static unescapeString(e) {
-    return k.BACKSLASH_OR_AMP.exec(e) ? k.replaceAll(
-      k.ENTITY_OR_ESCAPED_CHAR,
-      e,
-      k.UNESCAPE_REPLACER
-    ) : e;
+    return k.BACKSLASH_OR_AMP.exec(e) ? k.replaceAll(k.ENTITY_OR_ESCAPED_CHAR, e, k.UNESCAPE_REPLACER) : e;
   }
   static percentEncodeUrl(e) {
-    return k.replaceAll(
-      k.ESCAPE_IN_URI,
-      e,
-      k.URI_REPLACER
-    );
+    return k.replaceAll(k.ESCAPE_IN_URI, e, k.URI_REPLACER);
   }
   static normalizeLabelContent(e) {
     return e.trim().toLocaleLowerCase().toLocaleLowerCase().replace(k.WHITESPACE, " ");
@@ -4336,10 +4310,7 @@ let ye = Pe, jt = class {
       if (a !== null)
         return b.of(a).atIndex(r.getContent().length);
     }
-    const n = fe.getSetextHeadingLevel(
-      r.getContent(),
-      s
-    );
+    const n = fe.getSetextHeadingLevel(r.getContent(), s);
     if (n > 0) {
       const a = t.getParagraphLines();
       if (!a.isEmpty())
@@ -4430,9 +4401,7 @@ let fe = re, Qt = class {
           continue;
         const a = ke.BLOCK_PATTERNS[n][0], l = ke.BLOCK_PATTERNS[n][1];
         if (a == null ? void 0 : a.exec(s.substring(r, s.length)))
-          return b.of(new ke(l)).atIndex(
-            e.getIndex()
-          );
+          return b.of(new ke(l)).atIndex(e.getIndex());
       }
     return b.none();
   }
@@ -4464,10 +4433,7 @@ const g = class g extends K {
 i(g, "TAGNAME", "[A-Za-z][A-Za-z0-9-]*"), i(g, "ATTRIBUTENAME", "[a-zA-Z_:][a-zA-Z0-9:._-]*"), i(g, "UNQUOTEDVALUE", "[^\"'=<>`\\x00-\\x20]+"), i(g, "SINGLEQUOTEDVALUE", "'[^']*'"), i(g, "DOUBLEQUOTEDVALUE", '"[^"]*"'), i(g, "ATTRIBUTEVALUE", "(?:" + g.UNQUOTEDVALUE + "|" + g.SINGLEQUOTEDVALUE + "|" + g.DOUBLEQUOTEDVALUE + ")"), i(g, "ATTRIBUTEVALUESPEC", "(?:\\s*=\\s*" + g.ATTRIBUTEVALUE + ")"), i(g, "ATTRIBUTE", "(?:\\s+" + g.ATTRIBUTENAME + g.ATTRIBUTEVALUESPEC + "?)"), i(g, "OPENTAG", "<" + g.TAGNAME + g.ATTRIBUTE + "*\\s*/?>"), i(g, "CLOSETAG", "</" + g.TAGNAME + "\\s*[>]"), i(g, "BLOCK_PATTERNS", [
   [null, null],
   // not used (no type 0)
-  [
-    /^<(?:script|pre|style|textarea)(?:\\s|>|$)/i,
-    /<\/(?:script|pre|style|textarea)>/i
-  ],
+  [/^<(?:script|pre|style|textarea)(?:\\s|>|$)/i, /<\/(?:script|pre|style|textarea)>/i],
   [/^<!--/, /-->/],
   [/^<[?]/, /\\?>/],
   [/^<![A-Z]/, />/],
@@ -4481,10 +4447,7 @@ i(g, "TAGNAME", "[A-Za-z][A-Za-z0-9-]*"), i(g, "ATTRIBUTENAME", "[a-zA-Z_:][a-zA
     // terminated by blank line
   ],
   [
-    new RegExp(
-      "^(?:" + g.OPENTAG + "|" + g.CLOSETAG + ")\\s*$",
-      "i"
-    ),
+    new RegExp("^(?:" + g.OPENTAG + "|" + g.CLOSETAG + ")\\s*$", "i"),
     null
     // terminated by blank line
   ]
@@ -4506,9 +4469,7 @@ class nt extends K {
     return this.block;
   }
   tryContinue(t) {
-    return t.getIndent() >= T.CODE_BLOCK_INDENT ? w.atColumn(
-      t.getColumn() + T.CODE_BLOCK_INDENT
-    ) : t.isBlank() ? w.atIndex(t.getNextNonSpaceIndex()) : w.none();
+    return t.getIndent() >= T.CODE_BLOCK_INDENT ? w.atColumn(t.getColumn() + T.CODE_BLOCK_INDENT) : t.isBlank() ? w.atIndex(t.getNextNonSpaceIndex()) : w.none();
   }
   addLine(t) {
     this.lines.push(t.getContent());
@@ -4603,17 +4564,9 @@ let _t = class {
     );
     if (l === null)
       return b.none();
-    const c = l.contentColumn, h = new Xt(
-      e.getIndent(),
-      c - e.getColumn()
-    );
-    if (!(r instanceof le) || !le.listsMatch(
-      r.getBlock(),
-      l.listBlock
-    )) {
-      const u = new le(
-        l.listBlock
-      );
+    const c = l.contentColumn, h = new Xt(e.getIndent(), c - e.getColumn());
+    if (!(r instanceof le) || !le.listsMatch(r.getBlock(), l.listBlock)) {
+      const u = new le(l.listBlock);
       return l.listBlock.setTight(!0), b.of(u, h).atColumn(c);
     } else
       return b.of(h).atColumn(c);
@@ -4975,11 +4928,7 @@ class Bt {
   setLabel(e) {
     var r, s;
     const t = e.position();
-    return v.scanLinkLabelContent(e) ? ((r = this.label) == null || r.append(
-      e.getSource(t, e.position()).getContent()
-    ), e.hasNext() ? e.next("]") ? !e.next(":") || this.label && this.label.length() > 999 || E.normalizeLabelContent(
-      this.label.toString()
-    ) === "" ? !1 : (this.state = "DESTINATION", e.whitespace(), !0) : !1 : ((s = this.label) == null || s.append(`
+    return v.scanLinkLabelContent(e) ? ((r = this.label) == null || r.append(e.getSource(t, e.position()).getContent()), e.hasNext() ? e.next("]") ? !e.next(":") || this.label && this.label.length() > 999 || E.normalizeLabelContent(this.label.toString()) === "" ? !1 : (this.state = "DESTINATION", e.whitespace(), !0) : !1 : ((s = this.label) == null || s.append(`
 `), !0)) : !1;
   }
   setDestination(e) {
@@ -5016,9 +4965,7 @@ class Bt {
   setTitle(e) {
     var r, s;
     const t = e.position();
-    return v.scanLinkTitleContent(e, this.titleDelimiter || "") ? ((r = this.title) == null || r.append(
-      e.getSource(t, e.position()).getContent()
-    ), e.hasNext() ? (e.next(), e.whitespace(), e.hasNext() ? (this.title = null, !1) : (this.referenceValid = !0, this.paragraphLines.length = 0, this.state = "START_DEFINITION", !0)) : ((s = this.title) == null || s.append(`
+    return v.scanLinkTitleContent(e, this.titleDelimiter || "") ? ((r = this.title) == null || r.append(e.getSource(t, e.position()).getContent()), e.hasNext() ? (e.next(), e.whitespace(), e.hasNext() ? (this.title = null, !1) : (this.referenceValid = !0, this.paragraphLines.length = 0, this.state = "START_DEFINITION", !0)) : ((s = this.title) == null || s.append(`
 `), !0)) : (this.title = null, !1);
   }
   finishReference() {
@@ -5064,9 +5011,7 @@ class Xe extends K {
   closeBlock() {
     for (const t of this.linkReferenceDefinitionParser.getDefinitions())
       this.block.insertBefore(t);
-    this.linkReferenceDefinitionParser.getParagraphLines().isEmpty() ? this.block.unlink() : this.block.setSourceSpans(
-      this.linkReferenceDefinitionParser.getParagraphSourceSpans()
-    );
+    this.linkReferenceDefinitionParser.getParagraphLines().isEmpty() ? this.block.unlink() : this.block.setSourceSpans(this.linkReferenceDefinitionParser.getParagraphSourceSpans());
   }
   parseInlines(t) {
     const r = this.linkReferenceDefinitionParser.getParagraphLines();
@@ -5083,9 +5028,7 @@ let er = class {
     const r = e.getNextNonSpaceIndex(), s = e.getLine().getContent();
     if (De.isThematicBreak(s, r)) {
       const n = s.substring(e.getIndex(), s.length);
-      return b.of(new De(n)).atIndex(
-        s.length
-      );
+      return b.of(new De(n)).atIndex(s.length);
     } else
       return b.none();
   }
@@ -5275,9 +5218,7 @@ const I = class I {
       let p = null;
       h.isReplaceActiveBlockParser() && (p = this.prepareActiveBlockParserForReplacement().getSourceSpans());
       for (let f of h.getBlockParsers())
-        this.addChild(
-          new I.OpenBlockParser(f, u)
-        ), p !== null && f.getBlock().setSourceSpans(p), n = f, c = f.isContainer();
+        this.addChild(new I.OpenBlockParser(f, u)), p !== null && f.getBlock().setSourceSpans(p), n = f, c = f.isContainer();
     }
     if (!a && !this.isBlank() && this.getActiveBlockParser().canHaveLazyContinuationLines())
       this.openBlockParsers[this.openBlockParsers.length - 1].sourceIndex = l, this.addLine();
@@ -5287,20 +5228,13 @@ const I = class I {
       this.addSourceSpans();
     else {
       let h = new Xe();
-      this.addChild(
-        new I.OpenBlockParser(h, l)
-      ), this.addLine();
+      this.addChild(new I.OpenBlockParser(h, l)), this.addLine();
     }
   }
   setLine(e, t) {
     this.lineIndex++, this.index = 0, this.column = 0, this.columnIsInTab = !1;
     let r = I.prepareLine(e), s = null;
-    this.includeSourceSpans !== Se.NONE && (s = ce.of(
-      this.lineIndex,
-      0,
-      t,
-      r.length
-    )), this.line = ne.of(r, s);
+    this.includeSourceSpans !== Se.NONE && (s = ce.of(this.lineIndex, 0, t, r.length)), this.line = ne.of(r, s);
   }
   findNextNonSpace() {
     var s;
@@ -5358,13 +5292,13 @@ const I = class I {
     if (this.includeSourceSpans !== Se.NONE)
       for (let e = 1; e < this.openBlockParsers.length; e++) {
         const t = this.openBlockParsers[e], r = Math.min(t.sourceIndex, this.index);
-        this.line.getContent().length - r !== 0 && t.blockParser.addSourceSpan(
-          this.line.getSourceSpan().subSpan(r)
-        );
+        this.line.getContent().length - r !== 0 && t.blockParser.addSourceSpan(this.line.getSourceSpan().subSpan(r));
       }
   }
   findBlockStart(e) {
-    const t = new I.MatchedBlockParserImpl(e);
+    const t = new I.MatchedBlockParserImpl(
+      e
+    );
     for (const r of this.blockParserFactories) {
       const s = r.tryStart(this, t);
       if (s instanceof Tt)
@@ -5391,9 +5325,7 @@ const I = class I {
    * its parent, and so on until we find a block that can accept children.
    */
   addChild(e) {
-    for (; !this.getActiveBlockParser().canContain(
-      e.blockParser.getBlock()
-    ); )
+    for (; !this.getActiveBlockParser().canContain(e.blockParser.getBlock()); )
       this.closeBlockParsers(1);
     this.getActiveBlockParser().getBlock().appendChild(e.blockParser.getBlock()), this.activateBlockParser(e);
   }
@@ -5567,22 +5499,14 @@ class qe {
         e.getTitle()
       );
     const s = e.getLabel(), n = s || e.getText() || "", a = r.getDefinition(Ke, n);
-    return a !== null ? qe.process(
-      e,
-      t,
-      a.getDestination(),
-      a.getTitle()
-    ) : Ze.none();
+    return a !== null ? qe.process(e, t, a.getDestination(), a.getTitle()) : Ze.none();
   }
   static process(e, t, r, s) {
     const n = e.getMarker();
     return n !== null && n.getLiteral() === "!" ? Ze.wrapTextIn(
       new ge(r || "", s || void 0),
       t.position()
-    ).setIncludeMarker() : Ze.wrapTextIn(
-      new j(r || "", s || void 0),
-      t.position()
-    );
+    ).setIncludeMarker() : Ze.wrapTextIn(new j(r || "", s || void 0), t.position());
   }
 }
 let ar = class {
@@ -5614,10 +5538,7 @@ const D = class D {
   }
   entity(e, t) {
     const r = e.getSource(t, e.position()).getContent();
-    return O.of(
-      new A(ve.entityToString(r)),
-      e.position()
-    );
+    return O.of(new A(ve.entityToString(r)), e.position());
   }
 };
 i(D, "hex", R.builder().range("0", "9").range("A", "F").range("a", "f").build()), i(D, "dec", R.builder().range("0", "9").build()), i(D, "entityStart", R.builder().range("A", "Z").range("a", "z").build()), i(D, "entityContinue", D.entityStart.newBuilder().range("0", "9").build()), i(D, "Factory", ar);
@@ -5804,10 +5725,7 @@ class ft {
     return this.processors[0];
   }
   process(e, t) {
-    return this.findProcessor(e.length()).process(
-      e,
-      t
-    );
+    return this.findProcessor(e.length()).process(e, t);
   }
 }
 class kt {

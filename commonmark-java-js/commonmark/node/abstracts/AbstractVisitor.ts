@@ -8,7 +8,7 @@ import type { Visitor } from '../interfaces/Visitor';
  * call {@link #visitChildren}.
  */
 abstract class AbstractVisitor implements Visitor {
-  public visit(node: Node) {
+  visit(node: Node) {
     this.visitChildren(node);
   }
 

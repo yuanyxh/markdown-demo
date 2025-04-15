@@ -1,0 +1,46 @@
+type UnicodeCategoryTypes = keyof typeof Character.UnicodeCategory;
+declare class Character {
+    private static map;
+    static isUnicodeCharOfCategory(type: UnicodeCategoryTypes, char: string): boolean;
+    static isISOControl(c: string): boolean;
+    static isLetter(char: string): boolean;
+    static isHighSurrogate(codePoint: number): boolean;
+    static isLowSurrogate(codePoint: number): boolean;
+    static toCodePoint(char1: number, char2: number): number;
+    static readonly UnicodeCategory: {
+        readonly Ll: "Ll";
+        readonly Lu: "Lu";
+        readonly Lt: "Lt";
+        readonly Lm: "Lm";
+        readonly Lo: "Lo";
+        readonly Mn: "Mn";
+        readonly Mc: "Mc";
+        readonly Me: "Me";
+        readonly Nd: "Nd";
+        readonly Nl: "Nl";
+        readonly No: "No";
+        readonly Pd: "Pd";
+        readonly Ps: "Ps";
+        readonly Pe: "Pe";
+        readonly Pi: "Pi";
+        readonly Pf: "Pf";
+        readonly Pc: "Pc";
+        readonly Po: "Po";
+        readonly Sm: "Sm";
+        readonly Sc: "Sc";
+        readonly Sk: "Sk";
+        readonly So: "So";
+        readonly Zs: "Zs";
+        readonly Zl: "Zl";
+        readonly Zp: "Zp";
+        readonly Cc: "Cc";
+        readonly Cf: "Cf";
+        readonly Co: "Co";
+        readonly Cs: "Cs";
+        readonly Cn: "Cn";
+        readonly L: "L";
+        readonly P: "P";
+        readonly S: "S";
+    };
+}
+export default Character;

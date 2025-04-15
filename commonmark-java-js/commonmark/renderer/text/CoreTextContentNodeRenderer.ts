@@ -43,17 +43,17 @@ class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRendere
 
   private listHolder: ListHolder | null = null;
 
-  public constructor(context: TextContentNodeRendererContext) {
+  constructor(context: TextContentNodeRendererContext) {
     super();
 
     this.context = context;
     this.textContent = context.getWriter();
   }
 
-  public beforeRoot(rootNode: Node): void {}
-  public afterRoot(rootNode: Node): void {}
+  beforeRoot(rootNode: Node): void {}
+  afterRoot(rootNode: Node): void {}
 
-  public getNodeTypes(): Set<typeof Node> {
+  getNodeTypes(): Set<typeof Node> {
     return new Set([
       Document,
       Heading,
@@ -78,11 +78,11 @@ class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRendere
     ]);
   }
 
-  public render(node: Node) {
+  render(node: Node) {
     node.accept(this);
   }
 
-  public override visit(node: Node) {
+  override visit(node: Node) {
     switch (true) {
       case node instanceof Document:
         this.visitChildren(node);

@@ -5,13 +5,13 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class CodeView extends InlineView {
-  public children: ContentView[] = [];
+  children: ContentView[] = [];
 
-  public override eq(node: Code): boolean {
+  override eq(node: Code): boolean {
     return node.type === this.node.type && node.getLiteral() === this.dom.textContent;
   }
 
-  public override setNode(node: Code): void {
+  override setNode(node: Code): void {
     this.node = node;
 
     if (node.getLiteral() !== this.dom.textContent) {
@@ -19,7 +19,7 @@ class CodeView extends InlineView {
     }
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -32,7 +32,7 @@ class CodeView extends InlineView {
     return code;
   }
 
-  public static override craete(node: Code): CodeView {
+  static override craete(node: Code): CodeView {
     return new this(node);
   }
 }

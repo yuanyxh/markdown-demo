@@ -5,20 +5,20 @@ import type ContentView from './abstracts/contentview';
 import BlockView from './abstracts/blockview';
 
 class IndentedCodeBlockView extends BlockView {
-  public children: ContentView[] = [];
-  public node: IndentedCodeBlock;
+  children: ContentView[] = [];
+  node: IndentedCodeBlock;
 
-  public constructor(node: IndentedCodeBlock) {
+  constructor(node: IndentedCodeBlock) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: IndentedCodeBlock): boolean {
+  override eq(node: IndentedCodeBlock): boolean {
     return node.type === this.node.type && node.getLiteral() === this.dom.firstChild?.textContent;
   }
 
-  public override setNode(node: IndentedCodeBlock): void {
+  override setNode(node: IndentedCodeBlock): void {
     if (node.getLiteral() !== this.dom.firstChild?.textContent) {
       if (this.dom.firstChild) {
         this.dom.firstChild.textContent = node.getLiteral();
@@ -26,11 +26,11 @@ class IndentedCodeBlockView extends BlockView {
     }
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
-  public override destroy(): void {
+  override destroy(): void {
     super.destroy();
   }
 
@@ -47,7 +47,7 @@ class IndentedCodeBlockView extends BlockView {
     return block;
   }
 
-  public static override craete(node: IndentedCodeBlock): IndentedCodeBlockView {
+  static override craete(node: IndentedCodeBlock): IndentedCodeBlockView {
     return new this(node);
   }
 }

@@ -7,13 +7,13 @@ enum Type {
 }
 
 class LinkResultImpl implements LinkResult {
-  public setIncludeMarker(): LinkResult {
+  setIncludeMarker(): LinkResult {
     this.includeMarker = true;
 
     return this;
   }
 
-  public static Type = Type;
+  static Type = Type;
 
   private readonly type: Type;
   private readonly node: Node;
@@ -21,25 +21,25 @@ class LinkResultImpl implements LinkResult {
 
   private includeMarker: boolean = false;
 
-  public constructor(type: Type, node: Node, position: Position) {
+  constructor(type: Type, node: Node, position: Position) {
     this.type = type;
     this.node = node;
     this.position = position;
   }
 
-  public getType(): Type {
+  getType(): Type {
     return this.type;
   }
 
-  public getNode(): Node {
+  getNode(): Node {
     return this.node;
   }
 
-  public getPosition(): Position {
+  getPosition(): Position {
     return this.position;
   }
 
-  public isIncludeMarker(): boolean {
+  isIncludeMarker(): boolean {
     return this.includeMarker;
   }
 }

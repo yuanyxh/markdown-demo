@@ -4,7 +4,7 @@ class MarkdownNodeIterable implements Iterable<Node> {
   private readonly first: Node;
   private readonly end: Node;
 
-  public constructor(first: Node, end: Node) {
+  constructor(first: Node, end: Node) {
     this.first = first;
     this.end = end;
   }
@@ -13,7 +13,7 @@ class MarkdownNodeIterable implements Iterable<Node> {
     return this.iterator();
   }
 
-  public iterator(): Iterator<Node> {
+  iterator(): Iterator<Node> {
     return new MarkdownNodeIterator(this.first, this.end);
   }
 }
@@ -22,16 +22,16 @@ class MarkdownNodeIterator implements Iterator<Node> {
   private node: Node | null;
   private readonly end: Node;
 
-  public constructor(first: Node, end: Node) {
+  constructor(first: Node, end: Node) {
     this.node = first;
     this.end = end;
   }
 
-  // public hasNext(): boolean {
+  // hasNext(): boolean {
   //   return this.node !== null && this.node !== this.end;
   // }
 
-  public next(): IteratorResult<Node> {
+  next(): IteratorResult<Node> {
     const result = this.node;
     this.node = this.node ? this.node.getNext() : null;
 
@@ -52,7 +52,7 @@ class Nodes {
   /**
    * The nodes between (not including) start and end.
    */
-  public static between(start: Node, end: Node): MarkdownNodeIterable {
+  static between(start: Node, end: Node): MarkdownNodeIterable {
     const first = start.getNext();
 
     if (first !== null) {
@@ -62,9 +62,9 @@ class Nodes {
     throw Error('Null first node.');
   }
 
-  public static MarkdownNodeIterable = MarkdownNodeIterable;
+  static MarkdownNodeIterable = MarkdownNodeIterable;
 
-  public static MarkdownNodeIterator = MarkdownNodeIterator;
+  static MarkdownNodeIterator = MarkdownNodeIterator;
 }
 
 export default Nodes;

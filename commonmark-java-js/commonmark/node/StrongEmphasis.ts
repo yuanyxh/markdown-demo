@@ -6,25 +6,25 @@ import Node from './abstracts/Node';
 class StrongEmphasis extends Node implements Delimited {
   private delimiter: string;
 
-  public constructor(delimiter: string) {
+  constructor(delimiter: string) {
     super('strong-emphasis');
 
     this.delimiter = delimiter;
   }
 
-  public override accept(visitor: Visitor) {
+  override accept(visitor: Visitor) {
     visitor.visit(this);
   }
 
-  public setDelimiter(delimiter: string) {
+  setDelimiter(delimiter: string) {
     this.delimiter = delimiter;
   }
 
-  public getOpeningDelimiter(): string {
+  getOpeningDelimiter(): string {
     return this.delimiter;
   }
 
-  public getClosingDelimiter(): string {
+  getClosingDelimiter(): string {
     return this.delimiter;
   }
 }

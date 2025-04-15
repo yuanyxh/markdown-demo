@@ -5,16 +5,16 @@ import type ListItemView from './listitemview';
 import BlockView from './abstracts/blockview';
 
 class OrderedListView extends BlockView {
-  public children: ListItemView[] = [];
-  public node: OrderedList;
+  children: ListItemView[] = [];
+  node: OrderedList;
 
-  public constructor(node: OrderedList) {
+  constructor(node: OrderedList) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: OrderedList): boolean {
+  override eq(node: OrderedList): boolean {
     return (
       node.type === this.node.type &&
       node.getMarkerDelimiter() === this.node.getMarkerDelimiter() &&
@@ -34,7 +34,7 @@ class OrderedListView extends BlockView {
     return ol;
   }
 
-  public static override craete(node: OrderedList): OrderedListView {
+  static override craete(node: OrderedList): OrderedListView {
     return new this(node);
   }
 }

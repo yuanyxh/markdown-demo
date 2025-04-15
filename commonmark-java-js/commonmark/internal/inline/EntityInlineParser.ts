@@ -3,21 +3,21 @@ import type {
   InlineContentParserFactory,
   InlineParserState,
   Position,
-  Scanner,
-} from "@/parser";
+  Scanner
+} from '@/parser';
 
-import { ParsedInline } from "@/parser";
-import { Text } from "@/node";
-import { AsciiMatcher } from "@/text";
+import { ParsedInline } from '@/parser';
+import { Text } from '@/node';
+import { AsciiMatcher } from '@/text';
 
-import Html5Entities from "../internal_util/Html5Entities";
+import Html5Entities from '../internal_util/Html5Entities';
 
 class Factory implements InlineContentParserFactory {
-  public getTriggerCharacters(): Set<string> {
-    return new Set("&");
+  getTriggerCharacters(): Set<string> {
+    return new Set('&');
   }
 
-  public create(): InlineContentParser {
+  create(): InlineContentParser {
     return new EntityInlineParser();
   }
 }
@@ -27,45 +27,45 @@ class Factory implements InlineContentParserFactory {
  */
 class EntityInlineParser implements InlineContentParser {
   private static readonly hex = AsciiMatcher.builder()
-    .range("0", "9")
-    .range("A", "F")
-    .range("a", "f")
+    .range('0', '9')
+    .range('A', 'F')
+    .range('a', 'f')
     .build();
-  private static readonly dec = AsciiMatcher.builder().range("0", "9").build();
+  private static readonly dec = AsciiMatcher.builder().range('0', '9').build();
   private static readonly entityStart = AsciiMatcher.builder()
-    .range("A", "Z")
-    .range("a", "z")
+    .range('A', 'Z')
+    .range('a', 'z')
     .build();
   private static readonly entityContinue = EntityInlineParser.entityStart
     .newBuilder()
-    .range("0", "9")
+    .range('0', '9')
     .build();
 
-  public tryParse(inlineParserState: InlineParserState): ParsedInline | null {
+  tryParse(inlineParserState: InlineParserState): ParsedInline | null {
     const scanner = inlineParserState.getScanner();
     const start = scanner.position();
     // Skip `&`
     scanner.next();
 
     const c = scanner.peek();
-    if (c === "#") {
+    if (c === '#') {
       // Numeric
       scanner.next();
-      if (scanner.next("x") || scanner.next("X")) {
+      if (scanner.next('x') || scanner.next('X')) {
         const digits = scanner.match(EntityInlineParser.hex);
-        if (1 <= digits && digits <= 6 && scanner.next(";")) {
+        if (1 <= digits && digits <= 6 && scanner.next(';')) {
           return this.entity(scanner, start);
         }
       } else {
         const digits = scanner.match(EntityInlineParser.dec);
-        if (1 <= digits && digits <= 7 && scanner.next(";")) {
+        if (1 <= digits && digits <= 7 && scanner.next(';')) {
           return this.entity(scanner, start);
         }
       }
     } else if (EntityInlineParser.entityStart.matches(c)) {
       scanner.match(EntityInlineParser.entityContinue);
 
-      if (scanner.next(";")) {
+      if (scanner.next(';')) {
         return this.entity(scanner, start);
       }
     }
@@ -76,13 +76,10 @@ class EntityInlineParser implements InlineContentParser {
   private entity(scanner: Scanner, start: Position): ParsedInline {
     const text = scanner.getSource(start, scanner.position()).getContent();
 
-    return ParsedInline.of(
-      new Text(Html5Entities.entityToString(text)),
-      scanner.position()
-    );
+    return ParsedInline.of(new Text(Html5Entities.entityToString(text)), scanner.position());
   }
 
-  public static Factory = Factory;
+  static Factory = Factory;
 }
 
 export default EntityInlineParser;

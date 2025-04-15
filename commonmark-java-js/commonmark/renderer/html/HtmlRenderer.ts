@@ -25,19 +25,19 @@ class HtmlRendererExtension implements Extension {
 }
 
 class HtmlRendererBuilder {
-  public softbreak = '\n';
-  public escapeHtml = false;
-  public sanitizeUrls = false;
-  public urlSanitizer: UrlSanitizer = new DefaultUrlSanitizer();
-  public percentEncodeUrls = false;
-  public omitSingleParagraphP = false;
-  public attributeProviderFactories: AttributeProviderFactory[] = [];
-  public nodeRendererFactories: HtmlNodeRendererFactory[] = [];
+  softbreak = '\n';
+  escapeHtml = false;
+  sanitizeUrls = false;
+  urlSanitizer: UrlSanitizer = new DefaultUrlSanitizer();
+  percentEncodeUrls = false;
+  omitSingleParagraphP = false;
+  attributeProviderFactories: AttributeProviderFactory[] = [];
+  nodeRendererFactories: HtmlNodeRendererFactory[] = [];
 
   /**
    * @return the configured {@link HtmlRenderer}
    */
-  public build(): HtmlRenderer {
+  build(): HtmlRenderer {
     return new HtmlRenderer(this);
   }
 
@@ -52,7 +52,7 @@ class HtmlRendererBuilder {
    * @param softbreak HTML for softbreak
    * @return {@code this}
    */
-  public setSoftbreak(softbreak: string): HtmlRendererBuilder {
+  setSoftbreak(softbreak: string): HtmlRendererBuilder {
     this.softbreak = softbreak;
     return this;
   }
@@ -66,7 +66,7 @@ class HtmlRendererBuilder {
    * @param escapeHtml true for escaping, false for preserving raw HTML
    * @return {@code this}
    */
-  public setEscapeHtml(escapeHtml: boolean): HtmlRendererBuilder {
+  setEscapeHtml(escapeHtml: boolean): HtmlRendererBuilder {
     this.escapeHtml = escapeHtml;
     return this;
   }
@@ -78,7 +78,7 @@ class HtmlRendererBuilder {
    * @return {@code this}
    * @since 0.14.0
    */
-  public setSanitizeUrls(sanitizeUrls: boolean): HtmlRendererBuilder {
+  setSanitizeUrls(sanitizeUrls: boolean): HtmlRendererBuilder {
     this.sanitizeUrls = sanitizeUrls;
     return this;
   }
@@ -90,7 +90,7 @@ class HtmlRendererBuilder {
    * @return {@code this}
    * @since 0.14.0
    */
-  public setUrlSanitizer(urlSanitizer: UrlSanitizer): HtmlRendererBuilder {
+  setUrlSanitizer(urlSanitizer: UrlSanitizer): HtmlRendererBuilder {
     this.urlSanitizer = urlSanitizer;
     return this;
   }
@@ -109,7 +109,7 @@ class HtmlRendererBuilder {
    * @param percentEncodeUrls true to percent-encode, false for leaving as-is
    * @return {@code this}
    */
-  public setPercentEncodeUrls(percentEncodeUrls: boolean): HtmlRendererBuilder {
+  setPercentEncodeUrls(percentEncodeUrls: boolean): HtmlRendererBuilder {
     this.percentEncodeUrls = percentEncodeUrls;
     return this;
   }
@@ -120,7 +120,7 @@ class HtmlRendererBuilder {
    *
    * @return {@code this}
    */
-  public setOmitSingleParagraphP(omitSingleParagraphP: boolean): HtmlRendererBuilder {
+  setOmitSingleParagraphP(omitSingleParagraphP: boolean): HtmlRendererBuilder {
     this.omitSingleParagraphP = omitSingleParagraphP;
     return this;
   }
@@ -131,7 +131,7 @@ class HtmlRendererBuilder {
    * @param attributeProviderFactory the attribute provider factory to add
    * @return {@code this}
    */
-  public attributeProviderFactory(
+  attributeProviderFactory(
     attributeProviderFactory: AttributeProviderFactory
   ): HtmlRendererBuilder {
     this.attributeProviderFactories.push(attributeProviderFactory);
@@ -149,7 +149,7 @@ class HtmlRendererBuilder {
    * @param nodeRendererFactory the factory for creating a node renderer
    * @return {@code this}
    */
-  public nodeRendererFactory(nodeRendererFactory: HtmlNodeRendererFactory): HtmlRendererBuilder {
+  nodeRendererFactory(nodeRendererFactory: HtmlNodeRendererFactory): HtmlRendererBuilder {
     this.nodeRendererFactories.push(nodeRendererFactory);
 
     return this;
@@ -159,7 +159,7 @@ class HtmlRendererBuilder {
    * @param extensions extensions to use on this HTML renderer
    * @return {@code this}
    */
-  public extensions(extensions: Extension[]): HtmlRendererBuilder {
+  extensions(extensions: Extension[]): HtmlRendererBuilder {
     for (const extension of extensions) {
       if (extension instanceof HtmlRendererExtension) {
         extension.extend(this);
@@ -176,7 +176,7 @@ class RendererContext implements HtmlNodeRendererContext, AttributeProviderConte
   private readonly nodeRendererMap = new NodeRendererMap();
   private readonly context: HtmlRenderer;
 
-  public constructor(context: HtmlRenderer, htmlWriter: HtmlWriter) {
+  constructor(context: HtmlRenderer, htmlWriter: HtmlWriter) {
     this.context = context;
     this.htmlWriter = htmlWriter;
 
@@ -191,23 +191,23 @@ class RendererContext implements HtmlNodeRendererContext, AttributeProviderConte
     }
   }
 
-  public shouldEscapeHtml(): boolean {
+  shouldEscapeHtml(): boolean {
     return this.context.escapeHtml;
   }
 
-  public shouldOmitSingleParagraphP(): boolean {
+  shouldOmitSingleParagraphP(): boolean {
     return this.context.omitSingleParagraphP;
   }
 
-  public shouldSanitizeUrls(): boolean {
+  shouldSanitizeUrls(): boolean {
     return this.context.sanitizeUrls;
   }
 
-  public urlSanitizer(): UrlSanitizer {
+  urlSanitizer(): UrlSanitizer {
     return this.context.urlSanitizer;
   }
 
-  public encodeUrl(url: string): string {
+  encodeUrl(url: string): string {
     if (this.context.percentEncodeUrls) {
       return Escaping.percentEncodeUrl(url);
     } else {
@@ -215,7 +215,7 @@ class RendererContext implements HtmlNodeRendererContext, AttributeProviderConte
     }
   }
 
-  public extendAttributes(
+  extendAttributes(
     node: Node,
     tagName: string,
     attributes: Map<string, string>
@@ -226,23 +226,23 @@ class RendererContext implements HtmlNodeRendererContext, AttributeProviderConte
     return attrs;
   }
 
-  public getWriter(): HtmlWriter {
+  getWriter(): HtmlWriter {
     return this.htmlWriter;
   }
 
-  public getSoftbreak(): string {
+  getSoftbreak(): string {
     return this.context.softbreak;
   }
 
-  public render(node: Node) {
+  render(node: Node) {
     this.nodeRendererMap.render(node);
   }
 
-  public beforeRoot(node: Node) {
+  beforeRoot(node: Node) {
     this.nodeRendererMap.beforeRoot(node);
   }
 
-  public afterRoot(node: Node) {
+  afterRoot(node: Node) {
     this.nodeRendererMap.afterRoot(node);
   }
 
@@ -263,16 +263,16 @@ class RendererContext implements HtmlNodeRendererContext, AttributeProviderConte
  * </code></pre>
  */
 class HtmlRenderer implements Renderer {
-  public readonly softbreak: string;
-  public readonly escapeHtml: boolean;
-  public readonly percentEncodeUrls: boolean;
-  public readonly omitSingleParagraphP: boolean;
-  public readonly sanitizeUrls: boolean;
-  public readonly urlSanitizer: UrlSanitizer;
-  public readonly attributeProviderFactories: AttributeProviderFactory[];
-  public readonly nodeRendererFactories: HtmlNodeRendererFactory[];
+  readonly softbreak: string;
+  readonly escapeHtml: boolean;
+  readonly percentEncodeUrls: boolean;
+  readonly omitSingleParagraphP: boolean;
+  readonly sanitizeUrls: boolean;
+  readonly urlSanitizer: UrlSanitizer;
+  readonly attributeProviderFactories: AttributeProviderFactory[];
+  readonly nodeRendererFactories: HtmlNodeRendererFactory[];
 
-  public constructor(builder: HtmlRendererBuilder) {
+  constructor(builder: HtmlRendererBuilder) {
     this.softbreak = builder.softbreak;
     this.escapeHtml = builder.escapeHtml;
     this.percentEncodeUrls = builder.percentEncodeUrls;
@@ -297,11 +297,11 @@ class HtmlRenderer implements Renderer {
    *
    * @return a builder
    */
-  public static builder(): HtmlRendererBuilder {
+  static builder(): HtmlRendererBuilder {
     return new HtmlRendererBuilder();
   }
 
-  public render(node: Node, output?: Appendable) {
+  render(node: Node, output?: Appendable) {
     if (!output) {
       output = new Appendable();
     }
@@ -318,9 +318,9 @@ class HtmlRenderer implements Renderer {
   /**
    * Builder for configuring an {@link HtmlRenderer}. See methods for default configuration.
    */
-  public static Builder = HtmlRendererBuilder;
+  static Builder = HtmlRendererBuilder;
 
-  public static HtmlRendererExtension = HtmlRendererExtension;
+  static HtmlRendererExtension = HtmlRendererExtension;
 }
 
 export default HtmlRenderer;

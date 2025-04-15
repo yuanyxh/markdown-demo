@@ -11,7 +11,7 @@ abstract class LinkResult {
   /**
    * Link not handled by processor.
    */
-  public static none(): LinkResult | null {
+  static none(): LinkResult | null {
     return null;
   }
 
@@ -26,7 +26,7 @@ abstract class LinkResult {
    * @param node     the node to which the link text nodes will be added as child nodes
    * @param position the position to continue parsing from
    */
-  public static wrapTextIn(node: Node, position: Position): LinkResult {
+  static wrapTextIn(node: Node, position: Position): LinkResult {
     return new LinkResultImpl(LinkResultImpl.Type.WRAP, node, position);
   }
 
@@ -40,14 +40,14 @@ abstract class LinkResult {
    * @param node     the node to replace the link with
    * @param position the position to continue parsing from
    */
-  public static replaceWith(node: Node, position: Position): LinkResult {
+  static replaceWith(node: Node, position: Position): LinkResult {
     return new LinkResultImpl(LinkResultImpl.Type.REPLACE, node, position);
   }
 
   /**
    * If a {@link LinkInfo#marker()} is present, include it in processing (i.e. treat it the same way as the brackets).
    */
-  public abstract setIncludeMarker(): LinkResult;
+  abstract setIncludeMarker(): LinkResult;
 }
 
 export default LinkResult;

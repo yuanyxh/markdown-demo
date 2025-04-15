@@ -5,20 +5,20 @@ import type ContentView from './abstracts/contentview';
 import BlockView from './abstracts/blockview';
 
 class HtmlBlockView extends BlockView {
-  public children: ContentView[] = [];
-  public node: HtmlBlock;
+  children: ContentView[] = [];
+  node: HtmlBlock;
 
-  public constructor(node: HtmlBlock) {
+  constructor(node: HtmlBlock) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: HtmlBlock): boolean {
+  override eq(node: HtmlBlock): boolean {
     return node.type === this.node.type && node.getLiteral() === this.dom.innerHTML;
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -30,7 +30,7 @@ class HtmlBlockView extends BlockView {
     return wrapper;
   }
 
-  public static override craete(node: HtmlBlock): HtmlBlockView {
+  static override craete(node: HtmlBlock): HtmlBlockView {
     return new this(node);
   }
 }

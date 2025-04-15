@@ -1,7 +1,7 @@
-import type { Appendable } from "@helpers/index";
-import type { CharMatcher } from "@/text";
+import type { Appendable } from '@helpers/index';
+import type { CharMatcher } from '@/text';
 
-import { fromCodePoint } from "@helpers/index";
+import { fromCodePoint } from '@helpers/index';
 
 /**
  * Writer for Markdown (CommonMark) text.
@@ -19,14 +19,14 @@ class MarkdownWriter {
   private readonly tight: boolean[] = [];
   private readonly rawEscapes: CharMatcher[] = [];
 
-  public constructor(out: Appendable) {
+  constructor(out: Appendable) {
     this.buffer = out;
   }
 
   /**
    * Write the supplied string (raw/unescaped except if {@link #pushRawEscape} was used).
    */
-  public raw(s: string): void {
+  raw(s: string): void {
     this.flushBlockSeparator();
     this.write(s, null);
   }
@@ -37,8 +37,8 @@ class MarkdownWriter {
    * @param s      the string to write
    * @param escape which characters to escape
    */
-  public text(s: string, escape: CharMatcher) {
-    if (s === "") {
+  text(s: string, escape: CharMatcher) {
+    if (s === '') {
       return;
     }
 
@@ -52,8 +52,8 @@ class MarkdownWriter {
   /**
    * Write a newline (line terminator).
    */
-  public line() {
-    this.write("\n", null);
+  line() {
+    this.write('\n', null);
     this.writePrefixes();
     this.atLineStart = true;
   }
@@ -62,7 +62,7 @@ class MarkdownWriter {
    * Enqueue a block separator to be written before the next text is written. Block separators are not written
    * straight away because if there are no more blocks to write we don't want a separator (at the end of the document).
    */
-  public block() {
+  block() {
     // Remember whether this should be a tight or loose separator now because tight could get changed in between
     // this and the next flush.
     this.blockSeparator = this.isTight() ? 1 : 2;
@@ -75,7 +75,7 @@ class MarkdownWriter {
    *
    * @param prefix the raw prefix string
    */
-  public pushPrefix(prefix: string) {
+  pushPrefix(prefix: string) {
     this.prefixes.push(prefix);
   }
 
@@ -84,7 +84,7 @@ class MarkdownWriter {
    *
    * @param prefix the raw prefix string to write
    */
-  public writePrefix(prefix: string): void {
+  writePrefix(prefix: string): void {
     let tmp: boolean = this.atLineStart;
     this.raw(prefix);
     this.atLineStart = tmp;
@@ -93,7 +93,7 @@ class MarkdownWriter {
   /**
    * Remove the last prefix from the top of the stack.
    */
-  public popPrefix() {
+  popPrefix() {
     this.prefixes.pop();
   }
 
@@ -105,14 +105,14 @@ class MarkdownWriter {
    * Note that changing this does not affect block separators that have already been enqueued with {@link #block()},
    * only future ones.
    */
-  public pushTight(tight: boolean) {
+  pushTight(tight: boolean) {
     this.tight.push(tight);
   }
 
   /**
    * Remove the last "tight" setting from the top of the stack.
    */
-  public popTight() {
+  popTight() {
     this.tight.pop();
   }
 
@@ -123,28 +123,28 @@ class MarkdownWriter {
    *
    * @param rawEscape the characters to escape in raw text
    */
-  public pushRawEscape(rawEscape: CharMatcher) {
+  pushRawEscape(rawEscape: CharMatcher) {
     this.rawEscapes.push(rawEscape);
   }
 
   /**
    * Remove the last raw escape from the top of the stack.
    */
-  public popRawEscape(): void {
+  popRawEscape(): void {
     this.rawEscapes.pop();
   }
 
   /**
    * @return the last character that was written
    */
-  public getLastChar(): string {
+  getLastChar(): string {
     return this.lastChar;
   }
 
   /**
    * @return whether we're at the line start (not counting any prefixes), i.e. after a {@link #line} or {@link #block}.
    */
-  public isAtLineStart(): boolean {
+  isAtLineStart(): boolean {
     return this.atLineStart;
   }
 
@@ -179,11 +179,11 @@ class MarkdownWriter {
    */
   private flushBlockSeparator(): void {
     if (this.blockSeparator !== 0) {
-      this.write("\n", null);
+      this.write('\n', null);
       this.writePrefixes();
 
       if (this.blockSeparator > 1) {
-        this.write("\n", null);
+        this.write('\n', null);
         this.writePrefixes();
       }
 
@@ -193,11 +193,11 @@ class MarkdownWriter {
 
   private append(c: string, escape: CharMatcher | null) {
     if (this.needsEscaping(c, escape)) {
-      if (c === "\n") {
+      if (c === '\n') {
         // Can't escape this with \, use numeric character reference
-        this.buffer.append("&#10;");
+        this.buffer.append('&#10;');
       } else {
-        this.buffer.append("\\");
+        this.buffer.append('\\');
         this.buffer.append(c);
       }
     } else {

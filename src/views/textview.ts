@@ -5,20 +5,20 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class TextView extends InlineView {
-  public children: ContentView[] = [];
-  public node: Text;
+  children: ContentView[] = [];
+  node: Text;
 
-  public constructor(node: Text) {
+  constructor(node: Text) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: Text): boolean {
+  override eq(node: Text): boolean {
     return node.type === this.node.type && node.getLiteral() === this.dom.textContent;
   }
 
-  public override setNode(node: Text): void {
+  override setNode(node: Text): void {
     this.node = node;
 
     if (node.getLiteral() !== this.dom.textContent) {
@@ -26,7 +26,7 @@ class TextView extends InlineView {
     }
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -37,7 +37,7 @@ class TextView extends InlineView {
     return span;
   }
 
-  public static override craete(node: Text): TextView {
+  static override craete(node: Text): TextView {
     return new this(node);
   }
 }

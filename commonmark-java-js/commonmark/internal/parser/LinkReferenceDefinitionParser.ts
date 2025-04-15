@@ -1,27 +1,27 @@
-import type { SourceSpan } from "@/node";
-import type { SourceLine } from "@/parser";
+import type { SourceSpan } from '@/node';
+import type { SourceLine } from '@/parser';
 
-import { Appendable } from "@helpers/index";
-import { LinkReferenceDefinition } from "@/node";
-import { Scanner, SourceLines } from "@/parser";
+import { Appendable } from '@helpers/index';
+import { LinkReferenceDefinition } from '@/node';
+import { Scanner, SourceLines } from '@/parser';
 
-import Escaping from "../internal_util/Escaping";
-import LinkScanner from "../internal_util/LinkScanner";
+import Escaping from '../internal_util/Escaping';
+import LinkScanner from '../internal_util/LinkScanner';
 
 enum State {
   // Looking for the start of a definition, i.e. `[`
-  START_DEFINITION = "START_DEFINITION",
+  START_DEFINITION = 'START_DEFINITION',
   // Parsing the label, i.e. `foo` within `[foo]`
-  LABEL = "LABEL",
+  LABEL = 'LABEL',
   // Parsing the destination, i.e. `/url` in `[foo]: /url`
-  DESTINATION = "DESTINATION",
+  DESTINATION = 'DESTINATION',
   // Looking for the start of a title, i.e. the first `"` in `[foo]: /url "title"`
-  START_TITLE = "START_TITLE",
+  START_TITLE = 'START_TITLE',
   // Parsing the content of the title, i.e. `title` in `[foo]: /url "title"`
-  TITLE = "TITLE",
+  TITLE = 'TITLE',
 
   // End state, no matter what kind of lines we add, they won't be references
-  PARAGRAPH = "PARAGRAPH",
+  PARAGRAPH = 'PARAGRAPH'
 }
 
 /**
@@ -42,7 +42,7 @@ class LinkReferenceDefinitionParser {
   private title: Appendable | null = null;
   private referenceValid = false;
 
-  public parse(line: SourceLine) {
+  parse(line: SourceLine) {
     this.paragraphLines.push(line);
     if (this.state === State.PARAGRAPH) {
       // We're in a paragraph now. Link reference definitions can only appear at the beginning, so once
@@ -77,7 +77,7 @@ class LinkReferenceDefinitionParser {
           break;
         }
         default: {
-          throw Error("Unknown parsing state: " + this.state);
+          throw Error('Unknown parsing state: ' + this.state);
         }
       }
 
@@ -92,22 +92,22 @@ class LinkReferenceDefinitionParser {
     }
   }
 
-  public addSourceSpan(sourceSpan: SourceSpan) {
+  addSourceSpan(sourceSpan: SourceSpan) {
     this.sourceSpans.push(sourceSpan);
   }
 
   /**
    * @return the lines that are normal paragraph content, without newlines
    */
-  public getParagraphLines(): SourceLines {
+  getParagraphLines(): SourceLines {
     return SourceLines.of(this.paragraphLines);
   }
 
-  public getParagraphSourceSpans(): SourceSpan[] {
+  getParagraphSourceSpans(): SourceSpan[] {
     return this.sourceSpans;
   }
 
-  public getDefinitions(): LinkReferenceDefinition[] {
+  getDefinitions(): LinkReferenceDefinition[] {
     this.finishReference();
     return this.definitions;
   }
@@ -122,7 +122,7 @@ class LinkReferenceDefinitionParser {
     this.finishReference();
 
     scanner.whitespace();
-    if (!scanner.next("[")) {
+    if (!scanner.next('[')) {
       return false;
     }
 
@@ -130,7 +130,7 @@ class LinkReferenceDefinitionParser {
     this.label = new Appendable();
 
     if (!scanner.hasNext()) {
-      this.label.append("\n");
+      this.label.append('\n');
     }
 
     return true;
@@ -143,18 +143,16 @@ class LinkReferenceDefinitionParser {
       return false;
     }
 
-    this.label?.append(
-      scanner.getSource(start, scanner.position()).getContent()
-    );
+    this.label?.append(scanner.getSource(start, scanner.position()).getContent());
 
     if (!scanner.hasNext()) {
       // label might continue on next line
-      this.label?.append("\n");
+      this.label?.append('\n');
 
       return true;
-    } else if (scanner.next("]")) {
+    } else if (scanner.next(']')) {
       // end of label
-      if (!scanner.next(":")) {
+      if (!scanner.next(':')) {
         return false;
       }
 
@@ -163,11 +161,9 @@ class LinkReferenceDefinitionParser {
         return false;
       }
 
-      const normalizedLabel = Escaping.normalizeLabelContent(
-        this.label!.toString()
-      );
+      const normalizedLabel = Escaping.normalizeLabelContent(this.label!.toString());
 
-      if (normalizedLabel === "") {
+      if (normalizedLabel === '') {
         return false;
       }
 
@@ -187,10 +183,8 @@ class LinkReferenceDefinitionParser {
       return false;
     }
 
-    const rawDestination = scanner
-      .getSource(start, scanner.position())
-      .getContent();
-    this.destination = rawDestination.startsWith("<")
+    const rawDestination = scanner.getSource(start, scanner.position()).getContent();
+    this.destination = rawDestination.startsWith('<')
       ? rawDestination.substring(1, rawDestination.length - 1)
       : rawDestination;
 
@@ -216,27 +210,27 @@ class LinkReferenceDefinitionParser {
       return true;
     }
 
-    this.titleDelimiter = "\0";
+    this.titleDelimiter = '\0';
     let c = scanner.peek();
     switch (c) {
       case '"':
       case "'":
         this.titleDelimiter = c;
         break;
-      case "(":
-        this.titleDelimiter = ")";
+      case '(':
+        this.titleDelimiter = ')';
         break;
 
       default:
     }
 
-    if (this.titleDelimiter !== "\0") {
+    if (this.titleDelimiter !== '\0') {
       this.state = State.TITLE;
       this.title = new Appendable();
       scanner.next();
 
       if (!scanner.hasNext()) {
-        this.title.append("\n");
+        this.title.append('\n');
       }
     } else {
       // There might be another reference instead, try that for the same character.
@@ -248,20 +242,18 @@ class LinkReferenceDefinitionParser {
 
   private setTitle(scanner: Scanner): boolean {
     const start = scanner.position();
-    if (!LinkScanner.scanLinkTitleContent(scanner, this.titleDelimiter || "")) {
+    if (!LinkScanner.scanLinkTitleContent(scanner, this.titleDelimiter || '')) {
       // Invalid title, stop. Title collected so far must not be used.
       this.title = null;
 
       return false;
     }
 
-    this.title?.append(
-      scanner.getSource(start, scanner.position()).getContent()
-    );
+    this.title?.append(scanner.getSource(start, scanner.position()).getContent());
 
     if (!scanner.hasNext()) {
       // Title ran until the end of line, so continue on next line (until we find the delimiter)
-      this.title?.append("\n");
+      this.title?.append('\n');
       return true;
     }
 
@@ -288,8 +280,7 @@ class LinkReferenceDefinitionParser {
     }
 
     const d = Escaping.unescapeString(this.destination!);
-    const t =
-      this.title !== null ? Escaping.unescapeString(this.title.toString()) : "";
+    const t = this.title !== null ? Escaping.unescapeString(this.title.toString()) : '';
 
     const definition: LinkReferenceDefinition = new LinkReferenceDefinition(
       this.label?.toString(),

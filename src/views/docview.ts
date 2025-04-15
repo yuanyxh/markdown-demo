@@ -1,24 +1,17 @@
 import type { Document } from 'commonmark-java-js';
 
-import DocEventHandler from '@/events/doceventhandler';
 import BlockView from './abstracts/blockview';
 
 class DocView extends BlockView {
-  public children: BlockView[] = [];
+  children: BlockView[] = [];
 
-  private handler: DocEventHandler = DocEventHandler.create(this);
-
-  public constructor(node: Document) {
+  constructor(node: Document) {
     super(node);
-
-    this.handler.listenForViewDOM(this.dom);
 
     this.applyNode(node);
   }
 
-  public override destroy(): void {
-    this.handler.unlistenForViewDOM(this.dom);
-
+  override destroy(): void {
     super.destroy();
   }
 
@@ -37,7 +30,7 @@ class DocView extends BlockView {
     return dom;
   }
 
-  public static override craete(node: Document): DocView {
+  static override craete(node: Document): DocView {
     return new this(node);
   }
 }

@@ -5,16 +5,16 @@ import type ContentView from './abstracts/contentview';
 import BlockView from './abstracts/blockview';
 
 class FencedCodeBlockView extends BlockView {
-  public children: ContentView[] = [];
-  public node: FencedCodeBlock;
+  children: ContentView[] = [];
+  node: FencedCodeBlock;
 
-  public constructor(node: FencedCodeBlock) {
+  constructor(node: FencedCodeBlock) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: FencedCodeBlock): boolean {
+  override eq(node: FencedCodeBlock): boolean {
     return (
       node.type === this.node.type &&
       node.getFenceCharacter() === this.node.getFenceCharacter() &&
@@ -23,7 +23,7 @@ class FencedCodeBlockView extends BlockView {
     );
   }
 
-  public override setNode(node: FencedCodeBlock): void {
+  override setNode(node: FencedCodeBlock): void {
     if (node.getLiteral() !== this.dom.firstChild?.textContent) {
       if (this.dom.firstChild) {
         this.dom.firstChild.textContent = node.getLiteral();
@@ -31,11 +31,11 @@ class FencedCodeBlockView extends BlockView {
     }
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
-  public override destroy(): void {
+  override destroy(): void {
     super.destroy();
   }
 
@@ -52,7 +52,7 @@ class FencedCodeBlockView extends BlockView {
     return block;
   }
 
-  public static override craete(node: FencedCodeBlock): FencedCodeBlockView {
+  static override craete(node: FencedCodeBlock): FencedCodeBlockView {
     return new this(node);
   }
 }

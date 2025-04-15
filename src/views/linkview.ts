@@ -5,16 +5,16 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class LinkView extends InlineView {
-  public children: ContentView[] = [];
-  public node: Link;
+  children: ContentView[] = [];
+  node: Link;
 
-  public constructor(node: Link) {
+  constructor(node: Link) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: Link): boolean {
+  override eq(node: Link): boolean {
     return node.type === this.node.type && node.getDestination() === this.node.getDestination();
   }
 
@@ -29,7 +29,7 @@ class LinkView extends InlineView {
     return a;
   }
 
-  public static override craete(node: Link): LinkView {
+  static override craete(node: Link): LinkView {
     return new this(node);
   }
 }

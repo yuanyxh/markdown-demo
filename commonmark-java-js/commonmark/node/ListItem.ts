@@ -1,16 +1,16 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import Block from "./abstracts/Block";
+import Block from './abstracts/Block';
 
 class ListItem extends Block {
   private markerIndent: number | undefined;
   private contentIndent: number | undefined;
 
-  public constructor() {
-    super("list-item");
+  constructor() {
+    super('list-item');
   }
 
-  public override accept(visitor: Visitor) {
+  override accept(visitor: Visitor) {
     visitor.visit(this);
   }
 
@@ -26,11 +26,11 @@ class ListItem extends Block {
    * <pre>  1. Foo</pre>
    * Marker indent: 2
    */
-  public getMarkerIndent(): number | undefined {
+  getMarkerIndent(): number | undefined {
     return this.markerIndent;
   }
 
-  public setMarkerIndent(markerIndent: number) {
+  setMarkerIndent(markerIndent: number) {
     this.markerIndent = markerIndent;
   }
 
@@ -49,11 +49,11 @@ class ListItem extends Block {
    * Note that subsequent lines in the same list item need to be indented by at least the content indent to be counted
    * as part of the list item.
    */
-  public getContentIndent(): number | undefined {
+  getContentIndent(): number | undefined {
     return this.contentIndent;
   }
 
-  public setContentIndent(contentIndent: number) {
+  setContentIndent(contentIndent: number) {
     this.contentIndent = contentIndent;
   }
 }

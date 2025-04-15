@@ -1,8 +1,8 @@
-import type { SourceSpan } from "@/node";
+import type { SourceSpan } from '@/node';
 
-import type SourceLine from "./SourceLine";
+import type SourceLine from './SourceLine';
 
-import { Appendable } from "@helpers/index";
+import { Appendable } from '@helpers/index';
 
 /**
  * A set of lines ({@link SourceLine}) from the input source.
@@ -12,35 +12,35 @@ import { Appendable } from "@helpers/index";
 class SourceLines {
   private readonly lines: SourceLine[] = [];
 
-  public static empty(): SourceLines {
+  static empty(): SourceLines {
     return new SourceLines();
   }
 
-  public static of(sourceLines: SourceLine[]): SourceLines {
+  static of(sourceLines: SourceLine[]): SourceLines {
     const result = new SourceLines();
     result.lines.push(...sourceLines);
 
     return result;
   }
 
-  public addLine(sourceLine: SourceLine) {
+  addLine(sourceLine: SourceLine) {
     this.lines.push(sourceLine);
   }
 
-  public getLines(): SourceLine[] {
+  getLines(): SourceLine[] {
     return this.lines;
   }
 
-  public isEmpty(): boolean {
+  isEmpty(): boolean {
     return this.lines.length === 0;
   }
 
-  public getContent(): string {
+  getContent(): string {
     const sb = new Appendable();
 
     for (let i = 0; i < this.lines.length; i++) {
       if (i !== 0) {
-        sb.append("\n");
+        sb.append('\n');
       }
 
       sb.append(this.lines[i].getContent());
@@ -49,7 +49,7 @@ class SourceLines {
     return sb.toString();
   }
 
-  public getSourceSpans(): SourceSpan[] {
+  getSourceSpans(): SourceSpan[] {
     const sourceSpans: SourceSpan[] = [];
 
     for (const line of this.lines) {

@@ -1,8 +1,8 @@
-import type { Appendable } from "@helpers/index";
+import type { Appendable } from '@helpers/index';
 
-import { fromCodePoint, isNotUnDef } from "@helpers/index";
+import { fromCodePoint, isNotUnDef } from '@helpers/index';
 
-import LineBreakRendering from "./enums/LineBreakRendering";
+import LineBreakRendering from './enums/LineBreakRendering';
 
 class TextContentWriter {
   private readonly buffer: Appendable;
@@ -13,49 +13,45 @@ class TextContentWriter {
   private blockSeparator: string | undefined;
   private lastChar = fromCodePoint(0);
 
-  public constructor(
-    out: Appendable,
-    lineBreakRendering = LineBreakRendering.COMPACT
-  ) {
+  constructor(out: Appendable, lineBreakRendering = LineBreakRendering.COMPACT) {
     this.buffer = out;
     this.lineBreakRendering = lineBreakRendering;
   }
 
-  public whitespace() {
-    if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== " ") {
-      this.write(" ");
+  whitespace() {
+    if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== ' ') {
+      this.write(' ');
     }
   }
 
-  public colon() {
-    if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== ":") {
-      this.write(":");
+  colon() {
+    if (this.lastChar.charCodeAt(0) !== 0 && this.lastChar !== ':') {
+      this.write(':');
     }
   }
 
-  public line() {
-    this.append("\n");
+  line() {
+    this.append('\n');
   }
 
-  public block() {
+  block() {
     this.blockSeparator =
       this.lineBreakRendering === LineBreakRendering.STRIP
-        ? " " //
-        : this.lineBreakRendering === LineBreakRendering.COMPACT ||
-          this.isTight()
-        ? "\n"
-        : "\n\n";
+        ? ' ' //
+        : this.lineBreakRendering === LineBreakRendering.COMPACT || this.isTight()
+          ? '\n'
+          : '\n\n';
   }
 
-  public resetBlock() {
+  resetBlock() {
     this.blockSeparator = void 0;
   }
 
-  public writeStripped(s: string) {
-    this.write(s.replace(/[\r\n\s]+/g, " "));
+  writeStripped(s: string) {
+    this.write(s.replace(/[\r\n\s]+/g, ' '));
   }
 
-  public write(s: string) {
+  write(s: string) {
     this.flushBlockSeparator();
     this.append(s);
   }
@@ -68,14 +64,14 @@ class TextContentWriter {
    * Note that changing this does not affect block separators that have already been enqueued with {@link #block()},
    * only future ones.
    */
-  public pushTight(tight: boolean) {
+  pushTight(tight: boolean) {
     this.tight.push(tight);
   }
 
   /**
    * Remove the last "tight" setting from the top of the stack.
    */
-  public popTight() {
+  popTight() {
     this.tight.pop();
   }
 

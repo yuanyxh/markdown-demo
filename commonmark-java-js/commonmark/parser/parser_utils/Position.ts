@@ -3,10 +3,10 @@
  * the Scanner.
  */
 class Position {
-  public readonly lineIndex: number;
-  public readonly index: number;
+  readonly lineIndex: number;
+  readonly index: number;
 
-  public constructor(lineIndex: number, index: number) {
+  constructor(lineIndex: number, index: number) {
     this.lineIndex = lineIndex;
     this.index = index;
   }

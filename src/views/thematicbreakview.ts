@@ -5,9 +5,9 @@ import type ContentView from './abstracts/contentview';
 import BlockView from './abstracts/blockview';
 
 class ThematicBreakView extends BlockView {
-  public children: ContentView[] = [];
+  children: ContentView[] = [];
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -21,7 +21,7 @@ class ThematicBreakView extends BlockView {
     return wrapper;
   }
 
-  public static override craete(node: ThematicBreak): ThematicBreakView {
+  static override craete(node: ThematicBreak): ThematicBreakView {
     return new this(node);
   }
 }

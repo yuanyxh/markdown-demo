@@ -10,11 +10,11 @@ import { ParsedInlineImpl } from '@/internal';
  * <em>This interface is not intended to be implemented by clients.</em>
  */
 abstract class ParsedInline {
-  public static none(): ParsedInline | null {
+  static none(): ParsedInline | null {
     return null;
   }
 
-  public static of(node: Node, position: Position): ParsedInline {
+  static of(node: Node, position: Position): ParsedInline {
     return new ParsedInlineImpl(node, position);
   }
 }

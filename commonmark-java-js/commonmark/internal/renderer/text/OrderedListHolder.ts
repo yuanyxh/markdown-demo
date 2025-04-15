@@ -1,32 +1,32 @@
-import type { OrderedList } from "@/node";
+import type { OrderedList } from '@/node';
 
-import { isNotUnDef } from "@helpers/index";
+import { isNotUnDef } from '@helpers/index';
 
-import ListHolder from "./ListHolder";
+import ListHolder from './ListHolder';
 
 class OrderedListHolder extends ListHolder {
   private readonly delimiter: string;
   private counter: number;
 
-  public constructor(parent: ListHolder | null, list: OrderedList) {
+  constructor(parent: ListHolder | null, list: OrderedList) {
     super(parent);
 
     const markerDelimiter = list.getMarkerDelimiter();
     const markerStartNumber = list.getMarkerStartNumber();
 
-    this.delimiter = isNotUnDef(markerDelimiter) ? markerDelimiter : ".";
+    this.delimiter = isNotUnDef(markerDelimiter) ? markerDelimiter : '.';
     this.counter = isNotUnDef(markerStartNumber) ? markerStartNumber : 1;
   }
 
-  public getDelimiter(): string {
+  getDelimiter(): string {
     return this.delimiter;
   }
 
-  public getCounter(): number {
+  getCounter(): number {
     return this.counter;
   }
 
-  public increaseCounter() {
+  increaseCounter() {
     this.counter++;
   }
 }

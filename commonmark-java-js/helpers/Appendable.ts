@@ -1,21 +1,21 @@
 class Appendable {
-  private data = "";
+  private data = '';
 
-  public constructor(initStr?: string) {
+  constructor(initStr?: string) {
     if (initStr !== undefined) {
       this.data += initStr;
     }
   }
 
-  public append(str: string, start = 0, end = str.length) {
+  append(str: string, start = 0, end = str.length) {
     this.data += str.substring(start, end);
   }
 
-  public length() {
+  length() {
     return this.data.length;
   }
 
-  public toString() {
+  toString() {
     return this.data;
   }
 }

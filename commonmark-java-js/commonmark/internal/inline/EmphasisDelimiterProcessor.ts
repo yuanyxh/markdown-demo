@@ -10,19 +10,19 @@ abstract class EmphasisDelimiterProcessor implements DelimiterProcessor {
     this.delimiterChar = delimiterChar;
   }
 
-  public getOpeningCharacter(): string {
+  getOpeningCharacter(): string {
     return this.delimiterChar;
   }
 
-  public getClosingCharacter(): string {
+  getClosingCharacter(): string {
     return this.delimiterChar;
   }
 
-  public getMinLength(): number {
+  getMinLength(): number {
     return 1;
   }
 
-  public process(openingRun: DelimiterRun, closingRun: DelimiterRun): number {
+  process(openingRun: DelimiterRun, closingRun: DelimiterRun): number {
     // "multiple of 3" rule for internal delimiter runs
     if (
       (openingRun.getCanClose() || closingRun.getCanOpen()) &&

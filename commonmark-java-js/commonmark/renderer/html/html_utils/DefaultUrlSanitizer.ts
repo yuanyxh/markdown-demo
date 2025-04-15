@@ -1,4 +1,4 @@
-import type { UrlSanitizer } from "../interfaces/UrlSanitizer";
+import type { UrlSanitizer } from '../interfaces/UrlSanitizer';
 
 /**
  *
@@ -9,24 +9,24 @@ import type { UrlSanitizer } from "../interfaces/UrlSanitizer";
 class DefaultUrlSanitizer implements UrlSanitizer {
   private protocols: Set<string>;
 
-  public constructor(protocols = ["http", "https", "mailto", "data"]) {
+  constructor(protocols = ['http', 'https', 'mailto', 'data']) {
     this.protocols = new Set(protocols);
   }
 
-  public sanitizeLinkUrl(url: string): string {
+  sanitizeLinkUrl(url: string): string {
     url = this.stripHtmlSpaces(url);
 
     protocol_loop: for (let i = 0, n = url.length; i < n; ++i) {
       switch (url.charAt(i)) {
-        case "/":
-        case "#":
-        case "?": // No protocol.
+        case '/':
+        case '#':
+        case '?': // No protocol.
           break protocol_loop;
-        case ":":
+        case ':':
           const protocol = url.substring(0, i).toLowerCase();
 
           if (!this.protocols.has(protocol)) {
-            return "";
+            return '';
           }
 
           break protocol_loop;
@@ -38,7 +38,7 @@ class DefaultUrlSanitizer implements UrlSanitizer {
     return url;
   }
 
-  public sanitizeImageUrl(url: string): string {
+  sanitizeImageUrl(url: string): string {
     return this.sanitizeLinkUrl(url);
   }
 
@@ -67,11 +67,11 @@ class DefaultUrlSanitizer implements UrlSanitizer {
 
   private isHtmlSpace(ch: string): boolean {
     switch (ch) {
-      case " ":
-      case "\t":
-      case "\n":
-      case "\u000c":
-      case "\r":
+      case ' ':
+      case '\t':
+      case '\n':
+      case '\u000c':
+      case '\r':
         return true;
       default:
         return false;

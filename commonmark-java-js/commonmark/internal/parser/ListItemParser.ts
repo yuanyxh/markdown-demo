@@ -1,8 +1,8 @@
-import type { Block } from "@/node";
-import type { ParserState } from "@/parser";
+import type { Block } from '@/node';
+import type { ParserState } from '@/parser';
 
-import { ListBlock, ListItem, Paragraph } from "@/node";
-import { AbstractBlockParser, BlockContinue } from "@/parser";
+import { ListBlock, ListItem, Paragraph } from '@/node';
+import { AbstractBlockParser, BlockContinue } from '@/parser';
 
 class ListItemParser extends AbstractBlockParser {
   private readonly block = new ListItem();
@@ -15,18 +15,18 @@ class ListItemParser extends AbstractBlockParser {
 
   private hadBlankLine: boolean = false;
 
-  public constructor(markerIndent: number, contentIndent: number) {
+  constructor(markerIndent: number, contentIndent: number) {
     super();
     this.contentIndent = contentIndent;
     this.block.setMarkerIndent(markerIndent);
     this.block.setContentIndent(contentIndent);
   }
 
-  public override isContainer(): boolean {
+  override isContainer(): boolean {
     return true;
   }
 
-  public canContain(childBlock: Block): boolean {
+  canContain(childBlock: Block): boolean {
     if (this.hadBlankLine) {
       // We saw a blank line in this list item, that means the list block is loose.
       //
@@ -41,11 +41,11 @@ class ListItemParser extends AbstractBlockParser {
     return true;
   }
 
-  public override getBlock(): Block {
+  override getBlock(): Block {
     return this.block;
   }
 
-  public override tryContinue(state: ParserState): BlockContinue | null {
+  override tryContinue(state: ParserState): BlockContinue | null {
     if (state.isBlank()) {
       if (this.block.getFirstChild() === null) {
         // Blank line after empty list item
@@ -53,8 +53,7 @@ class ListItemParser extends AbstractBlockParser {
       } else {
         const activeBlock: Block = state.getActiveBlockParser().getBlock();
         // If the active block is a code block, blank lines in it should not affect if the list is tight.
-        this.hadBlankLine =
-          activeBlock instanceof Paragraph || activeBlock instanceof ListItem;
+        this.hadBlankLine = activeBlock instanceof Paragraph || activeBlock instanceof ListItem;
 
         return BlockContinue.atIndex(state.getNextNonSpaceIndex());
       }

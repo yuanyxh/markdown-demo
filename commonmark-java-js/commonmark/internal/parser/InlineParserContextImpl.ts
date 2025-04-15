@@ -1,12 +1,12 @@
-import type Definitions from "../Definitions";
+import type Definitions from '../Definitions';
 import type {
   InlineContentParserFactory,
   InlineParserContext,
   LinkProcessor,
-  DelimiterProcessor,
-} from "@/parser";
+  DelimiterProcessor
+} from '@/parser';
 
-import { LinkReferenceDefinition } from "@/node";
+import { LinkReferenceDefinition } from '@/node';
 
 class InlineParserContextImpl implements InlineParserContext {
   private readonly inlineContentParserFactories: InlineContentParserFactory[];
@@ -15,7 +15,7 @@ class InlineParserContextImpl implements InlineParserContext {
   private readonly linkMarkers: Set<string>;
   private readonly definitions: Definitions;
 
-  public constructor(
+  constructor(
     inlineContentParserFactories: InlineContentParserFactory[],
     delimiterProcessors: DelimiterProcessor[],
     linkProcessors: LinkProcessor[],
@@ -29,29 +29,27 @@ class InlineParserContextImpl implements InlineParserContext {
     this.definitions = definitions;
   }
 
-  public getCustomInlineContentParserFactories(): InlineContentParserFactory[] {
+  getCustomInlineContentParserFactories(): InlineContentParserFactory[] {
     return this.inlineContentParserFactories;
   }
 
-  public getCustomDelimiterProcessors(): DelimiterProcessor[] {
+  getCustomDelimiterProcessors(): DelimiterProcessor[] {
     return this.delimiterProcessors;
   }
 
-  public getCustomLinkProcessors(): LinkProcessor[] {
+  getCustomLinkProcessors(): LinkProcessor[] {
     return this.linkProcessors;
   }
 
-  public getCustomLinkMarkers(): Set<string> {
+  getCustomLinkMarkers(): Set<string> {
     return this.linkMarkers;
   }
 
-  public getLinkReferenceDefinition(
-    label: string
-  ): LinkReferenceDefinition | null {
+  getLinkReferenceDefinition(label: string): LinkReferenceDefinition | null {
     return this.definitions.getDefinition(LinkReferenceDefinition, label);
   }
 
-  public getDefinition<D extends abstract new (...args: any) => any>(
+  getDefinition<D extends abstract new (...args: any) => any>(
     type: D,
     label: string
   ): InstanceType<D> | null {

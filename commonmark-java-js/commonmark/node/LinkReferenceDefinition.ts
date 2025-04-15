@@ -1,6 +1,6 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import Block from "./abstracts/Block";
+import Block from './abstracts/Block';
 
 /**
  * A link reference definition, e.g.:
@@ -14,43 +14,43 @@ import Block from "./abstracts/Block";
  * @see <a href="https://spec.commonmark.org/0.31.2/#link-reference-definition">Link reference definitions</a>
  */
 class LinkReferenceDefinition extends Block {
-  private label = "";
-  private destination = "";
-  private title = "";
+  private label = '';
+  private destination = '';
+  private title = '';
 
-  public constructor(label = "", destination = "", title = "") {
-    super("link-reference-definition");
+  constructor(label = '', destination = '', title = '') {
+    super('link-reference-definition');
 
     this.label = label;
     this.destination = destination;
     this.title = title;
   }
 
-  public override accept(visitor: Visitor) {
+  override accept(visitor: Visitor) {
     visitor.visit(this);
   }
 
-  public getLabel(): string | null {
+  getLabel(): string | null {
     return this.label;
   }
 
-  public setLabel(label: string) {
+  setLabel(label: string) {
     this.label = label;
   }
 
-  public getDestination(): string {
+  getDestination(): string {
     return this.destination;
   }
 
-  public setDestination(destination: string) {
+  setDestination(destination: string) {
     this.destination = destination;
   }
 
-  public getTitle(): string {
+  getTitle(): string {
     return this.title;
   }
 
-  public setTitle(title: string) {
+  setTitle(title: string) {
     this.title = title;
   }
 }

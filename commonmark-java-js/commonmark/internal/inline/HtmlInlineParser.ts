@@ -3,19 +3,19 @@ import type {
   InlineParserState,
   InlineContentParser,
   Position,
-  Scanner,
-} from "@/parser";
+  Scanner
+} from '@/parser';
 
-import { HtmlInline } from "@/node";
-import { ParsedInline } from "@/parser";
-import { AsciiMatcher } from "@/text";
+import { HtmlInline } from '@/node';
+import { ParsedInline } from '@/parser';
+import { AsciiMatcher } from '@/text';
 
 class Factory implements InlineContentParserFactory {
-  public getTriggerCharacters(): Set<string> {
-    return new Set("<");
+  getTriggerCharacters(): Set<string> {
+    return new Set('<');
   }
 
-  public create(): InlineContentParser {
+  create(): InlineContentParser {
     return new HtmlInlineParser();
   }
 }
@@ -25,48 +25,48 @@ class Factory implements InlineContentParserFactory {
  */
 class HtmlInlineParser implements InlineContentParser {
   private static readonly asciiLetter = AsciiMatcher.builder()
-    .range("A", "Z")
-    .range("a", "z")
+    .range('A', 'Z')
+    .range('a', 'z')
     .build();
 
   // spec: A tag name consists of an ASCII letter followed by zero or more ASCII letters, digits, or hyphens (-).
   private static readonly tagNameStart = HtmlInlineParser.asciiLetter;
   private static readonly tagNameContinue = HtmlInlineParser.tagNameStart
     .newBuilder()
-    .range("0", "9")
-    .c("-")
+    .range('0', '9')
+    .c('-')
     .build();
 
   // spec: An attribute name consists of an ASCII letter, _, or :, followed by zero or more ASCII letters, digits,
   // _, ., :, or -. (Note: This is the XML specification restricted to ASCII. HTML5 is laxer.)
   private static readonly attributeStart = HtmlInlineParser.asciiLetter
     .newBuilder()
-    .c("_")
-    .c(":")
+    .c('_')
+    .c(':')
     .build();
   private static readonly attributeContinue = HtmlInlineParser.attributeStart
     .newBuilder()
-    .range("0", "9")
-    .c(".")
-    .c("-")
+    .range('0', '9')
+    .c('.')
+    .c('-')
     .build();
   // spec: An unquoted attribute value is a nonempty string of characters not including whitespace, ", ', =, <, >, or `.
   private static readonly attributeValueEnd = AsciiMatcher.builder()
-    .c(" ")
-    .c("\t")
-    .c("\n")
-    .c("\u000B")
-    .c("\f")
-    .c("\r")
+    .c(' ')
+    .c('\t')
+    .c('\n')
+    .c('\u000B')
+    .c('\f')
+    .c('\r')
     .c('"')
     .c("'")
-    .c("=")
-    .c("<")
-    .c(">")
-    .c("`")
+    .c('=')
+    .c('<')
+    .c('>')
+    .c('`')
     .build();
 
-  public tryParse(inlineParserState: InlineParserState): ParsedInline | null {
+  tryParse(inlineParserState: InlineParserState): ParsedInline | null {
     const scanner = inlineParserState.getScanner();
     const start: Position = scanner.position();
     // Skip over `<`
@@ -77,24 +77,24 @@ class HtmlInlineParser implements InlineContentParser {
       if (HtmlInlineParser.tryOpenTag(scanner)) {
         return HtmlInlineParser.htmlInline(start, scanner);
       }
-    } else if (c === "/") {
+    } else if (c === '/') {
       if (HtmlInlineParser.tryClosingTag(scanner)) {
         return HtmlInlineParser.htmlInline(start, scanner);
       }
-    } else if (c === "?") {
+    } else if (c === '?') {
       if (HtmlInlineParser.tryProcessingInstruction(scanner)) {
         return HtmlInlineParser.htmlInline(start, scanner);
       }
-    } else if (c === "!") {
+    } else if (c === '!') {
       // comment, declaration or CDATA
       scanner.next();
       c = scanner.peek();
 
-      if (c === "-") {
+      if (c === '-') {
         if (HtmlInlineParser.tryComment(scanner)) {
           return HtmlInlineParser.htmlInline(start, scanner);
         }
-      } else if (c === "[") {
+      } else if (c === '[') {
         if (HtmlInlineParser.tryCdata(scanner)) {
           return HtmlInlineParser.htmlInline(start, scanner);
         }
@@ -131,7 +131,7 @@ class HtmlInlineParser implements InlineContentParser {
       // optional whitespace, and an attribute value.
       whitespace = scanner.whitespace() >= 1;
 
-      if (scanner.next("=")) {
+      if (scanner.next('=')) {
         scanner.whitespace();
         const valueStart = scanner.peek();
 
@@ -161,8 +161,8 @@ class HtmlInlineParser implements InlineContentParser {
       }
     }
 
-    scanner.next("/");
-    return scanner.next(">");
+    scanner.next('/');
+    return scanner.next('>');
   }
 
   private static tryClosingTag(scanner: Scanner): boolean {
@@ -172,7 +172,7 @@ class HtmlInlineParser implements InlineContentParser {
     if (scanner.match(HtmlInlineParser.tagNameStart) >= 1) {
       scanner.match(HtmlInlineParser.tagNameContinue);
       scanner.whitespace();
-      return scanner.next(">");
+      return scanner.next('>');
     }
 
     return false;
@@ -183,9 +183,9 @@ class HtmlInlineParser implements InlineContentParser {
     // and the string ?>.
     scanner.next();
 
-    while (scanner.find("?") > 0) {
+    while (scanner.find('?') > 0) {
       scanner.next();
-      if (scanner.next(">")) {
+      if (scanner.next('>')) {
         return true;
       }
     }
@@ -200,16 +200,16 @@ class HtmlInlineParser implements InlineContentParser {
 
     // Skip first `-`
     scanner.next();
-    if (!scanner.next("-")) {
+    if (!scanner.next('-')) {
       return false;
     }
 
-    if (scanner.next(">") || scanner.next("->")) {
+    if (scanner.next('>') || scanner.next('->')) {
       return true;
     }
 
-    while (scanner.find("-") >= 0) {
-      if (scanner.next("-->")) {
+    while (scanner.find('-') >= 0) {
+      if (scanner.next('-->')) {
         return true;
       } else {
         scanner.next();
@@ -226,9 +226,9 @@ class HtmlInlineParser implements InlineContentParser {
     // Skip `[`
     scanner.next();
 
-    if (scanner.next("CDATA[")) {
-      while (scanner.find("]") >= 0) {
-        if (scanner.next("]]>")) {
+    if (scanner.next('CDATA[')) {
+      while (scanner.find(']') >= 0) {
+        if (scanner.next(']]>')) {
           return true;
         } else {
           scanner.next();
@@ -248,7 +248,7 @@ class HtmlInlineParser implements InlineContentParser {
       return false;
     }
 
-    if (scanner.find(">") >= 0) {
+    if (scanner.find('>') >= 0) {
       scanner.next();
       return true;
     }
@@ -256,7 +256,7 @@ class HtmlInlineParser implements InlineContentParser {
     return false;
   }
 
-  public static Factory = Factory;
+  static Factory = Factory;
 }
 
 export default HtmlInlineParser;

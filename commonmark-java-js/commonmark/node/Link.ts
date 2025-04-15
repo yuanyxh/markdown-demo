@@ -26,30 +26,30 @@ class Link extends Node {
   private destination = '';
   private title: string | undefined;
 
-  public constructor(destination = '', title?: string) {
+  constructor(destination = '', title?: string) {
     super('link');
 
     this.destination = destination;
     this.title = title;
   }
 
-  public override accept(visitor: Visitor) {
+  override accept(visitor: Visitor) {
     visitor.visit(this);
   }
 
-  public getDestination(): string {
+  getDestination(): string {
     return this.destination;
   }
 
-  public setDestination(destination: string) {
+  setDestination(destination: string) {
     this.destination = destination;
   }
 
-  public getTitle(): string | undefined {
+  getTitle(): string | undefined {
     return this.title;
   }
 
-  public setTitle(title?: string) {
+  setTitle(title?: string) {
     this.title = title;
   }
 

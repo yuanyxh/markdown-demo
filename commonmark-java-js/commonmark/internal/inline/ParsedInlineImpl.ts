@@ -7,16 +7,16 @@ class ParsedInlineImpl implements ParsedInline {
   private readonly node: Node;
   private readonly position: Position;
 
-  public constructor(node: Node, position: Position) {
+  constructor(node: Node, position: Position) {
     this.node = node;
     this.position = position;
   }
 
-  public getNode(): Node {
+  getNode(): Node {
     return this.node;
   }
 
-  public getPosition(): Position {
+  getPosition(): Position {
     return this.position;
   }
 }

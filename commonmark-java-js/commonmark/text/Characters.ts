@@ -1,10 +1,10 @@
-import { fromCodePoint, Character } from "@helpers/index";
+import { fromCodePoint, Character } from '@helpers/index';
 
 /**
  * Class for finding characters in strings or checking characters.
  */
 class Characters {
-  public static find(c: string, s: string, startIndex: number): number {
+  static find(c: string, s: string, startIndex: number): number {
     let length = s.length;
 
     for (let i = startIndex; i < length; i++) {
@@ -16,13 +16,13 @@ class Characters {
     return -1;
   }
 
-  public static findLineBreak(s: string, startIndex: number): number {
+  static findLineBreak(s: string, startIndex: number): number {
     let length: number = s.length;
 
     for (let i = startIndex; i < length; i++) {
       switch (s.charAt(i)) {
-        case "\n":
-        case "\r":
+        case '\n':
+        case '\r':
           return i;
 
         default:
@@ -35,26 +35,26 @@ class Characters {
   /**
    * @see <a href="https://spec.commonmark.org/0.31.2/#blank-line">blank line</a>
    */
-  public static isBlank(s: string): boolean {
+  static isBlank(s: string): boolean {
     return Characters.skipSpaceTab(s, 0, s.length) === s.length;
   }
 
-  public static hasNonSpace(s: string): boolean {
+  static hasNonSpace(s: string): boolean {
     let length = s.length;
-    let skipped = Characters.skip(" ", s, 0, length);
+    let skipped = Characters.skip(' ', s, 0, length);
 
     return skipped !== length;
   }
 
-  public static isLetter(s: string, index: number): boolean {
+  static isLetter(s: string, index: number): boolean {
     return Character.isLetter(s[index]);
   }
 
-  public static isSpaceOrTab(s: string, index: number): boolean {
+  static isSpaceOrTab(s: string, index: number): boolean {
     if (index < s.length) {
       switch (s.charAt(index)) {
-        case " ":
-        case "\t":
+        case ' ':
+        case '\t':
           return true;
 
         default:
@@ -67,7 +67,7 @@ class Characters {
   /**
    * @see <a href="https://spec.commonmark.org/0.31.2/#unicode-punctuation-character">Unicode punctuation character</a>
    */
-  public static isPunctuationCodePoint(codePoint: number): boolean {
+  static isPunctuationCodePoint(codePoint: number): boolean {
     const char = fromCodePoint(codePoint);
 
     switch (true) {
@@ -89,30 +89,22 @@ class Characters {
    *
    * @see <a href="https://spec.commonmark.org/0.31.2/#unicode-whitespace-character">Unicode whitespace character</a>
    */
-  public static isWhitespaceCodePoint(codePoint: number): boolean {
+  static isWhitespaceCodePoint(codePoint: number): boolean {
     const char = fromCodePoint(codePoint);
 
     switch (char) {
-      case " ":
-      case "\t":
-      case "\n":
-      case "\f":
-      case "\r":
+      case ' ':
+      case '\t':
+      case '\n':
+      case '\f':
+      case '\r':
         return true;
       default:
-        return Character.isUnicodeCharOfCategory(
-          Character.UnicodeCategory.Zs,
-          char
-        );
+        return Character.isUnicodeCharOfCategory(Character.UnicodeCategory.Zs, char);
     }
   }
 
-  public static skip(
-    skip: string,
-    s: string,
-    startIndex: number,
-    endIndex: number
-  ): number {
+  static skip(skip: string, s: string, startIndex: number, endIndex: number): number {
     for (let i = startIndex; i < endIndex; i++) {
       if (s.charAt(i) !== skip) {
         return i;
@@ -122,12 +114,7 @@ class Characters {
     return endIndex;
   }
 
-  public static skipBackwards(
-    skip: string,
-    s: string,
-    startIndex: number,
-    lastIndex: number
-  ): number {
+  static skipBackwards(skip: string, s: string, startIndex: number, lastIndex: number): number {
     for (let i = startIndex; i >= lastIndex; i--) {
       if (s.charAt(i) !== skip) {
         return i;
@@ -137,15 +124,11 @@ class Characters {
     return lastIndex - 1;
   }
 
-  public static skipSpaceTab(
-    s: string,
-    startIndex: number,
-    endIndex: number
-  ): number {
+  static skipSpaceTab(s: string, startIndex: number, endIndex: number): number {
     for (let i = startIndex; i < endIndex; i++) {
       switch (s.charAt(i)) {
-        case " ":
-        case "\t":
+        case ' ':
+        case '\t':
           break;
         default:
           return i;
@@ -154,15 +137,11 @@ class Characters {
     return endIndex;
   }
 
-  public static skipSpaceTabBackwards(
-    s: string,
-    startIndex: number,
-    lastIndex: number
-  ): number {
+  static skipSpaceTabBackwards(s: string, startIndex: number, lastIndex: number): number {
     for (let i = startIndex; i >= lastIndex; i--) {
       switch (s.charAt(i)) {
-        case " ":
-        case "\t":
+        case ' ':
+        case '\t':
           break;
         default:
           return i;

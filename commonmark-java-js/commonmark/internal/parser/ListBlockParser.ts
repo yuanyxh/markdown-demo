@@ -1,21 +1,14 @@
-import type { Block, ListBlock } from "@/node";
-import type {
-  BlockParserFactory,
-  MatchedBlockParser,
-  ParserState,
-} from "@/parser";
+import type { Block, ListBlock } from '@/node';
+import type { BlockParserFactory, MatchedBlockParser, ParserState } from '@/parser';
 
-import { BulletList, ListItem, OrderedList } from "@/node";
-import { AbstractBlockParser, BlockStart, BlockContinue } from "@/parser";
+import { BulletList, ListItem, OrderedList } from '@/node';
+import { AbstractBlockParser, BlockStart, BlockContinue } from '@/parser';
 
-import ListItemParser from "./ListItemParser";
-import Parsing from "../internal_util/Parsing";
+import ListItemParser from './ListItemParser';
+import Parsing from '../internal_util/Parsing';
 
 class Factory implements BlockParserFactory {
-  public tryStart(
-    state: ParserState,
-    matchedBlockParser: MatchedBlockParser
-  ): BlockStart | null {
+  tryStart(state: ParserState, matchedBlockParser: MatchedBlockParser): BlockStart | null {
     const matched = matchedBlockParser.getMatchedBlockParser();
 
     if (state.getIndent() >= Parsing.CODE_BLOCK_INDENT) {
@@ -24,9 +17,7 @@ class Factory implements BlockParserFactory {
 
     const markerIndex = state.getNextNonSpaceIndex();
     const markerColumn = state.getColumn() + state.getIndent();
-    const inParagraph: boolean = !matchedBlockParser
-      .getParagraphLines()
-      .isEmpty();
+    const inParagraph: boolean = !matchedBlockParser.getParagraphLines().isEmpty();
     const listData = ListBlockParser.parseList(
       state.getLine().getContent(),
       markerIndex,
@@ -39,22 +30,14 @@ class Factory implements BlockParserFactory {
     }
 
     const newColumn = listData.contentColumn;
-    const listItemParser = new ListItemParser(
-      state.getIndent(),
-      newColumn - state.getColumn()
-    );
+    const listItemParser = new ListItemParser(state.getIndent(), newColumn - state.getColumn());
 
     // prepend the list block if needed
     if (
       !(matched instanceof ListBlockParser) ||
-      !ListBlockParser.listsMatch(
-        matched.getBlock() as ListBlock,
-        listData.listBlock
-      )
+      !ListBlockParser.listsMatch(matched.getBlock() as ListBlock, listData.listBlock)
     ) {
-      const listBlockParser: ListBlockParser = new ListBlockParser(
-        listData.listBlock
-      );
+      const listBlockParser: ListBlockParser = new ListBlockParser(listData.listBlock);
       // We start out with assuming a list is tight. If we find a blank line, we set it to loose later.
       listData.listBlock.setTight(true);
 
@@ -66,20 +49,20 @@ class Factory implements BlockParserFactory {
 }
 
 class ListData {
-  public readonly listBlock: ListBlock;
-  public readonly contentColumn: number;
+  readonly listBlock: ListBlock;
+  readonly contentColumn: number;
 
-  public constructor(listBlock: ListBlock, contentColumn: number) {
+  constructor(listBlock: ListBlock, contentColumn: number) {
     this.listBlock = listBlock;
     this.contentColumn = contentColumn;
   }
 }
 
 class ListMarkerData {
-  public readonly listBlock: ListBlock;
-  public readonly indexAfterMarker: number;
+  readonly listBlock: ListBlock;
+  readonly indexAfterMarker: number;
 
-  public constructor(listBlock: ListBlock, indexAfterMarker: number) {
+  constructor(listBlock: ListBlock, indexAfterMarker: number) {
     this.listBlock = listBlock;
     this.indexAfterMarker = indexAfterMarker;
   }
@@ -91,16 +74,16 @@ class ListBlockParser extends AbstractBlockParser {
   private hadBlankLine = false;
   private linesAfterBlank: number | undefined;
 
-  public constructor(block: ListBlock) {
+  constructor(block: ListBlock) {
     super();
     this.block = block;
   }
 
-  public override isContainer(): boolean {
+  override isContainer(): boolean {
     return true;
   }
 
-  public override canContain(childBlock: Block): boolean {
+  override canContain(childBlock: Block): boolean {
     if (childBlock instanceof ListItem) {
       // Another list item is added to this list block. If the previous line was blank, that means this list block
       // is "loose" (not tight).
@@ -117,11 +100,11 @@ class ListBlockParser extends AbstractBlockParser {
     }
   }
 
-  public override getBlock(): Block {
+  override getBlock(): Block {
     return this.block;
   }
 
-  public override tryContinue(state: ParserState): BlockContinue {
+  override tryContinue(state: ParserState): BlockContinue {
     if (state.isBlank()) {
       this.hadBlankLine = true;
       this.linesAfterBlank = 0;
@@ -137,7 +120,7 @@ class ListBlockParser extends AbstractBlockParser {
   /**
    * Parse a list marker and return data on the marker or null.
    */
-  public static parseList(
+  static parseList(
     line: string,
     /* final */ markerIndex: number,
     /* final */ markerColumn: number,
@@ -162,9 +145,9 @@ class ListBlockParser extends AbstractBlockParser {
     const length = line.length;
     for (let i = indexAfterMarker; i < length; i++) {
       const c = line.charAt(i);
-      if (c === "\t") {
+      if (c === '\t') {
         contentColumn += Parsing.columnsToNextTabStop(contentColumn);
-      } else if (c === " ") {
+      } else if (c === ' ') {
         contentColumn++;
       } else {
         hasContent = true;
@@ -174,10 +157,7 @@ class ListBlockParser extends AbstractBlockParser {
 
     if (inParagraph) {
       // If the list item is ordered, the start number must be 1 to interrupt a paragraph.
-      if (
-        listBlock instanceof OrderedList &&
-        listBlock.getMarkerStartNumber() !== 1
-      ) {
+      if (listBlock instanceof OrderedList && listBlock.getMarkerStartNumber() !== 1) {
         return null;
       }
 
@@ -187,10 +167,7 @@ class ListBlockParser extends AbstractBlockParser {
       }
     }
 
-    if (
-      !hasContent ||
-      contentColumn - columnAfterMarker > Parsing.CODE_BLOCK_INDENT
-    ) {
+    if (!hasContent || contentColumn - columnAfterMarker > Parsing.CODE_BLOCK_INDENT) {
       // If this line is blank or has a code block, default to 1 space after marker
       contentColumn = columnAfterMarker + 1;
     }
@@ -198,16 +175,13 @@ class ListBlockParser extends AbstractBlockParser {
     return new ListData(listBlock, contentColumn);
   }
 
-  private static parseListMarker(
-    line: string,
-    index: number
-  ): ListMarkerData | null {
+  private static parseListMarker(line: string, index: number): ListMarkerData | null {
     const c = line.charAt(index);
     switch (c) {
       // spec: A bullet list marker is a -, +, or * character.
-      case "-":
-      case "+":
-      case "*":
+      case '-':
+      case '+':
+      case '*':
         if (ListBlockParser.isSpaceTabOrEnd(line, index + 1)) {
           let bulletList = new BulletList();
           bulletList.setMarker(c);
@@ -222,34 +196,31 @@ class ListBlockParser extends AbstractBlockParser {
 
   // spec: An ordered list marker is a sequence of 1-9 arabic digits (0-9), followed by either a `.` character or a
   // `)` character.
-  private static parseOrderedList(
-    line: string,
-    index: number
-  ): ListMarkerData | null {
+  private static parseOrderedList(line: string, index: number): ListMarkerData | null {
     let digits = 0;
     let length = line.length;
     for (let i = index; i < length; i++) {
       const c = line.charAt(i);
 
       switch (c) {
-        case "0":
-        case "1":
-        case "2":
-        case "3":
-        case "4":
-        case "5":
-        case "6":
-        case "7":
-        case "8":
-        case "9":
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
           digits++;
 
           if (digits > 9) {
             return null;
           }
           break;
-        case ".":
-        case ")":
+        case '.':
+        case ')':
           if (digits >= 1 && ListBlockParser.isSpaceTabOrEnd(line, i + 1)) {
             const number: string = line.substring(index, i);
             const orderedList: OrderedList = new OrderedList();
@@ -270,8 +241,8 @@ class ListBlockParser extends AbstractBlockParser {
   private static isSpaceTabOrEnd(line: string, index: number): boolean {
     if (index < line.length) {
       switch (line.charAt(index)) {
-        case " ":
-        case "\t":
+        case ' ':
+        case '\t':
           return true;
         default:
           return false;
@@ -286,7 +257,7 @@ class ListBlockParser extends AbstractBlockParser {
    * with the same delimiter and bullet character. This is used
    * in agglomerating list items into lists.
    */
-  public static listsMatch(a: ListBlock | null, b: ListBlock | null): boolean {
+  static listsMatch(a: ListBlock | null, b: ListBlock | null): boolean {
     if (a instanceof BulletList && b instanceof BulletList) {
       return a.getMarker() === b.getMarker();
     } else if (a instanceof OrderedList && b instanceof OrderedList) {
@@ -296,11 +267,11 @@ class ListBlockParser extends AbstractBlockParser {
     return false;
   }
 
-  public static Factory = Factory;
+  static Factory = Factory;
 
-  public static ListData = ListData;
+  static ListData = ListData;
 
-  public static ListMarkerData = ListMarkerData;
+  static ListMarkerData = ListMarkerData;
 }
 
 export default ListBlockParser;

@@ -1,4 +1,4 @@
-import { Escaping } from "@/internal";
+import { Escaping } from '@/internal';
 
 /**
  * A map that can be used to store and look up reference definitions by a label. The labels are case-insensitive and
@@ -11,15 +11,15 @@ class DefinitionMap<D extends abstract new (...args: any) => any> {
   // LinkedHashMap for determinism and to preserve document order
   private readonly definitions = new Map<string, InstanceType<D>>();
 
-  public constructor(type: D) {
+  constructor(type: D) {
     this.type = type;
   }
 
-  public getType(): D {
+  getType(): D {
     return this.type;
   }
 
-  public addAll(that: DefinitionMap<InstanceType<D>>): void {
+  addAll(that: DefinitionMap<InstanceType<D>>): void {
     for (const entry of that.definitions) {
       // Note that keys are already normalized, so we can add them directly
       if (!this.definitions.has(entry[0])) {
@@ -34,10 +34,7 @@ class DefinitionMap<D extends abstract new (...args: any) => any> {
    * <p>
    * The label is normalized by the definition map before storing.
    */
-  public putIfAbsent(
-    label: string,
-    definition: InstanceType<D>
-  ): InstanceType<D> {
+  putIfAbsent(label: string, definition: InstanceType<D>): InstanceType<D> {
     const normalizedLabel: string = Escaping.normalizeLabelContent(label);
 
     // spec: When there are multiple matching link reference definitions, the first is used
@@ -55,17 +52,17 @@ class DefinitionMap<D extends abstract new (...args: any) => any> {
    *
    * @return the value or null
    */
-  public get(label: string): InstanceType<D> | undefined {
+  get(label: string): InstanceType<D> | undefined {
     const normalizedLabel: string = Escaping.normalizeLabelContent(label);
 
     return this.definitions.get(normalizedLabel);
   }
 
-  public keySet(): string[] {
+  keySet(): string[] {
     return Array.from(this.definitions.keys());
   }
 
-  public values(): InstanceType<D>[] {
+  values(): InstanceType<D>[] {
     return Array.from(this.definitions.values());
   }
 }

@@ -1,6 +1,6 @@
-import type { Visitor } from "./interfaces/Visitor";
+import type { Visitor } from './interfaces/Visitor';
 
-import Block from "./abstracts/Block";
+import Block from './abstracts/Block';
 
 /**
  * HTML block
@@ -8,21 +8,21 @@ import Block from "./abstracts/Block";
  * @see <a href="http://spec.commonmark.org/0.31.2/#html-blocks">CommonMark Spec</a>
  */
 class HtmlBlock extends Block {
-  private literal = "";
+  private literal = '';
 
-  public constructor() {
-    super("html-block");
+  constructor() {
+    super('html-block');
   }
 
-  public override accept(visitor: Visitor) {
+  override accept(visitor: Visitor) {
     visitor.visit(this);
   }
 
-  public getLiteral(): string {
+  getLiteral(): string {
     return this.literal;
   }
 
-  public setLiteral(literal: string) {
+  setLiteral(literal: string) {
     this.literal = literal;
   }
 }

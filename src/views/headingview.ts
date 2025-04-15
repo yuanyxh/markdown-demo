@@ -5,16 +5,16 @@ import type InlineView from './abstracts/inlineview';
 import BlockView from './abstracts/blockview';
 
 class HeadingView extends BlockView {
-  public children: InlineView[] = [];
-  public node: Heading;
+  children: InlineView[] = [];
+  node: Heading;
 
-  public constructor(node: Heading) {
+  constructor(node: Heading) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: Heading): boolean {
+  override eq(node: Heading): boolean {
     return node.type === this.node.type && node.getLevel() === this.node.getLevel();
   }
 
@@ -22,7 +22,7 @@ class HeadingView extends BlockView {
     return window.document.createElement('h' + node.getLevel());
   }
 
-  public static craete(node: Heading): HeadingView {
+  static craete(node: Heading): HeadingView {
     return new this(node);
   }
 }

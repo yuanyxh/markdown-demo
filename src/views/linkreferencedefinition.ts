@@ -5,16 +5,16 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class LinkReferenceDefinitionView extends InlineView {
-  public children: ContentView[] = [];
-  public node: LinkReferenceDefinition;
+  children: ContentView[] = [];
+  node: LinkReferenceDefinition;
 
-  public constructor(node: LinkReferenceDefinition) {
+  constructor(node: LinkReferenceDefinition) {
     super(node);
 
     this.node = node;
   }
 
-  public override isOpend(): boolean {
+  override isOpend(): boolean {
     return false;
   }
 
@@ -26,7 +26,7 @@ class LinkReferenceDefinitionView extends InlineView {
     return wrapper;
   }
 
-  public static override craete(node: LinkReferenceDefinition): LinkReferenceDefinitionView {
+  static override craete(node: LinkReferenceDefinition): LinkReferenceDefinitionView {
     return new this(node);
   }
 }

@@ -1,19 +1,10 @@
-import type {
-  LinkInfo,
-  InlineParserContext,
-  LinkProcessor,
-  Scanner,
-} from "@/parser";
+import type { LinkInfo, InlineParserContext, LinkProcessor, Scanner } from '@/parser';
 
-import { LinkResult } from "@/parser";
-import { Image, Link, LinkReferenceDefinition } from "@/node";
+import { LinkResult } from '@/parser';
+import { Image, Link, LinkReferenceDefinition } from '@/node';
 
 class CoreLinkProcessor implements LinkProcessor {
-  public process(
-    linkInfo: LinkInfo,
-    scanner: Scanner,
-    context: InlineParserContext
-  ): LinkResult | null {
+  process(linkInfo: LinkInfo, scanner: Scanner, context: InlineParserContext): LinkResult | null {
     if (linkInfo.getDestination() !== null) {
       // Inline link
       return CoreLinkProcessor.process(
@@ -25,17 +16,12 @@ class CoreLinkProcessor implements LinkProcessor {
     }
 
     const label = linkInfo.getLabel();
-    const ref = label ? label : linkInfo.getText() || "";
+    const ref = label ? label : linkInfo.getText() || '';
     const def = context.getDefinition(LinkReferenceDefinition, ref);
 
     if (def !== null) {
       // Reference link
-      return CoreLinkProcessor.process(
-        linkInfo,
-        scanner,
-        def.getDestination(),
-        def.getTitle()
-      );
+      return CoreLinkProcessor.process(linkInfo, scanner, def.getDestination(), def.getTitle());
     }
 
     return LinkResult.none();
@@ -49,17 +35,14 @@ class CoreLinkProcessor implements LinkProcessor {
   ): LinkResult {
     const marker = linkInfo.getMarker();
 
-    if (marker !== null && marker.getLiteral() === "!") {
+    if (marker !== null && marker.getLiteral() === '!') {
       return LinkResult.wrapTextIn(
-        new Image(destination || "", title || void 0),
+        new Image(destination || '', title || void 0),
         scanner.position()
       ).setIncludeMarker();
     }
 
-    return LinkResult.wrapTextIn(
-      new Link(destination || "", title || void 0),
-      scanner.position()
-    );
+    return LinkResult.wrapTextIn(new Link(destination || '', title || void 0), scanner.position());
   }
 }
 

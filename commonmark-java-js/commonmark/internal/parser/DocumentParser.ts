@@ -43,15 +43,15 @@ import Parsing from '../internal_util/Parsing';
 class MatchedBlockParserImpl implements MatchedBlockParser {
   private readonly matchedBlockParser: BlockParser;
 
-  public constructor(matchedBlockParser: BlockParser) {
+  constructor(matchedBlockParser: BlockParser) {
     this.matchedBlockParser = matchedBlockParser;
   }
 
-  public getMatchedBlockParser(): BlockParser {
+  getMatchedBlockParser(): BlockParser {
     return this.matchedBlockParser;
   }
 
-  public getParagraphLines(): SourceLines {
+  getParagraphLines(): SourceLines {
     if (this.matchedBlockParser instanceof ParagraphParser) {
       return this.matchedBlockParser.getParagraphLines();
     }
@@ -61,10 +61,10 @@ class MatchedBlockParserImpl implements MatchedBlockParser {
 }
 
 class OpenBlockParser {
-  public readonly blockParser: BlockParser;
-  public sourceIndex: number;
+  readonly blockParser: BlockParser;
+  sourceIndex: number;
 
-  public constructor(blockParser: BlockParser, sourceIndex: number) {
+  constructor(blockParser: BlockParser, sourceIndex: number) {
     this.blockParser = blockParser;
     this.sourceIndex = sourceIndex;
   }
@@ -131,7 +131,7 @@ class DocumentParser implements ParserState {
   private readonly openBlockParsers: OpenBlockParser[] = [];
   private readonly allBlockParsers: BlockParser[] = [];
 
-  public constructor(
+  constructor(
     blockParserFactories: BlockParserFactory[],
     inlineParserFactory: InlineParserFactory,
     inlineContentParserFactories: InlineContentParserFactory[],
@@ -153,11 +153,11 @@ class DocumentParser implements ParserState {
     this.activateBlockParser(new OpenBlockParser(this.documentBlockParser, 0));
   }
 
-  public static getDefaultBlockParserTypes(): Set<typeof Block> {
+  static getDefaultBlockParserTypes(): Set<typeof Block> {
     return DocumentParser.CORE_FACTORY_TYPES;
   }
 
-  public static calculateBlockParserFactories(
+  static calculateBlockParserFactories(
     customBlockParserFactories: BlockParserFactory[],
     enabledBlockTypes: Set<typeof Block>
   ): BlockParserFactory[] {
@@ -172,7 +172,7 @@ class DocumentParser implements ParserState {
     return list;
   }
 
-  public static checkEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>) {
+  static checkEnabledBlockTypes(enabledBlockTypes: Set<typeof Block>) {
     for (const enabledBlockType of enabledBlockTypes) {
       if (!DocumentParser.NODES_TO_CORE_FACTORIES.has(enabledBlockType)) {
         throw new Error(
@@ -188,7 +188,7 @@ class DocumentParser implements ParserState {
   /**
    * The main parsing function. Returns a parsed document AST.
    */
-  public parse(input: string): Document {
+  parse(input: string): Document {
     let lineStart = 0;
     let lineBreak: number;
 
@@ -215,31 +215,31 @@ class DocumentParser implements ParserState {
     return this.finalizeAndProcess();
   }
 
-  public getLine(): SourceLine {
+  getLine(): SourceLine {
     return this.line!;
   }
 
-  public getIndex(): number {
+  getIndex(): number {
     return this.index;
   }
 
-  public getNextNonSpaceIndex(): number {
+  getNextNonSpaceIndex(): number {
     return this.nextNonSpace;
   }
 
-  public getColumn(): number {
+  getColumn(): number {
     return this.column;
   }
 
-  public getIndent(): number {
+  getIndent(): number {
     return this.indent;
   }
 
-  public isBlank(): boolean {
+  isBlank(): boolean {
     return this.blank;
   }
 
-  public getActiveBlockParser(): BlockParser {
+  getActiveBlockParser(): BlockParser {
     return this.openBlockParsers[this.openBlockParsers.length - 1].blockParser;
   }
 
@@ -674,9 +674,9 @@ class DocumentParser implements ParserState {
     }
   }
 
-  public static MatchedBlockParserImpl = MatchedBlockParserImpl;
+  static MatchedBlockParserImpl = MatchedBlockParserImpl;
 
-  public static OpenBlockParser = OpenBlockParser;
+  static OpenBlockParser = OpenBlockParser;
 }
 
 export default DocumentParser;

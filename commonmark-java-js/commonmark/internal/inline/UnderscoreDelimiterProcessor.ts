@@ -1,8 +1,8 @@
-import EmphasisDelimiterProcessor from "./EmphasisDelimiterProcessor";
+import EmphasisDelimiterProcessor from './EmphasisDelimiterProcessor';
 
 class UnderscoreDelimiterProcessor extends EmphasisDelimiterProcessor {
-  public constructor() {
-    super("_");
+  constructor() {
+    super('_');
   }
 }
 

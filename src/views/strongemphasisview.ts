@@ -5,16 +5,16 @@ import type ContentView from './abstracts/contentview';
 import InlineView from './abstracts/inlineview';
 
 class StrongEmphasisView extends InlineView {
-  public children: ContentView[] = [];
-  public node: StrongEmphasis;
+  children: ContentView[] = [];
+  node: StrongEmphasis;
 
-  public constructor(node: StrongEmphasis) {
+  constructor(node: StrongEmphasis) {
     super(node);
 
     this.node = node;
   }
 
-  public override eq(node: StrongEmphasis): boolean {
+  override eq(node: StrongEmphasis): boolean {
     return (
       node.type === this.node.type &&
       node.getOpeningDelimiter() === this.node.getOpeningDelimiter() &&
@@ -26,7 +26,7 @@ class StrongEmphasisView extends InlineView {
     return window.document.createElement('strong');
   }
 
-  public static override craete(node: StrongEmphasis): StrongEmphasisView {
+  static override craete(node: StrongEmphasis): StrongEmphasisView {
     return new this(node);
   }
 }

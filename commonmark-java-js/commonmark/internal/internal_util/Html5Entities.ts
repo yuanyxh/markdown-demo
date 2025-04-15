@@ -1,28 +1,28 @@
-import { fromCodePoint } from "@helpers/index";
+import { fromCodePoint } from '@helpers/index';
 
-import { EntitiesMap } from "./Entities";
+import { EntitiesMap } from './Entities';
 
 class Html5Entities {
   private static readonly NAMED_CHARACTER_REFERENCES = EntitiesMap;
 
-  public static entityToString(input: string): string {
-    if (!input.startsWith("&") || !input.endsWith(";")) {
+  static entityToString(input: string): string {
+    if (!input.startsWith('&') || !input.endsWith(';')) {
       return input;
     }
 
     let value = input.substring(1, input.length - 1);
-    if (value.startsWith("#")) {
+    if (value.startsWith('#')) {
       value = value.substring(1);
 
       let base = 10;
-      if (value.startsWith("x") || value.startsWith("X")) {
+      if (value.startsWith('x') || value.startsWith('X')) {
         value = value.substring(1);
         base = 16;
       }
 
       let codePoint = window.parseInt(value, base);
       if (codePoint === 0) {
-        return "\uFFFD";
+        return '\uFFFD';
       }
 
       return fromCodePoint(codePoint);
