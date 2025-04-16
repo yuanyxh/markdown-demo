@@ -132,7 +132,7 @@ abstract class ContentView {
         continue;
       }
 
-      view = this.context?.createViewByNodeType(newChild);
+      view = this.createViewByNodeType(this.context.getNodeViewConstructor(newChild), newChild);
 
       if (view) {
         this.children[i + 1]
@@ -170,6 +170,17 @@ abstract class ContentView {
     }
 
     this.parent = null;
+  }
+
+  private createViewByNodeType(
+    Constructor: typeof ContentView | null,
+    node: MarkdownNode
+  ): ContentView | null {
+    if (Constructor) {
+      return Constructor.craete(node, this.context);
+    }
+
+    return null;
   }
 
   protected abstract createElement(node: MarkdownNode): HTMLElement;

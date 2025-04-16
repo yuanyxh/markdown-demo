@@ -6,6 +6,5 @@ import source from './examples/example.md?raw';
 import Editor from './Editor';
 
 const editor = new Editor({
-  parent: window.document.getElementById('root')!!,
-  doc: source
+  parent: window.document.getElementById('root')!!
 });

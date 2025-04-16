@@ -1,36 +1,37 @@
-import type { Node } from 'commonmark-java-js';
+import type { Document, Node } from 'commonmark-java-js';
 import type { EditorOptions, NodeConfig } from './Editor';
 import type ContentView from './views/abstracts/contentview';
 
-import { Parser, IncludeSourceSpans } from 'commonmark-java-js';
+import { Parser, IncludeSourceSpans, Paragraph, SourceSpan } from 'commonmark-java-js';
 import NodeRelationMap from './NodeRelationMap';
 import { defaultRelationMap } from './nodeRelationMapData';
-import DocView from './views/docview';
 
 class EditorContext {
   parser: Parser;
   nodeRelationMap = new NodeRelationMap();
 
-  docView: DocView;
-
   constructor(options: Omit<EditorOptions, 'parent'>) {
     this.parser = this.configurationNodeParser(options.nodeConfig);
+  }
 
-    this.docView = new DocView(this.parser.parse(this.normalizeText(options.doc ?? '')), this);
+  parseMarkdown(text: string): Document {
+    const doc = this.parser.parse(this.normalizeText(text));
+
+    if (!doc.children.length) {
+      const p = new Paragraph();
+      p.addSourceSpan(SourceSpan.of(0, 0, 0, 0));
+      doc.appendChild(p);
+    }
+
+    return doc;
   }
 
   normalizeText(source: string): string {
     return source.split(/\r\n|\r|\n/).join('\n');
   }
 
-  createViewByNodeType(node: Node): ContentView | null {
-    const Constructor = this.nodeRelationMap.get(Object.getPrototypeOf(node).constructor);
-
-    if (Constructor) {
-      return Constructor.craete(node, this);
-    }
-
-    return null;
+  getNodeViewConstructor(node: Node): typeof ContentView | null {
+    return this.nodeRelationMap.get(Object.getPrototypeOf(node).constructor) || null;
   }
 
   private configurationNodeParser(config?: NodeConfig): Parser {
