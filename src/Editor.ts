@@ -30,19 +30,14 @@ class Editor {
   private _context: EditorContext;
   private editorEvent: EditorEvent;
 
-  private docView: DocView;
-
   constructor(options: EditorOptions) {
     this.parent = options.parent;
 
     this._context = new EditorContext(options);
 
-    this.docView = new DocView(this.context.parseMarkdown(options.doc ?? ''), this.context);
-    this.docView.attachTo(this.parent);
-
     this.editorEvent = new EditorEvent(this.context)
       .setEventHandler(options.eventHandler ?? {})
-      .listenForView(this.docView);
+      .listen();
   }
 
   get context(): EditorContext {
@@ -50,8 +45,8 @@ class Editor {
   }
 
   destroy(): void {
-    this.editorEvent.unListenForView(this.docView);
-    this.docView.destroy();
+    this.editorEvent.unListen();
+    this.context.docView.destroy();
   }
 }
 

@@ -26,13 +26,17 @@ class TextView extends InlineView {
     }
   }
 
+  override locatePointFromSrcPos(pos: number): { node: Node; offset: number } | null {
+    return { node: this.dom.childNodes[0], offset: pos - this.node.inputIndex };
+  }
+
   override isOpend(): boolean {
     return false;
   }
 
   protected override createElement(node: Text): HTMLSpanElement {
     const span = window.document.createElement('span');
-    span.textContent = node.getLiteral();
+    span.textContent = node.getLiteral().replace(/\s/g, '\u00A0');
 
     return span;
   }

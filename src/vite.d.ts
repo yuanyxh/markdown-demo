@@ -61,5 +61,5 @@ declare interface HTMLElementEventMap {
 }
 
 declare interface Node {
-  $view: ContentView;
+  $view: any;
 }

@@ -131,6 +131,13 @@ abstract class ContentView {
     return childMarkdownNode.inputEndIndex;
   }
 
+  locatePointFromSrcPos(pos: number): {
+    node: Node;
+    offset: number;
+  } | null {
+    return null;
+  }
+
   isOpend(): boolean {
     return true;
   }
@@ -164,9 +171,7 @@ abstract class ContentView {
       oldIndex = children.findIndex((child) => child.eq(nodeChild));
 
       if (oldIndex >= 0) {
-        if (children[oldIndex].isOpend()) {
-          children[oldIndex].setNode(nodeChild);
-        }
+        children[oldIndex].setNode(nodeChild);
 
         finalSubList[index] = children[oldIndex];
       } else {
