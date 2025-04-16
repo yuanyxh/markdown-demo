@@ -14,10 +14,6 @@ class SoftLineBreakView extends InlineView {
   protected override createElement(): HTMLBRElement {
     return window.document.createElement('br');
   }
-
-  static override craete(node: SoftLineBreak, context: EditorContext): SoftLineBreakView {
-    return new this(node, context);
-  }
 }
 
 export default SoftLineBreakView;

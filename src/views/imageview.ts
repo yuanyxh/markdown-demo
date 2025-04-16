@@ -67,10 +67,6 @@ class ImageView extends InlineView {
 
     return image;
   }
-
-  static override craete(node: Image, context: EditorContext): ImageView {
-    return new this(node, context);
-  }
 }
 
 export default ImageView;

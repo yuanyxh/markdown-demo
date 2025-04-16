@@ -31,10 +31,6 @@ class CodeView extends InlineView {
 
     return code;
   }
-
-  static override craete(node: Code, context: EditorContext): CodeView {
-    return new this(node, context);
-  }
 }
 
 export default CodeView;

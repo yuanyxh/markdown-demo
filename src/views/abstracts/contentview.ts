@@ -1,11 +1,13 @@
 import type { Node as MarkdownNode } from 'commonmark-java-js';
 import type EditorContext from '../../EditorContext';
 
+import { TypeUtils, MarkdownNodeUtils } from '../../utils';
+
 abstract class ContentView {
   abstract children: ContentView[];
+  node: MarkdownNode;
 
   protected parent: ContentView | null = null;
-  protected node: MarkdownNode;
   protected context: EditorContext;
 
   private _dom: HTMLElement;
@@ -36,6 +38,7 @@ abstract class ContentView {
   }
 
   setNode(node: MarkdownNode): void {
+    this.applyNode(node);
     this.node = node;
   }
 
@@ -79,7 +82,73 @@ abstract class ContentView {
     return view;
   }
 
-  applyNode(node: MarkdownNode): this {
+  locateSrcPos(node: Node, offset: number): number {
+    if (TypeUtils.isText(node) && node.parentElement) {
+      const textNode = node.parentElement.$view.node;
+
+      if (!textNode) {
+        return -1;
+      }
+
+      return textNode.inputIndex + offset;
+    }
+
+    const element = node as HTMLElement;
+
+    const block = element.$view.node;
+
+    if (offset === 0) {
+      return MarkdownNodeUtils.getContentIndex(block);
+    }
+
+    let isSoftLineBreak = false;
+    let childMarkdownNode: MarkdownNode | null = block.children[offset - 1];
+
+    if (childMarkdownNode?.isBlock() && childMarkdownNode.getNext()) {
+      childMarkdownNode = childMarkdownNode.getNext();
+    }
+
+    if (childMarkdownNode && TypeUtils.isSoftLineBreak(childMarkdownNode)) {
+      childMarkdownNode = childMarkdownNode.getPrevious();
+
+      isSoftLineBreak = true;
+    }
+
+    if (!childMarkdownNode) {
+      return -1;
+    }
+
+    if (isSoftLineBreak) {
+      const continuousLine = childMarkdownNode.getNext()!.getNext();
+
+      if (!continuousLine) {
+        return childMarkdownNode.inputEndIndex + 1;
+      }
+
+      return continuousLine.inputIndex;
+    }
+
+    return childMarkdownNode.inputEndIndex;
+  }
+
+  isOpend(): boolean {
+    return true;
+  }
+
+  destroy(): void {
+    if (this.dom.isConnected) {
+      this.dom.remove();
+      this.node.unlink();
+    }
+
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].destroy();
+    }
+
+    this.parent = null;
+  }
+
+  protected applyNode(node: MarkdownNode): this {
     const nodeChildren = node.children;
     const children = this.children.slice(0);
 
@@ -96,7 +165,7 @@ abstract class ContentView {
 
       if (oldIndex >= 0) {
         if (children[oldIndex].isOpend()) {
-          children[oldIndex].applyNode(nodeChild);
+          children[oldIndex].setNode(nodeChild);
         }
 
         finalSubList[index] = children[oldIndex];
@@ -142,34 +211,14 @@ abstract class ContentView {
         newChildren.push(view);
 
         if (view.isOpend()) {
-          view.applyNode(newChild);
+          view.setNode(newChild);
         }
       }
     }
 
-    // Always replace the old markdown nodes.
-    this.setNode(node);
-
     this.children = newChildren;
 
     return this;
-  }
-
-  isOpend(): boolean {
-    return true;
-  }
-
-  destroy(): void {
-    if (this.dom.isConnected) {
-      this.dom.remove();
-      this.node.unlink();
-    }
-
-    for (let i = 0; i < this.children.length; i++) {
-      this.children[i].destroy();
-    }
-
-    this.parent = null;
   }
 
   private createViewByNodeType(
@@ -177,23 +226,16 @@ abstract class ContentView {
     node: MarkdownNode
   ): ContentView | null {
     if (Constructor) {
-      return Constructor.craete(node, this.context);
+      return new (Constructor as new (node: MarkdownNode, context: EditorContext) => ContentView)(
+        node,
+        this.context
+      );
     }
 
     return null;
   }
 
   protected abstract createElement(node: MarkdownNode): HTMLElement;
-
-  static get(node: Node): ContentView | null {
-    return node.$view || null;
-  }
-
-  static craete(node: MarkdownNode, context: EditorContext): ContentView {
-    throw Error(
-      'This static method cannot be called directly. It must be overridden by a subclass.'
-    );
-  }
 }
 
 export default ContentView;

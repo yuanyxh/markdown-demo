@@ -25,10 +25,6 @@ class EmphasisView extends InlineView {
   protected override createElement(): HTMLElement {
     return window.document.createElement('em');
   }
-
-  static override craete(node: Emphasis, context: EditorContext): EmphasisView {
-    return new this(node, context);
-  }
 }
 
 export default EmphasisView;

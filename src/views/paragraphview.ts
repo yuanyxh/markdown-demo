@@ -10,10 +10,6 @@ class ParagraphView extends BlockView {
   protected override createElement(): HTMLParagraphElement {
     return window.document.createElement('p');
   }
-
-  static override craete(node: Paragraph, context: EditorContext): ParagraphView {
-    return new this(node, context);
-  }
 }
 
 export default ParagraphView;

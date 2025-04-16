@@ -25,13 +25,6 @@ class LinkReferenceDefinitionView extends InlineView {
 
     return wrapper;
   }
-
-  static override craete(
-    node: LinkReferenceDefinition,
-    context: EditorContext
-  ): LinkReferenceDefinitionView {
-    return new this(node, context);
-  }
 }
 
 export default LinkReferenceDefinitionView;

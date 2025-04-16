@@ -33,10 +33,6 @@ class OrderedListView extends BlockView {
 
     return ol;
   }
-
-  static override craete(node: OrderedList, context: EditorContext): OrderedListView {
-    return new this(node, context);
-  }
 }
 
 export default OrderedListView;

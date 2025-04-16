@@ -46,10 +46,6 @@ class IndentedCodeBlockView extends BlockView {
 
     return block;
   }
-
-  static override craete(node: IndentedCodeBlock, context: EditorContext): IndentedCodeBlockView {
-    return new this(node, context);
-  }
 }
 
 export default IndentedCodeBlockView;

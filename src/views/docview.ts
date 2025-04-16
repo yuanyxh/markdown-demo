@@ -1,4 +1,4 @@
-import type { Document } from 'commonmark-java-js';
+import type { Document, Node } from 'commonmark-java-js';
 import type EditorContext from '../EditorContext';
 import BlockView from './abstracts/blockview';
 
@@ -28,10 +28,6 @@ class DocView extends BlockView {
     dom.ariaMultiLine = 'true';
 
     return dom;
-  }
-
-  static override craete(node: Document, context: EditorContext): DocView {
-    return new this(node, context);
   }
 }
 

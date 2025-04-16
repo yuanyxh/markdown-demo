@@ -25,10 +25,6 @@ class BulletListView extends BlockView {
   protected override createElement(): HTMLUListElement {
     return window.document.createElement('ul');
   }
-
-  static override craete(node: BulletList, context: EditorContext): BulletListView {
-    return new this(node, context);
-  }
 }
 
 export default BulletListView;

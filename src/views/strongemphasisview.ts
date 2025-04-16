@@ -25,10 +25,6 @@ class StrongEmphasisView extends InlineView {
   protected override createElement(): HTMLElement {
     return window.document.createElement('strong');
   }
-
-  static override craete(node: StrongEmphasis, context: EditorContext): StrongEmphasisView {
-    return new this(node, context);
-  }
 }
 
 export default StrongEmphasisView;

@@ -19,10 +19,6 @@ class ListItemView extends BlockView {
   protected override createElement(): HTMLLIElement {
     return window.document.createElement('li');
   }
-
-  static override craete(node: ListItem, context: EditorContext): ListItemView {
-    return new this(node, context);
-  }
 }
 
 export default ListItemView;

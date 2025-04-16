@@ -18,10 +18,6 @@ class BlockQuoteView extends BlockView {
 
     return blockquote;
   }
-
-  static override craete(node: BlockQuote, context: EditorContext): BlockQuoteView {
-    return new this(node, context);
-  }
 }
 
 export default BlockQuoteView;

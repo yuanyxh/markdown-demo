@@ -51,10 +51,6 @@ class FencedCodeBlockView extends BlockView {
 
     return block;
   }
-
-  static override craete(node: FencedCodeBlock, context: EditorContext): FencedCodeBlockView {
-    return new this(node, context);
-  }
 }
 
 export default FencedCodeBlockView;

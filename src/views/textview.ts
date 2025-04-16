@@ -36,10 +36,6 @@ class TextView extends InlineView {
 
     return span;
   }
-
-  static override craete(node: Text, context: EditorContext): TextView {
-    return new this(node, context);
-  }
 }
 
 export default TextView;

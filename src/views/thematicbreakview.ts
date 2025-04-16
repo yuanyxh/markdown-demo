@@ -20,10 +20,6 @@ class ThematicBreakView extends BlockView {
 
     return wrapper;
   }
-
-  static override craete(node: ThematicBreak, context: EditorContext): ThematicBreakView {
-    return new this(node, context);
-  }
 }
 
 export default ThematicBreakView;

@@ -29,10 +29,6 @@ class HtmlInlineView extends InlineView {
 
     return wrapper;
   }
-
-  static override craete(node: HtmlInline, context: EditorContext): HtmlInlineView {
-    return new this(node, context);
-  }
 }
 
 export default HtmlInlineView;

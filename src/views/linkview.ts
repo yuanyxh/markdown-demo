@@ -28,10 +28,6 @@ class LinkView extends InlineView {
 
     return a;
   }
-
-  static override craete(node: Link, context: EditorContext): LinkView {
-    return new this(node, context);
-  }
 }
 
 export default LinkView;

@@ -21,10 +21,6 @@ class HeadingView extends BlockView {
   protected createElement(node: Heading): HTMLElement {
     return window.document.createElement('h' + node.getLevel());
   }
-
-  static craete(node: Heading, context: EditorContext): HeadingView {
-    return new this(node, context);
-  }
 }
 
 export default HeadingView;

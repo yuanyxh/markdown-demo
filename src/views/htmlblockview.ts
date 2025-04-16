@@ -29,10 +29,6 @@ class HtmlBlockView extends BlockView {
 
     return wrapper;
   }
-
-  static override craete(node: HtmlBlock, context: EditorContext): HtmlBlockView {
-    return new this(node, context);
-  }
 }
 
 export default HtmlBlockView;
